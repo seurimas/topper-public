@@ -26,6 +26,7 @@ pub struct AgentState {
     pub resin_state: ResinState,
     pub pipe_state: PipesState,
     pub bard_board: BardBoard,
+    pub predator_board: PredatorBoard,
     pub room_id: i64,
 }
 
@@ -774,6 +775,23 @@ impl AgentState {
     pub fn check_if_bard<R>(&self, action: &Fn(&BardClassState) -> R) -> Option<R> {
         if let ClassState::Bard(bard) = &self.class_state {
             Some(action(bard))
+        } else {
+            None
+        }
+    }
+
+    pub fn assume_predator<R>(&mut self, action: &Fn(&mut PredatorClassState) -> R) -> R {
+        if let ClassState::Predator(predator) = &mut self.class_state {
+            action(predator)
+        } else {
+            self.class_state = ClassState::Predator(PredatorClassState::default());
+            self.assume_predator(action)
+        }
+    }
+
+    pub fn check_if_predator<R>(&self, action: &Fn(&PredatorClassState) -> R) -> Option<R> {
+        if let ClassState::Predator(predator) = &self.class_state {
+            Some(action(predator))
         } else {
             None
         }

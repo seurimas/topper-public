@@ -977,6 +977,7 @@ impl DodgeState {
 pub enum ClassState {
     Zealot(ZealotClassState),
     Sentinel(SentinelClassState),
+    Predator(PredatorClassState),
     Bard(BardClassState),
     Shifter(HowlingState),
     Other(Class),
@@ -998,6 +999,7 @@ impl ClassState {
     pub fn get_normalized_class(&self) -> Option<Class> {
         match self {
             Self::Zealot(_) => Some(Class::Zealot),
+            Self::Predator(_) => Some(Class::Predator),
             Self::Sentinel(_) => Some(Class::Sentinel),
             Self::Bard(_) => Some(Class::Bard),
             Self::Shifter(_) => Some(Class::Shapeshifter),
@@ -1013,11 +1015,13 @@ impl ClassState {
             (Self::Sentinel(_), Class::Sentinel) => None,
             (Self::Bard(_), Class::Bard) => None,
             (Self::Shifter(_), Class::Shapeshifter) => None,
+            (Self::Predator(_), Class::Predator) => None,
             // Changed.
             (_, Class::Zealot) => Some(Self::Zealot(ZealotClassState::default())),
             (_, Class::Sentinel) => Some(Self::Sentinel(SentinelClassState::default())),
             (_, Class::Bard) => Some(Self::Bard(BardClassState::default())),
             (_, Class::Shapeshifter) => Some(Self::Shifter(HowlingState::default())),
+            (_, Class::Predator) => Some(Self::Predator(PredatorClassState::default())),
             (_, observed) => {
                 // Other initializations should have been covered above.
                 Some(Self::Other(observed))

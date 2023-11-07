@@ -4,6 +4,7 @@ use topper_bt::unpowered::*;
 
 use crate::classes::bard::BardPredicate;
 use crate::classes::get_affs_from_plan;
+use crate::classes::predator::PredatorPredicate;
 use crate::classes::VenomPlan;
 use crate::curatives::get_cure_depth;
 use crate::timeline::*;
@@ -60,6 +61,7 @@ pub enum AetPredicate {
     HasFocus(AetTarget),
     HasFitness(AetTarget),
     BardPredicate(AetTarget, BardPredicate),
+    PredatorPredicate(AetTarget, PredatorPredicate),
 }
 
 pub trait TargetPredicate {
@@ -308,6 +310,13 @@ impl UnpoweredFunction for AetPredicate {
             }
             AetPredicate::BardPredicate(target, bard_predicate) => {
                 if bard_predicate.check(target, model, controller) {
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetPredicate::PredatorPredicate(target, predator_predicate) => {
+                if predator_predicate.check(target, model, controller) {
                     UnpoweredFunctionState::Complete
                 } else {
                     UnpoweredFunctionState::Failed

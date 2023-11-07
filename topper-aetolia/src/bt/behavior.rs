@@ -3,6 +3,7 @@ use serde::Serialize;
 use topper_bt::unpowered::*;
 
 use crate::classes::bard::BardBehavior;
+use crate::classes::predator::PredatorBehavior;
 use crate::classes::VenomPlan;
 use crate::defense::DefenseBehavior;
 use crate::observables::PlainAction;
@@ -21,6 +22,7 @@ pub enum AetBehavior {
     PlainQebBehavior(String),
     DefenseBehavior(DefenseBehavior),
     BardBehavior(BardBehavior),
+    PredatorBehavior(PredatorBehavior),
 }
 
 impl UnpoweredFunction for AetBehavior {
@@ -76,6 +78,9 @@ impl UnpoweredFunction for AetBehavior {
             }
             AetBehavior::BardBehavior(bard_behavior) => {
                 bard_behavior.resume_with(model, controller)
+            }
+            AetBehavior::PredatorBehavior(predator_behavior) => {
+                predator_behavior.resume_with(model, controller)
             }
         }
     }

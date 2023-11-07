@@ -1,5 +1,7 @@
+use crate::bt::BehaviorController;
 use crate::curatives::{MENTAL_AFFLICTIONS, RANDOM_CURES};
 use crate::db::AetDatabaseModule;
+use crate::non_agent::AetNonAgent;
 use crate::observables::*;
 use crate::timeline::*;
 use crate::types::*;
@@ -18,6 +20,7 @@ pub mod luminary;
 pub mod mirrors;
 pub mod monk;
 pub mod praenomen;
+pub mod predator;
 pub mod sciomancer;
 pub mod sentinel;
 pub mod shaman;
@@ -69,6 +72,7 @@ pub enum Class {
     Shapeshifter,
     Wayfarer,
     Bard,
+    Predator,
     Lord,
     // Mirrors
     Revenant,     // Templar
@@ -108,6 +112,7 @@ impl Class {
             "Shapeshifter" => Some(Class::Shapeshifter),
             "Wayfarer" => Some(Class::Wayfarer),
             "Bard" => Some(Class::Bard),
+            "Predator" => Some(Class::Predator),
             "Titan Lord" => Some(Class::Lord),
             "Chaos Lord" => Some(Class::Lord),
             "Lord" => Some(Class::Lord),
@@ -149,6 +154,7 @@ impl Class {
             Class::Shapeshifter => "Shapeshifter",
             Class::Wayfarer => "Wayfarer",
             Class::Bard => "Bard",
+            Class::Predator => "Predator",
             Class::Lord => "Lord",
             // Mirrors
             Class::Revenant => "Revenant",
@@ -220,6 +226,7 @@ pub fn get_skill_class(category: &String) -> Option<Class> {
         "Ferality" | "Shapeshifting" | "Vocalizing" => Some(Class::Shapeshifter),
         "Tenacity" | "Wayfaring" | "Fury" => Some(Class::Wayfarer),
         "Weaving" | "Performance" | "Songcalling" => Some(Class::Bard),
+        "Knifeplay" | "Predation" | "Beastmastery" => Some(Class::Predator),
         "Titan" | "Chaos" => Some(Class::Lord),
         // Mirrors
         "Riving" | "Chirography" | "Manifestation" => Some(Class::Revenant),
@@ -380,6 +387,9 @@ pub fn handle_combat_action(
         }
         "Weaving" | "Performance" | "Songcalling" => {
             bard::handle_combat_action(combat_action, agent_states, before, after)
+        }
+        "Knifeplay" | "Predation" | "Beastmastery" => {
+            predator::handle_combat_action(combat_action, agent_states, before, after)
         }
         "Purification" | "Zeal" | "Psionics" => {
             zealot::handle_combat_action(combat_action, agent_states, before, after)
@@ -623,6 +633,65 @@ pub fn handle_combat_action(
             _ => Ok(()),
         },
         _ => Ok(()),
+    }
+}
+
+pub type VenomType = &'static str;
+
+pub fn get_stack<'s>(
+    timeline: &AetTimeline,
+    attack_class: &'static str,
+    target: &String,
+    strategy: &String,
+    db: Option<&impl AetDatabaseModule>,
+) -> Option<Vec<VenomPlan>> {
+    let mut stack_name = format!("{}_{}", attack_class, strategy);
+    if strategy.eq("class") {
+        if let Some(class) = db.and_then(|db| db.get_class(target)) {
+            stack_name = format!("{}_{:?}", attack_class, class.normal());
+        } else {
+            stack_name = format!("{}_aggro", attack_class);
+        }
+    }
+    db.and_then(|db| {
+        db.get_venom_plan(&stack_name)
+            .or_else(|| db.get_venom_plan(&format!("{}_aggro", attack_class)))
+    })
+}
+
+fn get_controller(
+    attack_class: &'static str,
+    me: &String,
+    target: &String,
+    timeline: &topper_core::timeline::Timeline<AetObservation, AetPrompt, AgentState, AetNonAgent>,
+    strategy: &String,
+    db: Option<&impl AetDatabaseModule>,
+) -> BehaviorController {
+    BehaviorController {
+        plan: ActionPlan::new(me),
+        target: Some(target.clone()),
+        aff_priorities: get_stack(timeline, attack_class, target, strategy, db),
+        allies: timeline
+            .state
+            .non_agent_states
+            .get(&format!("{}_allies", me))
+            .map(|ally_list| {
+                if let AetNonAgent::Players(ally_list) = ally_list {
+                    let mut ally_aggros = HashMap::new();
+                    let my_room = timeline.state.borrow_me().room_id;
+                    for ally in ally_list {
+                        let ally_state = timeline.state.borrow_agent(ally);
+                        if ally_state.room_id == my_room {
+                            ally_aggros.insert(ally.clone(), ally_state.get_aggro());
+                        }
+                    }
+                    ally_aggros
+                } else {
+                    panic!("Non-player list in allies spot!")
+                }
+            })
+            .unwrap_or_default(),
+        ..Default::default()
     }
 }
 
