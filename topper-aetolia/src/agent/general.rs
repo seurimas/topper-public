@@ -130,7 +130,7 @@ pub enum FType {
     // General
     Reflection,
 
-    // Syssin defences
+    // Infiltrator defences
     Shroud,
     Ghosted,
     Shadowslip,
@@ -372,7 +372,7 @@ pub enum FType {
     // Monk Uncurable
     NumbArms,
 
-    // Syssin Uncurable
+    // Infiltrator Uncurable
     Void,
     Weakvoid,
     Backstabbed,

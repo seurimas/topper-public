@@ -18,15 +18,15 @@ pub enum FlayType {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
-pub enum SyssinVenomAttack {
+pub enum InfiltratorVenomAttack {
     Doublestab,
     Flay(FlayType),
     Slit,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
-pub enum SyssinBehavior {
-    VenomAttack(SyssinVenomAttack),
+pub enum InfiltratorBehavior {
+    VenomAttack(InfiltratorVenomAttack),
     Bedazzle,
     StackSuggest,
     Seal,
@@ -35,7 +35,7 @@ pub enum SyssinBehavior {
     Bite(String),
 }
 
-impl UnpoweredFunction for SyssinBehavior {
+impl UnpoweredFunction for InfiltratorBehavior {
     type Model = BehaviorModel;
     type Controller = BehaviorController;
 
@@ -46,8 +46,8 @@ impl UnpoweredFunction for SyssinBehavior {
     ) -> UnpoweredFunctionState {
         let me = model.state.borrow_me();
         // match self {
-        //     SyssinBehavior::VenomAttack(attack) => match attack {
-        //         SyssinVenomAttack::Doublestab => {
+        //     InfiltratorBehavior::VenomAttack(attack) => match attack {
+        //         InfiltratorVenomAttack::Doublestab => {
         //             if me.stuck_fallen() {
         //                 return UnpoweredFunctionState::Failed;
         //             }
@@ -58,29 +58,29 @@ impl UnpoweredFunction for SyssinBehavior {
         //                 });
         //             }
         //         }
-        //         SyssinVenomAttack::Flay(flay_type) => {
+        //         InfiltratorVenomAttack::Flay(flay_type) => {
         //             controller.flay(flay_type);
         //         }
-        //         SyssinVenomAttack::Slit => {
+        //         InfiltratorVenomAttack::Slit => {
         //             controller.slit();
         //         }
         //     },
-        //     SyssinBehavior::Bedazzle => {
+        //     InfiltratorBehavior::Bedazzle => {
         //         controller.bedazzle();
         //     }
-        //     SyssinBehavior::StackSuggest => {
+        //     InfiltratorBehavior::StackSuggest => {
         //         controller.stack_suggest();
         //     }
-        //     SyssinBehavior::Seal => {
+        //     InfiltratorBehavior::Seal => {
         //         controller.seal();
         //     }
-        //     SyssinBehavior::ShrugVenom => {
+        //     InfiltratorBehavior::ShrugVenom => {
         //         controller.shrug_venom();
         //     }
-        //     SyssinBehavior::Bind => {
+        //     InfiltratorBehavior::Bind => {
         //         controller.bind();
         //     }
-        //     SyssinBehavior::Bite(target) => {
+        //     InfiltratorBehavior::Bite(target) => {
         //         controller.bite(target);
         //     }
         // }

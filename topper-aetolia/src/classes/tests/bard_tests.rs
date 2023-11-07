@@ -772,7 +772,7 @@ mod bard_timeline_tests {
         );
     }
 
-    use crate::classes::syssin::get_attack;
+    use crate::classes::infiltrator::get_attack;
 
     #[test]
     fn test_bedazzling() {

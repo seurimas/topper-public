@@ -12,6 +12,7 @@ pub mod bard;
 pub mod carnifex;
 pub mod group;
 pub mod indorani;
+pub mod infiltrator;
 pub mod lords;
 pub mod luminary;
 pub mod mirrors;
@@ -21,7 +22,6 @@ pub mod sciomancer;
 pub mod sentinel;
 pub mod shaman;
 pub mod shapeshifter;
-pub mod syssin;
 pub mod templar;
 pub mod teradrim;
 pub mod wayfarer;
@@ -65,7 +65,7 @@ pub enum Class {
     Zealot,
     Archivists,
     Sciomancer,
-    Syssin,
+    Infiltrator,
     Shapeshifter,
     Wayfarer,
     Bard,
@@ -103,7 +103,7 @@ impl Class {
             // Spinesreach
             "Archivist" => Some(Class::Archivists),
             "Sciomancer" => Some(Class::Sciomancer),
-            "Syssin" => Some(Class::Syssin),
+            "Infiltrator" => Some(Class::Infiltrator),
             // Unaffiliated
             "Shapeshifter" => Some(Class::Shapeshifter),
             "Wayfarer" => Some(Class::Wayfarer),
@@ -144,7 +144,7 @@ impl Class {
             // Spinesreach
             Class::Archivists => "Archivists",
             Class::Sciomancer => "Sciomancer",
-            Class::Syssin => "Syssin",
+            Class::Infiltrator => "Infiltrator",
             // Neutral
             Class::Shapeshifter => "Shapeshifter",
             Class::Wayfarer => "Wayfarer",
@@ -215,7 +215,7 @@ pub fn get_skill_class(category: &String) -> Option<Class> {
         // Spinesreach
         "Geometrics" | "Numerology" | "Bioessence" => Some(Class::Archivists),
         "Sciomancy" | "Sorcery" | "Gravitation" => Some(Class::Sciomancer),
-        "Assassination" | "Subterfuge" | "Hypnosis" => Some(Class::Syssin),
+        "Assassination" | "Subterfuge" | "Hypnosis" => Some(Class::Infiltrator),
         // Unaffiliated
         "Ferality" | "Shapeshifting" | "Vocalizing" => Some(Class::Shapeshifter),
         "Tenacity" | "Wayfaring" | "Fury" => Some(Class::Wayfarer),
@@ -242,7 +242,7 @@ pub fn has_special_cure(class: &Class, affliction: FType) -> bool {
     }
     match (affliction, class) {
         (FType::Asthma, Class::Monk) => true,
-        (FType::Asthma, Class::Syssin) => true,
+        (FType::Asthma, Class::Infiltrator) => true,
         (FType::Paresis, Class::Zealot) => true,
         _ => false,
     }
@@ -253,7 +253,7 @@ pub fn is_affected_by(class: &Class, affliction: FType) -> bool {
         return is_affected_by(&class.normal(), affliction);
     }
     match (affliction, class) {
-        (FType::Clumsiness, Class::Syssin) => true,
+        (FType::Clumsiness, Class::Infiltrator) => true,
         (FType::Clumsiness, Class::Bard) => true,
         (FType::Clumsiness, Class::Templar) => true,
         (FType::Clumsiness, Class::Carnifex) => true,
@@ -268,7 +268,7 @@ pub fn is_affected_by(class: &Class, affliction: FType) -> bool {
         (FType::Disfigurement, Class::Indorani) => true,
         (FType::Disfigurement, Class::Teradrim) => true,
         (FType::Lethargy, Class::Bard) => true,
-        (FType::Lethargy, Class::Syssin) => true,
+        (FType::Lethargy, Class::Infiltrator) => true,
         (FType::Lethargy, Class::Sentinel) => true,
         (FType::Lethargy, Class::Carnifex) => true,
         (FType::Lethargy, Class::Templar) => true,
@@ -283,7 +283,7 @@ lazy_static! {
 }
 
 pub fn handle_sent(command: &String, agent_states: &mut AetTimelineState) {
-    syssin::handle_sent(command, agent_states);
+    infiltrator::handle_sent(command, agent_states);
     if let Some(captures) = DIAGNOSING.captures(command) {
         let me = agent_states.me.clone();
         let time = agent_states.time;
@@ -301,13 +301,13 @@ pub fn get_attack(
     if let Some(class) = db.and_then(|db| db.get_class(me)) {
         match class {
             Class::Sentinel => sentinel::get_attack(timeline, target, strategy, db),
-            Class::Syssin => syssin::get_attack(timeline, target, strategy, db),
+            Class::Infiltrator => infiltrator::get_attack(timeline, target, strategy, db),
             Class::Bard => bard::get_attack(timeline, target, strategy, db),
             Class::Zealot => zealot::get_attack(timeline, target, strategy, db),
-            _ => syssin::get_attack(timeline, target, strategy, db),
+            _ => infiltrator::get_attack(timeline, target, strategy, db),
         }
     } else {
-        syssin::get_attack(timeline, target, strategy, db)
+        infiltrator::get_attack(timeline, target, strategy, db)
     }
 }
 
@@ -367,7 +367,7 @@ pub fn handle_combat_action(
             shapeshifter::handle_combat_action(combat_action, agent_states, before, after)
         }
         "Subterfuge" | "Assassination" | "Hypnosis" => {
-            syssin::handle_combat_action(combat_action, agent_states, before, after)
+            infiltrator::handle_combat_action(combat_action, agent_states, before, after)
         }
         "Battlefury" | "Righteousness" | "Bladefire" => {
             templar::handle_combat_action(combat_action, agent_states, before, after)

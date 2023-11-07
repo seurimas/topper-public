@@ -8,5 +8,5 @@ pub mod behavior;
 pub use behavior::*;
 
 #[cfg(test)]
-#[path = "../tests/syssin_tests.rs"]
-mod syssin_timeline_tests;
+#[path = "../tests/infiltrator_tests.rs"]
+mod infiltrator_timeline_tests;

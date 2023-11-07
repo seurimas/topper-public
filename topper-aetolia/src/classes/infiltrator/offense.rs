@@ -462,7 +462,7 @@ lazy_static! {
         val.insert("Sciomancer".into(), SCIOMANCER_STACK.to_vec());
         val.insert("Wayfarer".into(), WAYFARER_STACK.to_vec());
         val.insert("Praenomen".into(), PRAENOMEN_STACK.to_vec());
-        val.insert("Syssin".into(), SYSSIN_STACK.to_vec());
+        val.insert("Infiltrator".into(), SYSSIN_STACK.to_vec());
         val.insert("Shaman".into(), SHAMAN_STACK.to_vec());
         val.insert("Templar".into(), get_simple_plan(PHYS_STACK.to_vec()));
         val.insert("Indorani".into(), INDORANI_STACK.to_vec());
@@ -804,7 +804,7 @@ pub fn get_stack<'s>(
             return STACKING_STRATEGIES.get("aggro").cloned();
         }
     }
-    db.and_then(|db| db.get_venom_plan(&format!("syssin_{}", strategy)))
+    db.and_then(|db| db.get_venom_plan(&format!("infiltrator_{}", strategy)))
         .or(STACKING_STRATEGIES.get(strategy).cloned())
 }
 
@@ -1193,10 +1193,10 @@ pub fn get_action_plan(
     action_plan
 }
 
-struct SyssinActionPlanner;
+struct InfiltratorActionPlanner;
 const STRATEGIES: [&'static str; 3] = ["phys", "bedazzle", "aggro"];
 
-impl ActionPlanner for SyssinActionPlanner {
+impl ActionPlanner for InfiltratorActionPlanner {
     fn get_strategies(&self) -> &'static [&'static str] {
         &STRATEGIES
     }

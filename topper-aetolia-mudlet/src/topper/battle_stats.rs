@@ -1,6 +1,6 @@
 use serde::Serialize;
 use std::collections::HashMap;
-use topper_aetolia::classes::syssin::{get_hypno_stack, get_hypno_stack_name};
+use topper_aetolia::classes::infiltrator::{get_hypno_stack, get_hypno_stack_name};
 use topper_aetolia::classes::{get_attack, Class};
 use topper_aetolia::db::AetDatabaseModule;
 use topper_aetolia::timeline::*;
@@ -42,7 +42,7 @@ fn get_hypno_warning(state: &AgentState) -> Option<String> {
 
 fn get_lock_warning(state: &AgentState) -> Option<String> {
     use topper_aetolia::classes::get_venoms;
-    use topper_aetolia::classes::syssin::{should_lock, SOFT_STACK};
+    use topper_aetolia::classes::infiltrator::{should_lock, SOFT_STACK};
     if should_lock(
         None,
         state,
@@ -239,7 +239,7 @@ pub fn get_battle_stats(
         "".to_string()
     };
     let class_state = match my_stats.class.as_ref() {
-        "Syssin" => format!(
+        "Infiltrator" => format!(
             "{}: {:?}",
             get_hypno_stack_name(
                 &timeline,

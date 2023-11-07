@@ -1,4 +1,4 @@
-mod syssin_timeline_tests {
+mod infiltrator_timeline_tests {
     use crate::timeline::*;
     use crate::types::*;
     use topper_core::timeline::db::DummyDatabaseModule;
@@ -772,7 +772,7 @@ mod syssin_timeline_tests {
         );
     }
 
-    use crate::classes::syssin::get_attack;
+    use crate::classes::infiltrator::get_attack;
 
     #[test]
     fn test_bedazzling() {
