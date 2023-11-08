@@ -39,6 +39,7 @@ impl BaseAgentState for AgentState {
         self.dodge_state.wait(duration);
         self.pipe_state.wait(duration);
         self.bard_board.wait(duration);
+        self.predator_board.wait(duration);
         if let Some((cured_limb, regenerating, first_person)) = self.limb_damage.wait(duration) {
             if !first_person {
                 match self.get_restore_cure(cured_limb) {
@@ -137,6 +138,9 @@ impl AgentState {
 
     pub fn is(&self, flag: FType) -> bool {
         match flag {
+            FType::Fleshbane => self.predator_board.fleshbane.is_some(),
+            FType::Bloodscourge => self.predator_board.bloodscourge.is_some(),
+            FType::Cirisosis => self.predator_board.cirisosis.is_some(),
             FType::LeftLegCrippled => self.limb_damage.crippled(LType::LeftLegDamage),
             FType::RightLegCrippled => self.limb_damage.crippled(LType::RightLegDamage),
             FType::LeftArmCrippled => self.limb_damage.crippled(LType::LeftArmDamage),
@@ -220,6 +224,21 @@ impl AgentState {
             self.hidden_state.unhide(flag);
         }
         match flag {
+            FType::Fleshbane => self.predator_board.fleshbaned(),
+            FType::Bloodscourge => {
+                if value {
+                    self.predator_board.bloodscourged()
+                } else {
+                    self.predator_board.bloodscourge_end()
+                }
+            }
+            FType::Cirisosis => {
+                if value {
+                    self.predator_board.cirisosis_start()
+                } else {
+                    self.predator_board.cirisosis_lost();
+                }
+            }
             FType::LeftLegCrippled => self
                 .limb_damage
                 .set_limb_crippled(LType::LeftLegDamage, value),
@@ -794,6 +813,14 @@ impl AgentState {
             Some(action(predator))
         } else {
             None
+        }
+    }
+
+    pub fn get_predator_stance(&self) -> Stance {
+        if let ClassState::Predator(predator) = &self.class_state {
+            predator.stance
+        } else {
+            Stance::None
         }
     }
 

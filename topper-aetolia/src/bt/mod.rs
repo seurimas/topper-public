@@ -9,7 +9,16 @@ use serde::{Deserialize, Serialize};
 pub use sub_trees::*;
 use topper_bt::unpowered::*;
 
-use crate::{classes::VenomPlan, observables::ActionPlan, timeline::AetTimeline};
+use crate::{
+    classes::{
+        get_venoms_from_plan,
+        predator::{ComboAttack, PredatorCombo},
+        VenomPlan,
+    },
+    observables::ActionPlan,
+    timeline::AetTimeline,
+    types::AgentState,
+};
 
 pub type AetBehaviorTreeDef = UnpoweredTreeDef<AetBehaviorTreeNode>;
 
@@ -43,6 +52,8 @@ pub struct BehaviorController {
     pub plan_hints: HashMap<String, String>,
     pub target: Option<String>,
     pub allies: HashMap<String, i32>,
+    pub predator_combo_attacks: Vec<ComboAttack>,
+    pub predator_combos: Vec<PredatorCombo>,
 }
 
 impl BehaviorController {
@@ -60,6 +71,14 @@ impl BehaviorController {
 
     pub fn get_hint<T: ToString>(&self, hint_name: T) -> Option<&String> {
         self.plan_hints.get(&hint_name.to_string())
+    }
+
+    pub fn get_venoms_from_plan(&self, count: usize, you: &AgentState) -> Vec<&'static str> {
+        if let Some(venom_plan) = &self.aff_priorities {
+            get_venoms_from_plan(&self.aff_priorities.as_ref().unwrap(), count, &you)
+        } else {
+            vec![""]
+        }
     }
 }
 

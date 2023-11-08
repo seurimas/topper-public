@@ -311,6 +311,7 @@ pub fn get_attack(
             Class::Infiltrator => infiltrator::get_attack(timeline, target, strategy, db),
             Class::Bard => bard::get_attack(timeline, target, strategy, db),
             Class::Zealot => zealot::get_attack(timeline, target, strategy, db),
+            Class::Predator => predator::get_attack(timeline, target, strategy, db),
             _ => infiltrator::get_attack(timeline, target, strategy, db),
         }
     } else {

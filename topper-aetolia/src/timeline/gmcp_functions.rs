@@ -67,6 +67,36 @@ fn handle_char_vitals(
             },
         );
     }
+    if let Some(stance) = gmcp
+        .get("knife_stance")
+        .and_then(|stance| stance.as_str())
+        .map(Stance::from_name)
+    {
+        for_agent(
+            timeline,
+            &timeline.me.clone(),
+            &move |me: &mut AgentState| {
+                if let ClassState::Predator(class_state) = &mut me.class_state {
+                    class_state.stance = stance;
+                }
+            },
+        )
+    }
+    if let Some(apex) = gmcp
+        .get("apex")
+        .and_then(|apex| apex.as_str())
+        .and_then(|apex| apex.parse::<u32>().ok())
+    {
+        for_agent(
+            timeline,
+            &timeline.me.clone(),
+            &move |me: &mut AgentState| {
+                if let ClassState::Predator(class_state) = &mut me.class_state {
+                    class_state.apex = apex;
+                }
+            },
+        );
+    }
 }
 
 fn handle_room_info(

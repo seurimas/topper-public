@@ -1,13 +1,14 @@
+use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
 
 use super::*;
 use crate::types::*;
 
-#[derive(Debug, Copy, Clone, EnumIter, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, EnumIter, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ComboAttack {
     Tidalslash,
     Freefall,
-    Pheremones,
+    Pheromones,
     Pindown,
     Mindnumb,
     Jab,
@@ -33,7 +34,7 @@ impl ComboAttack {
         match self {
             ComboAttack::Tidalslash => false,
             ComboAttack::Freefall => false,
-            ComboAttack::Pheremones => false,
+            ComboAttack::Pheromones => false,
             ComboAttack::Pindown => false,
             ComboAttack::Mindnumb => false,
             _ => true,
@@ -43,25 +44,51 @@ impl ComboAttack {
     pub fn rebounds(&self) -> bool {
         match self {
             ComboAttack::Freefall => false,
-            ComboAttack::Pheremones => false,
+            ComboAttack::Pheromones => false,
             ComboAttack::Pindown => false,
             ComboAttack::Mindnumb => false,
+            ComboAttack::Flashkick => false,
+            ComboAttack::Raze => false,
             _ => true,
         }
     }
 
+    pub fn strips_rebounding(&self) -> bool {
+        match self {
+            ComboAttack::Raze => true,
+            _ => false,
+        }
+    }
+
+    pub fn get_aff_count(&self) -> usize {
+        if self.can_use_venom() {
+            1
+        } else {
+            match self {
+                ComboAttack::Pinprick => 1,
+                ComboAttack::Flashkick => 1,
+                ComboAttack::Veinrip => 2,
+                ComboAttack::Gouge => 1,
+                ComboAttack::Pheromones => 1,
+                ComboAttack::Mindnumb => 1,
+                _ => 0,
+            }
+        }
+    }
+
+    // Combo attacks where using it twice is impossible or an anti-pattern.
     pub fn idempotent(&self) -> bool {
         match self {
             ComboAttack::Tidalslash => true,
             ComboAttack::Freefall => true,
-            ComboAttack::Pheremones => true,
+            ComboAttack::Pheromones => true,
             ComboAttack::Pindown => true,
             ComboAttack::Mindnumb => true,
             ComboAttack::Pinprick => true,
-            ComboAttack::Flashkick => true,
             ComboAttack::Veinrip => true,
             ComboAttack::Feint => true,
             ComboAttack::Gouge => true,
+            ComboAttack::Vertical => true,
             _ => false,
         }
     }
@@ -75,6 +102,16 @@ impl ComboAttack {
             | ComboAttack::Veinrip
             | ComboAttack::Gouge => true,
             _ => false,
+        }
+    }
+
+    pub fn get_single_limb_target(&self) -> Option<LType> {
+        match self {
+            ComboAttack::Lateral => Some(LType::TorsoDamage),
+            ComboAttack::Flashkick => Some(LType::HeadDamage),
+            ComboAttack::Veinrip => Some(LType::HeadDamage),
+            ComboAttack::Gouge => Some(LType::HeadDamage),
+            _ => None,
         }
     }
 
@@ -114,6 +151,9 @@ impl ComboAttack {
     }
 
     pub fn is_good_combo_attack(&self, stance: Stance) -> bool {
+        if *self == ComboAttack::Raze {
+            return true;
+        }
         !self.is_combo_attack() || self.get_next_stance(stance) != stance
     }
 
@@ -141,7 +181,7 @@ impl ComboAttack {
             ComboAttack::Lowhook => 205,
             ComboAttack::Feint => 205,
             ComboAttack::Raze => 205,
-            ComboAttack::Pheremones => 205,
+            ComboAttack::Pheromones => 205,
             ComboAttack::Mindnumb => 251,
             ComboAttack::Vertical => 251,
             ComboAttack::Spinslash => 251,
@@ -171,7 +211,7 @@ impl ComboAttack {
             // Non knifeplay attacks.
             (ComboAttack::Tidalslash, _) => stance,
             (ComboAttack::Freefall, _) => stance,
-            (ComboAttack::Pheremones, _) => stance,
+            (ComboAttack::Pheromones, _) => stance,
             (ComboAttack::Pindown, _) => stance,
             (ComboAttack::Mindnumb, _) => stance,
             // Jab
@@ -305,75 +345,6 @@ impl ComboAttack {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum ParamComboAttack {
-    Tidalslash,
-    Freefall,
-    Pheremones,
-    Pindown,
-    Mindnumb,
-    Jab(LType),
-    Pinprick,
-    Lateral,
-    Vertical,
-    Crescentcut,
-    Spinslash,
-    Lowhook(LType),
-    Butterfly,
-    Flashkick,
-    Trip,
-    Veinrip,
-    Feint(LType),
-    Raze,
-    Gouge,
-    Bleed,
-    Swiftkick,
-}
-
-impl ParamComboAttack {
-    pub fn get_param_string(&self) -> String {
-        match self {
-            ParamComboAttack::Tidalslash => "tidalslash".to_string(),
-            ParamComboAttack::Freefall => "freefall".to_string(),
-            ParamComboAttack::Pheremones => "pheremones".to_string(),
-            ParamComboAttack::Pindown => "pindown".to_string(),
-            ParamComboAttack::Mindnumb => "mindnumb".to_string(),
-            ParamComboAttack::Jab(limb) => {
-                if *limb == LType::LeftArmDamage {
-                    "jab left".to_string()
-                } else if *limb == LType::RightArmDamage {
-                    "jab right".to_string()
-                } else {
-                    "jab".to_string()
-                }
-            }
-            ParamComboAttack::Lowhook(limb) => {
-                if *limb == LType::LeftLegDamage {
-                    "lowhook left".to_string()
-                } else if *limb == LType::RightLegDamage {
-                    "lowhook right".to_string()
-                } else {
-                    "lowhook".to_string()
-                }
-            }
-            ParamComboAttack::Pinprick => "pinprick".to_string(),
-            ParamComboAttack::Lateral => "lateral".to_string(),
-            ParamComboAttack::Vertical => "vertical".to_string(),
-            ParamComboAttack::Crescentcut => "crescentcut".to_string(),
-            ParamComboAttack::Spinslash => "spinslash".to_string(),
-            ParamComboAttack::Butterfly => "butterfly".to_string(),
-            ParamComboAttack::Flashkick => "flashkick".to_string(),
-            ParamComboAttack::Trip => "trip".to_string(),
-            ParamComboAttack::Veinrip => "veinrip".to_string(),
-            ParamComboAttack::Feint(limb) => format!("feint {}", limb.to_string()),
-            ParamComboAttack::Raze => "raze".to_string(),
-            ParamComboAttack::Gouge => "gouge".to_string(),
-            ParamComboAttack::Bleed => "bleed".to_string(),
-            ParamComboAttack::Swiftkick => "swiftkick".to_string(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PredatorCombo(Stance, Vec<ComboAttack>);
 
 impl PredatorCombo {
@@ -406,9 +377,18 @@ impl PredatorCombo {
             })
             .1
     }
+
+    pub fn estimate_aff_rate(&self) -> f32 {
+        let balance = self.get_balance_time();
+        let affs = self
+            .1
+            .iter()
+            .fold(0, |affs, attack| affs + attack.get_aff_count());
+        affs as f32 / balance as f32
+    }
 }
 
-fn add_combos(
+fn add_combos<'a>(
     valid_attacks: &Vec<ComboAttack>,
     combos: &mut Vec<PredatorCombo>,
     starting_stance: Stance,
@@ -417,6 +397,7 @@ fn add_combos(
     previous_attacks: Vec<ComboAttack>,
     mut parrying: bool,
     mut prone: bool,
+    mut rebounds: u32,
 ) {
     if combos.len() > 1000 {
         return;
@@ -434,12 +415,16 @@ fn add_combos(
     }
     parrying |= attack.can_drop_parry();
     prone |= attack.can_prone();
-    for next_attack in valid_attacks {
+    if attack.strips_rebounding() && rebounds > 0 {
+        rebounds -= 1;
+    }
+    for next_attack in valid_attacks.iter() {
         if next_attack.is_good_combo_attack(next_stance)
             && !next_attack.must_begin_combo()
-            && !new_attacks.contains(&next_attack)
+            && (!next_attack.idempotent() || !new_attacks.contains(&next_attack))
             && (!parrying || !next_attack.parryable())
             && (prone || !next_attack.requires_prone())
+            && (rebounds == 0 || !next_attack.rebounds())
         {
             add_combos(
                 valid_attacks,
@@ -450,22 +435,28 @@ fn add_combos(
                 new_attacks.clone(),
                 parrying,
                 prone,
+                rebounds,
             );
         }
     }
 }
 
-pub fn find_combos(
+pub fn find_combos<'a>(
     stance: Stance,
-    valid_attacks: Vec<ComboAttack>,
+    valid_attacks: &Vec<ComboAttack>,
     parrying: bool,
     prone: bool,
+    rebounds: u32,
 ) -> Vec<PredatorCombo> {
     let mut combos = vec![];
     for attack in valid_attacks.iter() {
-        if attack.is_good_combo_attack(stance) && (!parrying || !attack.parryable()) {
+        if attack.is_good_combo_attack(stance)
+            && (!parrying || !attack.parryable())
+            && (prone || !attack.requires_prone())
+            && (rebounds == 0 || !attack.rebounds())
+        {
             add_combos(
-                &valid_attacks,
+                valid_attacks,
                 &mut combos,
                 stance,
                 stance,
@@ -473,6 +464,7 @@ pub fn find_combos(
                 vec![],
                 parrying,
                 prone,
+                rebounds,
             );
         }
     }
@@ -486,20 +478,21 @@ mod predator_tests {
     pub fn test_find_combos() {
         let combos = find_combos(
             Stance::Rizet,
-            vec![
+            &vec![
                 ComboAttack::Jab,
                 ComboAttack::Pinprick,
                 ComboAttack::Mindnumb,
                 ComboAttack::Vertical,
                 ComboAttack::Veinrip,
                 ComboAttack::Lowhook,
-                ComboAttack::Pheremones,
+                ComboAttack::Pheromones,
                 ComboAttack::Gouge,
                 ComboAttack::Trip,
                 ComboAttack::Raze,
             ],
             false,
             false,
+            0,
         );
         assert_eq!(combos.len(), 610);
         for combo in combos.iter() {
@@ -510,7 +503,7 @@ mod predator_tests {
                 Stance::Rizet,
                 vec![
                     ComboAttack::Pinprick,
-                    ComboAttack::Pheremones,
+                    ComboAttack::Pheromones,
                     ComboAttack::Vertical,
                 ]
             ))

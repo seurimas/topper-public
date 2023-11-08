@@ -19,6 +19,17 @@ pub enum LType {
 }
 
 impl LType {
+    pub fn from_name(name: &String) -> Self {
+        match name.to_ascii_lowercase().as_ref() {
+            "head" => LType::HeadDamage,
+            "torso" => LType::TorsoDamage,
+            "left arm" => LType::LeftArmDamage,
+            "right arm" => LType::RightArmDamage,
+            "left leg" => LType::LeftLegDamage,
+            "right leg" => LType::RightLegDamage,
+            _ => LType::HeadDamage,
+        }
+    }
     pub fn to_string(&self) -> String {
         match self {
             LType::HeadDamage => "head".to_string(),

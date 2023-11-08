@@ -445,6 +445,11 @@ pub enum FType {
     LeftArmBroken,
     RightArmBroken,
 
+    // Predator special affs
+    Fleshbane,
+    Bloodscourge,
+    Cirisosis,
+
     // Mirrored affs
     Remorse,
     Contrition,
@@ -992,6 +997,7 @@ impl ClassState {
                 pyromania.wait(duration);
             }
             ClassState::Bard(bard_class_state) => bard_class_state.wait(duration),
+            ClassState::Predator(predator_class_state) => predator_class_state.wait(duration),
             _ => {}
         }
     }

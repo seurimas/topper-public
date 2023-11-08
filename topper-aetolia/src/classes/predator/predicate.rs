@@ -9,6 +9,7 @@ use super::actions::*;
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum PredatorPredicate {
     InStance(Stance),
+    CanFeint,
     Fleshbaned,
     Bloodscourged,
     TidalslashReady,
@@ -27,6 +28,9 @@ impl TargetPredicate for PredatorPredicate {
             match self {
                 PredatorPredicate::InStance(stance) => target
                     .check_if_predator(&|predator| predator.stance == *stance)
+                    .unwrap_or(false),
+                PredatorPredicate::CanFeint => target
+                    .check_if_predator(&|predator| predator.feint_time < 0)
                     .unwrap_or(false),
                 PredatorPredicate::Fleshbaned => target.predator_board.fleshbane.is_some(),
                 PredatorPredicate::Bloodscourged => target.predator_board.bloodscourge.is_some(),

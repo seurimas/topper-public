@@ -14,6 +14,7 @@ use log::warn;
 use regex::Regex;
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
+use std::f32::consts::E;
 use topper_core::observations::strip_ansi;
 use topper_core::timeline::db::DatabaseModule;
 use topper_core::timeline::CType;

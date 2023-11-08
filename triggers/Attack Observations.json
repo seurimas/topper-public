@@ -162,6 +162,24 @@
     "observation_name": "Devenoms"
   },
   {
+    "regex": "^Your dart strikes .*, digging (\\w+) into .* flesh.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Devenoms"
+  },
+  {
     "regex": "^A rune of the asp flares as your weapon connects.$",
     "args": [
       {

@@ -30,7 +30,24 @@ pub fn get_action_plan(
     };
     let tree = get_tree(&tree_name);
     if let Ok(mut tree) = tree.lock() {
+        unsafe {
+            if DEBUG_TREES {
+                if let Some(you) = AetTarget::Target.get_target(&timeline, &controller) {
+                    println!("Predator: {:?}", you);
+                }
+            }
+        }
         tree.resume_with(&timeline, &mut controller);
     }
     controller.plan
+}
+
+pub fn get_attack(
+    timeline: &AetTimeline,
+    target: &String,
+    strategy: &String,
+    db: Option<&impl AetDatabaseModule>,
+) -> String {
+    let action_plan = get_action_plan(&timeline, &timeline.who_am_i(), &target, &strategy, db);
+    action_plan.get_inputs(&timeline)
 }
