@@ -5,6 +5,7 @@ use topper_bt::unpowered::*;
 use crate::classes::bard::BardPredicate;
 use crate::classes::get_affs_from_plan;
 use crate::classes::predator::PredatorPredicate;
+use crate::classes::LockType;
 use crate::classes::VenomPlan;
 use crate::curatives::get_cure_depth;
 use crate::timeline::*;
@@ -52,6 +53,7 @@ pub enum AetPredicate {
     CannotCure(AetTarget, FType),
     Buffered(AetTarget, FType),
     Locked(AetTarget, bool),
+    NearLocked(AetTarget, LockType, usize),
     ReboundingWindow(AetTarget, CType),
     HintSet(String, String),
     HasBalanceEquilibrium(AetTarget),
@@ -212,6 +214,17 @@ impl UnpoweredFunction for AetPredicate {
                         if !*hard_only || lock >= 10.0 {
                             return UnpoweredFunctionState::Complete;
                         }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::NearLocked(target, lock_type, aff_count) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    let needed_affs = lock_type.affs();
+                    let affs_on_target = target.affs_count(&needed_affs);
+                    let affs_to_lock = needed_affs.len() - affs_on_target;
+                    if affs_to_lock <= *aff_count {
+                        return UnpoweredFunctionState::Complete;
                     }
                 }
                 UnpoweredFunctionState::Failed

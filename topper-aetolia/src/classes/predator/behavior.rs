@@ -15,8 +15,8 @@ use super::*;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum PredatorBehavior {
-    FastestComboWithAttacks(usize, Vec<ComboAttack>),
-    HighValueComboWithAttacks(usize, Vec<ComboAttack>),
+    FastestComboWithAttacks(usize, Stance, Vec<ComboAttack>),
+    HighValueComboWithAttacks(usize, Stance, Vec<ComboAttack>),
     AddComboAttacks(Vec<ComboAttack>),
     CalculateCombos,
     ResetComboAttacks,
@@ -45,10 +45,17 @@ impl UnpoweredFunction for PredatorBehavior {
                 controller.predator_combo_attacks.extend(attacks.iter());
                 UnpoweredFunctionState::Complete
             }
-            PredatorBehavior::FastestComboWithAttacks(minimum, attacks) => {
+            PredatorBehavior::FastestComboWithAttacks(minimum, final_stance, attacks) => {
                 let best_combo = controller
                     .predator_combos
                     .iter()
+                    .filter(|combo| {
+                        if *final_stance != Stance::None {
+                            combo.get_final_stance() == *final_stance
+                        } else {
+                            true
+                        }
+                    })
                     .filter(|combo| {
                         combo.get_attacks().len() >= *minimum
                             && attacks
@@ -65,10 +72,17 @@ impl UnpoweredFunction for PredatorBehavior {
                 }
                 use_combo(model, controller, best_combo)
             }
-            PredatorBehavior::HighValueComboWithAttacks(minimum, attacks) => {
+            PredatorBehavior::HighValueComboWithAttacks(minimum, final_stance, attacks) => {
                 let best_combo = controller
                     .predator_combos
                     .iter()
+                    .filter(|combo| {
+                        if *final_stance != Stance::None {
+                            combo.get_final_stance() == *final_stance
+                        } else {
+                            true
+                        }
+                    })
                     .filter(|combo| {
                         combo.get_attacks().len() >= *minimum
                             && attacks

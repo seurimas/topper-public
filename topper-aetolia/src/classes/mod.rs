@@ -637,6 +637,38 @@ pub fn handle_combat_action(
     }
 }
 
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+pub enum LockType {
+    // Just asthma/slickness/anorexia
+    Soft,
+    // Asthma, slickness, anorexia, paralysis, and stupidity
+    Buffered,
+    // Asthma, slickness, anorexia, paralysis, and focus blocked
+    Hard,
+}
+
+impl LockType {
+    pub fn affs(&self) -> Vec<FType> {
+        match self {
+            LockType::Soft => vec![FType::Anorexia, FType::Slickness, FType::Asthma],
+            LockType::Buffered => vec![
+                FType::Anorexia,
+                FType::Slickness,
+                FType::Stupidity,
+                FType::Asthma,
+                FType::Paresis,
+            ],
+            LockType::Hard => vec![
+                FType::Anorexia,
+                FType::Slickness,
+                FType::Asthma,
+                FType::Paresis,
+                FType::Impatience,
+            ],
+        }
+    }
+}
+
 pub type VenomType = &'static str;
 
 pub fn get_stack<'s>(

@@ -59,6 +59,24 @@ pub enum PredatorCompanionState {
     },
 }
 
+impl PredatorCompanionState {
+    pub fn wait(&mut self, time: CType) {
+        match self {
+            PredatorCompanionState::Orel { swooping, .. } => {
+                if let Some(swooping) = swooping {
+                    *swooping -= time;
+                }
+            }
+            PredatorCompanionState::Orgyuk { roaring } => {
+                if let Some(roaring) = roaring {
+                    *roaring -= time;
+                }
+            }
+            PredatorCompanionState::Spider { .. } => {}
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 pub struct PredatorClassState {
     pub apex: u32,
@@ -75,6 +93,53 @@ impl PredatorClassState {
 
     pub fn feint(&mut self) {
         self.feint_time = FEINT_COOLDOWN;
+    }
+
+    pub fn get_spider(&mut self) {
+        if !self.has_spider() {
+            self.companion = Some(PredatorCompanionState::Spider {
+                strands_target: None,
+            });
+        }
+    }
+
+    pub fn has_spider(&self) -> bool {
+        if let Some(PredatorCompanionState::Spider { .. }) = self.companion {
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn get_orgyuk(&mut self) {
+        if !self.has_orgyuk() {
+            self.companion = Some(PredatorCompanionState::Orgyuk { roaring: None });
+        }
+    }
+
+    pub fn has_orgyuk(&self) -> bool {
+        if let Some(PredatorCompanionState::Orgyuk { .. }) = self.companion {
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn get_orel(&mut self) {
+        if !self.has_orel() {
+            self.companion = Some(PredatorCompanionState::Orel {
+                venoms: Vec::new(),
+                swooping: None,
+            });
+        }
+    }
+
+    pub fn has_orel(&self) -> bool {
+        if let Some(PredatorCompanionState::Orel { .. }) = self.companion {
+            true
+        } else {
+            false
+        }
     }
 }
 

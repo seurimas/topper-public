@@ -138,6 +138,14 @@ pub fn handle_combat_action(
                 target.set_parrying(limb);
             });
         }
+        "Flashkicked" => {
+            let aff = FType::from_name(&combat_action.annotation);
+            if let Some(aff) = aff {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.toggle_flag(aff, true);
+                });
+            }
+        }
         "Raze" => {
             let annotation = combat_action.annotation.clone();
             for_agent(

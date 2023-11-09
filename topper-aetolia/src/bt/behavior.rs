@@ -4,18 +4,21 @@ use topper_bt::unpowered::*;
 
 use crate::classes::bard::BardBehavior;
 use crate::classes::predator::PredatorBehavior;
+use crate::classes::LockType;
 use crate::classes::VenomPlan;
 use crate::defense::DefenseBehavior;
 use crate::observables::PlainAction;
 use crate::timeline::*;
 use crate::types::*;
 
+use super::AetTarget;
 use super::{BehaviorController, BehaviorModel};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum AetBehavior {
     UnstackAffs(Vec<FType>),
     PushAff(FType),
+    PushLockers(LockType),
     TagPlan(String),
     HintPlan(String, String),
     CopyHint(String, String),
@@ -62,6 +65,21 @@ impl UnpoweredFunction for AetBehavior {
             AetBehavior::PushAff(aff) => {
                 if let Some(priorities) = &mut controller.aff_priorities {
                     priorities.insert(0, VenomPlan::Stick(*aff));
+                    return UnpoweredFunctionState::Complete;
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetBehavior::PushLockers(lock_type) => {
+                if let (Some(target), Some(priorities)) = (
+                    AetTarget::Target.get_target(model, controller),
+                    &mut controller.aff_priorities,
+                ) {
+                    let mut affs = lock_type.affs();
+                    affs.retain(|aff| !target.is(*aff));
+                    for aff in affs {
+                        priorities.insert(0, VenomPlan::Stick(aff));
+                    }
                     return UnpoweredFunctionState::Complete;
                 } else {
                     UnpoweredFunctionState::Failed

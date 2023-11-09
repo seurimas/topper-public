@@ -21,6 +21,27 @@
     "observation_name": "Proc"
   },
   {
+    "regex": "^Your precision strike causes (\\w+) in (\\w+).",
+    "args": [
+      {
+        "GroupAsTarget": 2
+      },
+      {
+        "Literal": "Knifeplay"
+      },
+      {
+        "Literal": "Flashkicked"
+      },
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
     "regex": "^The antidotes in (.*) blood have finally purged .* body of the awful taint that was scourging it.$",
     "args": [
       {
