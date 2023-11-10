@@ -335,6 +335,9 @@ pub fn handle_combat_action(
         for_agent(agent_states, &combat_action.target, &|me| {
             me.register_hit();
             me.room_id = my_room;
+            if me.is(FType::Pacifism) && me.balanced(BType::Pacifism) {
+                me.toggle_flag(FType::Pacifism, false);
+            }
         });
     }
     match combat_action.category.as_ref() {

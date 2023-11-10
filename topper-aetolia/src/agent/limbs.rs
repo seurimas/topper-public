@@ -133,7 +133,7 @@ pub struct Limb {
 pub struct LimbSet {
     pub limbs: [Limb; LType::SIZE as usize],
     pub restoring: Option<LType>,
-    pub restore_timer: Option<CType>,
+    pub restore_timer: Option<Timer>,
     pub regenerating: bool,
     pub first_person_restore: bool,
 }
@@ -365,11 +365,11 @@ impl LimbSet {
     }
 
     pub fn wait(&mut self, duration: CType) -> Option<(LType, bool, bool)> {
-        if let (Some(remaining), Some(restored)) = (self.restore_timer, self.restoring) {
-            if remaining < duration {
+        if let (Some(remaining), Some(restored)) = (&mut self.restore_timer, self.restoring) {
+            remaining.wait(duration);
+            if !remaining.is_active() {
                 self.complete_restore(None)
             } else {
-                self.restore_timer = Some(remaining - duration);
                 None
             }
         } else {
@@ -430,12 +430,12 @@ impl LimbSet {
 
     pub fn start_restore(&mut self, broken: LType, first_person: bool) {
         if let Some(timer) = self.restore_timer {
-            if timer < 10 {
+            if !timer.is_active() || timer.get_time_left() < 10 {
                 self.complete_restore(None);
             }
         }
         self.restoring = Some(broken);
-        self.restore_timer = Some(400);
+        self.restore_timer = Some(Timer::count_down(400));
         self.first_person_restore = first_person;
     }
 

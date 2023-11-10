@@ -8,7 +8,7 @@ use topper_core::timeline::BaseAgentState;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 pub struct AgentState {
-    pub balances: [CType; BType::SIZE as usize],
+    pub balances: [Timer; BType::SIZE as usize],
     pub stats: [CType; SType::SIZE as usize],
     pub max_stats: [CType; SType::SIZE as usize],
     pub aggro: AggroState,
@@ -72,7 +72,7 @@ impl BaseAgentState for AgentState {
         }
         let rebound_pending = !self.balanced(BType::Rebounding) && !self.is(FType::Rebounding);
         for i in 0..self.balances.len() {
-            self.balances[i] -= duration;
+            self.balances[i].wait(duration);
         }
         if rebound_pending && self.balanced(BType::Rebounding) {
             self.set_flag(FType::AssumedRebounding, true);
@@ -138,9 +138,9 @@ impl AgentState {
 
     pub fn is(&self, flag: FType) -> bool {
         match flag {
-            FType::Fleshbane => self.predator_board.fleshbane.is_some(),
-            FType::Bloodscourge => self.predator_board.bloodscourge.is_some(),
-            FType::Cirisosis => self.predator_board.cirisosis.is_some(),
+            FType::Fleshbane => self.predator_board.fleshbane.is_active(),
+            FType::Bloodscourge => self.predator_board.bloodscourge.is_active(),
+            FType::Cirisosis => self.predator_board.cirisosis.is_active(),
             FType::LeftLegCrippled => self.limb_damage.crippled(LType::LeftLegDamage),
             FType::RightLegCrippled => self.limb_damage.crippled(LType::RightLegDamage),
             FType::LeftArmCrippled => self.limb_damage.crippled(LType::LeftArmDamage),
@@ -281,6 +281,9 @@ impl AgentState {
         if value && flag == FType::SelfLoathing {
             self.set_balance(BType::SelfLoathing, 12.0);
         }
+        if value && flag == FType::Pacifism {
+            self.set_balance(BType::Pacifism, 1.5);
+        }
         match flag {
             FType::Zenith => {
                 if value {
@@ -329,11 +332,11 @@ impl AgentState {
     }
 
     pub fn set_balance(&mut self, balance: BType, value: f32) {
-        self.balances[balance as usize] = (value * BALANCE_SCALE) as CType;
+        self.balances[balance as usize].start_count_down_seconds(value);
     }
 
     pub fn get_raw_balance(&self, balance: BType) -> CType {
-        self.balances[balance as usize]
+        self.balances[balance as usize].get_time_left()
     }
 
     pub fn get_qeb_balance(&self) -> f32 {
@@ -347,11 +350,11 @@ impl AgentState {
     }
 
     pub fn get_balance(&self, balance: BType) -> f32 {
-        (self.balances[balance as usize] as f32) / (BALANCE_SCALE as f32)
+        self.balances[balance as usize].get_time_left_seconds()
     }
 
     pub fn balanced(&self, balance: BType) -> bool {
-        self.balances[balance as usize] <= 0
+        !self.balances[balance as usize].is_active()
     }
 
     pub fn qeb_balance(&self) -> BType {
@@ -366,9 +369,11 @@ impl AgentState {
         let mut earliest: Option<&BType> = None;
         for balance in balances {
             if let Some(earliest_bal) = earliest {
-                if self.balances[*earliest_bal as usize] <= 0 {
+                if !self.balances[*earliest_bal as usize].is_active() {
                     // Do nothing.
-                } else if self.balances[*balance as usize] < self.balances[*earliest_bal as usize] {
+                } else if self.balances[*balance as usize].get_time_left()
+                    < self.balances[*earliest_bal as usize].get_time_left()
+                {
                     earliest = Some(balance)
                 }
             } else {
@@ -526,16 +531,17 @@ impl AgentState {
             if !self.is(FType::Impatience) && !self.is(FType::Stupidity) {
                 let focus_time = self.balances[BType::Focus as usize];
                 earliest_escape = earliest_escape.map_or(Some(focus_time), |other| {
-                    if other < focus_time {
+                    if other.get_time_left() < focus_time.get_time_left() {
                         Some(other)
                     } else {
-                        Some(focus_time)
+                        Some(self.balances[BType::Focus as usize])
                     }
                 });
+            } else {
+                earliest_escape = earliest_escape.or(Some(Timer::count_down_seconds(15.)))
             }
-            earliest_escape = earliest_escape.or(Some((15.0 * BALANCE_SCALE) as CType))
         }
-        earliest_escape.map(|escape| (escape as f32) / BALANCE_SCALE)
+        earliest_escape.map(|escape| escape.get_time_left_seconds())
     }
 
     pub fn can_touch(&self) -> bool {
@@ -558,7 +564,6 @@ impl AgentState {
     pub fn can_parry(&self) -> bool {
         !self.is(FType::Indifference)
             && !self.is(FType::Frozen)
-            && !self.is(FType::Paresis)
             && !self.is(FType::Paralysis)
             && !(self.is(FType::LeftArmCrippled) && self.is(FType::RightArmCrippled))
     }
@@ -614,7 +619,7 @@ impl AgentState {
 
     pub fn get_restore_time_left(&self) -> f32 {
         if let Some(timer) = self.limb_damage.restore_timer {
-            timer as f32 / BALANCE_SCALE
+            timer.get_time_left_seconds()
         } else {
             0.0
         }

@@ -49,10 +49,10 @@ impl Stance {
 pub enum PredatorCompanionState {
     Orel {
         venoms: Vec<String>,
-        swooping: Option<CType>,
+        swooping: Option<Timer>,
     },
     Orgyuk {
-        roaring: Option<CType>,
+        roaring: Option<Timer>,
     },
     Spider {
         strands_target: Option<String>,
@@ -64,12 +64,12 @@ impl PredatorCompanionState {
         match self {
             PredatorCompanionState::Orel { swooping, .. } => {
                 if let Some(swooping) = swooping {
-                    *swooping -= time;
+                    swooping.wait(time);
                 }
             }
             PredatorCompanionState::Orgyuk { roaring } => {
                 if let Some(roaring) = roaring {
-                    *roaring -= time;
+                    roaring.wait(time);
                 }
             }
             PredatorCompanionState::Spider { .. } => {}
@@ -143,65 +143,61 @@ impl PredatorClassState {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PredatorBoard {
-    pub fleshbane: Option<CType>,
-    pub bloodscourge: Option<CType>,
-    pub veinrip: Option<CType>,
-    pub acid: Option<CType>,
-    pub cirisosis: Option<CType>,
+    pub fleshbane: Timer,
+    pub bloodscourge: Timer,
+    pub veinrip: Timer,
+    pub acid: Timer,
+    pub cirisosis: Timer,
+}
+
+impl Default for PredatorBoard {
+    fn default() -> Self {
+        PredatorBoard {
+            fleshbane: Timer::count_up_seconds(10.),
+            bloodscourge: Timer::count_up_seconds(5.),
+            veinrip: Timer::count_up_seconds(6.),
+            acid: Timer::count_up_seconds(10.),
+            cirisosis: Timer::count_up_seconds(6.),
+        }
+    }
 }
 
 impl PredatorBoard {
     pub fn wait(&mut self, time: CType) {
-        if let Some(fleshbane) = &mut self.fleshbane {
-            *fleshbane -= time;
-        }
-        if let Some(bloodscourge) = &mut self.bloodscourge {
-            *bloodscourge -= time;
-            if *bloodscourge < -600 {
-                self.bloodscourge = None;
-            }
-        }
-        if let Some(veinrip) = &mut self.veinrip {
-            *veinrip -= time;
-        }
-        if let Some(acid) = &mut self.acid {
-            *acid -= time;
-        }
-        if let Some(cirisosis) = &mut self.cirisosis {
-            *cirisosis -= time;
-            if *cirisosis < -600 {
-                self.cirisosis = None;
-            }
-        }
+        self.fleshbane.wait(time);
+        self.bloodscourge.wait(time);
+        self.veinrip.wait(time);
+        self.acid.wait(time);
+        self.cirisosis.wait(time);
     }
 
     pub fn fleshbaned(&mut self) {
-        self.fleshbane = Some(0);
+        self.fleshbane.reset();
     }
 
     pub fn bloodscourged(&mut self) {
-        self.bloodscourge = Some(0);
+        self.bloodscourge.reset();
     }
 
     pub fn bloodscourge_hit(&mut self) {
-        self.bloodscourge = Some(0);
+        self.bloodscourge.reset();
     }
 
     pub fn bloodscourge_end(&mut self) {
-        self.bloodscourge = None;
+        self.bloodscourge.expire();
     }
 
     pub fn cirisosis_start(&mut self) {
-        self.cirisosis = Some(0);
+        self.cirisosis.reset();
     }
 
     pub fn cirisosis_shock(&mut self) {
-        self.cirisosis = Some(0);
+        self.cirisosis.reset();
     }
 
     pub fn cirisosis_lost(&mut self) {
-        self.cirisosis = None;
+        self.cirisosis.expire();
     }
 }

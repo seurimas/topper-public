@@ -32,12 +32,12 @@ impl TargetPredicate for PredatorPredicate {
                 PredatorPredicate::CanFeint => target
                     .check_if_predator(&|predator| predator.feint_time < 0)
                     .unwrap_or(false),
-                PredatorPredicate::Fleshbaned => target.predator_board.fleshbane.is_some(),
-                PredatorPredicate::Bloodscourged => target.predator_board.bloodscourge.is_some(),
+                PredatorPredicate::Fleshbaned => target.predator_board.fleshbane.is_active(),
+                PredatorPredicate::Bloodscourged => target.predator_board.bloodscourge.is_active(),
                 PredatorPredicate::TidalslashReady => target
                     .check_if_predator(&|predator| predator.tidal_charge == 2)
                     .unwrap_or(false),
-                PredatorPredicate::Veinripped => target.predator_board.veinrip.is_some(),
+                PredatorPredicate::Veinripped => target.predator_board.veinrip.is_active(),
                 PredatorPredicate::ApexAtLeast(apex) => target
                     .check_if_predator(&|predator| predator.apex >= *apex)
                     .unwrap_or(false),

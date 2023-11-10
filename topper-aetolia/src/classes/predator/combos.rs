@@ -116,9 +116,7 @@ impl ComboAttack {
     }
 
     pub fn can_drop_parry(&self) -> bool {
-        if self.can_use_venom() {
-            true
-        } else if self == &ComboAttack::Feint {
+        if self == &ComboAttack::Feint {
             true
         } else {
             false

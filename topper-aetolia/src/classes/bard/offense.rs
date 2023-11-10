@@ -74,7 +74,7 @@ pub fn get_class_state(
         format!(
             "<magenta>{}({}) ",
             next_runeband,
-            (timer as f32 / BALANCE_SCALE)
+            timer.get_time_left_seconds()
         )
     } else {
         "<gray>No RB ".to_string()

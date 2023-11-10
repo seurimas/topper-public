@@ -53,6 +53,11 @@ pub fn apply_observation(
         }
         AetObservation::DiscernedCure(who, affliction) => {
             timeline.set_flag_for_agent(who, affliction, false)?;
+            if let Some(AetObservation::Devenoms(venom)) = before.last() {
+                if venom.eq_ignore_ascii_case("cirisosis") {
+                    timeline.set_flag_for_agent(who, &"cirisosis".to_string(), true);
+                }
+            }
         }
         AetObservation::Cured(affliction) => {
             timeline.set_flag_for_agent(&timeline.me.clone(), affliction, false)?;

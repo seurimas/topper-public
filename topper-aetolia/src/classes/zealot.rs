@@ -610,7 +610,7 @@ fn value_pendulum(
         if let (Some(timer), Some(limb)) =
             (you.limb_damage.restore_timer, you.limb_damage.restoring)
         {
-            let timer = timer as f32 / BALANCE_SCALE - me.get_qeb_balance();
+            let timer = timer.get_time_left_seconds() - me.get_qeb_balance();
             if timer > 0.0 {
                 if !you.get_limb_state(limb).crippled && timer < 1.0 {
                     println!("No pendulum, timer at {}", timer);

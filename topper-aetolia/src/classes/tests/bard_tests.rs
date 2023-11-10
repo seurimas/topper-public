@@ -821,7 +821,7 @@ mod bard_timeline_tests {
         );
         assert_eq!(
             qeb,
-            "qeb parry head;;stand;;dstab Benedicto delphinium kalmia;;dash d;;hypnotise Benedicto;;suggest Benedicto Hypochondria%%qs shadow sleight void Benedicto",
+            "qeb parry head;;stand;;dstab Benedicto curare kalmia;;dash d;;hypnotise Benedicto;;suggest Benedicto Hypochondria%%qs shadow sleight void Benedicto",
         );
         timeline
             .state

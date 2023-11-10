@@ -124,5 +124,47 @@
       }
     ],
     "observation_name": "Proc"
+  },
+  {
+    "regex": "^(.*) scurries in and looks up at (\\w+) expectantly.$",
+    "args": [
+      {
+        "GroupAsTarget": 2
+      },
+      {
+        "Literal": "Beastmastery"
+      },
+      {
+        "Literal": "Beastcalled"
+      },
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
+    "regex": "^(You)r (\\w+) is already here with you.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Beastmastery"
+      },
+      {
+        "Literal": "Beastcalled"
+      },
+      {
+        "GroupAsTarget": 2
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
   }
 ]
