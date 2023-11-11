@@ -188,6 +188,7 @@ pub struct Timeline<O, P, A, N> {
     pub slices: Vec<TimeSlice<O, P>>,
     pub digest: Vec<BattleEvent>,
     pub state: TimelineState<A, N>,
+    pub default_agent: A,
 }
 
 pub trait BaseTimeline<O, P, DB> {
@@ -200,6 +201,7 @@ impl<O, P, A: BaseAgentState + Clone, N: Clone> Timeline<O, P, A, N> {
             slices: Vec::new(),
             digest: Vec::new(),
             state: TimelineState::<A, N>::new(),
+            default_agent: A::get_base_state(),
         }
     }
 
@@ -208,6 +210,7 @@ impl<O, P, A: BaseAgentState + Clone, N: Clone> Timeline<O, P, A, N> {
             slices: Vec::new(),
             digest: self.digest.clone(),
             state: self.state.clone(),
+            default_agent: self.default_agent.clone(),
         }
     }
 

@@ -544,6 +544,7 @@ pub enum FType {
     Fleshbane,
     Bloodscourge,
     Cirisosis,
+    Veinrip,
 
     // Mirrored affs
     Remorse,

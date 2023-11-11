@@ -37,12 +37,12 @@ impl UnpoweredFunction for PredatorBehavior {
     ) -> UnpoweredFunctionState {
         match self {
             PredatorBehavior::ResetComboAttacks => {
-                controller.predator_combo_attacks.clear();
+                controller.predator_combo_store = Default::default();
                 controller.predator_combos.clear();
                 UnpoweredFunctionState::Complete
             }
             PredatorBehavior::AddComboAttacks(attacks) => {
-                controller.predator_combo_attacks.extend(attacks.iter());
+                controller.predator_combo_store.add_attacks(attacks.iter());
                 UnpoweredFunctionState::Complete
             }
             PredatorBehavior::FastestComboWithAttacks(minimum, final_stance, attacks) => {
@@ -66,6 +66,7 @@ impl UnpoweredFunction for PredatorBehavior {
                     .cloned();
                 unsafe {
                     if DEBUG_TREES {
+                        println!("Solver: {:?}", controller.predator_combo_store);
                         println!("Fastest combo: {:?}", best_combo);
                         println!("All combos: {:?}", controller.predator_combos);
                     }
@@ -93,6 +94,7 @@ impl UnpoweredFunction for PredatorBehavior {
                     .cloned();
                 unsafe {
                     if DEBUG_TREES {
+                        println!("Solver: {:?}", controller.predator_combo_store);
                         println!("Value combo: {:?}", best_combo);
                         println!("All combos: {:?}", controller.predator_combos);
                     }
@@ -104,17 +106,21 @@ impl UnpoweredFunction for PredatorBehavior {
                     model.state.borrow_me(),
                     AetTarget::Target.get_target(model, controller),
                 ) {
-                    controller.predator_combos = find_combos(
-                        me.get_predator_stance(),
-                        &controller.predator_combo_attacks,
-                        target.can_parry(),
-                        target.is_prone(),
-                        (if target.will_be_rebounding(me.get_qeb_balance()) {
-                            1
-                        } else {
-                            0
-                        }) + (if target.is(FType::Shielded) { 1 } else { 0 }),
-                    );
+                    controller
+                        .predator_combo_store
+                        .set_stance(me.get_predator_stance());
+                    controller
+                        .predator_combo_store
+                        .set_parry(target.can_parry())
+                        .set_prone(target.is_prone())
+                        .set_rebounds(
+                            (if target.will_be_rebounding(me.get_qeb_balance()) {
+                                1
+                            } else {
+                                0
+                            }) + (if target.is(FType::Shielded) { 1 } else { 0 }),
+                        );
+                    controller.predator_combos = controller.predator_combo_store.find_combos();
                     UnpoweredFunctionState::Complete
                 } else {
                     UnpoweredFunctionState::Failed

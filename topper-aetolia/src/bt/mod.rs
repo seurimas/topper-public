@@ -12,7 +12,7 @@ use topper_bt::unpowered::*;
 use crate::{
     classes::{
         get_venoms_from_plan,
-        predator::{ComboAttack, PredatorCombo},
+        predator::{ComboAttack, ComboSolver, PredatorCombo},
         VenomPlan,
     },
     observables::ActionPlan,
@@ -52,7 +52,7 @@ pub struct BehaviorController {
     pub plan_hints: HashMap<String, String>,
     pub target: Option<String>,
     pub allies: HashMap<String, i32>,
-    pub predator_combo_attacks: Vec<ComboAttack>,
+    pub predator_combo_store: ComboSolver,
     pub predator_combos: Vec<PredatorCombo>,
 }
 

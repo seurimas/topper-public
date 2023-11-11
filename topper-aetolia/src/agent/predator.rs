@@ -177,6 +177,10 @@ impl PredatorBoard {
         self.fleshbane.reset();
     }
 
+    pub fn fleshbane_end(&mut self) {
+        self.fleshbane.expire();
+    }
+
     pub fn bloodscourged(&mut self) {
         self.bloodscourge.reset();
     }
@@ -199,5 +203,21 @@ impl PredatorBoard {
 
     pub fn cirisosis_lost(&mut self) {
         self.cirisosis.expire();
+    }
+
+    pub fn veinrip_start(&mut self) {
+        self.veinrip.reset();
+    }
+
+    pub fn veinrip_end(&mut self) {
+        self.veinrip.expire();
+    }
+
+    pub fn acid(&mut self) {
+        self.acid.reset();
+    }
+
+    pub fn acid_end(&mut self) {
+        self.acid.expire();
     }
 }

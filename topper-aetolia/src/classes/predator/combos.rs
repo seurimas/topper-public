@@ -47,7 +47,6 @@ impl ComboAttack {
             ComboAttack::Pheromones => false,
             ComboAttack::Pindown => false,
             ComboAttack::Mindnumb => false,
-            ComboAttack::Flashkick => false,
             ComboAttack::Raze => false,
             _ => true,
         }
@@ -386,48 +385,139 @@ impl PredatorCombo {
     }
 }
 
-fn add_combos<'a>(
-    valid_attacks: &Vec<ComboAttack>,
-    combos: &mut Vec<PredatorCombo>,
+#[derive(Debug)]
+pub struct ComboSolver {
+    attacks: Vec<ComboAttack>,
     starting_stance: Stance,
-    current_stance: Stance,
-    attack: ComboAttack,
-    previous_attacks: Vec<ComboAttack>,
-    mut parrying: bool,
-    mut prone: bool,
-    mut rebounds: u32,
-) {
-    if combos.len() > 1000 {
-        return;
+    start_parry: bool,
+    start_prone: bool,
+    start_rebounds: u32,
+    blade_surge: bool,
+    allow_bad_stances: bool,
+}
+
+impl Default for ComboSolver {
+    fn default() -> Self {
+        Self::new(Stance::None)
     }
-    let next_stance = attack.get_next_stance(current_stance);
-    let mut new_attacks = previous_attacks.clone();
-    new_attacks.push(attack);
-    if attack.should_end_combo() {
-        combos.push(PredatorCombo::new(starting_stance, new_attacks.clone()));
+}
+
+impl ComboSolver {
+    pub fn new(stance: Stance) -> Self {
+        Self {
+            attacks: vec![],
+            starting_stance: stance,
+            start_parry: false,
+            start_prone: false,
+            start_rebounds: 0,
+            blade_surge: false,
+            allow_bad_stances: false,
+        }
     }
-    if new_attacks.len() == 3 && next_stance != Stance::Laesan {
-        return;
-    } else if new_attacks.len() == 4 {
-        return;
+
+    pub fn set_stance(&mut self, stance: Stance) -> &mut Self {
+        self.starting_stance = stance;
+        self
     }
-    parrying |= attack.can_drop_parry();
-    prone |= attack.can_prone();
-    if attack.strips_rebounding() && rebounds > 0 {
-        rebounds -= 1;
+
+    pub fn set_attacks(&mut self, attacks: Vec<ComboAttack>) -> &mut Self {
+        self.attacks = attacks;
+        self
     }
-    for next_attack in valid_attacks.iter() {
-        if next_attack.is_good_combo_attack(next_stance)
-            && !next_attack.must_begin_combo()
+
+    pub fn add_attacks<'a>(&mut self, attacks: impl Iterator<Item = &'a ComboAttack>) {
+        self.attacks.extend(attacks);
+    }
+
+    pub fn set_parry(&mut self, parry: bool) -> &mut Self {
+        self.start_parry = parry;
+        self
+    }
+
+    pub fn set_prone(&mut self, prone: bool) -> &mut Self {
+        self.start_prone = prone;
+        self
+    }
+
+    pub fn set_rebounds(&mut self, rebounds: u32) -> &mut Self {
+        self.start_rebounds = rebounds;
+        self
+    }
+
+    pub fn set_blade_surge(&mut self, blade_surge: bool) -> &mut Self {
+        self.blade_surge = blade_surge;
+        self
+    }
+
+    pub fn set_allow_bad_stances(&mut self, allow_bad_stances: bool) -> &mut Self {
+        self.allow_bad_stances = allow_bad_stances;
+        self
+    }
+
+    fn add_combos(
+        &self,
+        combos: &mut Vec<PredatorCombo>,
+        current_stance: Stance,
+        attack: ComboAttack,
+        previous_attacks: Vec<ComboAttack>,
+        mut parrying: bool,
+        mut prone: bool,
+        mut rebounds: u32,
+    ) {
+        if combos.len() > 1000 {
+            return;
+        }
+        let next_stance = attack.get_next_stance(current_stance);
+        let mut new_attacks = previous_attacks.clone();
+        new_attacks.push(attack);
+        if attack.should_end_combo() {
+            combos.push(PredatorCombo::new(
+                self.starting_stance,
+                new_attacks.clone(),
+            ));
+        }
+        if new_attacks.len() == 3 && next_stance != Stance::Laesan {
+            return;
+        } else if new_attacks.len() == 4 {
+            return;
+        }
+        parrying &= !attack.can_drop_parry();
+        prone |= attack.can_prone();
+        if attack.strips_rebounding() && rebounds > 0 {
+            rebounds -= 1;
+        }
+        for next_attack in self.attacks.iter() {
+            self.add_next_attack(
+                combos,
+                next_attack,
+                next_stance,
+                &new_attacks,
+                parrying,
+                prone,
+                rebounds,
+            );
+        }
+    }
+
+    fn add_next_attack(
+        &self,
+        combos: &mut Vec<PredatorCombo>,
+        next_attack: &ComboAttack,
+        next_stance: Stance,
+        new_attacks: &Vec<ComboAttack>,
+        parrying: bool,
+        prone: bool,
+        rebounds: u32,
+    ) {
+        if (self.allow_bad_stances || next_attack.is_good_combo_attack(next_stance))
+            && (new_attacks.len() == 0 || !next_attack.must_begin_combo())
             && (!next_attack.idempotent() || !new_attacks.contains(&next_attack))
             && (!parrying || !next_attack.parryable())
             && (prone || !next_attack.requires_prone())
             && (rebounds == 0 || !next_attack.rebounds())
         {
-            add_combos(
-                valid_attacks,
+            self.add_combos(
                 combos,
-                starting_stance,
                 next_stance,
                 *next_attack,
                 new_attacks.clone(),
@@ -437,36 +527,22 @@ fn add_combos<'a>(
             );
         }
     }
-}
 
-pub fn find_combos<'a>(
-    stance: Stance,
-    valid_attacks: &Vec<ComboAttack>,
-    parrying: bool,
-    prone: bool,
-    rebounds: u32,
-) -> Vec<PredatorCombo> {
-    let mut combos = vec![];
-    for attack in valid_attacks.iter() {
-        if attack.is_good_combo_attack(stance)
-            && (!parrying || !attack.parryable())
-            && (prone || !attack.requires_prone())
-            && (rebounds == 0 || !attack.rebounds())
-        {
-            add_combos(
-                valid_attacks,
+    pub fn find_combos(&self) -> Vec<PredatorCombo> {
+        let mut combos = vec![];
+        for attack in self.attacks.iter() {
+            self.add_next_attack(
                 &mut combos,
-                stance,
-                stance,
-                *attack,
-                vec![],
-                parrying,
-                prone,
-                rebounds,
+                attack,
+                self.starting_stance,
+                &vec![],
+                self.start_parry,
+                self.start_prone,
+                self.start_rebounds,
             );
         }
+        combos
     }
-    combos
 }
 
 mod predator_tests {
@@ -474,9 +550,9 @@ mod predator_tests {
 
     #[test]
     pub fn test_find_combos() {
-        let combos = find_combos(
-            Stance::Rizet,
-            &vec![
+        let mut solver = ComboSolver::new(Stance::Rizet);
+        solver
+            .set_attacks(vec![
                 ComboAttack::Jab,
                 ComboAttack::Pinprick,
                 ComboAttack::Mindnumb,
@@ -487,12 +563,12 @@ mod predator_tests {
                 ComboAttack::Gouge,
                 ComboAttack::Trip,
                 ComboAttack::Raze,
-            ],
-            false,
-            false,
-            0,
-        );
-        assert_eq!(combos.len(), 610);
+            ])
+            .set_prone(false)
+            .set_parry(false)
+            .set_rebounds(0);
+        let combos = solver.find_combos();
+        assert_eq!(combos.len(), 921);
         for combo in combos.iter() {
             println!("{:?}", combo);
         }
@@ -517,5 +593,29 @@ mod predator_tests {
                 ]
             ))
         ));
+    }
+
+    #[test]
+    fn find_veinrip_combo() {
+        let attacks = vec![
+            ComboAttack::Veinrip,
+            ComboAttack::Vertical,
+            ComboAttack::Crescentcut,
+            ComboAttack::Jab,
+            ComboAttack::Lowhook,
+            ComboAttack::Mindnumb,
+            ComboAttack::Pheromones,
+            ComboAttack::Flashkick,
+            ComboAttack::Pinprick,
+            ComboAttack::Feint,
+            ComboAttack::Raze,
+        ];
+        let mut solver = ComboSolver::new(Stance::EinFasit);
+        solver.set_attacks(attacks).set_parry(true).set_rebounds(1);
+        let combos = solver.find_combos();
+        assert_eq!(combos.len(), 57);
+        for combo in combos.iter() {
+            println!("{:?}", combo);
+        }
     }
 }

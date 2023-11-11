@@ -141,6 +141,7 @@ impl AgentState {
             FType::Fleshbane => self.predator_board.fleshbane.is_active(),
             FType::Bloodscourge => self.predator_board.bloodscourge.is_active(),
             FType::Cirisosis => self.predator_board.cirisosis.is_active(),
+            FType::Veinrip => self.predator_board.veinrip.is_active(),
             FType::LeftLegCrippled => self.limb_damage.crippled(LType::LeftLegDamage),
             FType::RightLegCrippled => self.limb_damage.crippled(LType::RightLegDamage),
             FType::LeftArmCrippled => self.limb_damage.crippled(LType::LeftArmDamage),
@@ -224,7 +225,13 @@ impl AgentState {
             self.hidden_state.unhide(flag);
         }
         match flag {
-            FType::Fleshbane => self.predator_board.fleshbaned(),
+            FType::Fleshbane => {
+                if value {
+                    self.predator_board.fleshbaned()
+                } else {
+                    self.predator_board.fleshbane_end();
+                }
+            }
             FType::Bloodscourge => {
                 if value {
                     self.predator_board.bloodscourged()
@@ -237,6 +244,13 @@ impl AgentState {
                     self.predator_board.cirisosis_start()
                 } else {
                     self.predator_board.cirisosis_lost();
+                }
+            }
+            FType::Veinrip => {
+                if value {
+                    self.predator_board.veinrip_start()
+                } else {
+                    self.predator_board.veinrip_end();
                 }
             }
             FType::LeftLegCrippled => self

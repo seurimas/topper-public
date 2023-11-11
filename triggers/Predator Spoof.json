@@ -166,5 +166,47 @@
       }
     ],
     "observation_name": "Proc"
+  },
+  {
+    "regex": "^Blood squirts from the open wound upon (\\w+)'s neck, drenching .* side.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Knifeplay"
+      },
+      {
+        "Literal": "Veinripped"
+      },
+      {
+        "Literal": "hit"
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
+    "regex": "^The flow of blood slows and thickens from (\\w+)'s neck, pale from from all the loss.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Knifeplay"
+      },
+      {
+        "Literal": "Veinripped"
+      },
+      {
+        "Literal": "end"
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
   }
 ]

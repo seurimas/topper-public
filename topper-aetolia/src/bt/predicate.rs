@@ -37,7 +37,8 @@ impl AetTarget {
                 .target
                 .as_ref()
                 .and_then(|target| model.state.get_agent(&target))
-                .and_then(|branches| branches.get(0)),
+                .and_then(|branches| branches.get(0))
+                .or(Some(&model.default_agent)),
         }
     }
 }

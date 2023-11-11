@@ -146,6 +146,28 @@ pub fn handle_combat_action(
                 });
             }
         }
+        "Veinrip" => {
+            for_agent(agent_states, &combat_action.target, &|me| {
+                me.predator_board.veinrip.reset();
+            });
+        }
+        "Veinripped" => {
+            if combat_action.annotation.eq_ignore_ascii_case("hit") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.predator_board.veinrip.reset();
+                });
+            } else {
+                attack_afflictions(
+                    agent_states,
+                    &combat_action.caster,
+                    vec![FType::Weariness, FType::Dizziness],
+                    after,
+                );
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.predator_board.veinrip.expire();
+                });
+            }
+        }
         "Raze" => {
             let annotation = combat_action.annotation.clone();
             for_agent(
