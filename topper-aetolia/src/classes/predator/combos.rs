@@ -528,7 +528,7 @@ impl ComboSolver {
         }
     }
 
-    pub fn find_combos(&self) -> Vec<PredatorCombo> {
+    pub fn find_combos(&self) -> ComboSet {
         let mut combos = vec![];
         for attack in self.attacks.iter() {
             self.add_next_attack(
@@ -541,7 +541,82 @@ impl ComboSolver {
                 self.start_rebounds,
             );
         }
-        combos
+        ComboSet(combos)
+    }
+}
+
+#[derive(Debug, Default)]
+pub struct ComboSet(Vec<PredatorCombo>);
+
+#[derive(Debug, Clone, Eq, Hash, PartialEq, Serialize, Deserialize)]
+pub enum ComboPredicate {
+    WithAttack(ComboAttack),
+    EndsInStance(Stance),
+    MinimumAttacks(usize),
+    MaxBalanceTime(CType),
+}
+
+impl ComboPredicate {
+    pub fn matches(&self, combo: &PredatorCombo) -> bool {
+        match self {
+            ComboPredicate::WithAttack(attack) => combo.get_attacks().contains(attack),
+            ComboPredicate::EndsInStance(stance) => combo.get_final_stance() == *stance,
+            ComboPredicate::MinimumAttacks(minimum) => combo.get_attacks().len() >= *minimum,
+            ComboPredicate::MaxBalanceTime(max_balance) => combo.get_balance_time() <= *max_balance,
+        }
+    }
+}
+
+impl ComboSet {
+    pub fn clear(&mut self) {
+        self.0.clear();
+    }
+
+    pub fn get_fastest_combo(&self, predicates: &Vec<ComboPredicate>) -> Option<PredatorCombo> {
+        let mut fastest_combo = None;
+        let mut fastest_time = CType::max_value();
+        for combo in self.0.iter() {
+            let mut valid = true;
+            for predicate in predicates.iter() {
+                if !predicate.matches(combo) {
+                    valid = false;
+                    break;
+                }
+            }
+            if valid {
+                let balance_time = combo.get_balance_time();
+                if balance_time < fastest_time {
+                    fastest_time = balance_time;
+                    fastest_combo = Some(combo);
+                }
+            }
+        }
+        fastest_combo.cloned()
+    }
+
+    pub fn get_highest_aff_rate_combo(
+        &self,
+        predicates: &Vec<ComboPredicate>,
+    ) -> Option<PredatorCombo> {
+        let mut highest_combo = None;
+        let mut highest_aff_rate = 0.0;
+        for combo in self.0.iter() {
+            let mut valid = true;
+            for predicate in predicates.iter() {
+                if !predicate.matches(combo) {
+                    valid = false;
+                    break;
+                }
+            }
+            if valid {
+                let aff_rate = combo.estimate_aff_rate();
+                if aff_rate > highest_aff_rate {
+                    highest_aff_rate = aff_rate;
+                    highest_combo = Some(combo);
+                }
+            }
+        }
+        highest_combo.cloned()
     }
 }
 
@@ -568,11 +643,11 @@ mod predator_tests {
             .set_parry(false)
             .set_rebounds(0);
         let combos = solver.find_combos();
-        assert_eq!(combos.len(), 921);
-        for combo in combos.iter() {
+        assert_eq!(combos.0.len(), 921);
+        for combo in combos.0.iter() {
             println!("{:?}", combo);
         }
-        assert!(combos.contains(
+        assert!(combos.0.contains(
             (&PredatorCombo::new(
                 Stance::Rizet,
                 vec![
@@ -582,7 +657,7 @@ mod predator_tests {
                 ]
             ))
         ));
-        assert!(combos.contains(
+        assert!(combos.0.contains(
             (&PredatorCombo::new(
                 Stance::Rizet,
                 vec![
@@ -613,8 +688,8 @@ mod predator_tests {
         let mut solver = ComboSolver::new(Stance::EinFasit);
         solver.set_attacks(attacks).set_parry(true).set_rebounds(1);
         let combos = solver.find_combos();
-        assert_eq!(combos.len(), 57);
-        for combo in combos.iter() {
+        assert_eq!(combos.0.len(), 57);
+        for combo in combos.0.iter() {
             println!("{:?}", combo);
         }
     }

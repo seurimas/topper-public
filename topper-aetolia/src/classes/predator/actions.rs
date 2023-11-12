@@ -183,10 +183,71 @@ impl ActiveTransition for BloodscourgeAction {
         todo!()
     }
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
-        Ok(format!(
-            "spider acid {};;bloodscourge {} {}",
-            self.target, self.target, self.venom
-        ))
+        Ok(format!("bloodscourge {} {}", self.target, self.venom))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct FleshbaneAction {
+    pub target: String,
+    pub venom: VenomType,
+}
+
+impl FleshbaneAction {
+    pub fn new(target: String, venom: &'static str) -> Self {
+        Self {
+            target,
+            venom: venom.into(),
+        }
+    }
+}
+
+impl ActiveTransition for FleshbaneAction {
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
+    fn act(&self, timline: &AetTimeline) -> ActivateResult {
+        Ok(format!("fleshbane {} {}", self.target, self.venom))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct AcidAction {
+    pub target: String,
+}
+
+impl AcidAction {
+    pub fn new(target: String) -> Self {
+        Self { target }
+    }
+}
+
+impl ActiveTransition for AcidAction {
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
+    fn act(&self, timline: &AetTimeline) -> ActivateResult {
+        Ok(format!("spider acid {}", self.target))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct IntoxicateAction {
+    pub target: String,
+}
+
+impl IntoxicateAction {
+    pub fn new(target: String) -> Self {
+        Self { target }
+    }
+}
+
+impl ActiveTransition for IntoxicateAction {
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
+    fn act(&self, timline: &AetTimeline) -> ActivateResult {
+        Ok(format!("spider intoxicate {}", self.target))
     }
 }
 

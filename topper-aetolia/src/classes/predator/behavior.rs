@@ -15,14 +15,17 @@ use super::*;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum PredatorBehavior {
-    FastestComboWithAttacks(usize, Stance, Vec<ComboAttack>),
-    HighValueComboWithAttacks(usize, Stance, Vec<ComboAttack>),
+    FastestCombo(Vec<ComboPredicate>),
+    AffRateCombo(Vec<ComboPredicate>),
     AddComboAttacks(Vec<ComboAttack>),
     CalculateCombos,
     ResetComboAttacks,
+    Fleshbane,
     Bloodscourge,
     Dartshot,
     Twinshot,
+    Acid,
+    Intoxicate,
     CirisosisDart,
 }
 
@@ -45,25 +48,8 @@ impl UnpoweredFunction for PredatorBehavior {
                 controller.predator_combo_store.add_attacks(attacks.iter());
                 UnpoweredFunctionState::Complete
             }
-            PredatorBehavior::FastestComboWithAttacks(minimum, final_stance, attacks) => {
-                let best_combo = controller
-                    .predator_combos
-                    .iter()
-                    .filter(|combo| {
-                        if *final_stance != Stance::None {
-                            combo.get_final_stance() == *final_stance
-                        } else {
-                            true
-                        }
-                    })
-                    .filter(|combo| {
-                        combo.get_attacks().len() >= *minimum
-                            && attacks
-                                .iter()
-                                .all(|attack| combo.get_attacks().contains(attack))
-                    })
-                    .min_by_key(|combo| combo.get_balance_time() - combo.get_attacks().len() as i32)
-                    .cloned();
+            PredatorBehavior::FastestCombo(predicates) => {
+                let best_combo = controller.predator_combos.get_fastest_combo(&predicates);
                 unsafe {
                     if DEBUG_TREES {
                         println!("Solver: {:?}", controller.predator_combo_store);
@@ -73,25 +59,10 @@ impl UnpoweredFunction for PredatorBehavior {
                 }
                 use_combo(model, controller, best_combo)
             }
-            PredatorBehavior::HighValueComboWithAttacks(minimum, final_stance, attacks) => {
+            PredatorBehavior::AffRateCombo(predicates) => {
                 let best_combo = controller
                     .predator_combos
-                    .iter()
-                    .filter(|combo| {
-                        if *final_stance != Stance::None {
-                            combo.get_final_stance() == *final_stance
-                        } else {
-                            true
-                        }
-                    })
-                    .filter(|combo| {
-                        combo.get_attacks().len() >= *minimum
-                            && attacks
-                                .iter()
-                                .all(|attack| combo.get_attacks().contains(attack))
-                    })
-                    .min_by_key(|combo| (combo.estimate_aff_rate() * BALANCE_SCALE) as i32)
-                    .cloned();
+                    .get_highest_aff_rate_combo(&predicates);
                 unsafe {
                     if DEBUG_TREES {
                         println!("Solver: {:?}", controller.predator_combo_store);
@@ -132,6 +103,60 @@ impl UnpoweredFunction for PredatorBehavior {
                     controller.plan.add_to_qeb(Box::new(BloodscourgeAction::new(
                         controller.target.clone().unwrap_or("".to_string()),
                         if venom.is_empty() { "" } else { venom[0] },
+                    )));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            PredatorBehavior::Fleshbane => {
+                if let Some(you) = AetTarget::Target.get_target(model, controller) {
+                    let venom = controller.get_venoms_from_plan(1, you);
+                    controller.plan.add_to_qeb(Box::new(FleshbaneAction::new(
+                        controller.target.clone().unwrap_or("".to_string()),
+                        if venom.is_empty() { "" } else { venom[0] },
+                    )));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            PredatorBehavior::Intoxicate => {
+                if let (Some(me), Some(you)) = (
+                    AetTarget::Me.get_target(model, controller),
+                    AetTarget::Target.get_target(model, controller),
+                ) {
+                    if me
+                        .check_if_predator(&|me| {
+                            !me.has_spider()
+                                || me.is_intoxicating(
+                                    &controller.target.clone().unwrap_or("".to_string()),
+                                )
+                        })
+                        .unwrap_or(true)
+                    {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    controller.plan.add_to_qeb(Box::new(IntoxicateAction::new(
+                        controller.target.clone().unwrap_or("".to_string()),
+                    )));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            PredatorBehavior::Acid => {
+                if let (Some(me), Some(you)) = (
+                    AetTarget::Me.get_target(model, controller),
+                    AetTarget::Target.get_target(model, controller),
+                ) {
+                    if you.is(FType::Acid) {
+                        return UnpoweredFunctionState::Failed;
+                    } else if !me.check_if_predator(&|me| me.has_spider()).unwrap_or(false) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    controller.plan.add_to_qeb(Box::new(AcidAction::new(
+                        controller.target.clone().unwrap_or("".to_string()),
                     )));
                     UnpoweredFunctionState::Complete
                 } else {

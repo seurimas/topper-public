@@ -240,6 +240,37 @@ pub fn handle_combat_action(
                 after,
             );
         }
+        // Beastmastery
+        "Beastcalled" => {
+            let beast = combat_action.annotation.clone();
+            for_agent(agent_states, &combat_action.caster, &|me| {
+                me.assume_predator(&|class_state| {
+                    if beast.contains("spider") {
+                        class_state.get_spider();
+                    } else if beast.contains("orgyuk") {
+                        class_state.get_orgyuk();
+                    } else if beast.contains("orel") {
+                        class_state.get_orel();
+                    }
+                });
+            });
+        }
+        "Acid" => {
+            attack_afflictions(
+                agent_states,
+                &combat_action.target,
+                vec![FType::Acid],
+                after,
+            );
+        }
+        "Intoxicate" => {
+            let target = combat_action.target.clone();
+            for_agent(agent_states, &combat_action.caster, &|me| {
+                me.assume_predator(&|class_state| {
+                    class_state.intoxicate(target.clone());
+                });
+            });
+        }
         _ => {}
     }
     Ok(())

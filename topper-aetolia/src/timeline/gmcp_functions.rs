@@ -76,9 +76,7 @@ fn handle_char_vitals(
             timeline,
             &timeline.me.clone(),
             &move |me: &mut AgentState| {
-                if let ClassState::Predator(class_state) = &mut me.class_state {
-                    class_state.stance = stance;
-                }
+                me.assume_predator(&move |class_state| class_state.stance = stance);
             },
         )
     }

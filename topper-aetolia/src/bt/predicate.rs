@@ -41,6 +41,17 @@ impl AetTarget {
                 .or(Some(&model.default_agent)),
         }
     }
+
+    pub fn get_name<'a>(
+        &self,
+        model: &'a BehaviorModel,
+        controller: &BehaviorController,
+    ) -> Option<String> {
+        match self {
+            AetTarget::Me => Some(model.who_am_i()),
+            AetTarget::Target => controller.target.clone(),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]

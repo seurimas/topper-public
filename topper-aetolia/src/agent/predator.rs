@@ -55,6 +55,7 @@ pub enum PredatorCompanionState {
         roaring: Option<Timer>,
     },
     Spider {
+        intoxicate_target: Option<String>,
         strands_target: Option<String>,
     },
 }
@@ -99,6 +100,7 @@ impl PredatorClassState {
         if !self.has_spider() {
             self.companion = Some(PredatorCompanionState::Spider {
                 strands_target: None,
+                intoxicate_target: None,
             });
         }
     }
@@ -106,6 +108,31 @@ impl PredatorClassState {
     pub fn has_spider(&self) -> bool {
         if let Some(PredatorCompanionState::Spider { .. }) = self.companion {
             true
+        } else {
+            false
+        }
+    }
+
+    pub fn intoxicate(&mut self, target: String) {
+        self.get_spider();
+        if let Some(PredatorCompanionState::Spider {
+            intoxicate_target, ..
+        }) = &mut self.companion
+        {
+            *intoxicate_target = Some(target);
+        }
+    }
+
+    pub fn is_intoxicating(&self, target: &String) -> bool {
+        if let Some(PredatorCompanionState::Spider {
+            intoxicate_target, ..
+        }) = &self.companion
+        {
+            if let Some(intoxicate_target) = intoxicate_target {
+                intoxicate_target.eq_ignore_ascii_case(target)
+            } else {
+                false
+            }
         } else {
             false
         }
@@ -154,13 +181,19 @@ pub struct PredatorBoard {
 
 impl Default for PredatorBoard {
     fn default() -> Self {
-        PredatorBoard {
+        let mut default = PredatorBoard {
             fleshbane: Timer::count_up_seconds(10.),
             bloodscourge: Timer::count_up_seconds(5.),
             veinrip: Timer::count_up_seconds(6.),
             acid: Timer::count_up_seconds(10.),
             cirisosis: Timer::count_up_seconds(6.),
-        }
+        };
+        default.fleshbane.expire();
+        default.bloodscourge.expire();
+        default.veinrip.expire();
+        default.acid.expire();
+        default.cirisosis.expire();
+        default
     }
 }
 

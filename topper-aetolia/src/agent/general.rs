@@ -541,6 +541,7 @@ pub enum FType {
     RightArmBroken,
 
     // Predator special affs
+    Acid,
     Fleshbane,
     Bloodscourge,
     Cirisosis,

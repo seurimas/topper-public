@@ -138,6 +138,7 @@ impl AgentState {
 
     pub fn is(&self, flag: FType) -> bool {
         match flag {
+            FType::Acid => self.predator_board.acid.is_active(),
             FType::Fleshbane => self.predator_board.fleshbane.is_active(),
             FType::Bloodscourge => self.predator_board.bloodscourge.is_active(),
             FType::Cirisosis => self.predator_board.cirisosis.is_active(),
@@ -225,6 +226,13 @@ impl AgentState {
             self.hidden_state.unhide(flag);
         }
         match flag {
+            FType::Acid => {
+                if value {
+                    self.predator_board.acid()
+                } else {
+                    self.predator_board.acid_end();
+                }
+            }
             FType::Fleshbane => {
                 if value {
                     self.predator_board.fleshbaned()

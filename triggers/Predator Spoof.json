@@ -168,7 +168,7 @@
     "observation_name": "Proc"
   },
   {
-    "regex": "^Blood squirts from the open wound upon (\\w+)'s neck, drenching .* side.$",
+    "regex": "^Blood squirts from the open wound upon (\\w+)'?s? neck, drenching .* side.$",
     "args": [
       {
         "GroupAsTarget": 1
