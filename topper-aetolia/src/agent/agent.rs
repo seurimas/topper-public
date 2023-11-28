@@ -852,11 +852,11 @@ impl AgentState {
     }
 
     pub fn get_aggro(&self) -> i32 {
-        self.aggro.get_aggro()
+        self.aggro.get_aggro_count()
     }
 
-    pub fn register_hit(&mut self) {
-        self.aggro.register_hit();
+    pub fn register_hit(&mut self, attacker: Option<&String>) {
+        self.aggro.register_hit(attacker);
     }
 }
 

@@ -197,7 +197,7 @@ lazy_static! {
 }
 
 lazy_static! {
-    static ref AGGRO_STACK: Vec<VenomPlan> = vec![
+    static ref DEFAULT_STACK: Vec<VenomPlan> = vec![
         VenomPlan::OnTree(FType::Paresis),
         VenomPlan::Stick(FType::Asthma),
         VenomPlan::IfDo(
@@ -292,10 +292,7 @@ lazy_static! {
     static ref CARNIFEX_STACK: Vec<VenomPlan> = vec![
         VenomPlan::OnTree(FType::Paresis),
         VenomPlan::Stick(FType::Clumsiness),
-        VenomPlan::IfDo(
-            FType::MentalFatigue,
-            Box::new(VenomPlan::OneOf(FType::Weariness, FType::Stupidity))
-        ),
+        VenomPlan::OneOf(FType::Weariness, FType::Stupidity),
         VenomPlan::Stick(FType::Vomiting),
         VenomPlan::Stick(FType::Allergies),
         VenomPlan::OneOf(FType::Asthma, FType::Slickness),
@@ -452,7 +449,6 @@ lazy_static! {
         val.insert("gank".into(), get_simple_plan(GANK_STACK.to_vec()));
         val.insert("fire".into(), get_simple_plan(FIRE_STACK.to_vec()));
         val.insert("kill".into(), get_simple_plan(KILL_STACK.to_vec()));
-        val.insert("aggro".into(), AGGRO_STACK.to_vec());
         val.insert("salve".into(), get_simple_plan(SALVE_STACK.to_vec()));
         val.insert("peace".into(), get_simple_plan(PEACE_STACK.to_vec()));
         val.insert("slit".into(), SLIT_STACK.to_vec());
@@ -782,32 +778,6 @@ pub fn add_delphs(
     }
 }
 
-pub fn get_stack<'s>(
-    timeline: &AetTimeline,
-    target: &String,
-    strategy: &String,
-    db: Option<&impl AetDatabaseModule>,
-) -> Option<Vec<VenomPlan>> {
-    if strategy.eq("class") {
-        if let Some(class) = db.and_then(|db| db.get_class(target)) {
-            let class_name = format!("{:?}", class.normal());
-            if STACKING_STRATEGIES.contains_key(&class_name) {
-                return STACKING_STRATEGIES.get(&class_name).cloned();
-            } else if is_affected_by(&class, FType::Clumsiness) {
-                return STACKING_STRATEGIES.get("phys").cloned();
-            } else if is_affected_by(&class, FType::Peace) {
-                return STACKING_STRATEGIES.get("peace").cloned();
-            } else {
-                return STACKING_STRATEGIES.get("aggro").cloned();
-            }
-        } else {
-            return STACKING_STRATEGIES.get("aggro").cloned();
-        }
-    }
-    db.and_then(|db| db.get_venom_plan(&format!("infiltrator_{}", strategy)))
-        .or(STACKING_STRATEGIES.get(strategy).cloned())
-}
-
 pub fn choose_venoms(
     timeline: &AetTimeline,
     who_am_i: &String,
@@ -908,7 +878,7 @@ pub fn get_balance_attack<'s>(
     strategy: &String,
     db: Option<&impl AetDatabaseModule>,
 ) -> Box<dyn ActiveTransition> {
-    if let Some(stack) = get_stack(timeline, target, strategy, db) {
+    if let Some(stack) = get_stack(timeline, "syssin", target, strategy, db) {
         let me = timeline.state.borrow_agent(who_am_i);
         let you = timeline.state.borrow_agent(target);
         let mut two_venoms = choose_venoms(&timeline, who_am_i, target, strategy, &stack, db, 2);
@@ -1006,7 +976,7 @@ pub fn get_balance_attack<'s>(
             return Box::new(FlayAction::fangbarrier(
                 who_am_i.to_string(),
                 target.to_string(),
-                get_venoms_from_plan(&AGGRO_STACK.to_vec(), 1, &you)
+                get_venoms_from_plan(&DEFAULT_STACK.to_vec(), 1, &you)
                     .get(0)
                     .map(|venom| venom.to_string())
                     .unwrap_or_default(),

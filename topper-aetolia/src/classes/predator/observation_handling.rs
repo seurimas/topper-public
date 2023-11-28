@@ -147,9 +147,12 @@ pub fn handle_combat_action(
             }
         }
         "Veinrip" => {
-            for_agent(agent_states, &combat_action.target, &|me| {
-                me.predator_board.veinrip.reset();
-            });
+            attack_afflictions(
+                agent_states,
+                &combat_action.target,
+                vec![FType::Veinrip],
+                after,
+            );
         }
         "Veinripped" => {
             if combat_action.annotation.eq_ignore_ascii_case("hit") {
@@ -228,7 +231,7 @@ pub fn handle_combat_action(
             attack_afflictions(
                 agent_states,
                 &combat_action.target,
-                vec![FType::Pacifism],
+                vec![FType::LoversEffect],
                 after,
             );
         }

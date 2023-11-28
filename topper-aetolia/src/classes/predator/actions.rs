@@ -1,5 +1,8 @@
 use super::*;
 use crate::alpha_beta::ActionPlanner;
+use crate::classes::group::call_venom;
+use crate::classes::group::call_venoms;
+use crate::classes::group::should_call_venoms;
 use crate::classes::*;
 use crate::curatives::get_cure_depth;
 use crate::observables::*;
@@ -149,17 +152,31 @@ impl ActiveTransition for SeriesAttack {
     fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
         vec![]
     }
-    fn act(&self, timline: &AetTimeline) -> ActivateResult {
-        Ok(format!(
-            "series {} {} {}",
-            self.attacks
-                .iter()
-                .map(|attack| attack.get_param_string())
-                .collect::<Vec<String>>()
-                .join(" "),
-            self.target,
-            self.venom
-        ))
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        if should_call_venoms(timeline) {
+            Ok(format!(
+                "{};;series {} {} {}",
+                call_venom(&self.target, &self.venom.to_string(), None),
+                self.attacks
+                    .iter()
+                    .map(|attack| attack.get_param_string())
+                    .collect::<Vec<String>>()
+                    .join(" "),
+                self.target,
+                self.venom
+            ))
+        } else {
+            Ok(format!(
+                "series {} {} {}",
+                self.attacks
+                    .iter()
+                    .map(|attack| attack.get_param_string())
+                    .collect::<Vec<String>>()
+                    .join(" "),
+                self.target,
+                self.venom
+            ))
+        }
     }
 }
 
@@ -182,8 +199,17 @@ impl ActiveTransition for BloodscourgeAction {
     fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
         todo!()
     }
-    fn act(&self, timline: &AetTimeline) -> ActivateResult {
-        Ok(format!("bloodscourge {} {}", self.target, self.venom))
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        if should_call_venoms(timeline) {
+            Ok(format!(
+                "{};;bloodscourge {} {}",
+                call_venom(&self.target, &self.venom.to_string(), None),
+                self.target,
+                self.venom
+            ))
+        } else {
+            Ok(format!("bloodscourge {} {}", self.target, self.venom))
+        }
     }
 }
 
@@ -207,7 +233,16 @@ impl ActiveTransition for FleshbaneAction {
         todo!()
     }
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
-        Ok(format!("fleshbane {} {}", self.target, self.venom))
+        if should_call_venoms(timline) {
+            Ok(format!(
+                "{};;fleshbane {} {}",
+                call_venom(&self.target, &self.venom.to_string(), None),
+                self.target,
+                self.venom
+            ))
+        } else {
+            Ok(format!("fleshbane {} {}", self.target, self.venom))
+        }
     }
 }
 
@@ -271,7 +306,16 @@ impl ActiveTransition for DartshotAction {
         todo!()
     }
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
-        Ok(format!("dartshot {} {}", self.target, self.venom))
+        if should_call_venoms(timline) {
+            Ok(format!(
+                "{};;dartshot {} {}",
+                call_venom(&self.target, &self.venom.to_string(), None),
+                self.target,
+                self.venom
+            ))
+        } else {
+            Ok(format!("dartshot {} {}", self.target, self.venom))
+        }
     }
 }
 
@@ -296,10 +340,25 @@ impl ActiveTransition for TwinshotAction {
     fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
         todo!()
     }
-    fn act(&self, timline: &AetTimeline) -> ActivateResult {
-        Ok(format!(
-            "twinshot {} {} {}",
-            self.target, self.venom_0, self.venom_1
-        ))
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        if should_call_venoms(timeline) {
+            Ok(format!(
+                "{};;twinshot {} {} {}",
+                call_venoms(
+                    &self.target,
+                    &self.venom_0.to_string(),
+                    &self.venom_1.to_string(),
+                    None
+                ),
+                self.target,
+                self.venom_0,
+                self.venom_1
+            ))
+        } else {
+            Ok(format!(
+                "twinshot {} {} {}",
+                self.target, self.venom_0, self.venom_1
+            ))
+        }
     }
 }

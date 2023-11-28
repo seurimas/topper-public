@@ -2,6 +2,7 @@ use serde::Serialize;
 use std::collections::HashMap;
 use topper_aetolia::classes::infiltrator::{get_hypno_stack, get_hypno_stack_name};
 use topper_aetolia::classes::{get_attack, Class};
+use topper_aetolia::curatives::gather_alerts;
 use topper_aetolia::db::AetDatabaseModule;
 use topper_aetolia::timeline::*;
 use topper_aetolia::types::*;
@@ -181,6 +182,7 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for BattleStatsModule {
 pub struct BattleStats {
     pub feed: Vec<String>,
     pub my_stats: PlayerStats,
+    pub alerts: Vec<String>,
     pub target_stats: Option<PlayerStats>,
     pub plan: String,
     pub class_state: String,
@@ -223,6 +225,10 @@ pub fn get_battle_stats(
     } else {
         None
     };
+    let alerts = gather_alerts(&timeline, timeline.who_am_i(), Some(db))
+        .iter()
+        .map(|alert| alert.to_string())
+        .collect();
     let mut lines_available = 16;
     lines.push(format_self_limbs(&timeline.state.borrow_me()));
     if let Some(target) = target {
@@ -304,6 +310,7 @@ pub fn get_battle_stats(
         feed: lines,
         my_stats,
         target_stats,
+        alerts,
         plan: plan_str,
         class_state,
     }

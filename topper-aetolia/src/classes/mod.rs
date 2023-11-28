@@ -1,5 +1,5 @@
 use crate::bt::BehaviorController;
-use crate::curatives::{MENTAL_AFFLICTIONS, RANDOM_CURES};
+use crate::curatives::{SafetyAlert, MENTAL_AFFLICTIONS, RANDOM_CURES};
 use crate::db::AetDatabaseModule;
 use crate::non_agent::AetNonAgent;
 use crate::observables::*;
@@ -8,6 +8,7 @@ use crate::types::*;
 use num_enum::TryFromPrimitive;
 use regex::Regex;
 use std::collections::HashMap;
+use std::sync::{Arc, Mutex, RwLock};
 pub mod archivist;
 pub mod ascendril;
 pub mod bard;
@@ -31,6 +32,7 @@ pub mod wayfarer;
 pub mod zealot;
 use serde::{Deserialize, Serialize};
 
+use self::archivist::get_archivist_alerts;
 use self::mirrors::normalize_combat_action;
 
 pub struct FitnessAction {
@@ -85,6 +87,8 @@ pub enum Class {
     Ravager,      // Zealot
     Runecarver,   // Sciomancer
     Bloodborn,    // Ascendril
+    Voidseer,     // Archivist
+    Executor,     // Sentinel
 }
 
 impl Class {
@@ -127,6 +131,8 @@ impl Class {
             "Ravager" => Some(Class::Ravager),
             "Runecarver" => Some(Class::Runecarver),
             "Bloodborn" => Some(Class::Bloodborn),
+            "Voidseer" => Some(Class::Voidseer),
+            "Executor" => Some(Class::Executor),
             _ => None,
         }
     }
@@ -167,6 +173,8 @@ impl Class {
             Class::Ravager => "Ravager",
             Class::Runecarver => "Runecarver",
             Class::Bloodborn => "Bloodborn",
+            Class::Voidseer => "Voidseer",
+            Class::Executor => "Executor",
             _ => "Unknown",
         }
     }
@@ -181,7 +189,9 @@ impl Class {
             | Class::Akkari
             | Class::Ravager
             | Class::Runecarver
-            | Class::Bloodborn => true,
+            | Class::Bloodborn
+            | Class::Voidseer
+            | Class::Executor => true,
             _ => false,
         }
     }
@@ -197,7 +207,16 @@ impl Class {
             Class::Ravager => Class::Zealot,
             Class::Runecarver => Class::Sciomancer,
             Class::Bloodborn => Class::Ascendril,
+            Class::Voidseer => Class::Archivists,
+            Class::Executor => Class::Sentinel,
             _ => self.clone(),
+        }
+    }
+
+    pub fn get_safety_alerts(&self, agent: &AgentState) -> Vec<SafetyAlert> {
+        match self {
+            Class::Archivists => get_archivist_alerts(agent),
+            _ => Vec::new(),
         }
     }
 }
@@ -239,6 +258,8 @@ pub fn get_skill_class(category: &String) -> Option<Class> {
         "Brutality" | "Ravaging" | "Egotism" => Some(Class::Ravager),
         "Malediction" | "Runecarving" | "Sporulation" => Some(Class::Runecarver),
         "Humourism" | "Esoterica" | "Hematurgy" => Some(Class::Bloodborn),
+        "Enlightenment" | "Cultivation" | "Voidgazing" => Some(Class::Voidseer),
+        "Bladedancing" | "Artifice" | "Subversion" => Some(Class::Executor),
         _ => None,
     }
 }
@@ -333,7 +354,7 @@ pub fn handle_combat_action(
     if !combat_action.target.is_empty() && !combat_action.caster.eq(&combat_action.target) {
         let my_room = agent_states.borrow_me().room_id;
         for_agent(agent_states, &combat_action.target, &|me| {
-            me.register_hit();
+            me.register_hit(Some(&combat_action.caster));
             me.room_id = my_room;
             if me.is(FType::Pacifism) && me.balanced(BType::Pacifism) {
                 me.toggle_flag(FType::Pacifism, false);
@@ -640,7 +661,7 @@ pub fn handle_combat_action(
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+#[derive(Debug, Display, Serialize, Deserialize, PartialEq, Clone)]
 pub enum LockType {
     // Just asthma/slickness/anorexia
     Soft,
@@ -670,6 +691,12 @@ impl LockType {
             ],
         }
     }
+
+    pub fn affs_to_lock(&self, agent: &AgentState) -> usize {
+        let needed_affs = self.affs();
+        let affs_on_target = agent.affs_count(&needed_affs);
+        needed_affs.len() - affs_on_target
+    }
 }
 
 pub type VenomType = &'static str;
@@ -681,18 +708,66 @@ pub fn get_stack<'s>(
     strategy: &String,
     db: Option<&impl AetDatabaseModule>,
 ) -> Option<Vec<VenomPlan>> {
-    let mut stack_name = format!("{}_{}", attack_class, strategy);
-    if strategy.eq("class") {
+    let stack = if strategy.eq("class") {
         if let Some(class) = db.and_then(|db| db.get_class(target)) {
-            stack_name = format!("{}_{:?}", attack_class, class.normal());
+            class.normal().to_str().to_string()
         } else {
-            stack_name = format!("{}_aggro", attack_class);
+            "aggro".to_string()
+        }
+    } else {
+        strategy.clone()
+    };
+    let mut stack_name = format!("{}_{}", attack_class, strategy);
+    get_stack_from_file(&attack_class.to_string(), &stack).or_else(|| {
+        db.and_then(|db| {
+            db.get_venom_plan(&stack_name).or_else(|| {
+                get_stack_from_file(&attack_class.to_string(), &"aggro".to_string())
+                    .or_else(|| db.get_venom_plan(&format!("{}_aggro", attack_class)))
+            })
+        })
+    })
+}
+
+pub static mut LOAD_STACK_FUNC: Option<fn(&String, &String) -> String> = None;
+
+lazy_static! {
+    pub static ref LOADED_VENOM_PLANS: RwLock<HashMap<String, Option<Vec<VenomPlan>>>> =
+        { RwLock::new(HashMap::new()) };
+}
+
+pub fn clear_aff_stacks() {
+    let mut stacks = LOADED_VENOM_PLANS.write().unwrap();
+    stacks.clear();
+}
+
+pub fn get_stack_from_file(class: &String, stack_name: &String) -> Option<Vec<VenomPlan>> {
+    {
+        let stacks = LOADED_VENOM_PLANS.read().unwrap();
+        if let Some(stack) = stacks.get(&format!("{}_{}", class, stack_name)) {
+            return stack.clone();
         }
     }
-    db.and_then(|db| {
-        db.get_venom_plan(&stack_name)
-            .or_else(|| db.get_venom_plan(&format!("{}_aggro", attack_class)))
-    })
+    {
+        let mut trees = LOADED_VENOM_PLANS.write().unwrap();
+        let stack_json = unsafe { LOAD_STACK_FUNC.unwrap()(class, stack_name) };
+        println!(
+            "Loading {}'s {} stack ({})",
+            class,
+            stack_name,
+            stack_json.len()
+        );
+        match serde_json::from_str::<Vec<VenomPlan>>(&stack_json) {
+            Ok(stack_def) => {
+                trees.insert(format!("{}_{}", class, stack_name), Some(stack_def.clone()));
+                Some(stack_def)
+            }
+            Err(err) => {
+                println!("Failed to load {}/{}: {:?}", class, stack_name, err);
+                trees.insert(format!("{}_{}", class, stack_name), None);
+                None
+            }
+        }
+    }
 }
 
 fn get_controller(
@@ -863,6 +938,10 @@ pub enum VenomPlan {
     StickThisIfThat(FType, FType),
     OnTree(FType),
     OffTree(FType),
+    OnFocus(FType),
+    OffFocus(FType),
+    OnFitness(FType),
+    OffFitness(FType),
     OneOf(FType, FType),
     IfDo(FType, Box<VenomPlan>),
     IfNotDo(FType, Box<VenomPlan>),
@@ -875,6 +954,10 @@ impl VenomPlan {
             | VenomPlan::StickThisIfThat(aff, _)
             | VenomPlan::OnTree(aff)
             | VenomPlan::OffTree(aff)
+            | VenomPlan::OnFocus(aff)
+            | VenomPlan::OffFocus(aff)
+            | VenomPlan::OnFitness(aff)
+            | VenomPlan::OffFitness(aff)
             | VenomPlan::OneOf(aff, _) => *aff,
             VenomPlan::IfDo(_pred, plan) | VenomPlan::IfNotDo(_pred, plan) => plan.affliction(),
         }
@@ -918,6 +1001,43 @@ macro_rules! affliction_plan_stacker {
                 }
                 VenomPlan::OffTree(aff) => {
                     if !(target.balanced(BType::Tree) || target.get_balance(BType::Tree) < 1.5)
+                        && is_susceptible(target, aff)
+                    {
+                        if let Some(venom) = $stack.get(aff) {
+                            venoms.insert(0, *venom);
+                        }
+                    }
+                }
+                VenomPlan::OnFocus(aff) => {
+                    if (target.balanced(BType::Focus) || target.get_balance(BType::Focus) < 1.5)
+                        && is_susceptible(target, aff)
+                    {
+                        if let Some(venom) = $stack.get(aff) {
+                            venoms.insert(0, *venom);
+                        }
+                    }
+                }
+                VenomPlan::OffFocus(aff) => {
+                    if !(target.balanced(BType::Focus) || target.get_balance(BType::Focus) < 1.5)
+                        && is_susceptible(target, aff)
+                    {
+                        if let Some(venom) = $stack.get(aff) {
+                            venoms.insert(0, *venom);
+                        }
+                    }
+                }
+                VenomPlan::OnFitness(aff) => {
+                    if (target.balanced(BType::Fitness) || target.get_balance(BType::Fitness) < 1.5)
+                        && is_susceptible(target, aff)
+                    {
+                        if let Some(venom) = $stack.get(aff) {
+                            venoms.insert(0, *venom);
+                        }
+                    }
+                }
+                VenomPlan::OffFitness(aff) => {
+                    if !(target.balanced(BType::Fitness)
+                        || target.get_balance(BType::Fitness) < 1.5)
                         && is_susceptible(target, aff)
                     {
                         if let Some(venom) = $stack.get(aff) {

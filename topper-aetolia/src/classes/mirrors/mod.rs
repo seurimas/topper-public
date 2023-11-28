@@ -6,6 +6,7 @@ use crate::types::*;
 use self::akkari::map_mentis;
 
 mod akkari;
+mod executor;
 mod ravager;
 mod revenant;
 
@@ -47,6 +48,7 @@ lazy_static! {
         revenant::add_mappings(&mut mapping);
         ravager::add_mappings(&mut mapping);
         akkari::add_mappings(&mut mapping);
+        executor::add_mappings(&mut mapping);
         mapping
     };
 }

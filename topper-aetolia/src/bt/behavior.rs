@@ -6,6 +6,7 @@ use crate::classes::bard::BardBehavior;
 use crate::classes::predator::PredatorBehavior;
 use crate::classes::LockType;
 use crate::classes::VenomPlan;
+use crate::curatives::CurativeBehavior;
 use crate::defense::DefenseBehavior;
 use crate::observables::PlainAction;
 use crate::timeline::*;
@@ -23,6 +24,7 @@ pub enum AetBehavior {
     HintPlan(String, String),
     CopyHint(String, String),
     PlainQebBehavior(String),
+    CurativeBehavior(CurativeBehavior),
     DefenseBehavior(DefenseBehavior),
     BardBehavior(BardBehavior),
     PredatorBehavior(PredatorBehavior),
@@ -90,6 +92,9 @@ impl UnpoweredFunction for AetBehavior {
                     .plan
                     .add_to_qeb(Box::new(PlainAction::new(action.clone())));
                 UnpoweredFunctionState::Complete
+            }
+            AetBehavior::CurativeBehavior(curative_behavior) => {
+                curative_behavior.resume_with(model, controller)
             }
             AetBehavior::DefenseBehavior(defense_behavior) => {
                 defense_behavior.resume_with(model, controller)

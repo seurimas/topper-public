@@ -232,9 +232,7 @@ impl UnpoweredFunction for AetPredicate {
             }
             AetPredicate::NearLocked(target, lock_type, aff_count) => {
                 if let Some(target) = target.get_target(model, controller) {
-                    let needed_affs = lock_type.affs();
-                    let affs_on_target = target.affs_count(&needed_affs);
-                    let affs_to_lock = needed_affs.len() - affs_on_target;
+                    let affs_to_lock = lock_type.affs_to_lock(target);
                     if affs_to_lock <= *aff_count {
                         return UnpoweredFunctionState::Complete;
                     }

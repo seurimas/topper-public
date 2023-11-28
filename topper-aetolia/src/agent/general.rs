@@ -11,7 +11,11 @@ use topper_core::timeline::BaseAgentState;
 #[derive(Deserialize, Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Timer {
     CountDown(CType),
-    CountUp { up_to: CType, progress: CType },
+    CountUpObserve {
+        expire_at: CType,
+        up_to: CType,
+        progress: CType,
+    },
 }
 
 impl Default for Timer {
@@ -30,12 +34,33 @@ impl Timer {
     }
 
     pub fn count_up(up_to: CType) -> Self {
-        Timer::CountUp { up_to, progress: 0 }
+        Timer::CountUpObserve {
+            up_to,
+            expire_at: up_to,
+            progress: 0,
+        }
     }
 
     pub fn count_up_seconds(up_to: f32) -> Self {
-        Timer::CountUp {
+        Timer::CountUpObserve {
             up_to: (up_to * BALANCE_SCALE) as CType,
+            expire_at: (up_to * BALANCE_SCALE) as CType,
+            progress: 0,
+        }
+    }
+
+    pub fn count_up_observe(up_to: CType, expire_at: CType) -> Self {
+        Timer::CountUpObserve {
+            up_to,
+            expire_at,
+            progress: 0,
+        }
+    }
+
+    pub fn count_up_observe_seconds(up_to: f32, expire_at: f32) -> Self {
+        Timer::CountUpObserve {
+            up_to: (up_to * BALANCE_SCALE) as CType,
+            expire_at: (expire_at * BALANCE_SCALE) as CType,
             progress: 0,
         }
     }
@@ -51,14 +76,18 @@ impl Timer {
     pub fn reset(&mut self) {
         match self {
             Timer::CountDown(_) => *self = Timer::CountDown(0),
-            Timer::CountUp { up_to, progress } => *progress = 0,
+            Timer::CountUpObserve { progress, .. } => *progress = 0,
         }
     }
 
     pub fn expire(&mut self) {
         match self {
             Timer::CountDown(_) => *self = Timer::CountDown(0),
-            Timer::CountUp { up_to, progress } => *progress = *up_to,
+            Timer::CountUpObserve {
+                expire_at,
+                progress,
+                ..
+            } => *progress = *expire_at,
         }
     }
 
@@ -71,8 +100,12 @@ impl Timer {
                     *self = Timer::CountDown(0);
                 }
             }
-            Timer::CountUp { up_to, progress } => {
-                if *progress < *up_to {
+            Timer::CountUpObserve {
+                expire_at,
+                progress,
+                ..
+            } => {
+                if *progress < *expire_at {
                     *progress += duration;
                 }
             }
@@ -82,14 +115,20 @@ impl Timer {
     pub fn is_active(&self) -> bool {
         match self {
             Timer::CountDown(remaining) => *remaining > 0,
-            Timer::CountUp { up_to, progress } => *progress < *up_to,
+            Timer::CountUpObserve {
+                expire_at,
+                progress,
+                ..
+            } => *progress < *expire_at,
         }
     }
 
     pub fn get_time_left(&self) -> CType {
         match self {
             Timer::CountDown(remaining) => *remaining,
-            Timer::CountUp { up_to, progress } => *up_to - *progress,
+            Timer::CountUpObserve {
+                up_to, progress, ..
+            } => *up_to - *progress,
         }
     }
 

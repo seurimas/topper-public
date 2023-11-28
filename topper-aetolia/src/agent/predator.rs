@@ -182,11 +182,11 @@ pub struct PredatorBoard {
 impl Default for PredatorBoard {
     fn default() -> Self {
         let mut default = PredatorBoard {
-            fleshbane: Timer::count_up_seconds(10.),
-            bloodscourge: Timer::count_up_seconds(5.),
-            veinrip: Timer::count_up_seconds(6.),
+            fleshbane: Timer::count_up_seconds(20.),
+            bloodscourge: Timer::count_up_observe_seconds(4., 7.),
+            veinrip: Timer::count_up_observe_seconds(14., 20.),
             acid: Timer::count_up_seconds(10.),
-            cirisosis: Timer::count_up_seconds(6.),
+            cirisosis: Timer::count_up_observe_seconds(4., 6.),
         };
         default.fleshbane.expire();
         default.bloodscourge.expire();
