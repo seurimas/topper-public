@@ -16,30 +16,36 @@ use super::*;
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum PredatorBehavior {
     // Combo attacks
-    FastestCombo(Vec<ComboPredicate>, Vec<LType>),
-    AffRateCombo(Vec<ComboPredicate>, Vec<LType>),
-    GradedCombo(Vec<ComboPredicate>, Vec<ComboGrader>, Vec<LType>),
+    FastestCombo(AetTarget, Vec<ComboPredicate>, Vec<LimbDescriptor>),
+    AffRateCombo(AetTarget, Vec<ComboPredicate>, Vec<LimbDescriptor>),
+    GradedCombo(
+        AetTarget,
+        Vec<ComboPredicate>,
+        Vec<ComboGrader>,
+        Vec<LimbDescriptor>,
+    ),
     AddComboAttacks(Vec<ComboAttack>),
-    CalculateCombos,
+    AllowParries(bool),
+    CalculateCombos(AetTarget),
     ResetComboAttacks,
     // Special knifeplay attacks
-    Fleshbane,
-    Bloodscourge,
+    Fleshbane(AetTarget),
+    Bloodscourge(AetTarget),
     // Darts
-    Dartshot,
-    Twinshot,
-    CirisosisDart,
+    Dartshot(AetTarget),
+    Twinshot(AetTarget),
+    CirisosisDart(AetTarget),
     // Spider
-    Acid,
-    Intoxicate,
+    Acid(AetTarget),
+    Intoxicate(AetTarget),
     // Orgyuk
-    Rake,
-    Swipe,
-    Throw,
+    Rake(AetTarget),
+    Swipe(AetTarget),
+    Throw(AetTarget),
     Roar,
-    Weaken,
-    Pummel(LType),
-    Mawcrush,
+    Weaken(AetTarget),
+    Pummel(AetTarget, LimbDescriptor),
+    Mawcrush(AetTarget),
 }
 
 impl UnpoweredFunction for PredatorBehavior {
@@ -61,7 +67,13 @@ impl UnpoweredFunction for PredatorBehavior {
                 controller.predator_combo_store.add_attacks(attacks.iter());
                 UnpoweredFunctionState::Complete
             }
-            PredatorBehavior::FastestCombo(predicates, preferred_limbs) => {
+            PredatorBehavior::AllowParries(allow_parries) => {
+                controller
+                    .predator_combo_store
+                    .set_allow_parries(*allow_parries);
+                UnpoweredFunctionState::Complete
+            }
+            PredatorBehavior::FastestCombo(target, predicates, preferred_limbs) => {
                 let best_combo = controller.predator_combos.get_fastest_combo(&predicates);
                 unsafe {
                     if DEBUG_TREES {
@@ -70,9 +82,9 @@ impl UnpoweredFunction for PredatorBehavior {
                         println!("All combos: {:?}", controller.predator_combos);
                     }
                 }
-                use_combo(model, controller, best_combo, preferred_limbs)
+                use_combo(model, controller, target, best_combo, preferred_limbs)
             }
-            PredatorBehavior::AffRateCombo(predicates, preferred_limbs) => {
+            PredatorBehavior::AffRateCombo(target, predicates, preferred_limbs) => {
                 let best_combo = controller
                     .predator_combos
                     .get_highest_aff_rate_combo(&predicates);
@@ -83,9 +95,9 @@ impl UnpoweredFunction for PredatorBehavior {
                         println!("All combos: {:?}", controller.predator_combos);
                     }
                 }
-                use_combo(model, controller, best_combo, preferred_limbs)
+                use_combo(model, controller, target, best_combo, preferred_limbs)
             }
-            PredatorBehavior::GradedCombo(predicates, graders, preferred_limbs) => {
+            PredatorBehavior::GradedCombo(target, predicates, graders, preferred_limbs) => {
                 let best_combo = controller
                     .predator_combos
                     .get_highest_scored_combo(&predicates, &graders);
@@ -96,12 +108,12 @@ impl UnpoweredFunction for PredatorBehavior {
                         println!("All combos: {:?}", controller.predator_combos);
                     }
                 }
-                use_combo(model, controller, best_combo, preferred_limbs)
+                use_combo(model, controller, target, best_combo, preferred_limbs)
             }
-            PredatorBehavior::CalculateCombos => {
+            PredatorBehavior::CalculateCombos(target) => {
                 if let (me, Some(target)) = (
                     model.state.borrow_me(),
-                    AetTarget::Target.get_target(model, controller),
+                    target.get_target(model, controller),
                 ) {
                     controller
                         .predator_combo_store
@@ -123,8 +135,8 @@ impl UnpoweredFunction for PredatorBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
-            PredatorBehavior::Bloodscourge => {
-                if let Some(you) = AetTarget::Target.get_target(model, controller) {
+            PredatorBehavior::Bloodscourge(target) => {
+                if let Some(you) = target.get_target(model, controller) {
                     if you.is(FType::Shielded) {
                         return UnpoweredFunctionState::Failed;
                     }
@@ -138,8 +150,8 @@ impl UnpoweredFunction for PredatorBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
-            PredatorBehavior::Fleshbane => {
-                if let Some(you) = AetTarget::Target.get_target(model, controller) {
+            PredatorBehavior::Fleshbane(target) => {
+                if let Some(you) = target.get_target(model, controller) {
                     if you.is(FType::Shielded) {
                         return UnpoweredFunctionState::Failed;
                     }
@@ -153,10 +165,10 @@ impl UnpoweredFunction for PredatorBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
-            PredatorBehavior::Intoxicate => {
+            PredatorBehavior::Intoxicate(target) => {
                 if let (Some(me), Some(you)) = (
                     AetTarget::Me.get_target(model, controller),
-                    AetTarget::Target.get_target(model, controller),
+                    target.get_target(model, controller),
                 ) {
                     if me
                         .check_if_predator(&|me| {
@@ -177,10 +189,10 @@ impl UnpoweredFunction for PredatorBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
-            PredatorBehavior::Acid => {
+            PredatorBehavior::Acid(target) => {
                 if let (Some(me), Some(you)) = (
                     AetTarget::Me.get_target(model, controller),
-                    AetTarget::Target.get_target(model, controller),
+                    target.get_target(model, controller),
                 ) {
                     if you.is(FType::Acid) {
                         return UnpoweredFunctionState::Failed;
@@ -197,8 +209,8 @@ impl UnpoweredFunction for PredatorBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
-            PredatorBehavior::Dartshot => {
-                if let Some(you) = AetTarget::Target.get_target(model, controller) {
+            PredatorBehavior::Dartshot(target) => {
+                if let Some(you) = target.get_target(model, controller) {
                     let me = model.state.borrow_me();
                     if me.check_if_predator(&|me| me.apex < 3).unwrap_or(true)
                         && you.will_be_rebounding(me.get_qeb_balance())
@@ -217,8 +229,8 @@ impl UnpoweredFunction for PredatorBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
-            PredatorBehavior::Twinshot => {
-                if let Some(you) = AetTarget::Target.get_target(model, controller) {
+            PredatorBehavior::Twinshot(target) => {
+                if let Some(you) = target.get_target(model, controller) {
                     if you.will_be_rebounding(model.state.borrow_me().get_qeb_balance()) {
                         return UnpoweredFunctionState::Failed;
                     } else if you.is(FType::Shielded) {
@@ -239,8 +251,8 @@ impl UnpoweredFunction for PredatorBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
-            PredatorBehavior::CirisosisDart => {
-                if let Some(you) = AetTarget::Target.get_target(model, controller) {
+            PredatorBehavior::CirisosisDart(target) => {
+                if let Some(you) = target.get_target(model, controller) {
                     let me = model.state.borrow_me();
                     if me.check_if_predator(&|me| me.apex >= 3).unwrap_or(true)
                         && you.will_be_rebounding(me.get_qeb_balance())
@@ -266,8 +278,8 @@ impl UnpoweredFunction for PredatorBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
-            PredatorBehavior::Rake => {
-                if let Some(you) = AetTarget::Target.get_target(model, controller) {
+            PredatorBehavior::Rake(target) => {
+                if let Some(you) = target.get_target(model, controller) {
                     if you.is(FType::Shielded) {
                         return UnpoweredFunctionState::Failed;
                     }
@@ -283,9 +295,9 @@ impl UnpoweredFunction for PredatorBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
-            PredatorBehavior::Swipe => {
-                if let Some(you) = AetTarget::Target.get_target(model, controller) {
-                    if you.is(FType::Shielded) {
+            PredatorBehavior::Swipe(target) => {
+                if let Some(you) = target.get_target(model, controller) {
+                    if you.is(FType::Shielded) || !you.is(FType::Density) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(SwipeAction::new(
@@ -296,8 +308,8 @@ impl UnpoweredFunction for PredatorBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
-            PredatorBehavior::Throw => {
-                if let Some(you) = AetTarget::Target.get_target(model, controller) {
+            PredatorBehavior::Throw(target) => {
+                if let Some(you) = target.get_target(model, controller) {
                     if you.is(FType::Shielded) || you.is(FType::Density) {
                         return UnpoweredFunctionState::Failed;
                     }
@@ -309,8 +321,8 @@ impl UnpoweredFunction for PredatorBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
-            PredatorBehavior::Weaken => {
-                if let Some(you) = AetTarget::Target.get_target(model, controller) {
+            PredatorBehavior::Weaken(target) => {
+                if let Some(you) = target.get_target(model, controller) {
                     if you.is(FType::Shielded) {
                         return UnpoweredFunctionState::Failed;
                     }
@@ -326,22 +338,23 @@ impl UnpoweredFunction for PredatorBehavior {
                 controller.plan.add_to_qeb(Box::new(RoarAction::new()));
                 UnpoweredFunctionState::Complete
             }
-            PredatorBehavior::Pummel(limb) => {
-                if let Some(you) = AetTarget::Target.get_target(model, controller) {
+            PredatorBehavior::Pummel(target, limb) => {
+                if let Some(you) = target.get_target(model, controller) {
                     if you.is(FType::Shielded) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(PummelAction::new(
                         controller.target.clone().unwrap_or("".to_string()),
-                        limb.clone(),
+                        limb.get_limb(model, controller, target)
+                            .unwrap_or(LType::TorsoDamage),
                     )));
                     UnpoweredFunctionState::Complete
                 } else {
                     UnpoweredFunctionState::Failed
                 }
             }
-            PredatorBehavior::Mawcrush => {
-                if let Some(you) = AetTarget::Target.get_target(model, controller) {
+            PredatorBehavior::Mawcrush(target) => {
+                if let Some(you) = target.get_target(model, controller) {
                     if you.is(FType::Shielded) || !you.get_limb_state(LType::TorsoDamage).broken {
                         return UnpoweredFunctionState::Failed;
                     }
@@ -364,11 +377,11 @@ impl UnpoweredFunction for PredatorBehavior {
 fn use_combo(
     model: &BehaviorModel,
     controller: &mut BehaviorController,
+    target: &AetTarget,
     best_combo: Option<PredatorCombo>,
-    preferred_limbs: &Vec<LType>,
+    preferred_limbs: &Vec<LimbDescriptor>,
 ) -> UnpoweredFunctionState {
-    if let (Some(you), Some(combo)) = (AetTarget::Target.get_target(model, controller), &best_combo)
-    {
+    if let (Some(you), Some(combo)) = (target.get_target(model, controller), &best_combo) {
         let venom = controller.get_venoms_from_plan(1, you);
         controller
             .plan
@@ -376,7 +389,13 @@ fn use_combo(
                 combo.get_attacks().to_vec(),
                 controller.target.clone().unwrap_or("".to_string()),
                 if venom.is_empty() { "" } else { venom[0] },
-                preferred_limbs,
+                &preferred_limbs
+                    .iter()
+                    .map(|limb| {
+                        limb.get_limb(model, controller, target)
+                            .unwrap_or(LType::TorsoDamage)
+                    })
+                    .collect::<Vec<LType>>(),
             )));
         UnpoweredFunctionState::Complete
     } else if let Some(combo) = &best_combo {
@@ -387,7 +406,13 @@ fn use_combo(
                 combo.get_attacks().to_vec(),
                 controller.target.clone().unwrap_or("".to_string()),
                 "curare",
-                preferred_limbs,
+                &preferred_limbs
+                    .iter()
+                    .map(|limb| {
+                        limb.get_limb(model, controller, target)
+                            .unwrap_or(LType::TorsoDamage)
+                    })
+                    .collect::<Vec<LType>>(),
             )));
         UnpoweredFunctionState::Complete
     } else {

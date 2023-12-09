@@ -154,6 +154,7 @@ pub struct LimbState {
     pub is_dislocated: bool,
     pub welt: bool,
     pub bruise_level: usize,
+    pub fleshbaned_count: usize,
 }
 
 impl LimbState {
@@ -164,9 +165,18 @@ impl LimbState {
         }
         i32::max((damage / 30.0) as i32, 0)
     }
+
     pub fn hits_to_break(&self, damage: f32) -> i32 {
         let damaged_value = (DAMAGED_VALUE + 1) as f32 / 100.0;
         f32::ceil((damaged_value - self.damage) / damage) as i32
+    }
+
+    pub fn assume_restore(&mut self) {
+        let mut restore_value = 30.0;
+        restore_value -= restore_value * self.fleshbaned_count as f32 * 2.0;
+        if restore_value > 0. {
+            self.damage -= restore_value;
+        }
     }
 }
 

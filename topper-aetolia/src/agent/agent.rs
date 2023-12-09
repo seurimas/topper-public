@@ -441,6 +441,7 @@ impl AgentState {
         } || damage > 35.0;
         let welt = limb.welt;
         let is_restoring = self.limb_damage.restoring == Some(what);
+        let fleshbaned_count = self.limb_damage.fleshbaned_count;
         let is_parried = self.can_parry() && self.parrying == Some(what);
         let is_dislocated = match what {
             LType::LeftArmDamage => self.is(FType::LeftArmDislocated),
@@ -493,6 +494,7 @@ impl AgentState {
             is_dislocated,
             welt,
             bruise_level,
+            fleshbaned_count,
         }
     }
 
@@ -584,20 +586,53 @@ impl AgentState {
     }
 
     pub fn can_parry(&self) -> bool {
-        !self.is(FType::Indifference)
-            && !self.is(FType::Frozen)
-            && !self.is(FType::Paralysis)
+        self.affs_count(&vec![
+            // Fallen counts for prone, but not parrying.
+            FType::Indifference,
+            FType::Asleep,
+            FType::Stun,
+            FType::Paralysis,
+            FType::WritheImpaled,
+            FType::WritheArmpitlock,
+            FType::WritheNecklock,
+            FType::WritheThighlock,
+            FType::WritheTransfix,
+            FType::WritheBind,
+            FType::WritheGunk,
+            FType::WritheRopes,
+            FType::WritheVines,
+            FType::WritheWeb,
+            FType::WritheDartpinned,
+            FType::WritheHoist,
+            FType::WritheGrappled,
+            FType::WritheStasis,
+        ]) == 0
             && !(self.is(FType::LeftArmCrippled) && self.is(FType::RightArmCrippled))
     }
 
     pub fn is_prone(&self) -> bool {
-        self.is(FType::Fallen)
-            || self.is(FType::Frozen)
-            || self.is(FType::Indifference)
-            || self.is(FType::Asleep)
-            || self.is(FType::Stun)
-            || self.is(FType::Paralysis)
-            || self.is(FType::WritheBind)
+        self.affs_count(&vec![
+            // Fallen counts for prone, but not parrying.
+            FType::Fallen,
+            FType::Indifference,
+            FType::Asleep,
+            FType::Stun,
+            FType::Paralysis,
+            FType::WritheImpaled,
+            FType::WritheArmpitlock,
+            FType::WritheNecklock,
+            FType::WritheThighlock,
+            FType::WritheTransfix,
+            FType::WritheBind,
+            FType::WritheGunk,
+            FType::WritheRopes,
+            FType::WritheVines,
+            FType::WritheWeb,
+            FType::WritheDartpinned,
+            FType::WritheHoist,
+            FType::WritheGrappled,
+            FType::WritheStasis,
+        ]) == 0
     }
 
     pub fn stuck_fallen(&self) -> bool {

@@ -17,6 +17,8 @@ pub const LATERAL_DAMAGE: f32 = 6.0;
 pub const LOWHOOK_DAMAGE: f32 = 5.5;
 pub const JAB_DAMAGE: f32 = 5.5;
 pub const SPINSLASH_DAMAGE: f32 = 4.0;
+pub const GOUGE_DAMAGE: f32 = 6.5;
+pub const FLASHKICK_DAMAGE: f32 = 5.0;
 
 pub fn handle_combat_action(
     combat_action: &CombatAction,
@@ -67,7 +69,7 @@ pub fn handle_combat_action(
                 });
             } else {
                 let count = match combat_action.annotation.as_str() {
-                    "one" => 1,
+                    "single" => 1,
                     "two" => 2,
                     "three" => 3,
                     "four" => 4,
@@ -186,6 +188,14 @@ pub fn handle_combat_action(
                 target.set_parrying(limb);
             });
         }
+        "Flashkick" => {
+            attack_limb_damage(
+                agent_states,
+                &combat_action.target,
+                (LType::HeadDamage, FLASHKICK_DAMAGE, true),
+                after,
+            );
+        }
         "Flashkicked" => {
             let aff = FType::from_name(&combat_action.annotation);
             if let Some(aff) = aff {
@@ -239,11 +249,27 @@ pub fn handle_combat_action(
                 },
             );
         }
+        "Swipe" => {
+            let annotation = combat_action.annotation.clone();
+            for_agent(
+                agent_states,
+                &combat_action.target,
+                &move |me: &mut AgentState| {
+                    me.set_flag(FType::Density, false);
+                },
+            );
+        }
         "Gouge" => {
             attack_afflictions(
                 agent_states,
                 &combat_action.target,
                 vec![FType::Disfigurement],
+                after,
+            );
+            attack_limb_damage(
+                agent_states,
+                &combat_action.target,
+                (LType::TorsoDamage, LATERAL_DAMAGE, true),
                 after,
             );
         }

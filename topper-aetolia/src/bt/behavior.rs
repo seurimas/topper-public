@@ -13,6 +13,7 @@ use crate::timeline::*;
 use crate::types::*;
 
 use super::AetTarget;
+use super::LimbDescriptor;
 use super::{BehaviorController, BehaviorModel};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
@@ -23,6 +24,7 @@ pub enum AetBehavior {
     TagPlan(String),
     HintPlan(String, String),
     CopyHint(String, String),
+    SetLimbHint(AetTarget, LimbDescriptor, String),
     PlainQebBehavior(String),
     CurativeBehavior(CurativeBehavior),
     DefenseBehavior(DefenseBehavior),
@@ -59,6 +61,15 @@ impl UnpoweredFunction for AetBehavior {
             AetBehavior::CopyHint(source_name, target_name) => {
                 if let Some(hint) = controller.get_hint(source_name) {
                     controller.hint_plan(target_name.clone(), hint.clone());
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetBehavior::SetLimbHint(target, limb_descriptor, hint_name) => {
+                let limb = limb_descriptor.get_limb(model, controller, target);
+                if let Some(limb) = limb {
+                    controller.hint_plan(hint_name.clone(), limb.to_string().to_lowercase());
                     UnpoweredFunctionState::Complete
                 } else {
                     UnpoweredFunctionState::Failed

@@ -143,7 +143,7 @@ impl ComboAttack {
     }
 
     pub fn can_drop_parry(&self) -> bool {
-        if self == &ComboAttack::Feint {
+        if self == &ComboAttack::Feint || self == &ComboAttack::Pindown {
             true
         } else {
             false
@@ -416,6 +416,7 @@ pub struct ComboSolver {
     start_rebounds: u32,
     blade_surge: bool,
     allow_bad_stances: bool,
+    allow_parries: bool,
 }
 
 impl Default for ComboSolver {
@@ -434,6 +435,7 @@ impl ComboSolver {
             start_rebounds: 0,
             blade_surge: false,
             allow_bad_stances: false,
+            allow_parries: false,
         }
     }
 
@@ -476,6 +478,11 @@ impl ComboSolver {
         self
     }
 
+    pub fn set_allow_parries(&mut self, allow_parries: bool) -> &mut Self {
+        self.allow_parries = allow_parries;
+        self
+    }
+
     fn add_combos(
         &self,
         combos: &mut Vec<PredatorCombo>,
@@ -498,7 +505,10 @@ impl ComboSolver {
                 new_attacks.clone(),
             ));
         }
-        if new_attacks.len() == 3 && next_stance != Stance::Laesan {
+        if new_attacks.len() == 3
+            && next_stance != Stance::Laesan
+            && next_stance != Stance::Bladesurge
+        {
             return;
         } else if new_attacks.len() == 4 {
             return;
@@ -534,7 +544,7 @@ impl ComboSolver {
         if (self.allow_bad_stances || next_attack.is_good_combo_attack(next_stance))
             && (new_attacks.len() == 0 || !next_attack.must_begin_combo())
             && (!next_attack.idempotent() || !new_attacks.contains(&next_attack))
-            && (!parrying || !next_attack.parryable())
+            && (!parrying || !next_attack.parryable() || self.allow_parries)
             && (prone || !next_attack.requires_prone())
             && (rebounds == 0 || !next_attack.rebounds())
         {
@@ -601,15 +611,28 @@ impl ComboPredicate {
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub enum ComboGrader {
+    Reuse(i32),
     Hits(LType, i32),
     ValueMove(ComboAttack, i32),
     ValueMoveInStance(ComboAttack, Stance, i32),
     HasVenom(i32),
+    EndsInStance(Stance, i32),
 }
 
 impl ComboGrader {
     pub fn grade(&self, combo: &PredatorCombo) -> i32 {
         match self {
+            ComboGrader::Reuse(value) => {
+                let mut seen_hits = vec![];
+                for attack in combo.get_attacks().iter() {
+                    if seen_hits.contains(&attack) {
+                        return *value;
+                    } else {
+                        seen_hits.push(attack);
+                    }
+                }
+                0
+            }
             ComboGrader::Hits(limb, value) => {
                 let mut total_value = 0;
                 for attack in combo.get_attacks().iter() {
@@ -650,6 +673,13 @@ impl ComboGrader {
                     }
                 }
                 return 0;
+            }
+            ComboGrader::EndsInStance(stance, value) => {
+                if combo.0 == Stance::Bladesurge || combo.get_final_stance() == *stance {
+                    *value
+                } else {
+                    0
+                }
             }
         }
     }

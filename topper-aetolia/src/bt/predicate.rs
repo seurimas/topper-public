@@ -13,6 +13,7 @@ use crate::types::*;
 
 use super::BehaviorController;
 use super::BehaviorModel;
+use super::LimbDescriptor;
 
 pub const QUEUE_TIME: f32 = 0.25;
 
@@ -67,10 +68,12 @@ pub enum AetPredicate {
     Locked(AetTarget, bool),
     NearLocked(AetTarget, LockType, usize),
     ReboundingWindow(AetTarget, CType),
+    LimbHintIs(String, LType),
     HintSet(String, String),
     HasBalanceEquilibrium(AetTarget),
     HasBalance(AetTarget),
     HasEquilibrium(AetTarget),
+    KnownParry(AetTarget, LimbDescriptor),
     CanParry(AetTarget),
     HasTree(AetTarget),
     HasFocus(AetTarget),
@@ -307,6 +310,16 @@ impl UnpoweredFunction for AetPredicate {
                 }
                 UnpoweredFunctionState::Failed
             }
+            AetPredicate::KnownParry(target, limb_descriptor) => {
+                if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
+                    if let Some(target) = target.get_target(model, controller) {
+                        if target.get_parrying() == Some(limb) {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
             AetPredicate::CanParry(target) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.can_parry() {
@@ -359,6 +372,17 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::PredatorPredicate(target, predator_predicate) => {
                 if predator_predicate.check(target, model, controller) {
                     UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetPredicate::LimbHintIs(hint, limb) => {
+                if let Some(hint) = controller.get_hint(hint) {
+                    if hint.eq_ignore_ascii_case(&limb.to_string()) {
+                        UnpoweredFunctionState::Complete
+                    } else {
+                        UnpoweredFunctionState::Failed
+                    }
                 } else {
                     UnpoweredFunctionState::Failed
                 }

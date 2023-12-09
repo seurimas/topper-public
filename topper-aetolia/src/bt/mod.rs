@@ -1,9 +1,11 @@
 mod behavior;
+mod limb_desc;
 mod predicate;
 mod sub_trees;
 use std::collections::{HashMap, HashSet};
 
 pub use behavior::*;
+pub use limb_desc::*;
 pub use predicate::*;
 use serde::{Deserialize, Serialize};
 pub use sub_trees::*;

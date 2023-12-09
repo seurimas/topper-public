@@ -1,5 +1,6 @@
 use super::*;
 use crate::alpha_beta::ActionPlanner;
+use crate::bt::DEBUG_TREES;
 use crate::classes::group::call_venom;
 use crate::classes::group::call_venoms;
 use crate::classes::group::should_call_venoms;
@@ -112,12 +113,20 @@ impl SeriesAttack {
             LType::RightLegDamage,
         ];
         valid_feints.retain(|l| {
-            base_attacks.iter().any(|attack| match attack {
-                ComboAttack::Jab => *l != LType::LeftArmDamage && *l != LType::RightArmDamage,
-                ComboAttack::Lowhook => *l != LType::LeftLegDamage && *l != LType::RightLegDamage,
-                _ => Some(*l) != attack.get_single_limb_target(),
-            })
+            !base_attacks
+                .iter()
+                .any(|attack| Some(*l) == attack.get_single_limb_target())
         });
+        valid_feints.retain(|l| !preferred_limbs.contains(l));
+        if valid_feints.is_empty() {
+            println!("Valid feints is empty, defaulting to head");
+            valid_feints = vec![LType::HeadDamage];
+        }
+        unsafe {
+            if DEBUG_TREES {
+                println!("Valid feints: {:?}", valid_feints);
+            }
+        }
         let attacks = base_attacks.iter().map(|base| match base {
             ComboAttack::Jab => {
                 ParamComboAttack::Jab(if preferred_limbs.contains(&LType::LeftArmDamage) {
