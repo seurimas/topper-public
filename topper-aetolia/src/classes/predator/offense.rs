@@ -60,6 +60,7 @@ fn get_stance_color(stance: &Stance) -> String {
         Stance::Rizet => "yellow".to_string(),
         Stance::EinFasit => "green".to_string(),
         Stance::Laesan => "blue".to_string(),
+        Stance::Bladesurge => "purple".to_string(),
     }
 }
 

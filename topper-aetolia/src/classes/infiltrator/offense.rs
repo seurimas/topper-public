@@ -289,37 +289,6 @@ lazy_static! {
 }
 
 lazy_static! {
-    static ref CARNIFEX_STACK: Vec<VenomPlan> = vec![
-        VenomPlan::OnTree(FType::Paresis),
-        VenomPlan::Stick(FType::Clumsiness),
-        VenomPlan::OneOf(FType::Weariness, FType::Stupidity),
-        VenomPlan::Stick(FType::Vomiting),
-        VenomPlan::Stick(FType::Allergies),
-        VenomPlan::OneOf(FType::Asthma, FType::Slickness),
-        VenomPlan::OneOf(FType::LeftLegCrippled, FType::LeftArmCrippled),
-        VenomPlan::OneOf(FType::RightLegCrippled, FType::RightLegCrippled),
-        VenomPlan::OneOf(FType::Sensitivity, FType::Dizziness),
-    ];
-}
-
-lazy_static! {
-    static ref SCIOMANCER_STACK: Vec<VenomPlan> = vec![
-        VenomPlan::Stick(FType::Paresis),
-        VenomPlan::IfDo(
-            FType::MentalFatigue,
-            Box::new(VenomPlan::OneOf(FType::Weariness, FType::Stupidity))
-        ),
-        VenomPlan::Stick(FType::Vomiting),
-        VenomPlan::Stick(FType::Allergies),
-        VenomPlan::OneOf(FType::Sensitivity, FType::Dizziness),
-        VenomPlan::OneOf(FType::Asthma, FType::Slickness),
-        VenomPlan::OneOf(FType::LeftLegCrippled, FType::LeftArmCrippled),
-        VenomPlan::OneOf(FType::RightLegCrippled, FType::RightLegCrippled),
-        VenomPlan::OneOf(FType::Sensitivity, FType::Dizziness),
-    ];
-}
-
-lazy_static! {
     static ref WAYFARER_STACK: Vec<VenomPlan> = vec![
         VenomPlan::OnTree(FType::Paresis),
         VenomPlan::Stick(FType::Clumsiness),
@@ -438,36 +407,6 @@ lazy_static! {
 lazy_static! {
     static ref LOCK_BUFFER_STACK: Vec<FType> =
         vec![FType::Paresis, FType::Stupidity, FType::Clumsiness];
-}
-
-lazy_static! {
-    static ref STACKING_STRATEGIES: HashMap<String, Vec<VenomPlan>> = {
-        let mut val = HashMap::new();
-        val.insert("coag".into(), get_simple_plan(COAG_STACK.to_vec()));
-        val.insert("dec".into(), get_simple_plan(DEC_STACK.to_vec()));
-        val.insert("phys".into(), get_simple_plan(PHYS_STACK.to_vec()));
-        val.insert("gank".into(), get_simple_plan(GANK_STACK.to_vec()));
-        val.insert("fire".into(), get_simple_plan(FIRE_STACK.to_vec()));
-        val.insert("kill".into(), get_simple_plan(KILL_STACK.to_vec()));
-        val.insert("salve".into(), get_simple_plan(SALVE_STACK.to_vec()));
-        val.insert("peace".into(), get_simple_plan(PEACE_STACK.to_vec()));
-        val.insert("slit".into(), SLIT_STACK.to_vec());
-        val.insert("Monk".into(), get_simple_plan(MONK_STACK.to_vec()));
-        val.insert("Luminary".into(), LUMINARY_STACK.to_vec());
-        val.insert("Carnifex".into(), CARNIFEX_STACK.to_vec());
-        val.insert("Sciomancer".into(), SCIOMANCER_STACK.to_vec());
-        val.insert("Wayfarer".into(), WAYFARER_STACK.to_vec());
-        val.insert("Praenomen".into(), PRAENOMEN_STACK.to_vec());
-        val.insert("Infiltrator".into(), SYSSIN_STACK.to_vec());
-        val.insert("Shaman".into(), SHAMAN_STACK.to_vec());
-        val.insert("Templar".into(), get_simple_plan(PHYS_STACK.to_vec()));
-        val.insert("Indorani".into(), INDORANI_STACK.to_vec());
-        val.insert("Zealot".into(), ZEALOT_STACK.to_vec());
-        val.insert("yedan".into(), get_simple_plan(YEDAN_STACK.to_vec()));
-        val.insert("bedazzle".into(), BEDAZZLE_STACK.to_vec());
-        val.insert("thin".into(), THIN_STACK.to_vec());
-        val
-    };
 }
 
 lazy_static! {
@@ -878,7 +817,62 @@ pub fn get_balance_attack<'s>(
     strategy: &String,
     db: Option<&impl AetDatabaseModule>,
 ) -> Box<dyn ActiveTransition> {
-    if let Some(stack) = get_stack(timeline, "syssin", target, strategy, db) {
+    if strategy == "damage" {
+        let you = timeline.state.borrow_agent(target);
+        if you.is(FType::Fangbarrier) {
+            return Box::new(FlayAction::fangbarrier(
+                who_am_i.to_string(),
+                target.to_string(),
+                get_venoms_from_plan(&DEFAULT_STACK.to_vec(), 1, &you)
+                    .get(0)
+                    .map(|venom| venom.to_string())
+                    .unwrap_or_default(),
+            ));
+        } else {
+            return Box::new(BiteAction::new(who_am_i, &target, &"camus"));
+        }
+    } else if strategy == "group" {
+        let you = timeline.state.borrow_agent(target);
+        if you.is_prone() {
+            return Box::new(GarroteAction::new(who_am_i, target));
+        } else {
+            return get_balance_attack(timeline, who_am_i, target, &"salve".to_string(), db);
+        }
+    } else if strategy == "shield" {
+        let me = timeline.state.borrow_me();
+        if me.can_touch() && !me.is(FType::Shielded) {
+            return Box::new(ShieldAction::new(who_am_i));
+        } else if needs_fitness(timeline, who_am_i) {
+            return Box::new(FitnessAction::new(who_am_i.to_string()));
+        } else {
+            return Box::new(Action::new(
+                "firstaid elevate paresis;;firstaid elevate frozen;;firstaid elevate paralysis"
+                    .to_string(),
+            ));
+        }
+    } else if let Some(captures) = ERADICATE_PLAN.captures(strategy) {
+        if let Some(names) = captures.get(1) {
+            for name in names.as_str().split(",") {
+                let you = timeline.state.borrow_agent(&name.to_string());
+                if let Some(hypno) =
+                    get_top_hypno(who_am_i, &name.to_string(), &you, &ERADICATE_STACK)
+                {
+                    return Box::new(SeparatorAction::pair(
+                        Box::new(Trace::new(format!(
+                            "{}: {}",
+                            name,
+                            you.hypno_state.suggestion_count()
+                        ))),
+                        hypno,
+                    ));
+                }
+            }
+            return Box::new(Inactivity);
+        } else {
+            println!("No names found for eradicate: {}", strategy);
+            return Box::new(Inactivity);
+        }
+    } else if let Some(stack) = get_stack(timeline, "syssin", target, strategy, db) {
         let me = timeline.state.borrow_agent(who_am_i);
         let you = timeline.state.borrow_agent(target);
         let mut two_venoms = choose_venoms(&timeline, who_am_i, target, strategy, &stack, db, 2);
@@ -969,61 +963,6 @@ pub fn get_balance_attack<'s>(
             } else {
                 return Box::new(BiteAction::new(who_am_i, &target, &"camus"));
             }
-        }
-    } else if strategy == "damage" {
-        let you = timeline.state.borrow_agent(target);
-        if you.is(FType::Fangbarrier) {
-            return Box::new(FlayAction::fangbarrier(
-                who_am_i.to_string(),
-                target.to_string(),
-                get_venoms_from_plan(&DEFAULT_STACK.to_vec(), 1, &you)
-                    .get(0)
-                    .map(|venom| venom.to_string())
-                    .unwrap_or_default(),
-            ));
-        } else {
-            return Box::new(BiteAction::new(who_am_i, &target, &"camus"));
-        }
-    } else if strategy == "group" {
-        let you = timeline.state.borrow_agent(target);
-        if you.is_prone() {
-            return Box::new(GarroteAction::new(who_am_i, target));
-        } else {
-            return get_balance_attack(timeline, who_am_i, target, &"salve".to_string(), db);
-        }
-    } else if strategy == "shield" {
-        let me = timeline.state.borrow_me();
-        if me.can_touch() && !me.is(FType::Shielded) {
-            return Box::new(ShieldAction::new(who_am_i));
-        } else if needs_fitness(timeline, who_am_i) {
-            return Box::new(FitnessAction::new(who_am_i.to_string()));
-        } else {
-            return Box::new(Action::new(
-                "firstaid elevate paresis;;firstaid elevate frozen;;firstaid elevate paralysis"
-                    .to_string(),
-            ));
-        }
-    } else if let Some(captures) = ERADICATE_PLAN.captures(strategy) {
-        if let Some(names) = captures.get(1) {
-            for name in names.as_str().split(",") {
-                let you = timeline.state.borrow_agent(&name.to_string());
-                if let Some(hypno) =
-                    get_top_hypno(who_am_i, &name.to_string(), &you, &ERADICATE_STACK)
-                {
-                    return Box::new(SeparatorAction::pair(
-                        Box::new(Trace::new(format!(
-                            "{}: {}",
-                            name,
-                            you.hypno_state.suggestion_count()
-                        ))),
-                        hypno,
-                    ));
-                }
-            }
-            return Box::new(Inactivity);
-        } else {
-            println!("No names found for eradicate: {}", strategy);
-            return Box::new(Inactivity);
         }
     } else {
         return Box::new(Inactivity);

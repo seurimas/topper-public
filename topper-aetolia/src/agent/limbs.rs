@@ -5,7 +5,7 @@ use std::convert::TryFrom;
 use std::fmt;
 use topper_core::timeline::BaseAgentState;
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, TryFromPrimitive)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, TryFromPrimitive, Serialize, Deserialize)]
 #[repr(u8)]
 pub enum LType {
     HeadDamage,
@@ -134,6 +134,7 @@ pub struct LimbSet {
     pub limbs: [Limb; LType::SIZE as usize],
     pub restoring: Option<LType>,
     pub restore_timer: Option<Timer>,
+    pub fleshbaned_count: usize,
     pub regenerating: bool,
     pub first_person_restore: bool,
 }
@@ -364,7 +365,7 @@ impl LimbSet {
         self.limbs[limb as usize].amputated
     }
 
-    pub fn wait(&mut self, duration: CType) -> Option<(LType, bool, bool)> {
+    pub fn wait(&mut self, duration: CType) -> Option<(LType, CType, bool)> {
         if let (Some(remaining), Some(restored)) = (&mut self.restore_timer, self.restoring) {
             remaining.wait(duration);
             if !remaining.is_active() {
@@ -400,15 +401,18 @@ impl LimbSet {
         }
     }
 
-    pub fn complete_restore(&mut self, broken: Option<LType>) -> Option<(LType, bool, bool)> {
+    pub fn complete_restore(&mut self, broken: Option<LType>) -> Option<(LType, CType, bool)> {
         if broken == self.restoring || broken == None {
             if let Some(broken) = self.restoring {
-                let regenerating = self.regenerating;
+                let regenerating_modifier = if self.regenerating { 1500 } else { 0 };
+                let fleshbane_modifier = self.fleshbaned_count as i32 * -200;
                 let first_person_restore = self.first_person_restore;
                 self.regenerating = false;
                 self.restoring = None;
                 self.restore_timer = None;
-                return Some((broken, regenerating, first_person_restore));
+                self.fleshbaned_count = 0;
+                let heal_modifier = regenerating_modifier + fleshbane_modifier;
+                return Some((broken, heal_modifier, first_person_restore));
             }
             self.regenerating = false;
             self.restoring = None;
@@ -421,8 +425,8 @@ impl LimbSet {
         self.restoring
     }
 
-    pub fn restore(&mut self, limb: LType, regenerating: bool) {
-        let expected_heal = if regenerating { 4500 } else { 3000 };
+    pub fn restore(&mut self, limb: LType, heal_modifier: CType) {
+        let expected_heal = 3000 + heal_modifier;
         let new_damage = self.limbs[limb as usize].damage
             - i32::min(self.limbs[limb as usize].damage, expected_heal);
         self.set_limb_damage(limb, new_damage);

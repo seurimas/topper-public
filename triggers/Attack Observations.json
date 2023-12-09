@@ -342,24 +342,6 @@
     "observation_name": "Misses"
   },
   {
-    "regex": "^The dart misses",
-    "args": [
-      {
-        "Literal": "you"
-      },
-      {
-        "Literal": ""
-      },
-      {
-        "Literal": ""
-      },
-      {
-        "Literal": ""
-      }
-    ],
-    "observation_name": "Misses"
-  },
-  {
     "regex": "^\\w+ misses by mere inches.$",
     "args": [
       {

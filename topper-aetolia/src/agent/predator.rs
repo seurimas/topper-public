@@ -13,6 +13,7 @@ pub enum Stance {
     Rizet,
     EinFasit,
     Laesan,
+    Bladesurge,
 }
 
 impl Default for Stance {
@@ -29,6 +30,7 @@ impl Stance {
             "Rizet" => Stance::Rizet,
             "Ein-Fasit" => Stance::EinFasit,
             "Laesan" => Stance::Laesan,
+            "Bladesurge" => Stance::Bladesurge,
             _ => Stance::None,
         }
     }
@@ -40,6 +42,7 @@ impl Stance {
             Stance::Rizet => "Rizet",
             Stance::EinFasit => "Ein-Fasit",
             Stance::Laesan => "Laesan",
+            Stance::Bladesurge => "Bladesurge",
             _ => "None",
         }
     }
@@ -53,6 +56,7 @@ pub enum PredatorCompanionState {
     },
     Orgyuk {
         roaring: Option<Timer>,
+        raking: Option<(Timer, u32)>,
     },
     Spider {
         intoxicate_target: Option<String>,
@@ -68,9 +72,15 @@ impl PredatorCompanionState {
                     swooping.wait(time);
                 }
             }
-            PredatorCompanionState::Orgyuk { roaring } => {
+            PredatorCompanionState::Orgyuk { roaring, raking } => {
                 if let Some(roaring) = roaring {
                     roaring.wait(time);
+                }
+                if let Some((raking_timer, _)) = raking {
+                    raking_timer.wait(time);
+                    if !raking_timer.is_active() {
+                        *raking = None;
+                    }
                 }
             }
             PredatorCompanionState::Spider { .. } => {}
@@ -82,8 +92,8 @@ impl PredatorCompanionState {
 pub struct PredatorClassState {
     pub apex: u32,
     pub stance: Stance,
-    pub tidal_charge: u32,
     pub feint_time: CType,
+    pub tidalslash: bool,
     pub companion: Option<PredatorCompanionState>,
 }
 
@@ -140,13 +150,48 @@ impl PredatorClassState {
 
     pub fn get_orgyuk(&mut self) {
         if !self.has_orgyuk() {
-            self.companion = Some(PredatorCompanionState::Orgyuk { roaring: None });
+            self.companion = Some(PredatorCompanionState::Orgyuk {
+                roaring: None,
+                raking: None,
+            });
         }
     }
 
     pub fn has_orgyuk(&self) -> bool {
         if let Some(PredatorCompanionState::Orgyuk { .. }) = self.companion {
             true
+        } else {
+            false
+        }
+    }
+
+    pub fn rake_start(&mut self, target: String, rake_count: u32) {
+        self.get_orgyuk();
+        if let Some(PredatorCompanionState::Orgyuk { raking, .. }) = &mut self.companion {
+            *raking = Some((Timer::count_up_observe_seconds(2., 3.), 1));
+        }
+    }
+
+    pub fn rake(&mut self) {
+        if let Some(PredatorCompanionState::Orgyuk { raking, .. }) = &mut self.companion {
+            if let Some((raking_timer, rake_count)) = raking {
+                *rake_count += 1;
+                if *rake_count == 4 {
+                    *raking = None;
+                } else {
+                    raking_timer.reset();
+                }
+            }
+        }
+    }
+
+    pub fn is_raking(&self) -> bool {
+        if let Some(PredatorCompanionState::Orgyuk { raking, .. }) = &self.companion {
+            if let Some((raking_timer, _)) = raking {
+                raking_timer.is_active()
+            } else {
+                false
+            }
         } else {
             false
         }
@@ -168,11 +213,20 @@ impl PredatorClassState {
             false
         }
     }
+
+    pub fn tidalslash_full(&mut self) {
+        self.tidalslash = true;
+    }
+
+    pub fn use_tidalslash(&mut self) {
+        self.tidalslash = false;
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PredatorBoard {
     pub fleshbane: Timer,
+    pub fleshbane_count: u32,
     pub bloodscourge: Timer,
     pub veinrip: Timer,
     pub acid: Timer,
@@ -182,7 +236,8 @@ pub struct PredatorBoard {
 impl Default for PredatorBoard {
     fn default() -> Self {
         let mut default = PredatorBoard {
-            fleshbane: Timer::count_up_seconds(20.),
+            fleshbane: Timer::count_up_observe_seconds(60., 65.),
+            fleshbane_count: 0,
             bloodscourge: Timer::count_up_observe_seconds(4., 7.),
             veinrip: Timer::count_up_observe_seconds(14., 20.),
             acid: Timer::count_up_seconds(10.),
@@ -200,6 +255,9 @@ impl Default for PredatorBoard {
 impl PredatorBoard {
     pub fn wait(&mut self, time: CType) {
         self.fleshbane.wait(time);
+        if !self.fleshbane.is_active() {
+            self.fleshbane_count = 0;
+        }
         self.bloodscourge.wait(time);
         self.veinrip.wait(time);
         self.acid.wait(time);
@@ -208,6 +266,11 @@ impl PredatorBoard {
 
     pub fn fleshbaned(&mut self) {
         self.fleshbane.reset();
+    }
+
+    pub fn fleshbane_triggered(&mut self) {
+        // Timer NOT reset.
+        self.fleshbane_count = 0;
     }
 
     pub fn fleshbane_end(&mut self) {

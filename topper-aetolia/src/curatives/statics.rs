@@ -313,11 +313,11 @@ lazy_static! {
     pub static ref PANACEA_ORDER: Vec<FType> = vec![
         FType::Stormtouched,
         FType::Patterns,
-        FType::ShaderotBody,
-        FType::ShaderotWither,
-        FType::ShaderotHeat,
-        FType::ShaderotSpirit,
-        FType::ShaderotBenign,
+        FType::RotBody,
+        FType::RotWither,
+        FType::RotHeat,
+        FType::RotSpirit,
+        FType::RotBenign,
     ];
 }
 

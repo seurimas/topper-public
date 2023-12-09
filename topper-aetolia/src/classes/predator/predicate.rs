@@ -16,6 +16,9 @@ pub enum PredatorPredicate {
     Veinripped,
     Intoxicating(AetTarget),
     ApexAtLeast(u32),
+    HasOrgyuk,
+    HasSpider,
+    HasOrel,
 }
 
 impl TargetPredicate for PredatorPredicate {
@@ -36,7 +39,7 @@ impl TargetPredicate for PredatorPredicate {
                 PredatorPredicate::Fleshbaned => target.predator_board.fleshbane.is_active(),
                 PredatorPredicate::Bloodscourged => target.predator_board.bloodscourge.is_active(),
                 PredatorPredicate::TidalslashReady => target
-                    .check_if_predator(&|predator| predator.tidal_charge == 2)
+                    .check_if_predator(&|predator| predator.tidalslash)
                     .unwrap_or(false),
                 PredatorPredicate::Veinripped => target.predator_board.veinrip.is_active(),
                 PredatorPredicate::Intoxicating(other_target) => {
@@ -50,6 +53,15 @@ impl TargetPredicate for PredatorPredicate {
                 }
                 PredatorPredicate::ApexAtLeast(apex) => target
                     .check_if_predator(&|predator| predator.apex >= *apex)
+                    .unwrap_or(false),
+                PredatorPredicate::HasOrgyuk => target
+                    .check_if_predator(&|predator| predator.has_orgyuk())
+                    .unwrap_or(false),
+                PredatorPredicate::HasSpider => target
+                    .check_if_predator(&|predator| predator.has_spider())
+                    .unwrap_or(false),
+                PredatorPredicate::HasOrel => target
+                    .check_if_predator(&|predator| predator.has_orel())
                     .unwrap_or(false),
             }
         } else {

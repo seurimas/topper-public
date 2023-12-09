@@ -101,6 +101,7 @@ impl SeriesAttack {
         base_attacks: Vec<ComboAttack>,
         target: String,
         venom: &'static str,
+        preferred_limbs: &Vec<LType>,
     ) -> Self {
         let mut valid_feints = vec![
             LType::TorsoDamage,
@@ -118,8 +119,24 @@ impl SeriesAttack {
             })
         });
         let attacks = base_attacks.iter().map(|base| match base {
-            ComboAttack::Jab => ParamComboAttack::Jab(LType::HeadDamage),
-            ComboAttack::Lowhook => ParamComboAttack::Lowhook(LType::HeadDamage),
+            ComboAttack::Jab => {
+                ParamComboAttack::Jab(if preferred_limbs.contains(&LType::LeftArmDamage) {
+                    LType::LeftArmDamage
+                } else if preferred_limbs.contains(&LType::RightArmDamage) {
+                    LType::RightArmDamage
+                } else {
+                    LType::SIZE
+                })
+            }
+            ComboAttack::Lowhook => {
+                ParamComboAttack::Lowhook(if preferred_limbs.contains(&LType::LeftLegDamage) {
+                    LType::LeftLegDamage
+                } else if preferred_limbs.contains(&LType::RightLegDamage) {
+                    LType::RightLegDamage
+                } else {
+                    LType::SIZE
+                })
+            }
             ComboAttack::Feint => ParamComboAttack::Feint(valid_feints[0]),
             ComboAttack::Bleed => ParamComboAttack::Bleed,
             ComboAttack::Gouge => ParamComboAttack::Gouge,
@@ -360,5 +377,152 @@ impl ActiveTransition for TwinshotAction {
                 self.target, self.venom_0, self.venom_1
             ))
         }
+    }
+}
+
+// ==================
+// Orgyuk
+// ==================
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct RakeAction {
+    pub target: String,
+}
+
+impl RakeAction {
+    pub fn new(target: String) -> Self {
+        Self { target }
+    }
+}
+
+impl ActiveTransition for RakeAction {
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("orgyuk rake {}", self.target))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct SwipeAction {
+    pub target: String,
+}
+
+impl SwipeAction {
+    pub fn new(target: String) -> Self {
+        Self { target }
+    }
+}
+
+impl ActiveTransition for SwipeAction {
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("orgyuk swipe {}", self.target))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ThrowAction {
+    pub target: String,
+}
+
+impl ThrowAction {
+    pub fn new(target: String) -> Self {
+        Self { target }
+    }
+}
+
+impl ActiveTransition for ThrowAction {
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("orgyuk throw {}", self.target))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct RoarAction;
+
+impl RoarAction {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl ActiveTransition for RoarAction {
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("orgyuk roar"))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct WeakenAction {
+    pub target: String,
+}
+
+impl WeakenAction {
+    pub fn new(target: String) -> Self {
+        Self { target }
+    }
+}
+
+impl ActiveTransition for WeakenAction {
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("orgyuk weaken {}", self.target))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct MawcrushAction {
+    pub target: String,
+}
+
+impl MawcrushAction {
+    pub fn new(target: String) -> Self {
+        Self { target }
+    }
+}
+
+impl ActiveTransition for MawcrushAction {
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("orgyuk mawcrush {}", self.target))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct PummelAction {
+    pub target: String,
+    pub limb: LType,
+}
+
+impl PummelAction {
+    pub fn new(target: String, limb: LType) -> Self {
+        Self { target, limb }
+    }
+}
+
+impl ActiveTransition for PummelAction {
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!(
+            "orgyuk pummel {} {}",
+            self.target,
+            self.limb.to_string()
+        ))
     }
 }

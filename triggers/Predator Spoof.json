@@ -21,6 +21,69 @@
     "observation_name": "Proc"
   },
   {
+    "regex": "^(\\w+)'s wounds cease to weep foul looking fluids.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Knifeplay"
+      },
+      {
+        "Literal": "Fleshbaned"
+      },
+      {
+        "Literal": "end"
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
+    "regex": "^The (.*) slices on (\\w+) fester, interfering with the restoration of .* limbs.$",
+    "args": [
+      {
+        "GroupAsTarget": 2
+      },
+      {
+        "Literal": "Knifeplay"
+      },
+      {
+        "Literal": "Fleshbaned"
+      },
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
+    "regex": "^A pitched hum emanates from (you)r sitara, and you feel that it has reached its peak absorption of magical energies.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Knifeplay"
+      },
+      {
+        "Literal": "Tidalslash"
+      },
+      {
+        "Literal": "full"
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
     "regex": "^Your precision strike causes (\\w+) in (\\w+).",
     "args": [
       {
@@ -126,10 +189,10 @@
     "observation_name": "Proc"
   },
   {
-    "regex": "^(.*) scurries in and looks up at (\\w+) expectantly.$",
+    "regex": "^(.*) (trots|scurries) in and looks up at (\\w+) expectantly.$",
     "args": [
       {
-        "GroupAsTarget": 2
+        "GroupAsTarget": 3
       },
       {
         "Literal": "Beastmastery"

@@ -390,12 +390,12 @@ pub enum FType {
     // Panacea
     Stormtouched,
     Patterns,
-    Shaderot,
-    ShaderotBenign,
-    ShaderotSpirit,
-    ShaderotHeat,
-    ShaderotWither,
-    ShaderotBody,
+    Rot,
+    RotBenign,
+    RotSpirit,
+    RotHeat,
+    RotWither,
+    RotBody,
 
     // Reishi
     Besilence,
@@ -624,8 +624,14 @@ impl FType {
                 }
             })
             .collect::<String>();
-        let result: Option<FType> = pretty.parse::<FType>().ok().map(|aff| aff.normalize());
-        result
+        match pretty.as_ref() {
+            "Inoculated" => Some(FType::Imbued),
+            "FungalInvasion" => Some(FType::Impeded),
+            "Preymark" => Some(FType::Shadowbrand),
+            "WoeCurse" => Some(FType::Shadowsphere),
+            "Mystified" => Some(FType::Voidtrapped),
+            _ => pretty.parse::<FType>().ok().map(|aff| aff.normalize()),
+        }
     }
 
     pub fn to_name(&self) -> String {

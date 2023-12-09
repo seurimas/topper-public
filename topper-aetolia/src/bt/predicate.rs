@@ -75,6 +75,7 @@ pub enum AetPredicate {
     HasTree(AetTarget),
     HasFocus(AetTarget),
     HasFitness(AetTarget),
+    HasClassCure(AetTarget),
     BardPredicate(AetTarget, BardPredicate),
     PredatorPredicate(AetTarget, PredatorPredicate),
 }
@@ -325,6 +326,14 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::HasFitness(target) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.get_balance(BType::Fitness) < QUEUE_TIME {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::HasClassCure(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.get_balance(BType::ClassCure1) < QUEUE_TIME {
                         return UnpoweredFunctionState::Complete;
                     }
                 }

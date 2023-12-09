@@ -1,4 +1,5 @@
 use crate::classes::remove_through;
+use crate::curatives::RANDOM_CURES;
 use crate::timeline::*;
 use crate::types::*;
 
@@ -10,6 +11,12 @@ lazy_static! {
         FType::Speed,
     ];
 }
+
+pub const PUMMEL_DAMAGE: f32 = 20.0;
+pub const LATERAL_DAMAGE: f32 = 6.0;
+pub const LOWHOOK_DAMAGE: f32 = 5.5;
+pub const JAB_DAMAGE: f32 = 5.5;
+pub const SPINSLASH_DAMAGE: f32 = 4.0;
 
 pub fn handle_combat_action(
     combat_action: &CombatAction,
@@ -53,6 +60,38 @@ pub fn handle_combat_action(
                 &hints,
             );
         }
+        "Fleshbaned" => {
+            if combat_action.annotation.eq_ignore_ascii_case("end") {
+                for_agent(agent_states, &combat_action.target, &|me| {
+                    me.predator_board.fleshbane_end();
+                });
+            } else {
+                let count = match combat_action.annotation.as_str() {
+                    "one" => 1,
+                    "two" => 2,
+                    "three" => 3,
+                    "four" => 4,
+                    "five" => 5,
+                    "six" => 6,
+                    "seven" => 7,
+                    "eight" => 8,
+                    "nine" => 9,
+                    "ten" => 10,
+                    "eleven" => 11,
+                    "twelve" => 12,
+                    "thirteen" => 13,
+                    "fourteen" => 14,
+                    "fifteen" => 15,
+                    // Can we get more than 15? Sure.
+                    // Will we? Probably not.
+                    _ => 15,
+                };
+                for_agent(agent_states, &combat_action.target, &|me| {
+                    me.limb_damage.fleshbaned_count = count;
+                    me.predator_board.fleshbane_triggered();
+                });
+            }
+        }
         "Bloodscourged" => {
             let venom = combat_action.annotation.clone();
             for_agent(agent_states, &combat_action.caster, &|me| {
@@ -75,12 +114,21 @@ pub fn handle_combat_action(
             });
         }
         // Knifeplay combo attacks.
-        "Jab" | "Lowhook" => {
+        "Jab" => {
             let limb = LType::from_name(&combat_action.annotation);
             attack_limb_damage(
                 agent_states,
                 &combat_action.target,
-                (limb, 5.5, true),
+                (limb, JAB_DAMAGE, true),
+                after,
+            );
+        }
+        "Lowhook" => {
+            let limb = LType::from_name(&combat_action.annotation);
+            attack_limb_damage(
+                agent_states,
+                &combat_action.target,
+                (limb, LOWHOOK_DAMAGE, true),
                 after,
             );
         }
@@ -89,7 +137,7 @@ pub fn handle_combat_action(
             attack_limb_damage(
                 agent_states,
                 &combat_action.target,
-                (limb, 4.0, true),
+                (limb, SPINSLASH_DAMAGE, true),
                 after,
             );
         }
@@ -105,7 +153,7 @@ pub fn handle_combat_action(
             attack_limb_damage(
                 agent_states,
                 &combat_action.target,
-                (LType::TorsoDamage, 6.0, true),
+                (LType::TorsoDamage, LATERAL_DAMAGE, true),
                 after,
             );
         }
@@ -199,6 +247,21 @@ pub fn handle_combat_action(
                 after,
             );
         }
+        "Tidalslash" => {
+            if combat_action.annotation.eq_ignore_ascii_case("full") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_predator(&|class| {
+                        class.tidalslash_full();
+                    });
+                });
+            } else {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_predator(&|class| {
+                        class.use_tidalslash();
+                    });
+                });
+            }
+        }
         // Predation attacks
         "Dartshot" | "Twinshot" => {
             apply_weapon_hits(
@@ -243,6 +306,23 @@ pub fn handle_combat_action(
                 after,
             );
         }
+        "Ferocity" => {
+            let observations = after.clone();
+            let perspective = agent_states.get_perspective(&combat_action);
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &move |me: &mut AgentState| {
+                    apply_or_strike_random_cure(
+                        me,
+                        &observations,
+                        perspective,
+                        (1, RANDOM_CURES.to_vec()),
+                    );
+                    apply_or_infer_balance(me, (BType::ClassCure1, 20.0), &observations);
+                },
+            );
+        }
         // Beastmastery
         "Beastcalled" => {
             let beast = combat_action.annotation.clone();
@@ -273,6 +353,15 @@ pub fn handle_combat_action(
                     class_state.intoxicate(target.clone());
                 });
             });
+        }
+        "Pummel" => {
+            let limb = LType::from_name(&combat_action.annotation);
+            attack_limb_damage(
+                agent_states,
+                &combat_action.target,
+                (limb, PUMMEL_DAMAGE, true),
+                after,
+            );
         }
         _ => {}
     }

@@ -40,7 +40,7 @@ impl BaseAgentState for AgentState {
         self.pipe_state.wait(duration);
         self.bard_board.wait(duration);
         self.predator_board.wait(duration);
-        if let Some((cured_limb, regenerating, first_person)) = self.limb_damage.wait(duration) {
+        if let Some((cured_limb, heal_modifier, first_person)) = self.limb_damage.wait(duration) {
             if !first_person {
                 match self.get_restore_cure(cured_limb) {
                     Some(FType::LeftArmBroken)
@@ -59,13 +59,13 @@ impl BaseAgentState for AgentState {
                     | Some(FType::TorsoMangled)
                     | Some(FType::HeadBroken)
                     | Some(FType::HeadMangled) => {
-                        self.limb_damage.restore(cured_limb, regenerating);
+                        self.limb_damage.restore(cured_limb, heal_modifier);
                     }
                     Some(aff) => {
                         self.set_flag(aff, false);
                     }
                     _ => {
-                        self.limb_damage.restore(cured_limb, regenerating);
+                        self.limb_damage.restore(cured_limb, heal_modifier);
                     }
                 }
             }

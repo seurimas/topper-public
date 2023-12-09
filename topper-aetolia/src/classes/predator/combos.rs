@@ -114,6 +114,34 @@ impl ComboAttack {
         }
     }
 
+    pub fn can_hit(&self, limb: LType) -> bool {
+        if Some(limb) == self.get_single_limb_target() {
+            true
+        } else {
+            match (self, limb) {
+                (ComboAttack::Jab, LType::LeftArmDamage) => true,
+                (ComboAttack::Jab, LType::RightArmDamage) => true,
+                (ComboAttack::Lowhook, LType::LeftArmDamage) => true,
+                (ComboAttack::Lowhook, LType::RightArmDamage) => true,
+                (ComboAttack::Spinslash, _) => true,
+                _ => false,
+            }
+        }
+    }
+
+    pub fn get_limb_damage(&self) -> CType {
+        match self {
+            ComboAttack::Lateral => 600,
+            ComboAttack::Flashkick => 500,
+            ComboAttack::Veinrip => 200,
+            ComboAttack::Gouge => 650,
+            ComboAttack::Lowhook => 550,
+            ComboAttack::Jab => 550,
+            ComboAttack::Spinslash => 400,
+            _ => 0,
+        }
+    }
+
     pub fn can_drop_parry(&self) -> bool {
         if self == &ComboAttack::Feint {
             true
@@ -148,7 +176,7 @@ impl ComboAttack {
     }
 
     pub fn is_good_combo_attack(&self, stance: Stance) -> bool {
-        if *self == ComboAttack::Raze {
+        if *self == ComboAttack::Raze || stance == Stance::Bladesurge {
             return true;
         }
         !self.is_combo_attack() || self.get_next_stance(stance) != stance
@@ -196,7 +224,7 @@ impl ComboAttack {
         };
         if !self.is_good_combo_attack(stance) {
             base + 40
-        } else if stance == Stance::Laesan {
+        } else if stance == Stance::Laesan || stance == Stance::Bladesurge {
             base - 40
         } else {
             base
@@ -205,6 +233,8 @@ impl ComboAttack {
 
     pub fn get_next_stance(&self, stance: Stance) -> Stance {
         match (self, stance) {
+            // Bladesurge stays in bladesurge.
+            (_, Stance::Bladesurge) => Stance::Bladesurge,
             // Non knifeplay attacks.
             (ComboAttack::Tidalslash, _) => stance,
             (ComboAttack::Freefall, _) => stance,
@@ -325,20 +355,6 @@ impl ComboAttack {
             (ComboAttack::Swiftkick, Stance::Laesan) => Stance::Rizet,
         }
     }
-
-    pub fn get_attacks_to_stance(
-        &self,
-        current_stance: Stance,
-        target_stance: Stance,
-    ) -> Vec<Self> {
-        let mut attacks = vec![];
-        for attack in ComboAttack::iter() {
-            if attack.get_next_stance(current_stance) == target_stance {
-                attacks.push(attack);
-            }
-        }
-        attacks
-    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -382,6 +398,12 @@ impl PredatorCombo {
             .iter()
             .fold(0, |affs, attack| affs + attack.get_aff_count());
         affs as f32 / balance as f32
+    }
+
+    pub fn score_combo(&self, graders: &Vec<ComboGrader>) -> i32 {
+        graders
+            .iter()
+            .fold(0, |score, grader| score + grader.grade(self))
     }
 }
 
@@ -554,15 +576,81 @@ pub enum ComboPredicate {
     EndsInStance(Stance),
     MinimumAttacks(usize),
     MaxBalanceTime(CType),
+    ScoreOver(i32),
 }
 
 impl ComboPredicate {
-    pub fn matches(&self, combo: &PredatorCombo) -> bool {
+    pub fn matches(&self, combo: &PredatorCombo, score: Option<i32>) -> bool {
         match self {
             ComboPredicate::WithAttack(attack) => combo.get_attacks().contains(attack),
-            ComboPredicate::EndsInStance(stance) => combo.get_final_stance() == *stance,
+            ComboPredicate::EndsInStance(stance) => {
+                combo.0 == Stance::Bladesurge || combo.get_final_stance() == *stance
+            }
             ComboPredicate::MinimumAttacks(minimum) => combo.get_attacks().len() >= *minimum,
             ComboPredicate::MaxBalanceTime(max_balance) => combo.get_balance_time() <= *max_balance,
+            ComboPredicate::ScoreOver(min_score) => {
+                if let Some(score) = score {
+                    score >= *min_score
+                } else {
+                    false
+                }
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, Hash, PartialEq, Serialize, Deserialize)]
+pub enum ComboGrader {
+    Hits(LType, i32),
+    ValueMove(ComboAttack, i32),
+    ValueMoveInStance(ComboAttack, Stance, i32),
+    HasVenom(i32),
+}
+
+impl ComboGrader {
+    pub fn grade(&self, combo: &PredatorCombo) -> i32 {
+        match self {
+            ComboGrader::Hits(limb, value) => {
+                let mut total_value = 0;
+                for attack in combo.get_attacks().iter() {
+                    if attack.can_hit(*limb) {
+                        total_value += *value;
+                    }
+                }
+                total_value
+            }
+            ComboGrader::ValueMove(attack, value) => {
+                if combo.get_attacks().contains(attack) {
+                    *value
+                } else {
+                    0
+                }
+            }
+            ComboGrader::ValueMoveInStance(attack, stance, value) => {
+                combo
+                    .get_attacks()
+                    .iter()
+                    .fold((combo.0, 0), |(current_stance, total), combo_attack| {
+                        if combo_attack == attack {
+                            if combo.0 == *stance {
+                                (combo_attack.get_next_stance(current_stance), total + *value)
+                            } else {
+                                (combo_attack.get_next_stance(current_stance), total)
+                            }
+                        } else {
+                            (combo_attack.get_next_stance(current_stance), total)
+                        }
+                    })
+                    .1
+            }
+            ComboGrader::HasVenom(value) => {
+                for attack in combo.get_attacks().iter() {
+                    if attack.can_use_venom() {
+                        return *value;
+                    }
+                }
+                return 0;
+            }
         }
     }
 }
@@ -578,7 +666,7 @@ impl ComboSet {
         for combo in self.0.iter() {
             let mut valid = true;
             for predicate in predicates.iter() {
-                if !predicate.matches(combo) {
+                if !predicate.matches(combo, None) {
                     valid = false;
                     break;
                 }
@@ -603,7 +691,7 @@ impl ComboSet {
         for combo in self.0.iter() {
             let mut valid = true;
             for predicate in predicates.iter() {
-                if !predicate.matches(combo) {
+                if !predicate.matches(combo, None) {
                     valid = false;
                     break;
                 }
@@ -612,6 +700,33 @@ impl ComboSet {
                 let aff_rate = combo.estimate_aff_rate();
                 if aff_rate > highest_aff_rate {
                     highest_aff_rate = aff_rate;
+                    highest_combo = Some(combo);
+                }
+            }
+        }
+        highest_combo.cloned()
+    }
+
+    pub fn get_highest_scored_combo(
+        &self,
+        predicates: &Vec<ComboPredicate>,
+        graders: &Vec<ComboGrader>,
+    ) -> Option<PredatorCombo> {
+        let mut highest_combo = None;
+        let mut highest_score = 0.0;
+        for combo in self.0.iter() {
+            let mut valid = true;
+            let score = combo.score_combo(graders);
+            for predicate in predicates.iter() {
+                if !predicate.matches(combo, Some(score)) {
+                    valid = false;
+                    break;
+                }
+            }
+            if valid {
+                let balance_score = score as f32 / (combo.get_balance_time() as f32);
+                if balance_score > highest_score {
+                    highest_score = balance_score;
                     highest_combo = Some(combo);
                 }
             }
