@@ -28,6 +28,7 @@ pub struct AgentState {
     pub bard_board: BardBoard,
     pub predator_board: PredatorBoard,
     pub room_id: i64,
+    pub elevation: Elevation,
 }
 
 impl BaseAgentState for AgentState {
@@ -84,6 +85,9 @@ impl BaseAgentState for AgentState {
         }
         if self.is(FType::Manabarbs) && self.balanced(BType::Manabarbs) {
             self.set_flag(FType::Manabarbs, false);
+        }
+        if self.is(FType::WritheDartpinned) && self.balanced(BType::WritheDartpinned) {
+            self.set_flag(FType::WritheDartpinned, false);
         }
         if self.is(FType::SelfLoathing) {
             let observed = self.get_count(FType::SelfLoathing);
@@ -206,6 +210,10 @@ impl AgentState {
             // We've observed this is true, so no need to guess!
             self.hidden_state.unhide(flag);
         }
+        match flag {
+            FType::TorsoBroken => self.limb_damage.set_limb_broken(LType::TorsoDamage, false),
+            _ => {}
+        }
         self.set_flag(flag, value);
     }
 
@@ -305,6 +313,9 @@ impl AgentState {
         }
         if value && flag == FType::Pacifism {
             self.set_balance(BType::Pacifism, 1.5);
+        }
+        if value && flag == FType::WritheDartpinned {
+            self.set_balance(BType::WritheDartpinned, 3.0);
         }
         match flag {
             FType::Zenith => {
@@ -413,9 +424,9 @@ impl AgentState {
         self.stats[stat as usize]
     }
 
-    pub fn set_limb_damage(&mut self, limb: LType, value: CType) {
+    pub fn set_limb_damage(&mut self, limb: LType, value: CType, assume_break: bool) {
         let old_value = self.limb_damage.limbs[limb as usize].damage;
-        self.limb_damage.set_limb_damage(limb, value);
+        self.limb_damage.set_limb_damage(limb, value, assume_break);
     }
 
     pub fn get_limbs_state(&self) -> LimbsState {
@@ -632,7 +643,32 @@ impl AgentState {
             FType::WritheHoist,
             FType::WritheGrappled,
             FType::WritheStasis,
-        ]) == 0
+        ]) > 0
+    }
+
+    pub fn observe_not_prone(&mut self) {
+        if self.is_prone() {
+            println!("Not actually prone!");
+            self.observe_flag(FType::Fallen, false);
+            self.observe_flag(FType::Indifference, false);
+            self.observe_flag(FType::Asleep, false);
+            self.observe_flag(FType::Stun, false);
+            // No writhes!
+            self.observe_flag(FType::WritheImpaled, false);
+            self.observe_flag(FType::WritheArmpitlock, false);
+            self.observe_flag(FType::WritheNecklock, false);
+            self.observe_flag(FType::WritheThighlock, false);
+            self.observe_flag(FType::WritheTransfix, false);
+            self.observe_flag(FType::WritheBind, false);
+            self.observe_flag(FType::WritheGunk, false);
+            self.observe_flag(FType::WritheRopes, false);
+            self.observe_flag(FType::WritheVines, false);
+            self.observe_flag(FType::WritheWeb, false);
+            self.observe_flag(FType::WritheDartpinned, false);
+            self.observe_flag(FType::WritheHoist, false);
+            self.observe_flag(FType::WritheGrappled, false);
+            self.observe_flag(FType::WritheStasis, false);
+        }
     }
 
     pub fn stuck_fallen(&self) -> bool {

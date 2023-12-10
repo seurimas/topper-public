@@ -353,9 +353,11 @@ pub fn handle_combat_action(
     }
     if !combat_action.target.is_empty() && !combat_action.caster.eq(&combat_action.target) {
         let my_room = agent_states.borrow_me().room_id;
+        let my_elevation = agent_states.borrow_me().elevation;
         for_agent(agent_states, &combat_action.target, &|me| {
             me.register_hit(Some(&combat_action.caster));
             me.room_id = my_room;
+            me.elevation = my_elevation;
             if me.is(FType::Pacifism) && me.balanced(BType::Pacifism) {
                 me.toggle_flag(FType::Pacifism, false);
             }

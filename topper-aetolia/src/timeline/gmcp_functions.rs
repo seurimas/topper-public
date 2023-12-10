@@ -30,6 +30,25 @@ fn handle_char_vitals(
     gmcp: &serde_json::Value,
     timeline: &mut TimelineState<crate::types::AgentState, crate::non_agent::AetNonAgent>,
 ) {
+    if let Some(elevation) = gmcp
+        .get("elevation")
+        .and_then(|elevation| elevation.as_str())
+    {
+        let elevation = match elevation {
+            "ground" => Elevation::Ground,
+            "flying" => Elevation::Flying,
+            "trees" => Elevation::Trees,
+            "roofs" => Elevation::Roof,
+            _ => Elevation::Ground,
+        };
+        for_agent(
+            timeline,
+            &timeline.me.clone(),
+            &move |me: &mut AgentState| {
+                me.elevation = elevation;
+            },
+        );
+    }
     if let (Some(left), Some(right)) = (
         gmcp.get("wield_left").and_then(|left| left.as_str()),
         gmcp.get("wield_right").and_then(|left| left.as_str()),

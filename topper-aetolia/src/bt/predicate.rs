@@ -57,28 +57,43 @@ impl AetTarget {
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum AetPredicate {
+    // Affs
     AllAffs(AetTarget, Vec<FType>),
     SomeAffs(AetTarget, Vec<FType>),
     NoAffs(AetTarget, Vec<FType>),
     AffCountOver(AetTarget, usize, Vec<FType>),
     AffCountUnder(AetTarget, usize, Vec<FType>),
+    // Limbs
+    CanBreak(AetTarget, LimbDescriptor, f32),
+    CanMangled(AetTarget, LimbDescriptor, f32),
+    // Priorities
     PriorityAffIs(AetTarget, FType),
+    // Buffer/locks
     CannotCure(AetTarget, FType),
     Buffered(AetTarget, FType),
     Locked(AetTarget, bool),
     NearLocked(AetTarget, LockType, usize),
+    // Timing
     ReboundingWindow(AetTarget, CType),
+    // Hints
     LimbHintIs(String, LType),
     HintSet(String, String),
+    // Balances
     HasBalanceEquilibrium(AetTarget),
     HasBalance(AetTarget),
     HasEquilibrium(AetTarget),
-    KnownParry(AetTarget, LimbDescriptor),
-    CanParry(AetTarget),
     HasTree(AetTarget),
     HasFocus(AetTarget),
     HasFitness(AetTarget),
     HasClassCure(AetTarget),
+    // Elevation
+    IsGrounded(AetTarget),
+    IsFlying(AetTarget),
+    IsClimbing(AetTarget),
+    // Parries
+    KnownParry(AetTarget, LimbDescriptor),
+    CanParry(AetTarget),
+    // Class-specific
     BardPredicate(AetTarget, BardPredicate),
     PredatorPredicate(AetTarget, PredatorPredicate),
 }
@@ -223,6 +238,26 @@ impl UnpoweredFunction for AetPredicate {
                 } else {
                     UnpoweredFunctionState::Failed
                 }
+            }
+            AetPredicate::CanBreak(target, limb_descriptor, damage) => {
+                if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
+                    if let Some(target) = target.get_target(model, controller) {
+                        if target.get_limb_state(limb).hits_to_break(*damage) == 1 {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::CanMangled(target, limb_descriptor, damage) => {
+                if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
+                    if let Some(target) = target.get_target(model, controller) {
+                        if target.get_limb_state(limb).hits_to_mangle(*damage) == 1 {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
             }
             AetPredicate::Locked(target, hard_only) => {
                 if let Some(target) = target.get_target(model, controller) {
@@ -390,6 +425,39 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::HintSet(hint, value) => {
                 if let Some(hint) = controller.get_hint(hint) {
                     if hint.eq_ignore_ascii_case(value) {
+                        UnpoweredFunctionState::Complete
+                    } else {
+                        UnpoweredFunctionState::Failed
+                    }
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetPredicate::IsGrounded(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.elevation == Elevation::Ground {
+                        UnpoweredFunctionState::Complete
+                    } else {
+                        UnpoweredFunctionState::Failed
+                    }
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetPredicate::IsFlying(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.elevation == Elevation::Flying {
+                        UnpoweredFunctionState::Complete
+                    } else {
+                        UnpoweredFunctionState::Failed
+                    }
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetPredicate::IsClimbing(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.elevation == Elevation::Trees || target.elevation == Elevation::Roof {
                         UnpoweredFunctionState::Complete
                     } else {
                         UnpoweredFunctionState::Failed

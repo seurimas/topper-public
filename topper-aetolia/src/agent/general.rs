@@ -181,6 +181,9 @@ pub enum BType {
     Manabarbs,
     Pacifism,
 
+    // Writhe
+    WritheDartpinned,
+
     UNKNOWN,
     SIZE,
 }
@@ -1253,5 +1256,19 @@ impl TimedFlagState {
 
     pub fn deactivate(&mut self) {
         *self = TimedFlagState::Inactive;
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Elevation {
+    Ground,
+    Flying,
+    Trees,
+    Roof,
+}
+
+impl Default for Elevation {
+    fn default() -> Self {
+        Elevation::Ground
     }
 }

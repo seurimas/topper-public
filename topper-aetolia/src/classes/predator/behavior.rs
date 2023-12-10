@@ -15,6 +15,8 @@ use super::*;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum PredatorBehavior {
+    // Class cure.
+    Ferocity,
     // Combo attacks
     FastestCombo(AetTarget, Vec<ComboPredicate>, Vec<LimbDescriptor>),
     AffRateCombo(AetTarget, Vec<ComboPredicate>, Vec<LimbDescriptor>),
@@ -24,6 +26,7 @@ pub enum PredatorBehavior {
         Vec<ComboGrader>,
         Vec<LimbDescriptor>,
     ),
+    AddGraders(Vec<ComboGrader>),
     AddComboAttacks(Vec<ComboAttack>),
     AllowParries(bool),
     CalculateCombos(AetTarget),
@@ -58,6 +61,15 @@ impl UnpoweredFunction for PredatorBehavior {
         controller: &mut Self::Controller,
     ) -> UnpoweredFunctionState {
         match self {
+            PredatorBehavior::Ferocity => {
+                let me = model.state.borrow_me();
+                if me.balanced(BType::ClassCure1) {
+                    controller.plan.add_to_qeb(Box::new(FerocityAction::new()));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
             PredatorBehavior::ResetComboAttacks => {
                 controller.predator_combo_store = Default::default();
                 controller.predator_combos.clear();
@@ -71,6 +83,12 @@ impl UnpoweredFunction for PredatorBehavior {
                 controller
                     .predator_combo_store
                     .set_allow_parries(*allow_parries);
+                UnpoweredFunctionState::Complete
+            }
+            PredatorBehavior::AddGraders(graders) => {
+                controller
+                    .predator_base_graders
+                    .extend(graders.iter().cloned());
                 UnpoweredFunctionState::Complete
             }
             PredatorBehavior::FastestCombo(target, predicates, preferred_limbs) => {
@@ -98,9 +116,11 @@ impl UnpoweredFunction for PredatorBehavior {
                 use_combo(model, controller, target, best_combo, preferred_limbs)
             }
             PredatorBehavior::GradedCombo(target, predicates, graders, preferred_limbs) => {
-                let best_combo = controller
-                    .predator_combos
-                    .get_highest_scored_combo(&predicates, &graders);
+                let best_combo = controller.predator_combos.get_highest_scored_combo(
+                    &predicates,
+                    &controller.predator_base_graders,
+                    &graders,
+                );
                 unsafe {
                     if DEBUG_TREES {
                         println!("Solver: {:?}", controller.predator_combo_store);

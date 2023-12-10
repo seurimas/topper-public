@@ -349,6 +349,20 @@ pub fn handle_combat_action(
                 },
             );
         }
+        "Pindown" => {
+            if combat_action.annotation.eq_ignore_ascii_case("fail") {
+                for_agent(agent_states, &combat_action.target, &|me| {
+                    me.observe_not_prone();
+                });
+            } else {
+                attack_afflictions(
+                    agent_states,
+                    &combat_action.target,
+                    vec![FType::WritheDartpinned],
+                    after,
+                );
+            }
+        }
         // Beastmastery
         "Beastcalled" => {
             let beast = combat_action.annotation.clone();
@@ -388,6 +402,13 @@ pub fn handle_combat_action(
                 (limb, PUMMEL_DAMAGE, true),
                 after,
             );
+        }
+        "Mawrcrush" => {
+            if combat_action.annotation.eq_ignore_ascii_case("fail") {
+                for_agent(agent_states, &combat_action.target, &|me| {
+                    me.observe_flag(FType::TorsoBroken, false);
+                });
+            }
         }
         _ => {}
     }

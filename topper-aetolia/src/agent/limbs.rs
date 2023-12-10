@@ -99,22 +99,22 @@ pub fn get_damage_limb(what: LType) -> Result<String, String> {
 
 pub fn get_damage_barrier(aff: &String) -> Result<(LType, CType), String> {
     match aff.as_ref() {
-        "head_mangled" => Ok((LType::HeadDamage, 666)),
-        "head_damaged" => Ok((LType::HeadDamage, 333)),
-        "torso_mangled" => Ok((LType::TorsoDamage, 666)),
-        "torso_damaged" => Ok((LType::TorsoDamage, 333)),
-        "left_arm_mangled" => Ok((LType::LeftArmDamage, 666)),
-        "left_arm_damaged" => Ok((LType::LeftArmDamage, 333)),
-        "right_arm_mangled" => Ok((LType::RightArmDamage, 666)),
-        "right_arm_damaged" => Ok((LType::RightArmDamage, 333)),
-        "left_leg_mangled" => Ok((LType::LeftLegDamage, 666)),
-        "left_leg_damaged" => Ok((LType::LeftLegDamage, 333)),
-        "right_leg_mangled" => Ok((LType::RightLegDamage, 666)),
-        "right_leg_damaged" => Ok((LType::RightLegDamage, 333)),
-        "left_arm_amputated" => Ok((LType::LeftArmDamage, 1000)),
-        "right_arm_amputated" => Ok((LType::RightArmDamage, 1000)),
-        "left_leg_amputated" => Ok((LType::LeftLegDamage, 1000)),
-        "right_leg_amputated" => Ok((LType::RightLegDamage, 1000)),
+        "head_mangled" => Ok((LType::HeadDamage, 6666)),
+        "head_damaged" => Ok((LType::HeadDamage, 3333)),
+        "torso_mangled" => Ok((LType::TorsoDamage, 6666)),
+        "torso_damaged" => Ok((LType::TorsoDamage, 3333)),
+        "left_arm_mangled" => Ok((LType::LeftArmDamage, 6666)),
+        "left_arm_damaged" => Ok((LType::LeftArmDamage, 3333)),
+        "right_arm_mangled" => Ok((LType::RightArmDamage, 6666)),
+        "right_arm_damaged" => Ok((LType::RightArmDamage, 3333)),
+        "left_leg_mangled" => Ok((LType::LeftLegDamage, 6666)),
+        "left_leg_damaged" => Ok((LType::LeftLegDamage, 3333)),
+        "right_leg_mangled" => Ok((LType::RightLegDamage, 6666)),
+        "right_leg_damaged" => Ok((LType::RightLegDamage, 3333)),
+        "left_arm_amputated" => Ok((LType::LeftArmDamage, 10000)),
+        "right_arm_amputated" => Ok((LType::RightArmDamage, 10000)),
+        "left_leg_amputated" => Ok((LType::LeftLegDamage, 10000)),
+        "right_leg_amputated" => Ok((LType::RightLegDamage, 10000)),
         _ => Err(format!("Could not find damage for {}", aff)),
     }
 }
@@ -168,6 +168,11 @@ impl LimbState {
 
     pub fn hits_to_break(&self, damage: f32) -> i32 {
         let damaged_value = (DAMAGED_VALUE + 1) as f32 / 100.0;
+        f32::ceil((damaged_value - self.damage) / damage) as i32
+    }
+
+    pub fn hits_to_mangle(&self, damage: f32) -> i32 {
+        let damaged_value = (MANGLED_VALUE + 1) as f32 / 100.0;
         f32::ceil((damaged_value - self.damage) / damage) as i32
     }
 
@@ -249,7 +254,7 @@ impl fmt::Display for LimbSet {
         for idx in 0..(LType::SIZE as usize) {
             if let Ok(damage) = LType::try_from(idx as u8) {
                 if let Ok(limb) = get_damage_limb(damage) {
-                    if self.limbs[idx].damage > DAMAGED_VALUE {
+                    if self.limbs[idx].damage >= DAMAGED_VALUE {
                         if wrote {
                             write!(f, ", ")?;
                         }
@@ -339,6 +344,9 @@ impl LimbSet {
             }
         }
         self.limbs[limb as usize].broken = damaged;
+        if !damaged {
+            self.limbs[limb as usize].mangled = false;
+        }
         if damaged && self.limbs[limb as usize].damage <= DAMAGED_VALUE {
             self.limbs[limb as usize].damage = DAMAGED_VALUE + 1;
         } else if !damaged && self.limbs[limb as usize].damage > DAMAGED_VALUE {
@@ -360,6 +368,9 @@ impl LimbSet {
             }
         }
         self.limbs[limb as usize].mangled = damaged;
+        if damaged {
+            self.limbs[limb as usize].broken = true;
+        }
         if damaged && self.limbs[limb as usize].damage <= MANGLED_VALUE {
             self.limbs[limb as usize].damage = MANGLED_VALUE + 1;
         } else if !damaged && self.limbs[limb as usize].damage > MANGLED_VALUE {
@@ -392,13 +403,31 @@ impl LimbSet {
         self.limbs[broken as usize].damage
     }
 
-    pub fn set_limb_damage(&mut self, broken: LType, new_damage: CType) {
+    pub fn set_limb_damage(&mut self, broken: LType, new_damage: CType, assume_break: bool) {
         self.limbs[broken as usize].damage = new_damage;
         if self.limbs[broken as usize].damage < DAMAGED_VALUE {
             self.limbs[broken as usize].broken = false;
             self.limbs[broken as usize].mangled = false;
         } else if self.limbs[broken as usize].damage < MANGLED_VALUE {
             self.limbs[broken as usize].mangled = false;
+            if assume_break {
+                match broken {
+                    LType::TorsoDamage | LType::HeadDamage => {}
+                    _ => {
+                        self.limbs[broken as usize].crippled = true;
+                    }
+                }
+                self.limbs[broken as usize].broken = true;
+            }
+        } else if assume_break {
+            match broken {
+                LType::TorsoDamage | LType::HeadDamage => {}
+                _ => {
+                    self.limbs[broken as usize].crippled = true;
+                }
+            }
+            self.limbs[broken as usize].broken = true;
+            self.limbs[broken as usize].mangled = true;
         }
     }
 
@@ -439,7 +468,7 @@ impl LimbSet {
         let expected_heal = 3000 + heal_modifier;
         let new_damage = self.limbs[limb as usize].damage
             - i32::min(self.limbs[limb as usize].damage, expected_heal);
-        self.set_limb_damage(limb, new_damage);
+        self.set_limb_damage(limb, new_damage, false);
     }
 
     pub fn start_restore(&mut self, broken: LType, first_person: bool) {

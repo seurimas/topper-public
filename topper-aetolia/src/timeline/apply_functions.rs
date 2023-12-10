@@ -130,7 +130,7 @@ pub fn apply_observation(
                                     if let (Ok(limb), Ok(damage)) =
                                         (get_limb_damage(limb), damage.parse::<f32>())
                                     {
-                                        me.set_limb_damage(limb, (damage * 100.0) as CType);
+                                        me.set_limb_damage(limb, (damage * 100.0) as CType, true);
                                     }
                                 }
                             }
@@ -699,7 +699,7 @@ pub fn apply_limb_damage(
                     limb_hit,
                     target.limb_damage.get_damage(limb_hit)
                 );
-                target.set_limb_damage(limb_hit, DAMAGED_VALUE);
+                target.set_limb_damage(limb_hit, DAMAGED_VALUE, false);
             }
             if limb_mangled(observations, limb_hit) {
                 if target.limb_damage.get_damage(limb_hit) <= MANGLED_VALUE {
@@ -718,7 +718,7 @@ pub fn apply_limb_damage(
                     limb_hit,
                     target.limb_damage.get_damage(limb_hit)
                 );
-                target.set_limb_damage(limb_hit, MANGLED_VALUE);
+                target.set_limb_damage(limb_hit, MANGLED_VALUE, false);
             }
         }
     }

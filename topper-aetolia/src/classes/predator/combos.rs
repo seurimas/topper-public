@@ -613,7 +613,8 @@ impl ComboPredicate {
 pub enum ComboGrader {
     Reuse(i32),
     Hits(LType, i32),
-    ValueMove(ComboAttack, i32),
+    ValueMove(ComboAttack, i32, i32),
+    ValueMoveUnparried(ComboAttack, i32),
     ValueMoveInStance(ComboAttack, Stance, i32),
     HasVenom(i32),
     EndsInStance(Stance, i32),
@@ -642,12 +643,38 @@ impl ComboGrader {
                 }
                 total_value
             }
-            ComboGrader::ValueMove(attack, value) => {
-                if combo.get_attacks().contains(attack) {
-                    *value
-                } else {
-                    0
-                }
+            ComboGrader::ValueMove(attack, first_value, rest_value) => {
+                combo
+                    .get_attacks()
+                    .iter()
+                    .fold((0, false), |(total, seen), combo_attack| {
+                        if combo_attack == attack {
+                            if seen {
+                                (total + *rest_value, seen)
+                            } else {
+                                (total + *first_value, true)
+                            }
+                        } else {
+                            (total, seen)
+                        }
+                    })
+                    .0
+            }
+            ComboGrader::ValueMoveUnparried(attack, unparried_value) => {
+                combo
+                    .get_attacks()
+                    .iter()
+                    .fold((0, false), |(total, mut parrying), combo_attack| {
+                        if combo_attack.can_drop_parry() {
+                            parrying = false;
+                        }
+                        if combo_attack == attack {
+                            (total + *unparried_value, parrying)
+                        } else {
+                            (total, parrying)
+                        }
+                    })
+                    .0
             }
             ComboGrader::ValueMoveInStance(attack, stance, value) => {
                 combo
@@ -655,7 +682,7 @@ impl ComboGrader {
                     .iter()
                     .fold((combo.0, 0), |(current_stance, total), combo_attack| {
                         if combo_attack == attack {
-                            if combo.0 == *stance {
+                            if combo.0 == Stance::Bladesurge || combo.0 == *stance {
                                 (combo_attack.get_next_stance(current_stance), total + *value)
                             } else {
                                 (combo_attack.get_next_stance(current_stance), total)
@@ -740,13 +767,14 @@ impl ComboSet {
     pub fn get_highest_scored_combo(
         &self,
         predicates: &Vec<ComboPredicate>,
+        base_graders: &Vec<ComboGrader>,
         graders: &Vec<ComboGrader>,
     ) -> Option<PredatorCombo> {
         let mut highest_combo = None;
         let mut highest_score = 0.0;
         for combo in self.0.iter() {
             let mut valid = true;
-            let score = combo.score_combo(graders);
+            let score = combo.score_combo(base_graders) + combo.score_combo(graders);
             for predicate in predicates.iter() {
                 if !predicate.matches(combo, Some(score)) {
                     valid = false;

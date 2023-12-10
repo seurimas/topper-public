@@ -105,12 +105,12 @@ impl SeriesAttack {
         preferred_limbs: &Vec<LType>,
     ) -> Self {
         let mut valid_feints = vec![
-            LType::TorsoDamage,
             LType::HeadDamage,
             LType::LeftArmDamage,
             LType::RightArmDamage,
             LType::LeftLegDamage,
             LType::RightLegDamage,
+            LType::TorsoDamage,
         ];
         valid_feints.retain(|l| {
             !base_attacks
@@ -533,5 +533,23 @@ impl ActiveTransition for PummelAction {
             self.target,
             self.limb.to_string()
         ))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct FerocityAction;
+
+impl FerocityAction {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl ActiveTransition for FerocityAction {
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("ferocity"))
     }
 }
