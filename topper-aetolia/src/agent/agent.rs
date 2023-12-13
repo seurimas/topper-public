@@ -211,7 +211,11 @@ impl AgentState {
             self.hidden_state.unhide(flag);
         }
         match flag {
-            FType::TorsoBroken => self.limb_damage.set_limb_broken(LType::TorsoDamage, false),
+            FType::TorsoBroken => {
+                if !value {
+                    self.limb_damage.set_limb_broken(LType::TorsoDamage, false)
+                }
+            }
             _ => {}
         }
         self.set_flag(flag, value);
@@ -299,7 +303,7 @@ impl AgentState {
             | FType::RightArmAmputated => {}
             _ => self.flags.set_flag(flag, value),
         }
-        if flag == FType::Rebounding && value == true {
+        if flag == FType::Rebounding {
             self.flags.set_flag(FType::AssumedRebounding, false);
         }
         if (flag == FType::Weakvoid || flag == FType::Void) && value == true {
@@ -422,6 +426,18 @@ impl AgentState {
 
     pub fn get_stat(&self, stat: SType) -> CType {
         self.stats[stat as usize]
+    }
+
+    pub fn get_max_stat(&self, stat: SType) -> CType {
+        self.max_stats[stat as usize]
+    }
+
+    pub fn set_max_stat(&mut self, stat: SType, value: CType) {
+        self.max_stats[stat as usize] = value;
+    }
+
+    pub fn get_health_percent(&self) -> f32 {
+        self.stats[SType::Health as usize] as f32 / self.max_stats[SType::Health as usize] as f32
     }
 
     pub fn set_limb_damage(&mut self, limb: LType, value: CType, assume_break: bool) {

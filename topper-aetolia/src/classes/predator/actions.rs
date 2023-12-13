@@ -553,3 +553,21 @@ impl ActiveTransition for FerocityAction {
         Ok(format!("ferocity"))
     }
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ArouseAction;
+
+impl ArouseAction {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl ActiveTransition for ArouseAction {
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("arouse"))
+    }
+}

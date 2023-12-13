@@ -346,8 +346,14 @@ pub fn apply_observation(
             timeline.finish_agent_restore(&timeline.me.clone(), what)?;
         }
         AetObservation::Stand(who) => {
-            timeline.set_flag_for_agent(who, &"asleep".to_string(), false);
-            timeline.set_flag_for_agent(who, &"fallen".to_string(), false);
+            for_agent(timeline, who, &move |you| {
+                you.toggle_flag(FType::Fallen, false);
+                you.observe_flag(FType::Asleep, false);
+                you.observe_flag(FType::Frozen, false);
+                you.observe_flag(FType::Paralysis, false);
+                you.observe_flag(FType::LeftLegCrippled, false);
+                you.observe_flag(FType::RightLegCrippled, false);
+            });
             if timeline.borrow_agent(who).is(FType::Backstrain) {
                 let after = after.clone();
                 for_agent(timeline, who, &move |you| {
@@ -369,11 +375,16 @@ pub fn apply_observation(
             });
         }
         AetObservation::Parry(who, what) => {
-            let limb = get_limb_damage(what)?;
+            let limb = match what.as_str() {
+                "arms" | "legs" => LType::SIZE,
+                _ => get_limb_damage(what)?,
+            };
             let who = who.clone();
             let after = after.clone();
             for_agent(timeline, &who, &move |you: &mut AgentState| {
-                you.set_parrying(limb);
+                if limb != LType::SIZE {
+                    you.set_parrying(limb);
+                }
                 if you.is(FType::SoreWrist) {
                     apply_limb_damage(
                         you,

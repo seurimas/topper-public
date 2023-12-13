@@ -252,6 +252,27 @@
     "observation_name": "Proc"
   },
   {
+    "regex": "^With the other paw, a bulky orgyuk rakes into (\\w+) with its wicked claws.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Beastmastery"
+      },
+      {
+        "Literal": "Raked"
+      },
+      {
+        "Literal": "hit"
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
     "regex": "^The flow of blood slows and thickens from (\\w+)'s neck, pale from from all the loss.$",
     "args": [
       {

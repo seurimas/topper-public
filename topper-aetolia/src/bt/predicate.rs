@@ -64,6 +64,7 @@ pub enum AetPredicate {
     AffCountOver(AetTarget, usize, Vec<FType>),
     AffCountUnder(AetTarget, usize, Vec<FType>),
     // Limbs
+    IsRestoring(AetTarget, LimbDescriptor),
     CanBreak(AetTarget, LimbDescriptor, f32),
     CanMangled(AetTarget, LimbDescriptor, f32),
     // Priorities
@@ -75,9 +76,12 @@ pub enum AetPredicate {
     NearLocked(AetTarget, LockType, usize),
     // Timing
     ReboundingWindow(AetTarget, CType),
+    SalveBlocked(AetTarget, CType),
     // Hints
     LimbHintIs(String, LType),
     HintSet(String, String),
+    // Stats
+    HealthUnder(AetTarget, f32),
     // Balances
     HasBalanceEquilibrium(AetTarget),
     HasBalance(AetTarget),
@@ -239,6 +243,16 @@ impl UnpoweredFunction for AetPredicate {
                     UnpoweredFunctionState::Failed
                 }
             }
+            AetPredicate::IsRestoring(target, limb_descriptor) => {
+                if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
+                    if let Some(target) = target.get_target(model, controller) {
+                        if target.get_limb_state(limb).is_restoring {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
             AetPredicate::CanBreak(target, limb_descriptor, damage) => {
                 if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
                     if let Some(target) = target.get_target(model, controller) {
@@ -317,6 +331,16 @@ impl UnpoweredFunction for AetPredicate {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.get_balance(BType::Rebounding) > (*minimum as f32 / BALANCE_SCALE) {
                         return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::SalveBlocked(target, minimum) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if let Some(restore) = target.limb_damage.restore_timer {
+                        if restore.get_time_left() > *minimum {
+                            return UnpoweredFunctionState::Complete;
+                        }
                     }
                 }
                 UnpoweredFunctionState::Failed
@@ -458,6 +482,17 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::IsClimbing(target) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.elevation == Elevation::Trees || target.elevation == Elevation::Roof {
+                        UnpoweredFunctionState::Complete
+                    } else {
+                        UnpoweredFunctionState::Failed
+                    }
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetPredicate::HealthUnder(target, percent) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.get_health_percent() < *percent {
                         UnpoweredFunctionState::Complete
                     } else {
                         UnpoweredFunctionState::Failed

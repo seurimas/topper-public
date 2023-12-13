@@ -56,7 +56,7 @@ pub enum PredatorCompanionState {
     },
     Orgyuk {
         roaring: Option<Timer>,
-        raking: Option<(Timer, u32)>,
+        raking: Option<(Timer, String, u32)>,
     },
     Spider {
         intoxicate_target: Option<String>,
@@ -76,7 +76,7 @@ impl PredatorCompanionState {
                 if let Some(roaring) = roaring {
                     roaring.wait(time);
                 }
-                if let Some((raking_timer, _)) = raking {
+                if let Some((raking_timer, _, _)) = raking {
                     raking_timer.wait(time);
                     if !raking_timer.is_active() {
                         *raking = None;
@@ -100,6 +100,7 @@ pub struct PredatorClassState {
 impl PredatorClassState {
     pub fn wait(&mut self, time: CType) {
         self.feint_time -= time;
+        self.companion.iter_mut().for_each(|c| c.wait(time));
     }
 
     pub fn feint(&mut self) {
@@ -165,21 +166,23 @@ impl PredatorClassState {
         }
     }
 
-    pub fn rake_start(&mut self, target: String, rake_count: u32) {
+    pub fn rake_start(&mut self, who: String) {
         self.get_orgyuk();
         if let Some(PredatorCompanionState::Orgyuk { raking, .. }) = &mut self.companion {
-            *raking = Some((Timer::count_up_observe_seconds(2., 3.), 1));
+            *raking = Some((Timer::count_up_observe_seconds(2., 3.), who, 1));
         }
     }
 
-    pub fn rake(&mut self) {
+    pub fn rake(&mut self, who: &String) {
         if let Some(PredatorCompanionState::Orgyuk { raking, .. }) = &mut self.companion {
-            if let Some((raking_timer, rake_count)) = raking {
-                *rake_count += 1;
-                if *rake_count == 4 {
-                    *raking = None;
-                } else {
-                    raking_timer.reset();
+            if let Some((raking_timer, who, rake_count)) = raking {
+                if who.eq_ignore_ascii_case(who) {
+                    *rake_count += 1;
+                    if *rake_count >= 4 {
+                        *raking = None;
+                    } else {
+                        raking_timer.reset();
+                    }
                 }
             }
         }
@@ -187,7 +190,7 @@ impl PredatorClassState {
 
     pub fn is_raking(&self) -> bool {
         if let Some(PredatorCompanionState::Orgyuk { raking, .. }) = &self.companion {
-            if let Some((raking_timer, _)) = raking {
+            if let Some((raking_timer, _, _)) = raking {
                 raking_timer.is_active()
             } else {
                 false
@@ -220,6 +223,14 @@ impl PredatorClassState {
 
     pub fn use_tidalslash(&mut self) {
         self.tidalslash = false;
+    }
+
+    pub fn get_arouse_time(&self) -> f32 {
+        if self.apex >= 3 {
+            5.
+        } else {
+            90. - (self.apex as f32 * 30.)
+        }
     }
 }
 

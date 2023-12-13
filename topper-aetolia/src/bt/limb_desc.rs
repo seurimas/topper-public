@@ -11,8 +11,11 @@ use super::{BehaviorController, BehaviorModel};
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum LimbDescriptor {
     Static(LType),
+    NotRestoring(Vec<LType>),
     Highest(Vec<LType>),
     Lowest(Vec<LType>),
+    HighestOver(Vec<LType>, f32),
+    LowestOver(Vec<LType>, f32),
     Breakable(Vec<(LType, CType)>),
     Random(Vec<LType>),
     FromHint(String),
@@ -28,6 +31,23 @@ impl LimbDescriptor {
         if let Some(me) = target.get_target(model, controller) {
             match self {
                 LimbDescriptor::Static(limb) => Some(*limb),
+                LimbDescriptor::NotRestoring(limbs) => {
+                    let mut found_restoring = false;
+                    let mut not_restoring = None;
+                    for limb in limbs {
+                        let mut limb_state = me.get_limb_state(*limb);
+                        if limb_state.is_restoring {
+                            found_restoring = true;
+                        } else {
+                            not_restoring = Some(*limb);
+                        }
+                    }
+                    if found_restoring {
+                        not_restoring
+                    } else {
+                        None
+                    }
+                }
                 LimbDescriptor::Highest(limbs) => {
                     let mut highest = None;
                     let mut highest_damage = 0.0;
@@ -52,6 +72,36 @@ impl LimbDescriptor {
                             limb_state.assume_restore();
                         }
                         if limb_state.damage < lowest_damage {
+                            lowest = Some(*limb);
+                            lowest_damage = limb_state.damage;
+                        }
+                    }
+                    lowest
+                }
+                LimbDescriptor::HighestOver(limbs, minimum) => {
+                    let mut highest = None;
+                    let mut highest_damage = 0.0;
+                    for limb in limbs {
+                        let mut limb_state = me.get_limb_state(*limb);
+                        if limb_state.is_restoring {
+                            limb_state.assume_restore();
+                        }
+                        if limb_state.damage > highest_damage && limb_state.damage > *minimum {
+                            highest = Some(*limb);
+                            highest_damage = limb_state.damage;
+                        }
+                    }
+                    highest
+                }
+                LimbDescriptor::LowestOver(limbs, minimum) => {
+                    let mut lowest = None;
+                    let mut lowest_damage = 100.0;
+                    for limb in limbs {
+                        let mut limb_state = me.get_limb_state(*limb);
+                        if limb_state.is_restoring {
+                            limb_state.assume_restore();
+                        }
+                        if limb_state.damage < lowest_damage && limb_state.damage > *minimum {
                             lowest = Some(*limb);
                             lowest_damage = limb_state.damage;
                         }

@@ -17,6 +17,7 @@ use super::*;
 pub enum PredatorBehavior {
     // Class cure.
     Ferocity,
+    Arouse,
     // Combo attacks
     FastestCombo(AetTarget, Vec<ComboPredicate>, Vec<LimbDescriptor>),
     AffRateCombo(AetTarget, Vec<ComboPredicate>, Vec<LimbDescriptor>),
@@ -28,6 +29,7 @@ pub enum PredatorBehavior {
     ),
     AddGraders(Vec<ComboGrader>),
     AddComboAttacks(Vec<ComboAttack>),
+    AllowBadStances(bool),
     AllowParries(bool),
     CalculateCombos(AetTarget),
     ResetComboAttacks,
@@ -70,6 +72,15 @@ impl UnpoweredFunction for PredatorBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
+            PredatorBehavior::Arouse => {
+                let me = model.state.borrow_me();
+                if me.balanced(BType::ClassCure2) {
+                    controller.plan.add_to_qeb(Box::new(ArouseAction::new()));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
             PredatorBehavior::ResetComboAttacks => {
                 controller.predator_combo_store = Default::default();
                 controller.predator_combos.clear();
@@ -77,6 +88,12 @@ impl UnpoweredFunction for PredatorBehavior {
             }
             PredatorBehavior::AddComboAttacks(attacks) => {
                 controller.predator_combo_store.add_attacks(attacks.iter());
+                UnpoweredFunctionState::Complete
+            }
+            PredatorBehavior::AllowBadStances(allow_bad_stances) => {
+                controller
+                    .predator_combo_store
+                    .set_allow_bad_stances(*allow_bad_stances);
                 UnpoweredFunctionState::Complete
             }
             PredatorBehavior::AllowParries(allow_parries) => {
@@ -135,6 +152,10 @@ impl UnpoweredFunction for PredatorBehavior {
                     model.state.borrow_me(),
                     target.get_target(model, controller),
                 ) {
+                    if !me.arm_free() || me.stuck_fallen() {
+                        // No need to calculate combos we can't use!
+                        return UnpoweredFunctionState::Failed;
+                    }
                     controller
                         .predator_combo_store
                         .set_stance(me.get_predator_stance());
@@ -160,6 +181,10 @@ impl UnpoweredFunction for PredatorBehavior {
                     if you.is(FType::Shielded) {
                         return UnpoweredFunctionState::Failed;
                     }
+                    let me = model.state.borrow_me();
+                    if !me.arm_free() || me.stuck_fallen() {
+                        return UnpoweredFunctionState::Failed;
+                    }
                     let venom = controller.get_venoms_from_plan(1, you);
                     controller.plan.add_to_qeb(Box::new(BloodscourgeAction::new(
                         controller.target.clone().unwrap_or("".to_string()),
@@ -173,6 +198,10 @@ impl UnpoweredFunction for PredatorBehavior {
             PredatorBehavior::Fleshbane(target) => {
                 if let Some(you) = target.get_target(model, controller) {
                     if you.is(FType::Shielded) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    let me = model.state.borrow_me();
+                    if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
                     }
                     let venom = controller.get_venoms_from_plan(1, you);
@@ -200,6 +229,12 @@ impl UnpoweredFunction for PredatorBehavior {
                         .unwrap_or(true)
                     {
                         return UnpoweredFunctionState::Failed;
+                    } else if !me.arm_free() || me.stuck_fallen() {
+                        return UnpoweredFunctionState::Failed;
+                    } else if me.is(FType::Disfigurement) {
+                        return UnpoweredFunctionState::Failed;
+                    } else if you.is(FType::Shielded) {
+                        return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(IntoxicateAction::new(
                         controller.target.clone().unwrap_or("".to_string()),
@@ -220,6 +255,10 @@ impl UnpoweredFunction for PredatorBehavior {
                         return UnpoweredFunctionState::Failed;
                     } else if you.is(FType::Shielded) {
                         return UnpoweredFunctionState::Failed;
+                    } else if !me.arm_free() || me.stuck_fallen() {
+                        return UnpoweredFunctionState::Failed;
+                    } else if me.is(FType::Disfigurement) {
+                        return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(AcidAction::new(
                         controller.target.clone().unwrap_or("".to_string()),
@@ -238,6 +277,8 @@ impl UnpoweredFunction for PredatorBehavior {
                         return UnpoweredFunctionState::Failed;
                     } else if you.is(FType::Shielded) {
                         return UnpoweredFunctionState::Failed;
+                    } else if !me.arm_free() || me.stuck_fallen() {
+                        return UnpoweredFunctionState::Failed;
                     }
                     let venom = controller.get_venoms_from_plan(1, you);
                     controller.plan.add_to_qeb(Box::new(DartshotAction::new(
@@ -254,6 +295,10 @@ impl UnpoweredFunction for PredatorBehavior {
                     if you.will_be_rebounding(model.state.borrow_me().get_qeb_balance()) {
                         return UnpoweredFunctionState::Failed;
                     } else if you.is(FType::Shielded) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    let me = model.state.borrow_me();
+                    if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
                     }
                     let venoms = controller.get_venoms_from_plan(2, you);
@@ -286,6 +331,8 @@ impl UnpoweredFunction for PredatorBehavior {
                         return UnpoweredFunctionState::Failed;
                     } else if you.is(FType::Shielded) {
                         return UnpoweredFunctionState::Failed;
+                    } else if !me.arm_free() || me.stuck_fallen() {
+                        return UnpoweredFunctionState::Failed;
                     }
                     let venom = controller.get_venoms_from_plan(1, you);
                     controller.plan.add_to_qeb(Box::new(TwinshotAction::new(
@@ -306,6 +353,10 @@ impl UnpoweredFunction for PredatorBehavior {
                     let me = model.state.borrow_me();
                     if me.check_if_predator(&|me| me.is_raking()).unwrap_or(false) {
                         return UnpoweredFunctionState::Failed;
+                    } else if !me.arm_free() || me.stuck_fallen() {
+                        return UnpoweredFunctionState::Failed;
+                    } else if me.is(FType::Disfigurement) {
+                        return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(RakeAction::new(
                         controller.target.clone().unwrap_or("".to_string()),
@@ -318,6 +369,12 @@ impl UnpoweredFunction for PredatorBehavior {
             PredatorBehavior::Swipe(target) => {
                 if let Some(you) = target.get_target(model, controller) {
                     if you.is(FType::Shielded) || !you.is(FType::Density) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    let me = model.state.borrow_me();
+                    if !me.arm_free() || me.stuck_fallen() {
+                        return UnpoweredFunctionState::Failed;
+                    } else if me.is(FType::Disfigurement) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(SwipeAction::new(
@@ -333,6 +390,12 @@ impl UnpoweredFunction for PredatorBehavior {
                     if you.is(FType::Shielded) || you.is(FType::Density) {
                         return UnpoweredFunctionState::Failed;
                     }
+                    let me = model.state.borrow_me();
+                    if !me.arm_free() || me.stuck_fallen() {
+                        return UnpoweredFunctionState::Failed;
+                    } else if me.is(FType::Disfigurement) {
+                        return UnpoweredFunctionState::Failed;
+                    }
                     controller.plan.add_to_qeb(Box::new(ThrowAction::new(
                         controller.target.clone().unwrap_or("".to_string()),
                     )));
@@ -344,6 +407,12 @@ impl UnpoweredFunction for PredatorBehavior {
             PredatorBehavior::Weaken(target) => {
                 if let Some(you) = target.get_target(model, controller) {
                     if you.is(FType::Shielded) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    let me = model.state.borrow_me();
+                    if !me.arm_free() || me.stuck_fallen() {
+                        return UnpoweredFunctionState::Failed;
+                    } else if me.is(FType::Disfigurement) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(WeakenAction::new(
@@ -363,6 +432,12 @@ impl UnpoweredFunction for PredatorBehavior {
                     if you.is(FType::Shielded) {
                         return UnpoweredFunctionState::Failed;
                     }
+                    let me = model.state.borrow_me();
+                    if !me.arm_free() || me.stuck_fallen() {
+                        return UnpoweredFunctionState::Failed;
+                    } else if me.is(FType::Disfigurement) {
+                        return UnpoweredFunctionState::Failed;
+                    }
                     controller.plan.add_to_qeb(Box::new(PummelAction::new(
                         controller.target.clone().unwrap_or("".to_string()),
                         limb.get_limb(model, controller, target)
@@ -376,6 +451,12 @@ impl UnpoweredFunction for PredatorBehavior {
             PredatorBehavior::Mawcrush(target) => {
                 if let Some(you) = target.get_target(model, controller) {
                     if you.is(FType::Shielded) || !you.get_limb_state(LType::TorsoDamage).broken {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    let me = model.state.borrow_me();
+                    if !me.arm_free() || me.stuck_fallen() {
+                        return UnpoweredFunctionState::Failed;
+                    } else if me.is(FType::Disfigurement) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(MawcrushAction::new(
@@ -401,6 +482,10 @@ fn use_combo(
     best_combo: Option<PredatorCombo>,
     preferred_limbs: &Vec<LimbDescriptor>,
 ) -> UnpoweredFunctionState {
+    let preferred_limbs = preferred_limbs
+        .iter()
+        .filter_map(|limb| limb.get_limb(model, controller, target))
+        .collect::<Vec<LType>>();
     if let (Some(you), Some(combo)) = (target.get_target(model, controller), &best_combo) {
         let venom = controller.get_venoms_from_plan(1, you);
         controller
@@ -409,13 +494,7 @@ fn use_combo(
                 combo.get_attacks().to_vec(),
                 controller.target.clone().unwrap_or("".to_string()),
                 if venom.is_empty() { "" } else { venom[0] },
-                &preferred_limbs
-                    .iter()
-                    .map(|limb| {
-                        limb.get_limb(model, controller, target)
-                            .unwrap_or(LType::TorsoDamage)
-                    })
-                    .collect::<Vec<LType>>(),
+                &preferred_limbs,
             )));
         UnpoweredFunctionState::Complete
     } else if let Some(combo) = &best_combo {
@@ -426,13 +505,7 @@ fn use_combo(
                 combo.get_attacks().to_vec(),
                 controller.target.clone().unwrap_or("".to_string()),
                 "curare",
-                &preferred_limbs
-                    .iter()
-                    .map(|limb| {
-                        limb.get_limb(model, controller, target)
-                            .unwrap_or(LType::TorsoDamage)
-                    })
-                    .collect::<Vec<LType>>(),
+                &preferred_limbs,
             )));
         UnpoweredFunctionState::Complete
     } else {

@@ -8,6 +8,7 @@ use crate::{
     bt::*,
     classes::{FitnessAction, ParryAction},
     db::AetDatabaseModule,
+    types::general::BType,
 };
 
 #[macro_use]
@@ -67,7 +68,7 @@ impl UnpoweredFunction for DefenseBehavior {
             }
             DefenseBehavior::Fitness => {
                 let me = model.state.borrow_me();
-                if me.lock_duration().is_some() {
+                if me.lock_duration().is_some() && me.balanced(BType::Fitness) {
                     controller
                         .plan
                         .add_to_qeb(Box::new(FitnessAction::new(model.who_am_i())));

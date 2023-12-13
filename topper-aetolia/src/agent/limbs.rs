@@ -326,6 +326,10 @@ impl LimbSet {
             LType::TorsoDamage | LType::HeadDamage => {}
             _ => {
                 self.limbs[limb as usize].crippled = damaged;
+                if !damaged {
+                    self.limbs[limb as usize].broken = false;
+                    self.limbs[limb as usize].mangled = false;
+                }
             }
         }
     }
@@ -349,8 +353,8 @@ impl LimbSet {
         }
         if damaged && self.limbs[limb as usize].damage <= DAMAGED_VALUE {
             self.limbs[limb as usize].damage = DAMAGED_VALUE + 1;
-        } else if !damaged && self.limbs[limb as usize].damage > DAMAGED_VALUE {
-            self.limbs[limb as usize].damage = DAMAGED_VALUE;
+        } else if !damaged && self.limbs[limb as usize].damage >= DAMAGED_VALUE {
+            self.limbs[limb as usize].damage = DAMAGED_VALUE - 1;
         }
     }
 
@@ -373,8 +377,8 @@ impl LimbSet {
         }
         if damaged && self.limbs[limb as usize].damage <= MANGLED_VALUE {
             self.limbs[limb as usize].damage = MANGLED_VALUE + 1;
-        } else if !damaged && self.limbs[limb as usize].damage > MANGLED_VALUE {
-            self.limbs[limb as usize].damage = MANGLED_VALUE;
+        } else if !damaged && self.limbs[limb as usize].damage >= MANGLED_VALUE {
+            self.limbs[limb as usize].damage = MANGLED_VALUE - 1;
         }
     }
 

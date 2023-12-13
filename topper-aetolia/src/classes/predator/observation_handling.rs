@@ -269,7 +269,7 @@ pub fn handle_combat_action(
             attack_limb_damage(
                 agent_states,
                 &combat_action.target,
-                (LType::TorsoDamage, LATERAL_DAMAGE, true),
+                (LType::TorsoDamage, GOUGE_DAMAGE, true),
                 after,
             );
         }
@@ -349,6 +349,20 @@ pub fn handle_combat_action(
                 },
             );
         }
+        "Arouse" => {
+            let observations = after.clone();
+            let perspective = agent_states.get_perspective(&combat_action);
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &move |me: &mut AgentState| {
+                    let arouse_time = me
+                        .check_if_predator(&|predator| predator.get_arouse_time())
+                        .unwrap_or(90.0);
+                    apply_or_infer_balance(me, (BType::ClassCure2, arouse_time), &observations);
+                },
+            );
+        }
         "Pindown" => {
             if combat_action.annotation.eq_ignore_ascii_case("fail") {
                 for_agent(agent_states, &combat_action.target, &|me| {
@@ -409,6 +423,24 @@ pub fn handle_combat_action(
                     me.observe_flag(FType::TorsoBroken, false);
                 });
             }
+        }
+        "Rake" => {
+            let who = combat_action.target.clone();
+            for_agent(agent_states, &combat_action.caster, &|me| {
+                me.assume_predator(&|class_state| {
+                    class_state.rake_start(who.clone());
+                });
+            });
+        }
+        "Raked" => {
+            let who = combat_action.caster.clone();
+            agent_states.agent_states.iter_mut().for_each(|(id, me)| {
+                for agent in me {
+                    if let ClassState::Predator(ref mut predator) = agent.class_state {
+                        predator.rake(&who);
+                    }
+                }
+            });
         }
         _ => {}
     }

@@ -114,6 +114,35 @@ fn handle_char_vitals(
             },
         );
     }
+    if let (Some(hp), Some(mp), Some(max_hp), Some(max_mp)) = (
+        gmcp.get("hp")
+            .and_then(|hp| hp.as_str())
+            .and_then(|hp| hp.parse::<i32>().ok()),
+        gmcp.get("mp")
+            .and_then(|mp| mp.as_str())
+            .and_then(|mp| mp.parse::<i32>().ok()),
+        gmcp.get("maxhp")
+            .and_then(|max_hp| max_hp.as_str())
+            .and_then(|max_hp| max_hp.parse::<i32>().ok()),
+        gmcp.get("maxmp")
+            .and_then(|max_mp| max_mp.as_str())
+            .and_then(|max_mp| max_mp.parse::<i32>().ok()),
+    ) {
+        for_agent(
+            timeline,
+            &timeline.me.clone(),
+            &move |me: &mut AgentState| {
+                if !me.is(FType::Recklessness) {
+                    me.set_stat(SType::Health, hp);
+                    me.set_stat(SType::Mana, mp);
+                    me.set_max_stat(SType::Health, max_hp);
+                    me.set_max_stat(SType::Mana, max_mp);
+                } else if max_mp != mp || max_hp != hp {
+                    me.observe_flag(FType::Recklessness, false);
+                }
+            },
+        );
+    }
 }
 
 fn handle_room_info(

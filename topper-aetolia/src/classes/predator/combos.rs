@@ -212,19 +212,19 @@ impl ComboAttack {
             ComboAttack::Spinslash => 251,
             ComboAttack::Trip => 298,
             ComboAttack::Gouge => 298,
-            ComboAttack::Tidalslash => 300, // Guess
-            ComboAttack::Butterfly => 300,  // Guess
             ComboAttack::Bleed => 344,
             ComboAttack::Swiftkick => 344,
             ComboAttack::Crescentcut => 367,
             ComboAttack::Pindown => 372,
+            ComboAttack::Tidalslash => 391,
+            ComboAttack::Butterfly => 391,
             ComboAttack::Freefall => 391,
             ComboAttack::Flashkick => 391,
             ComboAttack::Veinrip => 391,
         };
         if !self.is_good_combo_attack(stance) {
-            base + 40
-        } else if stance == Stance::Laesan || stance == Stance::Bladesurge {
+            base + 98
+        } else if stance == Stance::VaeSant || stance == Stance::Bladesurge {
             base - 40
         } else {
             base
@@ -486,6 +486,7 @@ impl ComboSolver {
     fn add_combos(
         &self,
         combos: &mut Vec<PredatorCombo>,
+        balance_time: CType,
         current_stance: Stance,
         attack: ComboAttack,
         previous_attacks: Vec<ComboAttack>,
@@ -521,6 +522,7 @@ impl ComboSolver {
         for next_attack in self.attacks.iter() {
             self.add_next_attack(
                 combos,
+                balance_time,
                 next_attack,
                 next_stance,
                 &new_attacks,
@@ -534,6 +536,7 @@ impl ComboSolver {
     fn add_next_attack(
         &self,
         combos: &mut Vec<PredatorCombo>,
+        balance_time: CType,
         next_attack: &ComboAttack,
         next_stance: Stance,
         new_attacks: &Vec<ComboAttack>,
@@ -541,7 +544,9 @@ impl ComboSolver {
         prone: bool,
         rebounds: u32,
     ) {
-        if (self.allow_bad_stances || next_attack.is_good_combo_attack(next_stance))
+        if (self.allow_bad_stances
+            || next_attack.is_good_combo_attack(next_stance)
+            || next_attack.get_balance_time(next_stance) <= balance_time)
             && (new_attacks.len() == 0 || !next_attack.must_begin_combo())
             && (!next_attack.idempotent() || !new_attacks.contains(&next_attack))
             && (!parrying || !next_attack.parryable() || self.allow_parries)
@@ -550,6 +555,7 @@ impl ComboSolver {
         {
             self.add_combos(
                 combos,
+                balance_time.max(next_attack.get_balance_time(next_stance)),
                 next_stance,
                 *next_attack,
                 new_attacks.clone(),
@@ -565,6 +571,7 @@ impl ComboSolver {
         for attack in self.attacks.iter() {
             self.add_next_attack(
                 &mut combos,
+                0,
                 attack,
                 self.starting_stance,
                 &vec![],

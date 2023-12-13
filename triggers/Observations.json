@@ -54,6 +54,24 @@
     "observation_name": "DiscernedCure"
   },
   {
+    "regex": "^(\\w+) nimbly stays on .* feet.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "fallen"
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "DiscernedCure"
+  },
+  {
     "regex": "^A thick, hardened shell of paste has formed around (\\w+).$",
     "args": [
       {

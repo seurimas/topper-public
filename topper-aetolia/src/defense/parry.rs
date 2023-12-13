@@ -117,9 +117,7 @@ pub fn get_preferred_parry<DB: AetDatabaseModule + ?Sized>(
             }
             Class::Sentinel => {
                 let myself = timeline.state.borrow_agent(me);
-                if myself.is(FType::Heartflutter) {
-                    Ok(LType::TorsoDamage)
-                } else if !myself.is(FType::Impatience) {
+                if !myself.is(FType::Impatience) {
                     Ok(LType::HeadDamage)
                 } else if let Some(parry) = get_restore_parry(timeline, me) {
                     Ok(parry)

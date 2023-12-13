@@ -1,6 +1,6 @@
 [
   {
-    "regex": "^(\\w+) (parries|parry) the attack (to|on) (\\w+) ?\\w* (head|torso|left arm|right arm|left leg|right leg) with a deft maneuver.$",
+    "regex": "^(\\w+) (parries|parry) the attack (to|on) (\\w+) ?\\w* (head|torso|left arm|right arm|left leg|right leg|legs|arms) with a deft maneuver.$",
     "args": [
       {
         "GroupAsTarget": 1
@@ -18,7 +18,7 @@
     "observation_name": "Parry"
   },
   {
-    "regex": "^With a free hand, (\\w+) fends? off the attack (to|on) (\\w+) ?\\w* (head|torso|left arm|right arm|left leg|right leg).$",
+    "regex": "^With a free hand, (\\w+) fends? off the attack (to|on) (\\w+) ?\\w* (head|torso|left arm|right arm|left leg|right leg|legs|arms).$",
     "args": [
       {
         "GroupAsTarget": 1
@@ -36,7 +36,7 @@
     "observation_name": "Parry"
   },
   {
-    "regex": "^With a predatory growl, (\\w+) opposes? the attack (to|on) (\\w+) ?\\w* (head|torso|left arm|right arm|left leg|right leg), denying it purchase.$",
+    "regex": "^With a predatory growl, (\\w+) opposes? the attack (to|on) (\\w+) ?\\w* (head|torso|left arm|right arm|left leg|right leg|legs|arms), denying it purchase.$",
     "args": [
       {
         "GroupAsTarget": 1
