@@ -6,9 +6,9 @@ use topper_core::timeline::db::DummyDatabaseModule;
 
 use crate::{
     bt::*,
-    classes::{FitnessAction, ParryAction},
+    classes::{Class, FitnessAction, ParryAction},
     db::AetDatabaseModule,
-    types::general::BType,
+    types::*,
 };
 
 #[macro_use]
@@ -68,10 +68,28 @@ impl UnpoweredFunction for DefenseBehavior {
             }
             DefenseBehavior::Fitness => {
                 let me = model.state.borrow_me();
-                if me.lock_duration().is_some() && me.balanced(BType::Fitness) {
+                if !me.balanced(BType::Fitness) {
+                    return UnpoweredFunctionState::Complete;
+                }
+                if me.lock_duration().is_some() {
                     controller
                         .plan
                         .add_to_qeb(Box::new(FitnessAction::new(model.who_am_i())));
+                } else {
+                    for aggressor in me.aggro.get_aggro_attackers() {
+                        let aggressor = model.state.borrow_agent(&aggressor);
+                        match aggressor.class_state.get_normalized_class() {
+                            Some(Class::Sentinel) => {
+                                if me.is(FType::Asthma) && me.is(FType::Slickness) {
+                                    controller
+                                        .plan
+                                        .add_to_qeb(Box::new(FitnessAction::new(model.who_am_i())));
+                                    return UnpoweredFunctionState::Complete;
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
                 }
             }
             DefenseBehavior::Dodge => {

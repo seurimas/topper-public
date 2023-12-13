@@ -671,7 +671,7 @@ impl ComboGrader {
                 combo
                     .get_attacks()
                     .iter()
-                    .fold((0, false), |(total, mut parrying), combo_attack| {
+                    .fold((0, true), |(total, mut parrying), combo_attack| {
                         if combo_attack.can_drop_parry() {
                             parrying = false;
                         }
