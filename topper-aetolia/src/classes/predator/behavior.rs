@@ -21,6 +21,7 @@ pub enum PredatorBehavior {
     // Combo attacks
     FastestCombo(AetTarget, Vec<ComboPredicate>, Vec<LimbDescriptor>),
     AffRateCombo(AetTarget, Vec<ComboPredicate>, Vec<LimbDescriptor>),
+    DpsCombo(AetTarget, Vec<ComboPredicate>, Vec<LimbDescriptor>),
     GradedCombo(
         AetTarget,
         Vec<ComboPredicate>,
@@ -40,8 +41,13 @@ pub enum PredatorBehavior {
     Dartshot(AetTarget),
     Twinshot(AetTarget),
     CirisosisDart(AetTarget),
+    // Predation
+    Quickassess(AetTarget),
     // Spider
+    Web(AetTarget),
     Acid(AetTarget),
+    Negate(AetTarget),
+    Strands(AetTarget),
     Intoxicate(AetTarget),
     // Orgyuk
     Rake(AetTarget),
@@ -131,6 +137,24 @@ impl UnpoweredFunction for PredatorBehavior {
                     }
                 }
                 use_combo(model, controller, target, best_combo, preferred_limbs)
+            }
+            PredatorBehavior::DpsCombo(target_spec, predicates, preferred_limbs) => {
+                if let Some(target) = target_spec.get_target(model, controller) {
+                    let best_combo = controller.predator_combos.get_highest_dps_combo(
+                        &predicates,
+                        ComboAttack::get_crescentcut_damage(target),
+                    );
+                    unsafe {
+                        if DEBUG_TREES {
+                            println!("Solver: {:?}", controller.predator_combo_store);
+                            println!("Value combo: {:?}", best_combo);
+                            println!("All combos: {:?}", controller.predator_combos);
+                        }
+                    }
+                    use_combo(model, controller, target_spec, best_combo, preferred_limbs)
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
             }
             PredatorBehavior::GradedCombo(target, predicates, graders, preferred_limbs) => {
                 let best_combo = controller.predator_combos.get_highest_scored_combo(
@@ -261,6 +285,82 @@ impl UnpoweredFunction for PredatorBehavior {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(AcidAction::new(
+                        controller.target.clone().unwrap_or("".to_string()),
+                    )));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            PredatorBehavior::Web(target) => {
+                if let (Some(me), Some(you)) = (
+                    AetTarget::Me.get_target(model, controller),
+                    target.get_target(model, controller),
+                ) {
+                    if !me
+                        .check_if_predator(&|me| me.has_spider() && me.can_web())
+                        .unwrap_or(false)
+                    {
+                        return UnpoweredFunctionState::Failed;
+                    } else if you.is(FType::Shielded) {
+                        return UnpoweredFunctionState::Failed;
+                    } else if !me.arm_free() || me.stuck_fallen() {
+                        return UnpoweredFunctionState::Failed;
+                    } else if me.is(FType::Disfigurement) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    controller.plan.add_to_qeb(Box::new(WebAction::new(
+                        controller.target.clone().unwrap_or("".to_string()),
+                    )));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            PredatorBehavior::Negate(target) => {
+                if let (Some(me), Some(you)) = (
+                    AetTarget::Me.get_target(model, controller),
+                    target.get_target(model, controller),
+                ) {
+                    if you.is(FType::Negated) {
+                        return UnpoweredFunctionState::Failed;
+                    } else if !me.check_if_predator(&|me| me.has_spider()).unwrap_or(false) {
+                        return UnpoweredFunctionState::Failed;
+                    } else if you.is(FType::Shielded) {
+                        return UnpoweredFunctionState::Failed;
+                    } else if !me.arm_free() || me.stuck_fallen() {
+                        return UnpoweredFunctionState::Failed;
+                    } else if me.is(FType::Disfigurement) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    controller.plan.add_to_qeb(Box::new(NegateAction::new(
+                        controller.target.clone().unwrap_or("".to_string()),
+                    )));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            PredatorBehavior::Strands(target) => {
+                if let (Some(me), Some(you)) = (
+                    AetTarget::Me.get_target(model, controller),
+                    target.get_target(model, controller),
+                ) {
+                    if !me.check_if_predator(&|me| me.has_spider()).unwrap_or(false) {
+                        return UnpoweredFunctionState::Failed;
+                    } else if me
+                        .check_if_predator(&|me| me.strands_on(&target.get_name(model, controller)))
+                        .unwrap_or(false)
+                    {
+                        return UnpoweredFunctionState::Failed;
+                    } else if you.is(FType::Shielded) {
+                        return UnpoweredFunctionState::Failed;
+                    } else if !me.arm_free() || me.stuck_fallen() {
+                        return UnpoweredFunctionState::Failed;
+                    } else if me.is(FType::Disfigurement) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    controller.plan.add_to_qeb(Box::new(StrandsAction::new(
                         controller.target.clone().unwrap_or("".to_string()),
                     )));
                     UnpoweredFunctionState::Complete
@@ -466,6 +566,14 @@ impl UnpoweredFunction for PredatorBehavior {
                 } else {
                     UnpoweredFunctionState::Failed
                 }
+            }
+            PredatorBehavior::Quickassess(target) => {
+                controller
+                    .plan
+                    .add_to_back_of_qeb(Box::new(QuickassessAction::new(
+                        target.get_name(model, controller).unwrap_or("".to_string()),
+                    )));
+                UnpoweredFunctionState::Complete
             }
         }
     }

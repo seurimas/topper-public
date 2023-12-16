@@ -180,9 +180,12 @@ pub enum BType {
     SelfLoathing,
     Manabarbs,
     Pacifism,
+    Shock,
+    Burnout,
 
     // Writhe
     WritheDartpinned,
+    WritheWeb,
 
     UNKNOWN,
     SIZE,
@@ -589,6 +592,8 @@ pub enum FType {
     Bloodscourge,
     Cirisosis,
     Veinrip,
+    Negated,
+    Intoxicated,
 
     // Mirrored affs
     Remorse,

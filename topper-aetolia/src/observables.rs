@@ -28,6 +28,7 @@ pub trait ActiveTransition {
 pub struct ActionPlan {
     who: String,
     qeb: Option<Box<dyn ActiveTransition>>,
+    back_qeb: Option<Box<dyn ActiveTransition>>,
     other: HashMap<BType, Box<dyn ActiveTransition>>,
 }
 
@@ -42,6 +43,7 @@ impl ActionPlan {
         ActionPlan {
             who: who.to_string(),
             qeb: None,
+            back_qeb: None,
             other: HashMap::new(),
         }
     }
@@ -75,6 +77,17 @@ impl ActionPlan {
         }
     }
 
+    pub fn add_to_back_of_qeb(&mut self, action: Box<dyn ActiveTransition>) {
+        if self.back_qeb.is_some() {
+            self.back_qeb = self
+                .back_qeb
+                .take()
+                .map(|old_qeb| ActionPlan::join(old_qeb, action));
+        } else {
+            self.back_qeb = Some(action);
+        }
+    }
+
     pub fn queue_for(&mut self, bal: BType, action: Box<dyn ActiveTransition>) {
         self.other.insert(bal, action);
     }
@@ -82,6 +95,11 @@ impl ActionPlan {
     pub fn get_inputs(&self, timeline: &AetTimeline) -> String {
         let mut inputs = "".to_string();
         if let Some(Ok(qeb)) = self.qeb.as_ref().map(|action| action.act(&timeline)) {
+            inputs = format!("qeb {}", qeb);
+            if let Some(Ok(back_qeb)) = self.back_qeb.as_ref().map(|action| action.act(&timeline)) {
+                inputs = format!("{};;{}", inputs, back_qeb);
+            }
+        } else if let Some(Ok(qeb)) = self.back_qeb.as_ref().map(|action| action.act(&timeline)) {
             inputs = format!("qeb {}", qeb);
         }
         if let Some(Ok(qs)) = self

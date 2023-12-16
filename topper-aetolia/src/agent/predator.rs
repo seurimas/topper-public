@@ -59,6 +59,7 @@ pub enum PredatorCompanionState {
         raking: Option<(Timer, String, u32)>,
     },
     Spider {
+        web_cooldown: Timer,
         intoxicate_target: Option<String>,
         strands_target: Option<String>,
     },
@@ -83,7 +84,9 @@ impl PredatorCompanionState {
                     }
                 }
             }
-            PredatorCompanionState::Spider { .. } => {}
+            PredatorCompanionState::Spider { web_cooldown, .. } => {
+                web_cooldown.wait(time);
+            }
         }
     }
 }
@@ -112,6 +115,7 @@ impl PredatorClassState {
             self.companion = Some(PredatorCompanionState::Spider {
                 strands_target: None,
                 intoxicate_target: None,
+                web_cooldown: Timer::count_up_seconds(20.),
             });
         }
     }
@@ -121,6 +125,21 @@ impl PredatorClassState {
             true
         } else {
             false
+        }
+    }
+
+    pub fn can_web(&self) -> bool {
+        if let Some(PredatorCompanionState::Spider { web_cooldown, .. }) = &self.companion {
+            !web_cooldown.is_active()
+        } else {
+            false
+        }
+    }
+
+    pub fn webbed(&mut self) {
+        self.get_spider();
+        if let Some(PredatorCompanionState::Spider { web_cooldown, .. }) = &mut self.companion {
+            web_cooldown.reset();
         }
     }
 
@@ -141,6 +160,21 @@ impl PredatorClassState {
         {
             if let Some(intoxicate_target) = intoxicate_target {
                 intoxicate_target.eq_ignore_ascii_case(target)
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    }
+
+    pub fn strands_on(&self, target: &Option<String>) -> bool {
+        if target.is_none() {
+            false
+        } else if let Some(PredatorCompanionState::Spider { strands_target, .. }) = &self.companion
+        {
+            if let Some(strands_target) = strands_target {
+                strands_target.eq_ignore_ascii_case(target.as_ref().unwrap())
             } else {
                 false
             }
@@ -238,10 +272,12 @@ impl PredatorClassState {
 pub struct PredatorBoard {
     pub fleshbane: Timer,
     pub fleshbane_count: u32,
+    pub intoxicate: Timer,
     pub bloodscourge: Timer,
     pub veinrip: Timer,
     pub acid: Timer,
     pub cirisosis: Timer,
+    pub negate: Timer,
 }
 
 impl Default for PredatorBoard {
@@ -249,16 +285,20 @@ impl Default for PredatorBoard {
         let mut default = PredatorBoard {
             fleshbane: Timer::count_up_observe_seconds(60., 65.),
             fleshbane_count: 0,
+            intoxicate: Timer::count_up_observe_seconds(10., 11.),
             bloodscourge: Timer::count_up_observe_seconds(4., 7.),
             veinrip: Timer::count_up_observe_seconds(14., 20.),
             acid: Timer::count_up_seconds(10.),
             cirisosis: Timer::count_up_observe_seconds(4., 6.),
+            negate: Timer::count_up_observe_seconds(20., 21.),
         };
+        default.intoxicate.expire();
         default.fleshbane.expire();
         default.bloodscourge.expire();
         default.veinrip.expire();
         default.acid.expire();
         default.cirisosis.expire();
+        default.negate.expire();
         default
     }
 }
@@ -326,5 +366,29 @@ impl PredatorBoard {
 
     pub fn acid_end(&mut self) {
         self.acid.expire();
+    }
+
+    pub fn is_intoxicated(&self) -> bool {
+        self.intoxicate.is_active()
+    }
+
+    pub fn intoxicate(&mut self) {
+        self.intoxicate.reset();
+    }
+
+    pub fn intoxicate_used(&mut self) {
+        self.intoxicate.expire();
+    }
+
+    pub fn is_negated(&self) -> bool {
+        self.negate.is_active()
+    }
+
+    pub fn negate(&mut self) {
+        self.negate.reset();
+    }
+
+    pub fn negate_end(&mut self) {
+        self.negate.expire();
     }
 }

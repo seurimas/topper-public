@@ -30,6 +30,33 @@ pub enum ComboAttack {
 }
 
 impl ComboAttack {
+    pub fn get_crescentcut_damage(agent: &AgentState) -> f32 {
+        let mut damage = 1.25; // Fallen is 1.25, and we're assuming it's up.
+        if agent.is(FType::Paresis) {
+            damage += 0.15;
+        }
+        if agent.is(FType::Shock) {
+            damage += 0.40;
+        }
+        damage += agent.affs_count(&vec![
+            FType::LeftLegCrippled,
+            FType::LeftArmCrippled,
+            FType::RightLegCrippled,
+            FType::RightArmCrippled,
+        ]) as f32
+            * 0.1;
+        damage += agent.affs_count(&vec![
+            FType::LeftLegBroken,
+            FType::LeftArmBroken,
+            FType::RightLegBroken,
+            FType::RightArmBroken,
+        ]) as f32
+            * 0.35;
+        damage += agent.affs_count(&vec![FType::HeadBroken, FType::TorsoBroken]) as f32 * 0.3;
+        damage += agent.affs_count(&vec![FType::HeadMangled, FType::TorsoMangled]) as f32 * 0.5;
+        damage
+    }
+
     pub fn is_combo_attack(&self) -> bool {
         match self {
             ComboAttack::Tidalslash => false,
@@ -87,7 +114,6 @@ impl ComboAttack {
             ComboAttack::Veinrip => true,
             ComboAttack::Feint => true,
             ComboAttack::Gouge => true,
-            ComboAttack::Vertical => true,
             _ => false,
         }
     }
@@ -228,6 +254,36 @@ impl ComboAttack {
             base - 40
         } else {
             base
+        }
+    }
+
+    pub fn get_stance_damage(&self, stance: Stance) -> CType {
+        let base_damage = match self {
+            ComboAttack::Jab => 240,
+            ComboAttack::Lowhook => 240,
+            ComboAttack::Pinprick => 80,
+            ComboAttack::Lateral => 230,
+            ComboAttack::Spinslash => 350,
+            ComboAttack::Vertical => 475,
+            ComboAttack::Gouge => 333,
+            ComboAttack::Bleed => 133,
+            // Gets bonuses elsewhere.
+            ComboAttack::Crescentcut => 470,
+            ComboAttack::Veinrip => 170,
+            ComboAttack::Swiftkick => {
+                // Unmodified by stance.
+                return 240;
+            }
+            ComboAttack::Flashkick => {
+                // Unmodified by stance.
+                return 575;
+            }
+            _ => 0,
+        };
+        if stance == Stance::Rizet || stance == Stance::Bladesurge {
+            base_damage * 5 / 4
+        } else {
+            base_damage
         }
     }
 
@@ -391,6 +447,23 @@ impl PredatorCombo {
             .1
     }
 
+    pub fn estimate_damage(&self, crescentcut_value: f32) -> CType {
+        self.1
+            .iter()
+            .fold((self.0, 0), |(stance, damage), attack| {
+                (
+                    attack.get_next_stance(stance),
+                    damage
+                        + if *attack == ComboAttack::Crescentcut {
+                            (attack.get_stance_damage(stance) as f32 * crescentcut_value) as CType
+                        } else {
+                            attack.get_stance_damage(stance)
+                        },
+                )
+            })
+            .1
+    }
+
     pub fn estimate_aff_rate(&self) -> f32 {
         let balance = self.get_balance_time();
         let affs = self
@@ -398,6 +471,12 @@ impl PredatorCombo {
             .iter()
             .fold(0, |affs, attack| affs + attack.get_aff_count());
         affs as f32 / balance as f32
+    }
+
+    pub fn estimate_dps(&self, crescentcut_value: f32) -> f32 {
+        let damage = self.estimate_damage(crescentcut_value);
+        let balance = self.get_balance_time();
+        damage as f32 / balance as f32
     }
 
     pub fn score_combo(&self, graders: &Vec<ComboGrader>) -> i32 {
@@ -589,6 +668,7 @@ pub struct ComboSet(Vec<PredatorCombo>);
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub enum ComboPredicate {
+    HasVenom,
     WithAttack(ComboAttack),
     EndsInStance(Stance),
     MinimumAttacks(usize),
@@ -599,6 +679,10 @@ pub enum ComboPredicate {
 impl ComboPredicate {
     pub fn matches(&self, combo: &PredatorCombo, score: Option<i32>) -> bool {
         match self {
+            ComboPredicate::HasVenom => combo
+                .get_attacks()
+                .iter()
+                .any(|attack| attack.can_use_venom()),
             ComboPredicate::WithAttack(attack) => combo.get_attacks().contains(attack),
             ComboPredicate::EndsInStance(stance) => {
                 combo.0 == Stance::Bladesurge || combo.get_final_stance() == *stance
@@ -764,6 +848,32 @@ impl ComboSet {
                 let aff_rate = combo.estimate_aff_rate();
                 if aff_rate > highest_aff_rate {
                     highest_aff_rate = aff_rate;
+                    highest_combo = Some(combo);
+                }
+            }
+        }
+        highest_combo.cloned()
+    }
+
+    pub fn get_highest_dps_combo(
+        &self,
+        predicates: &Vec<ComboPredicate>,
+        crescentcut_value: f32,
+    ) -> Option<PredatorCombo> {
+        let mut highest_combo = None;
+        let mut highest_dps = 0.0;
+        for combo in self.0.iter() {
+            let mut valid = true;
+            for predicate in predicates.iter() {
+                if !predicate.matches(combo, None) {
+                    valid = false;
+                    break;
+                }
+            }
+            if valid {
+                let dps = combo.estimate_dps(crescentcut_value);
+                if dps > highest_dps {
+                    highest_dps = dps;
                     highest_combo = Some(combo);
                 }
             }

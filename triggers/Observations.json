@@ -569,5 +569,20 @@
     "regex": "^\\*\\* Illusion \\*\\*",
     "args": [],
     "observation_name": "Illusion"
+  },
+  {
+    "regex": "^You glance over (\\w+) and see that .* health is at (\\d+)/(\\d+).$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Group": 2
+      },
+      {
+        "Group": 3
+      }
+    ],
+    "observation_name": "Assess"
   }
 ]

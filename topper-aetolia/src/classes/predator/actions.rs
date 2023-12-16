@@ -293,6 +293,66 @@ impl ActiveTransition for AcidAction {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct StrandsAction {
+    pub target: String,
+}
+
+impl StrandsAction {
+    pub fn new(target: String) -> Self {
+        Self { target }
+    }
+}
+
+impl ActiveTransition for StrandsAction {
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
+    fn act(&self, timline: &AetTimeline) -> ActivateResult {
+        Ok(format!("spider strands {}", self.target))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct NegateAction {
+    pub target: String,
+}
+
+impl NegateAction {
+    pub fn new(target: String) -> Self {
+        Self { target }
+    }
+}
+
+impl ActiveTransition for NegateAction {
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
+    fn act(&self, timline: &AetTimeline) -> ActivateResult {
+        Ok(format!("spider negate {}", self.target))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct WebAction {
+    pub target: String,
+}
+
+impl WebAction {
+    pub fn new(target: String) -> Self {
+        Self { target }
+    }
+}
+
+impl ActiveTransition for WebAction {
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
+    fn act(&self, timline: &AetTimeline) -> ActivateResult {
+        Ok(format!("spider web {}", self.target))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct IntoxicateAction {
     pub target: String,
 }
@@ -569,5 +629,25 @@ impl ActiveTransition for ArouseAction {
     }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("arouse"))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct QuickassessAction {
+    pub target: String,
+}
+
+impl QuickassessAction {
+    pub fn new(target: String) -> Self {
+        Self { target }
+    }
+}
+
+impl ActiveTransition for QuickassessAction {
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("quickassess {}", self.target))
     }
 }

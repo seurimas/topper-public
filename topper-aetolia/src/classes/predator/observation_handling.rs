@@ -20,6 +20,18 @@ pub const SPINSLASH_DAMAGE: f32 = 4.0;
 pub const GOUGE_DAMAGE: f32 = 6.5;
 pub const FLASHKICK_DAMAGE: f32 = 5.0;
 
+pub fn use_up_intoxicated(
+    agent_states: &mut AetTimelineState,
+    target: &String,
+    after: &Vec<AetObservation>,
+) {
+    if attack_hit(after) {
+        agent_states.for_agent(target, &move |you: &mut AgentState| {
+            you.predator_board.intoxicate_used();
+        });
+    }
+}
+
 pub fn handle_combat_action(
     combat_action: &CombatAction,
     agent_states: &mut AetTimelineState,
@@ -45,6 +57,7 @@ pub fn handle_combat_action(
                 first_person,
                 &hints,
             );
+            use_up_intoxicated(agent_states, &combat_action.target, after);
         }
         "Fleshbane" => {
             attack_afflictions(
@@ -61,6 +74,7 @@ pub fn handle_combat_action(
                 first_person,
                 &hints,
             );
+            use_up_intoxicated(agent_states, &combat_action.target, after);
         }
         "Fleshbaned" => {
             if combat_action.annotation.eq_ignore_ascii_case("end") {
@@ -159,7 +173,7 @@ pub fn handle_combat_action(
                 after,
             );
         }
-        "Vertical" | "Crescentcut" | "Butterfly" => {
+        "Vertical" | "Crescentcut" | "Butterfly" | "Freefall" => {
             apply_weapon_hits(
                 agent_states,
                 &combat_action.caster,
@@ -168,6 +182,7 @@ pub fn handle_combat_action(
                 first_person,
                 &hints,
             );
+            use_up_intoxicated(agent_states, &combat_action.target, after);
         }
         "Trip" => {
             attack_afflictions(
@@ -392,6 +407,14 @@ pub fn handle_combat_action(
                 });
             });
         }
+        "Negate" => {
+            attack_afflictions(
+                agent_states,
+                &combat_action.target,
+                vec![FType::Negated],
+                after,
+            );
+        }
         "Acid" => {
             attack_afflictions(
                 agent_states,
@@ -400,12 +423,30 @@ pub fn handle_combat_action(
                 after,
             );
         }
+        "Web" => {
+            attack_afflictions(
+                agent_states,
+                &combat_action.target,
+                vec![FType::WritheWeb],
+                after,
+            );
+            for_agent(agent_states, &combat_action.caster, &|me| {
+                me.assume_predator(&|class_state| {
+                    class_state.webbed();
+                });
+            });
+        }
         "Intoxicate" => {
             let target = combat_action.target.clone();
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_predator(&|class_state| {
                     class_state.intoxicate(target.clone());
                 });
+            });
+        }
+        "Intoxicated" => {
+            for_agent(agent_states, &combat_action.caster, &|me| {
+                me.predator_board.intoxicate();
             });
         }
         "Pummel" => {

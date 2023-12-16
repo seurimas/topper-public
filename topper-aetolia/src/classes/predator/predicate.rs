@@ -15,6 +15,8 @@ pub enum PredatorPredicate {
     TidalslashReady,
     Veinripped,
     Intoxicating(AetTarget),
+    Intoxicated,
+    Negated,
     ApexAtLeast(u32),
     HasOrgyuk,
     HasSpider,
@@ -51,6 +53,8 @@ impl TargetPredicate for PredatorPredicate {
                         false
                     }
                 }
+                PredatorPredicate::Intoxicated => target.predator_board.is_intoxicated(),
+                PredatorPredicate::Negated => target.predator_board.is_negated(),
                 PredatorPredicate::ApexAtLeast(apex) => target
                     .check_if_predator(&|predator| predator.apex >= *apex)
                     .unwrap_or(false),

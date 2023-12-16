@@ -213,6 +213,8 @@ pub enum AetObservation {
     Stand(String),
     Sent(String),
     Illusion,
+    #[skip_args]
+    Assess(String, i32, i32),
 }
 
 pub trait AetTimelineStateTrait {

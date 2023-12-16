@@ -292,5 +292,47 @@
       }
     ],
     "observation_name": "Proc"
+  },
+  {
+    "regex": "scuttles towards (\\w+) and sinks its venomous fangs into .* body.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Beastmastery"
+      },
+      {
+        "Literal": "Intoxicated"
+      },
+      {
+        "Literal": "hit"
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
+    "regex": "^(You)r spider is already focused on (\\w+).$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Beastmastery"
+      },
+      {
+        "Literal": "Intoxicate"
+      },
+      {
+        "Literal": "fail"
+      },
+      {
+        "GroupAsTarget": 2
+      }
+    ],
+    "observation_name": "Proc"
   }
 ]

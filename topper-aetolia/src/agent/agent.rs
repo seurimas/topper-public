@@ -6,6 +6,9 @@ use std::convert::TryFrom;
 use std::fmt;
 use topper_core::timeline::BaseAgentState;
 
+pub const SHOCK_TIME: f32 = 20.0;
+pub const BURNOUT_TIME: f32 = 20.0;
+
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 pub struct AgentState {
     pub balances: [Timer; BType::SIZE as usize],
@@ -89,6 +92,9 @@ impl BaseAgentState for AgentState {
         if self.is(FType::WritheDartpinned) && self.balanced(BType::WritheDartpinned) {
             self.set_flag(FType::WritheDartpinned, false);
         }
+        if self.is(FType::WritheWeb) && self.balanced(BType::WritheWeb) {
+            self.set_flag(FType::WritheWeb, false);
+        }
         if self.is(FType::SelfLoathing) {
             let observed = self.get_count(FType::SelfLoathing);
             if (observed <= 2 && self.get_balance(BType::SelfLoathing) < 3.)
@@ -100,6 +106,12 @@ impl BaseAgentState for AgentState {
                 );
                 self.observe_flag(FType::SelfLoathing, false);
             }
+        }
+        if self.is(FType::Shock) && self.balanced(BType::Shock) {
+            self.set_flag(FType::Shock, false);
+        }
+        if self.is(FType::Burnout) && self.balanced(BType::Burnout) {
+            self.set_flag(FType::Burnout, false);
         }
     }
     fn get_base_state() -> Self {
@@ -147,6 +159,8 @@ impl AgentState {
             FType::Bloodscourge => self.predator_board.bloodscourge.is_active(),
             FType::Cirisosis => self.predator_board.cirisosis.is_active(),
             FType::Veinrip => self.predator_board.veinrip.is_active(),
+            FType::Intoxicated => self.predator_board.is_intoxicated(),
+            FType::Negated => self.predator_board.is_negated(),
             FType::LeftLegCrippled => self.limb_damage.crippled(LType::LeftLegDamage),
             FType::RightLegCrippled => self.limb_damage.crippled(LType::RightLegDamage),
             FType::LeftArmCrippled => self.limb_damage.crippled(LType::LeftArmDamage),
@@ -273,6 +287,20 @@ impl AgentState {
                     self.predator_board.veinrip_end();
                 }
             }
+            FType::Intoxicated => {
+                if value {
+                    self.predator_board.intoxicate()
+                } else {
+                    self.predator_board.intoxicate_used();
+                }
+            }
+            FType::Negated => {
+                if value {
+                    self.predator_board.negate()
+                } else {
+                    self.predator_board.negate_end();
+                }
+            }
             FType::LeftLegCrippled => self
                 .limb_damage
                 .set_limb_crippled(LType::LeftLegDamage, value),
@@ -303,6 +331,12 @@ impl AgentState {
             | FType::RightArmAmputated => {}
             _ => self.flags.set_flag(flag, value),
         }
+        if flag == FType::Shock && value {
+            self.set_balance(BType::Shock, SHOCK_TIME);
+        }
+        if flag == FType::Burnout && value {
+            self.set_balance(BType::Burnout, BURNOUT_TIME);
+        }
         if flag == FType::Rebounding {
             self.flags.set_flag(FType::AssumedRebounding, false);
         }
@@ -320,6 +354,9 @@ impl AgentState {
         }
         if value && flag == FType::WritheDartpinned {
             self.set_balance(BType::WritheDartpinned, 3.0);
+        }
+        if value && flag == FType::WritheWeb {
+            self.set_balance(BType::WritheWeb, 3.0);
         }
         match flag {
             FType::Zenith => {

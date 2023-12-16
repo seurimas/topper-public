@@ -461,6 +461,18 @@ pub fn apply_observation(
                 },
             );
         }
+        AetObservation::Assess(who, current, max) => {
+            let percent = *current as f32 / *max as f32;
+            for_agent(timeline, who, &move |me: &mut AgentState| {
+                if !me.is(FType::Shock) {
+                    if me.is(FType::Deadening) && percent <= 0.4 {
+                        me.toggle_flag(FType::Shock, true);
+                    } else if percent <= 0.25 {
+                        me.toggle_flag(FType::Shock, true);
+                    }
+                }
+            });
+        }
         _ => {}
     }
     Ok(())
