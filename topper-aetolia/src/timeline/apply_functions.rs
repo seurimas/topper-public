@@ -374,6 +374,22 @@ pub fn apply_observation(
                 me.set_parrying(limb);
             });
         }
+        AetObservation::HiddenAff => {
+            for_agent(
+                timeline,
+                &timeline.me.clone(),
+                &move |me: &mut AgentState| {
+                    me.hidden_state.add_unknown();
+                    if !me.is(FType::Recklessness)
+                        && me.get_health_percent() == 1.
+                        && me.get_mana_percent() == 1.
+                    {
+                        println!("Guessing recklessness!");
+                        me.hidden_state.add_guess(FType::Recklessness);
+                    }
+                },
+            );
+        }
         AetObservation::Parry(who, what) => {
             let limb = match what.as_str() {
                 "arms" | "legs" => LType::SIZE,

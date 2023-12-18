@@ -14,12 +14,14 @@ use topper_bt::unpowered::*;
 use crate::{
     classes::{
         get_venoms_from_plan,
-        predator::{ComboAttack, ComboGrader, ComboSet, ComboSolver, PredatorCombo},
+        predator::{
+            ComboAttack, ComboGrader, ComboPredicate, ComboSet, ComboSolver, PredatorCombo,
+        },
         VenomPlan,
     },
     observables::ActionPlan,
     timeline::AetTimeline,
-    types::AgentState,
+    types::{AgentState, Stance},
 };
 
 pub type AetBehaviorTreeDef = UnpoweredTreeDef<AetBehaviorTreeNode>;
@@ -54,9 +56,18 @@ pub struct BehaviorController {
     pub plan_hints: HashMap<String, String>,
     pub target: Option<String>,
     pub allies: HashMap<String, i32>,
-    pub predator_combo_store: ComboSolver,
-    pub predator_base_graders: Vec<ComboGrader>,
-    pub predator_combos: ComboSet,
+    pub class_controller: ClassController,
+}
+
+#[derive(Default, Debug)]
+pub enum ClassController {
+    #[default]
+    Unset,
+    Predator {
+        predator_combo_store: ComboSolver,
+        predator_base_graders: Vec<ComboGrader>,
+        predator_combos: ComboSet,
+    },
 }
 
 impl BehaviorController {
@@ -81,6 +92,66 @@ impl BehaviorController {
             get_venoms_from_plan(&self.aff_priorities.as_ref().unwrap(), count, &you)
         } else {
             vec![""]
+        }
+    }
+
+    pub fn init_predator(&mut self) {
+        self.class_controller = ClassController::Predator {
+            predator_combo_store: ComboSolver::default(),
+            predator_base_graders: vec![],
+            predator_combos: ComboSet::default(),
+        };
+    }
+
+    pub fn predator_combo_store(&mut self) -> &mut ComboSolver {
+        if let ClassController::Predator {
+            predator_combo_store,
+            ..
+        } = &mut self.class_controller
+        {
+            predator_combo_store
+        } else {
+            panic!("Not a predator!")
+        }
+    }
+
+    pub fn predator_base_graders(&mut self) -> &mut Vec<ComboGrader> {
+        if let ClassController::Predator {
+            predator_base_graders,
+            ..
+        } = &mut self.class_controller
+        {
+            predator_base_graders
+        } else {
+            panic!("Not a predator!")
+        }
+    }
+
+    pub fn predator_combos(&mut self) -> &mut ComboSet {
+        if let ClassController::Predator {
+            predator_combos, ..
+        } = &mut self.class_controller
+        {
+            predator_combos
+        } else {
+            panic!("Not a predator!")
+        }
+    }
+
+    pub fn get_highest_scored_predator_combo(
+        &self,
+        predicates: &Vec<ComboPredicate>,
+        graders: &Vec<ComboGrader>,
+    ) -> Option<PredatorCombo> {
+        if let ClassController::Predator {
+            predator_combos,
+            predator_base_graders,
+            ..
+        } = &self.class_controller
+        {
+            predator_combos.get_highest_scored_combo(predicates, predator_base_graders, graders)
+        } else {
+            panic!("Not a predator!")
         }
     }
 }

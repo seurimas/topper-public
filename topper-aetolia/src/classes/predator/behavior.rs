@@ -88,67 +88,70 @@ impl UnpoweredFunction for PredatorBehavior {
                 }
             }
             PredatorBehavior::ResetComboAttacks => {
-                controller.predator_combo_store = Default::default();
-                controller.predator_combos.clear();
+                *controller.predator_combo_store() = Default::default();
+                controller.predator_combos().clear();
                 UnpoweredFunctionState::Complete
             }
             PredatorBehavior::AddComboAttacks(attacks) => {
-                controller.predator_combo_store.add_attacks(attacks.iter());
+                controller
+                    .predator_combo_store()
+                    .add_attacks(attacks.iter());
                 UnpoweredFunctionState::Complete
             }
             PredatorBehavior::AllowBadStances(allow_bad_stances) => {
                 controller
-                    .predator_combo_store
+                    .predator_combo_store()
                     .set_allow_bad_stances(*allow_bad_stances);
                 UnpoweredFunctionState::Complete
             }
             PredatorBehavior::AllowParries(allow_parries) => {
                 controller
-                    .predator_combo_store
+                    .predator_combo_store()
                     .set_allow_parries(*allow_parries);
                 UnpoweredFunctionState::Complete
             }
             PredatorBehavior::AddGraders(graders) => {
                 controller
-                    .predator_base_graders
+                    .predator_base_graders()
                     .extend(graders.iter().cloned());
                 UnpoweredFunctionState::Complete
             }
             PredatorBehavior::FastestCombo(target, predicates, preferred_limbs) => {
-                let best_combo = controller.predator_combos.get_fastest_combo(&predicates);
+                let best_combo = controller.predator_combos().get_fastest_combo(&predicates);
                 unsafe {
                     if DEBUG_TREES {
-                        println!("Solver: {:?}", controller.predator_combo_store);
+                        println!("Solver: {:?}", controller.predator_combo_store());
                         println!("Fastest combo: {:?}", best_combo);
-                        println!("All combos: {:?}", controller.predator_combos);
+                        println!("All combos: {:?}", controller.predator_combos());
                     }
                 }
                 use_combo(model, controller, target, best_combo, preferred_limbs)
             }
             PredatorBehavior::AffRateCombo(target, predicates, preferred_limbs) => {
                 let best_combo = controller
-                    .predator_combos
+                    .predator_combos()
                     .get_highest_aff_rate_combo(&predicates);
                 unsafe {
                     if DEBUG_TREES {
-                        println!("Solver: {:?}", controller.predator_combo_store);
+                        println!("Solver: {:?}", controller.predator_combo_store());
                         println!("Value combo: {:?}", best_combo);
-                        println!("All combos: {:?}", controller.predator_combos);
+                        println!("All combos: {:?}", controller.predator_combos());
                     }
                 }
                 use_combo(model, controller, target, best_combo, preferred_limbs)
             }
             PredatorBehavior::DpsCombo(target_spec, predicates, preferred_limbs) => {
                 if let Some(target) = target_spec.get_target(model, controller) {
-                    let best_combo = controller.predator_combos.get_highest_dps_combo(
+                    let best_combo = controller.predator_combos().get_highest_dps_combo(
                         &predicates,
+                        target.is(FType::Fallen),
                         ComboAttack::get_crescentcut_damage(target),
                     );
                     unsafe {
                         if DEBUG_TREES {
-                            println!("Solver: {:?}", controller.predator_combo_store);
+                            println!("Solver: {:?}", controller.predator_combo_store());
                             println!("Value combo: {:?}", best_combo);
-                            println!("All combos: {:?}", controller.predator_combos);
+                            println!("All combos: {:?}", controller.predator_combos());
                         }
                     }
                     use_combo(model, controller, target_spec, best_combo, preferred_limbs)
@@ -157,16 +160,13 @@ impl UnpoweredFunction for PredatorBehavior {
                 }
             }
             PredatorBehavior::GradedCombo(target, predicates, graders, preferred_limbs) => {
-                let best_combo = controller.predator_combos.get_highest_scored_combo(
-                    &predicates,
-                    &controller.predator_base_graders,
-                    &graders,
-                );
+                let best_combo =
+                    controller.get_highest_scored_predator_combo(&predicates, &graders);
                 unsafe {
                     if DEBUG_TREES {
-                        println!("Solver: {:?}", controller.predator_combo_store);
+                        println!("Solver: {:?}", controller.predator_combo_store());
                         println!("Value combo: {:?}", best_combo);
-                        println!("All combos: {:?}", controller.predator_combos);
+                        println!("All combos: {:?}", controller.predator_combos());
                     }
                 }
                 use_combo(model, controller, target, best_combo, preferred_limbs)
@@ -181,10 +181,10 @@ impl UnpoweredFunction for PredatorBehavior {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
-                        .predator_combo_store
+                        .predator_combo_store()
                         .set_stance(me.get_predator_stance());
                     controller
-                        .predator_combo_store
+                        .predator_combo_store()
                         .set_parry(target.can_parry())
                         .set_prone(target.is_prone())
                         .set_rebounds(
@@ -194,7 +194,7 @@ impl UnpoweredFunction for PredatorBehavior {
                                 0
                             }) + (if target.is(FType::Shielded) { 1 } else { 0 }),
                         );
-                    controller.predator_combos = controller.predator_combo_store.find_combos();
+                    *controller.predator_combos() = controller.predator_combo_store().find_combos();
                     UnpoweredFunctionState::Complete
                 } else {
                     UnpoweredFunctionState::Failed

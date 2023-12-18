@@ -23,6 +23,7 @@ pub fn get_action_plan(
     db: Option<&impl AetDatabaseModule>,
 ) -> ActionPlan {
     let mut controller = get_controller("predator", me, target, timeline, strategy, db);
+    controller.init_predator();
     let tree_name = if strategy.eq("class") {
         format!("predator/base")
     } else {

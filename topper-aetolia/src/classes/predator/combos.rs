@@ -31,7 +31,10 @@ pub enum ComboAttack {
 
 impl ComboAttack {
     pub fn get_crescentcut_damage(agent: &AgentState) -> f32 {
-        let mut damage = 1.25; // Fallen is 1.25, and we're assuming it's up.
+        let mut damage = 1.;
+        if agent.is(FType::Fallen) {
+            damage += 0.25;
+        }
         if agent.is(FType::Paresis) {
             damage += 0.15;
         }
@@ -179,7 +182,6 @@ impl ComboAttack {
     pub fn requires_prone(&self) -> bool {
         match self {
             ComboAttack::Pindown => true,
-            ComboAttack::Crescentcut => true, // Technically not true, but it's a good idea.
             _ => false,
         }
     }
@@ -447,21 +449,29 @@ impl PredatorCombo {
             .1
     }
 
-    pub fn estimate_damage(&self, crescentcut_value: f32) -> CType {
+    pub fn estimate_damage(&self, start_fallen: bool, crescentcut_value: f32) -> CType {
         self.1
             .iter()
-            .fold((self.0, 0), |(stance, damage), attack| {
-                (
-                    attack.get_next_stance(stance),
-                    damage
-                        + if *attack == ComboAttack::Crescentcut {
-                            (attack.get_stance_damage(stance) as f32 * crescentcut_value) as CType
-                        } else {
-                            attack.get_stance_damage(stance)
-                        },
-                )
-            })
-            .1
+            .fold(
+                (self.0, start_fallen, 0),
+                |(stance, prone, damage), attack| {
+                    let mut modded_value = crescentcut_value;
+                    if !start_fallen && prone {
+                        modded_value += 0.25;
+                    }
+                    (
+                        attack.get_next_stance(stance),
+                        prone || attack.can_prone(),
+                        damage
+                            + if *attack == ComboAttack::Crescentcut {
+                                (attack.get_stance_damage(stance) as f32 * modded_value) as CType
+                            } else {
+                                attack.get_stance_damage(stance)
+                            },
+                    )
+                },
+            )
+            .2
     }
 
     pub fn estimate_aff_rate(&self) -> f32 {
@@ -473,8 +483,8 @@ impl PredatorCombo {
         affs as f32 / balance as f32
     }
 
-    pub fn estimate_dps(&self, crescentcut_value: f32) -> f32 {
-        let damage = self.estimate_damage(crescentcut_value);
+    pub fn estimate_dps(&self, start_fallen: bool, crescentcut_value: f32) -> f32 {
+        let damage = self.estimate_damage(start_fallen, crescentcut_value);
         let balance = self.get_balance_time();
         damage as f32 / balance as f32
     }
@@ -759,7 +769,7 @@ impl ComboGrader {
                         if combo_attack.can_drop_parry() {
                             parrying = false;
                         }
-                        if combo_attack == attack {
+                        if !parrying && combo_attack == attack {
                             (total + *unparried_value, parrying)
                         } else {
                             (total, parrying)
@@ -858,6 +868,7 @@ impl ComboSet {
     pub fn get_highest_dps_combo(
         &self,
         predicates: &Vec<ComboPredicate>,
+        start_fallen: bool,
         crescentcut_value: f32,
     ) -> Option<PredatorCombo> {
         let mut highest_combo = None;
@@ -871,7 +882,7 @@ impl ComboSet {
                 }
             }
             if valid {
-                let dps = combo.estimate_dps(crescentcut_value);
+                let dps = combo.estimate_dps(start_fallen, crescentcut_value);
                 if dps > highest_dps {
                     highest_dps = dps;
                     highest_combo = Some(combo);

@@ -313,6 +313,7 @@ impl PredatorBoard {
         self.veinrip.wait(time);
         self.acid.wait(time);
         self.cirisosis.wait(time);
+        self.negate.wait(time);
     }
 
     pub fn fleshbaned(&mut self) {

@@ -74,6 +74,7 @@ pub fn get_guessed_value(
         FType::Stupidity => 6,
         FType::Paresis => 5,
         FType::Weariness => 4,
+        FType::Recklessness => 3,
         _ => 0,
     }
 }
