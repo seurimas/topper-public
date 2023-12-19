@@ -32,6 +32,19 @@ pub fn use_up_intoxicated(
     }
 }
 
+pub fn sitara_strike(
+    agent_states: &mut AetTimelineState,
+    target: &String,
+    after: &Vec<AetObservation>,
+    count: u32,
+) {
+    if attack_hit(after) {
+        agent_states.for_agent(target, &move |you: &mut AgentState| {
+            you.predator_board.sitara_hit(count);
+        });
+    }
+}
+
 pub fn handle_combat_action(
     combat_action: &CombatAction,
     agent_states: &mut AetTimelineState,
@@ -58,6 +71,7 @@ pub fn handle_combat_action(
                 &hints,
             );
             use_up_intoxicated(agent_states, &combat_action.target, after);
+            sitara_strike(agent_states, &combat_action.target, after, 1);
         }
         "Fleshbane" => {
             attack_afflictions(
@@ -75,6 +89,7 @@ pub fn handle_combat_action(
                 &hints,
             );
             use_up_intoxicated(agent_states, &combat_action.target, after);
+            sitara_strike(agent_states, &combat_action.target, after, 1);
         }
         "Fleshbaned" => {
             if combat_action.annotation.eq_ignore_ascii_case("end") {
@@ -138,6 +153,7 @@ pub fn handle_combat_action(
                 (limb, JAB_DAMAGE, true),
                 after,
             );
+            sitara_strike(agent_states, &combat_action.target, after, 1);
         }
         "Lowhook" => {
             let limb = LType::from_name(&combat_action.annotation);
@@ -147,6 +163,7 @@ pub fn handle_combat_action(
                 (limb, LOWHOOK_DAMAGE, true),
                 after,
             );
+            sitara_strike(agent_states, &combat_action.target, after, 1);
         }
         "Spinslash" => {
             let limb = LType::from_name(&combat_action.annotation);
@@ -156,6 +173,7 @@ pub fn handle_combat_action(
                 (limb, SPINSLASH_DAMAGE, true),
                 after,
             );
+            sitara_strike(agent_states, &combat_action.target, after, 2);
         }
         "Pinprick" => {
             attack_afflictions(
@@ -172,8 +190,9 @@ pub fn handle_combat_action(
                 (LType::TorsoDamage, LATERAL_DAMAGE, true),
                 after,
             );
+            sitara_strike(agent_states, &combat_action.target, after, 1);
         }
-        "Vertical" | "Crescentcut" | "Butterfly" | "Freefall" => {
+        "Vertical" | "Crescentcut" | "Butterfly" => {
             apply_weapon_hits(
                 agent_states,
                 &combat_action.caster,
@@ -183,6 +202,19 @@ pub fn handle_combat_action(
                 &hints,
             );
             use_up_intoxicated(agent_states, &combat_action.target, after);
+            sitara_strike(agent_states, &combat_action.target, after, 1);
+        }
+        "Freefall" => {
+            apply_weapon_hits(
+                agent_states,
+                &combat_action.caster,
+                &combat_action.target,
+                after,
+                first_person,
+                &hints,
+            );
+            use_up_intoxicated(agent_states, &combat_action.target, after);
+            sitara_strike(agent_states, &combat_action.target, after, 3);
         }
         "Trip" => {
             attack_afflictions(
@@ -226,6 +258,7 @@ pub fn handle_combat_action(
                 vec![FType::Veinrip],
                 after,
             );
+            sitara_strike(agent_states, &combat_action.target, after, 1);
         }
         "Veinripped" => {
             if combat_action.annotation.eq_ignore_ascii_case("hit") {

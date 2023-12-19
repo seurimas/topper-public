@@ -329,6 +329,10 @@ impl PredatorBoard {
         self.fleshbane.expire();
     }
 
+    pub fn sitara_hit(&mut self, count: u32) {
+        self.fleshbane_count += count;
+    }
+
     pub fn bloodscourged(&mut self) {
         self.bloodscourge.reset();
     }

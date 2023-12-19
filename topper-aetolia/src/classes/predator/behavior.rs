@@ -28,6 +28,7 @@ pub enum PredatorBehavior {
         Vec<ComboGrader>,
         Vec<LimbDescriptor>,
     ),
+    SeriesCombo(AetTarget, PredatorCombo, Vec<LimbDescriptor>),
     AddGraders(Vec<ComboGrader>),
     AddComboAttacks(Vec<ComboAttack>),
     AllowBadStances(bool),
@@ -170,6 +171,30 @@ impl UnpoweredFunction for PredatorBehavior {
                     }
                 }
                 use_combo(model, controller, target, best_combo, preferred_limbs)
+            }
+            PredatorBehavior::SeriesCombo(aet_target, predator_combo, preferred_limbs) => {
+                if let (me, Some(target)) = (
+                    model.state.borrow_me(),
+                    aet_target.get_target(model, controller),
+                ) {
+                    if !me
+                        .check_if_predator(&|me| {
+                            me.stance == predator_combo.get_starting_stance()
+                                || me.stance == Stance::Bladesurge
+                        })
+                        .unwrap_or(false)
+                    {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    return use_combo(
+                        model,
+                        controller,
+                        aet_target,
+                        Some(predator_combo.clone()),
+                        preferred_limbs,
+                    );
+                }
+                UnpoweredFunctionState::Failed
             }
             PredatorBehavior::CalculateCombos(target) => {
                 if let (me, Some(target)) = (

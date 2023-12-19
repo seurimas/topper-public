@@ -11,6 +11,7 @@ pub enum PredatorPredicate {
     InStance(Stance),
     CanFeint,
     Fleshbaned,
+    FleshbanedOver(u32),
     Bloodscourged,
     TidalslashReady,
     Veinripped,
@@ -39,6 +40,9 @@ impl TargetPredicate for PredatorPredicate {
                     .check_if_predator(&|predator| predator.feint_time < 0)
                     .unwrap_or(false),
                 PredatorPredicate::Fleshbaned => target.predator_board.fleshbane.is_active(),
+                PredatorPredicate::FleshbanedOver(count) => {
+                    target.predator_board.fleshbane_count >= *count
+                }
                 PredatorPredicate::Bloodscourged => target.predator_board.bloodscourge.is_active(),
                 PredatorPredicate::TidalslashReady => target
                     .check_if_predator(&|predator| predator.tidalslash)

@@ -4,7 +4,9 @@ use topper_bt::unpowered::*;
 
 use crate::classes::bard::BardPredicate;
 use crate::classes::get_affs_from_plan;
+use crate::classes::is_affected_by;
 use crate::classes::predator::PredatorPredicate;
+use crate::classes::Class;
 use crate::classes::LockType;
 use crate::classes::VenomPlan;
 use crate::curatives::get_cure_depth;
@@ -86,10 +88,10 @@ pub enum AetPredicate {
     HasBalanceEquilibrium(AetTarget),
     HasBalance(AetTarget),
     HasEquilibrium(AetTarget),
-    HasTree(AetTarget),
-    HasFocus(AetTarget),
-    HasFitness(AetTarget),
-    HasClassCure(AetTarget),
+    HasTree(AetTarget, f32),
+    HasFocus(AetTarget, f32),
+    HasFitness(AetTarget, f32),
+    HasClassCure(AetTarget, f32),
     // Elevation
     IsGrounded(AetTarget),
     IsFlying(AetTarget),
@@ -98,6 +100,8 @@ pub enum AetPredicate {
     KnownParry(AetTarget, LimbDescriptor),
     CanParry(AetTarget),
     // Class-specific
+    IsAffectedBy(AetTarget, FType),
+    ClassIn(AetTarget, Vec<Class>),
     BardPredicate(AetTarget, BardPredicate),
     PredatorPredicate(AetTarget, PredatorPredicate),
 }
@@ -361,9 +365,9 @@ impl UnpoweredFunction for AetPredicate {
                 }
                 UnpoweredFunctionState::Failed
             }
-            AetPredicate::HasFocus(target) => {
+            AetPredicate::HasFocus(target, buffer) => {
                 if let Some(target) = target.get_target(model, controller) {
-                    if target.get_balance(BType::Focus) < QUEUE_TIME {
+                    if target.get_balance(BType::Focus) < QUEUE_TIME + *buffer {
                         return UnpoweredFunctionState::Complete;
                     }
                 }
@@ -387,25 +391,25 @@ impl UnpoweredFunction for AetPredicate {
                 }
                 UnpoweredFunctionState::Failed
             }
-            AetPredicate::HasTree(target) => {
+            AetPredicate::HasTree(target, buffer) => {
                 if let Some(target) = target.get_target(model, controller) {
-                    if target.get_balance(BType::Tree) < QUEUE_TIME {
+                    if target.get_balance(BType::Tree) < QUEUE_TIME + *buffer {
                         return UnpoweredFunctionState::Complete;
                     }
                 }
                 UnpoweredFunctionState::Failed
             }
-            AetPredicate::HasFitness(target) => {
+            AetPredicate::HasFitness(target, buffer) => {
                 if let Some(target) = target.get_target(model, controller) {
-                    if target.get_balance(BType::Fitness) < QUEUE_TIME {
+                    if target.get_balance(BType::Fitness) < QUEUE_TIME + *buffer {
                         return UnpoweredFunctionState::Complete;
                     }
                 }
                 UnpoweredFunctionState::Failed
             }
-            AetPredicate::HasClassCure(target) => {
+            AetPredicate::HasClassCure(target, buffer) => {
                 if let Some(target) = target.get_target(model, controller) {
-                    if target.get_balance(BType::ClassCure1) < QUEUE_TIME {
+                    if target.get_balance(BType::ClassCure1) < QUEUE_TIME + *buffer {
                         return UnpoweredFunctionState::Complete;
                     }
                 }
@@ -500,6 +504,26 @@ impl UnpoweredFunction for AetPredicate {
                 } else {
                     UnpoweredFunctionState::Failed
                 }
+            }
+            AetPredicate::IsAffectedBy(target, aff) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if let Some(class) = target.class_state.get_normalized_class() {
+                        if is_affected_by(&class, *aff) {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::ClassIn(target, classes) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if let Some(class) = target.class_state.get_normalized_class() {
+                        if classes.contains(&class) {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
             }
         }
     }

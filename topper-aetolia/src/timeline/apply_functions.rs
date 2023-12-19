@@ -52,7 +52,11 @@ pub fn apply_observation(
             handle_simple_cure_action(simple_cure, timeline, before, after)?;
         }
         AetObservation::DiscernedCure(who, affliction) => {
-            timeline.set_flag_for_agent(who, affliction, false)?;
+            for_agent(timeline, who, &|me| {
+                if let Some(aff_flag) = FType::from_name(&affliction) {
+                    me.toggle_flag(aff_flag, false);
+                }
+            });
             if let Some(AetObservation::Devenoms(venom)) = before.last() {
                 if venom.eq_ignore_ascii_case("cirisosis") {
                     timeline.set_flag_for_agent(who, &"cirisosis".to_string(), true);
@@ -60,7 +64,13 @@ pub fn apply_observation(
             }
         }
         AetObservation::Cured(affliction) => {
-            timeline.set_flag_for_agent(&timeline.me.clone(), affliction, false)?;
+            for_agent(timeline, &timeline.me.clone(), &|me| {
+                if let Ok((_damage_type, _damage_amount)) = get_damage_barrier(&affliction) {
+                    // Do nothing...
+                } else if let Some(aff_flag) = FType::from_name(&affliction) {
+                    me.toggle_flag(aff_flag, false);
+                }
+            });
         }
         AetObservation::FlameShield(who) => {
             if timeline.borrow_agent(who).get_count(FType::Ablaze) <= 1 {
@@ -487,6 +497,8 @@ pub fn apply_observation(
                         me.toggle_flag(FType::Shock, true);
                     }
                 }
+                me.set_stat(SType::Health, *current);
+                me.set_max_stat(SType::Health, *max);
             });
         }
         _ => {}

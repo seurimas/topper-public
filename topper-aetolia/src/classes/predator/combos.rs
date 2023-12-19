@@ -90,18 +90,15 @@ impl ComboAttack {
     }
 
     pub fn get_aff_count(&self) -> usize {
-        if self.can_use_venom() {
-            1
-        } else {
-            match self {
-                ComboAttack::Pinprick => 1,
-                ComboAttack::Flashkick => 1,
-                ComboAttack::Veinrip => 2,
-                ComboAttack::Gouge => 1,
-                ComboAttack::Pheromones => 1,
-                ComboAttack::Mindnumb => 1,
-                _ => 0,
-            }
+        match self {
+            ComboAttack::Pinprick => 1,
+            ComboAttack::Flashkick => 1,
+            ComboAttack::Veinrip => 2,
+            ComboAttack::Gouge => 1,
+            ComboAttack::Pheromones => 1,
+            ComboAttack::Mindnumb => 1,
+            ComboAttack::Trip => 1,
+            _ => 0,
         }
     }
 
@@ -415,7 +412,7 @@ impl ComboAttack {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 pub struct PredatorCombo(Stance, Vec<ComboAttack>);
 
 impl PredatorCombo {
@@ -429,6 +426,10 @@ impl PredatorCombo {
 
     pub fn get_starting_stance(&self) -> Stance {
         self.0
+    }
+
+    pub fn has_venom(&self) -> bool {
+        self.1.iter().any(|attack| attack.can_use_venom())
     }
 
     pub fn get_final_stance(&self) -> Stance {
@@ -476,10 +477,13 @@ impl PredatorCombo {
 
     pub fn estimate_aff_rate(&self) -> f32 {
         let balance = self.get_balance_time();
-        let affs = self
+        let mut affs = self
             .1
             .iter()
             .fold(0, |affs, attack| affs + attack.get_aff_count());
+        if self.has_venom() {
+            affs += 1;
+        }
         affs as f32 / balance as f32
     }
 
@@ -689,10 +693,7 @@ pub enum ComboPredicate {
 impl ComboPredicate {
     pub fn matches(&self, combo: &PredatorCombo, score: Option<i32>) -> bool {
         match self {
-            ComboPredicate::HasVenom => combo
-                .get_attacks()
-                .iter()
-                .any(|attack| attack.can_use_venom()),
+            ComboPredicate::HasVenom => combo.has_venom(),
             ComboPredicate::WithAttack(attack) => combo.get_attacks().contains(attack),
             ComboPredicate::EndsInStance(stance) => {
                 combo.0 == Stance::Bladesurge || combo.get_final_stance() == *stance
@@ -795,12 +796,11 @@ impl ComboGrader {
                     .1
             }
             ComboGrader::HasVenom(value) => {
-                for attack in combo.get_attacks().iter() {
-                    if attack.can_use_venom() {
-                        return *value;
-                    }
+                if combo.has_venom() {
+                    *value
+                } else {
+                    0
                 }
-                return 0;
             }
             ComboGrader::EndsInStance(stance, value) => {
                 if combo.0 == Stance::Bladesurge || combo.get_final_stance() == *stance {

@@ -54,7 +54,9 @@ impl ActiveTransition for FitnessAction {
     }
 }
 
-#[derive(Debug, Serialize, Clone, Copy, Display, TryFromPrimitive, PartialEq, Eq, Hash)]
+#[derive(
+    Debug, Serialize, Deserialize, Clone, Copy, Display, TryFromPrimitive, PartialEq, Eq, Hash,
+)]
 #[repr(u8)]
 pub enum Class {
     Carnifex,
@@ -284,11 +286,13 @@ pub fn is_affected_by(class: &Class, affliction: FType) -> bool {
         (FType::Clumsiness, Class::Infiltrator) => true,
         (FType::Clumsiness, Class::Bard) => true,
         (FType::Clumsiness, Class::Templar) => true,
-        (FType::Clumsiness, Class::Carnifex) => true,
         (FType::Clumsiness, Class::Sentinel) => true,
         (FType::Clumsiness, Class::Wayfarer) => true,
         (FType::Clumsiness, Class::Teradrim) => true,
+        (FType::Clumsiness, Class::Predator) => true,
         (FType::Clumsiness, Class::Zealot) => true,
+        (FType::Weariness, Class::Carnifex) => true,
+        (FType::Weariness, Class::Sciomancer) => true,
         (FType::Peace, Class::Luminary) => true,
         (FType::Disfigurement, Class::Sentinel) => true,
         (FType::Disfigurement, Class::Carnifex) => true,
