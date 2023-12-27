@@ -175,9 +175,6 @@ impl SeriesAttack {
 }
 
 impl ActiveTransition for SeriesAttack {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        vec![]
-    }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         if should_call_venoms(timeline) {
             Ok(format!(
@@ -222,9 +219,6 @@ impl BloodscourgeAction {
 }
 
 impl ActiveTransition for BloodscourgeAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         if should_call_venoms(timeline) {
             Ok(format!(
@@ -255,9 +249,6 @@ impl FleshbaneAction {
 }
 
 impl ActiveTransition for FleshbaneAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         if should_call_venoms(timline) {
             Ok(format!(
@@ -284,9 +275,6 @@ impl AcidAction {
 }
 
 impl ActiveTransition for AcidAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         Ok(format!("spider acid {}", self.target))
     }
@@ -304,9 +292,6 @@ impl StrandsAction {
 }
 
 impl ActiveTransition for StrandsAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         Ok(format!("spider strands {}", self.target))
     }
@@ -324,9 +309,6 @@ impl NegateAction {
 }
 
 impl ActiveTransition for NegateAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         Ok(format!("spider negate {}", self.target))
     }
@@ -344,9 +326,6 @@ impl WebAction {
 }
 
 impl ActiveTransition for WebAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         Ok(format!("spider web {}", self.target))
     }
@@ -364,9 +343,6 @@ impl IntoxicateAction {
 }
 
 impl ActiveTransition for IntoxicateAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         Ok(format!("spider intoxicate {}", self.target))
     }
@@ -388,9 +364,6 @@ impl DartshotAction {
 }
 
 impl ActiveTransition for DartshotAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         if should_call_venoms(timline) {
             Ok(format!(
@@ -423,9 +396,6 @@ impl TwinshotAction {
 }
 
 impl ActiveTransition for TwinshotAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         if should_call_venoms(timeline) {
             Ok(format!(
@@ -460,9 +430,6 @@ impl RakeAction {
 }
 
 impl ActiveTransition for RakeAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("orgyuk rake {}", self.target))
     }
@@ -480,9 +447,6 @@ impl SwipeAction {
 }
 
 impl ActiveTransition for SwipeAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("orgyuk swipe {}", self.target))
     }
@@ -500,9 +464,6 @@ impl ThrowAction {
 }
 
 impl ActiveTransition for ThrowAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("orgyuk throw {}", self.target))
     }
@@ -518,9 +479,6 @@ impl RoarAction {
 }
 
 impl ActiveTransition for RoarAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("orgyuk roar"))
     }
@@ -538,9 +496,6 @@ impl WeakenAction {
 }
 
 impl ActiveTransition for WeakenAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("orgyuk weaken {}", self.target))
     }
@@ -558,9 +513,6 @@ impl MawcrushAction {
 }
 
 impl ActiveTransition for MawcrushAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("orgyuk mawcrush {}", self.target))
     }
@@ -579,9 +531,6 @@ impl PummelAction {
 }
 
 impl ActiveTransition for PummelAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!(
             "orgyuk pummel {} {}",
@@ -601,9 +550,6 @@ impl FerocityAction {
 }
 
 impl ActiveTransition for FerocityAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("ferocity"))
     }
@@ -619,9 +565,6 @@ impl ArouseAction {
 }
 
 impl ActiveTransition for ArouseAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("arouse"))
     }
@@ -639,9 +582,6 @@ impl QuickassessAction {
 }
 
 impl ActiveTransition for QuickassessAction {
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        todo!()
-    }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("quickassess {}", self.target))
     }

@@ -6,7 +6,7 @@ use topper_core::timeline::db::DummyDatabaseModule;
 
 use crate::{
     bt::*,
-    classes::{Class, FitnessAction, ParryAction},
+    classes::{Action, Class, FitnessAction, ParryAction},
     db::AetDatabaseModule,
     types::*,
 };
@@ -20,6 +20,7 @@ use super::{
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum DefenseBehavior {
     Parry,
+    ClassParry(String),
     Repipe,
     Fitness,
     Dodge,
@@ -52,6 +53,32 @@ impl UnpoweredFunction for DefenseBehavior {
                                         model.who_am_i(),
                                         limb,
                                     )));
+                                };
+                            }
+                            Err(err) => println!("Could not parry, inner: {:?}", err),
+                        }
+                    }
+                }
+                Err(err) => println!("Could not parry: {:?}", err),
+            },
+            DefenseBehavior::ClassParry(verb) => match DEFENSE_DATABASE.as_ref().try_lock() {
+                Ok(outer_guard) => {
+                    let option = outer_guard.as_ref();
+                    if let Some(inner_mutex) = option {
+                        match inner_mutex.as_ref().read() {
+                            Ok(db) => {
+                                if let Some(limb) = get_needed_parry(
+                                    model,
+                                    &model.who_am_i(),
+                                    &controller.target.clone().unwrap_or_default(),
+                                    &"".to_string(),
+                                    Some(&*db),
+                                ) {
+                                    controller.plan.add_to_qeb(Box::new(Action::new(format!(
+                                        "{} {}",
+                                        verb,
+                                        limb.to_string()
+                                    ))));
                                 };
                             }
                             Err(err) => println!("Could not parry, inner: {:?}", err),

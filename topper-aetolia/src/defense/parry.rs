@@ -77,7 +77,10 @@ pub fn get_preferred_parry<DB: AetDatabaseModule + ?Sized>(
     strategy: &String,
     db: Option<&DB>,
 ) -> Result<LType, String> {
-    if let Some(mut class) = db.and_then(|db| db.get_class(target)) {
+    if let Some(mut class) = db.and_then(|db| db.get_class(target)).or_else(|| {
+        let them = timeline.state.borrow_agent(target);
+        them.class_state.get_normalized_class()
+    }) {
         if class.is_mirror() {
             class = class.normal();
         }

@@ -21,7 +21,9 @@ impl ProbableEvent {
 
 pub trait ActiveTransition {
     fn act(&self, timline: &AetTimeline) -> ActivateResult;
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent>;
+    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
+        todo!()
+    }
 }
 
 #[derive(Default)]
@@ -160,9 +162,6 @@ impl ActiveTransition for Inactivity {
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         Ok(format!(""))
     }
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        vec![]
-    }
 }
 
 pub struct PlainAction(String);
@@ -177,9 +176,6 @@ impl ActiveTransition for PlainAction {
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         Ok(self.0.clone())
     }
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        vec![]
-    }
 }
 
 pub struct Trace(String);
@@ -193,9 +189,6 @@ impl Trace {
 impl ActiveTransition for Trace {
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         Ok(format!("echo {}", self.0))
-    }
-    fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
-        vec![]
     }
 }
 
