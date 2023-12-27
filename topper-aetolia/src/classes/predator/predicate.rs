@@ -8,7 +8,7 @@ use super::actions::*;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum PredatorPredicate {
-    InStance(Stance),
+    InStance(KnifeStance),
     CanFeint,
     Fleshbaned,
     FleshbanedOver(u32),
@@ -48,15 +48,11 @@ impl TargetPredicate for PredatorPredicate {
                     .check_if_predator(&|predator| predator.tidalslash)
                     .unwrap_or(false),
                 PredatorPredicate::Veinripped => target.predator_board.veinrip.is_active(),
-                PredatorPredicate::Intoxicating(other_target) => {
-                    if let Some(target_name) = other_target.get_name(model, controller) {
-                        target
-                            .check_if_predator(&|predator| predator.is_intoxicating(&target_name))
-                            .unwrap_or(false)
-                    } else {
-                        false
-                    }
-                }
+                PredatorPredicate::Intoxicating(other_target) => target
+                    .check_if_predator(&|predator| {
+                        predator.is_intoxicating(&other_target.get_name(model, controller))
+                    })
+                    .unwrap_or(false),
                 PredatorPredicate::Intoxicated => target.predator_board.is_intoxicated(),
                 PredatorPredicate::Negated => target.predator_board.is_negated(),
                 PredatorPredicate::ApexAtLeast(apex) => target

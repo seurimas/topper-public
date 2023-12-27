@@ -113,7 +113,6 @@ impl ComboAttack {
             ComboAttack::Pinprick => true,
             ComboAttack::Veinrip => true,
             ComboAttack::Feint => true,
-            ComboAttack::Gouge => true,
             _ => false,
         }
     }
@@ -200,8 +199,8 @@ impl ComboAttack {
         }
     }
 
-    pub fn is_good_combo_attack(&self, stance: Stance) -> bool {
-        if *self == ComboAttack::Raze || stance == Stance::Bladesurge {
+    pub fn is_good_combo_attack(&self, stance: KnifeStance) -> bool {
+        if *self == ComboAttack::Raze || stance == KnifeStance::Bladesurge {
             return true;
         }
         !self.is_combo_attack() || self.get_next_stance(stance) != stance
@@ -223,7 +222,7 @@ impl ComboAttack {
         }
     }
 
-    pub fn get_balance_time(&self, stance: Stance) -> CType {
+    pub fn get_balance_time(&self, stance: KnifeStance) -> CType {
         let base = match self {
             ComboAttack::Jab => 205,
             ComboAttack::Pinprick => 205,
@@ -249,14 +248,14 @@ impl ComboAttack {
         };
         if !self.is_good_combo_attack(stance) {
             base + 98
-        } else if stance == Stance::VaeSant || stance == Stance::Bladesurge {
+        } else if stance == KnifeStance::VaeSant || stance == KnifeStance::Bladesurge {
             base - 40
         } else {
             base
         }
     }
 
-    pub fn get_stance_damage(&self, stance: Stance) -> CType {
+    pub fn get_stance_damage(&self, stance: KnifeStance) -> CType {
         let base_damage = match self {
             ComboAttack::Jab => 240,
             ComboAttack::Lowhook => 240,
@@ -279,17 +278,17 @@ impl ComboAttack {
             }
             _ => 0,
         };
-        if stance == Stance::Rizet || stance == Stance::Bladesurge {
+        if stance == KnifeStance::Rizet || stance == KnifeStance::Bladesurge {
             base_damage * 5 / 4
         } else {
             base_damage
         }
     }
 
-    pub fn get_next_stance(&self, stance: Stance) -> Stance {
+    pub fn get_next_stance(&self, stance: KnifeStance) -> KnifeStance {
         match (self, stance) {
             // Bladesurge stays in bladesurge.
-            (_, Stance::Bladesurge) => Stance::Bladesurge,
+            (_, KnifeStance::Bladesurge) => KnifeStance::Bladesurge,
             // Non knifeplay attacks.
             (ComboAttack::Tidalslash, _) => stance,
             (ComboAttack::Freefall, _) => stance,
@@ -297,126 +296,126 @@ impl ComboAttack {
             (ComboAttack::Pindown, _) => stance,
             (ComboAttack::Mindnumb, _) => stance,
             // Jab
-            (ComboAttack::Jab, Stance::None) => Stance::Gyanis,
-            (ComboAttack::Jab, Stance::Gyanis) => Stance::Rizet,
-            (ComboAttack::Jab, Stance::VaeSant) => Stance::Gyanis,
-            (ComboAttack::Jab, Stance::Rizet) => stance,
-            (ComboAttack::Jab, Stance::EinFasit) => Stance::VaeSant,
-            (ComboAttack::Jab, Stance::Laesan) => Stance::Rizet,
+            (ComboAttack::Jab, KnifeStance::None) => KnifeStance::Gyanis,
+            (ComboAttack::Jab, KnifeStance::Gyanis) => KnifeStance::Rizet,
+            (ComboAttack::Jab, KnifeStance::VaeSant) => KnifeStance::Gyanis,
+            (ComboAttack::Jab, KnifeStance::Rizet) => stance,
+            (ComboAttack::Jab, KnifeStance::EinFasit) => KnifeStance::VaeSant,
+            (ComboAttack::Jab, KnifeStance::Laesan) => KnifeStance::Rizet,
             // Pinprick
-            (ComboAttack::Pinprick, Stance::None) => Stance::Gyanis,
-            (ComboAttack::Pinprick, Stance::Gyanis) => Stance::Rizet,
-            (ComboAttack::Pinprick, Stance::VaeSant) => Stance::Rizet,
-            (ComboAttack::Pinprick, Stance::Rizet) => Stance::VaeSant,
-            (ComboAttack::Pinprick, Stance::EinFasit) => stance,
-            (ComboAttack::Pinprick, Stance::Laesan) => Stance::Gyanis,
+            (ComboAttack::Pinprick, KnifeStance::None) => KnifeStance::Gyanis,
+            (ComboAttack::Pinprick, KnifeStance::Gyanis) => KnifeStance::Rizet,
+            (ComboAttack::Pinprick, KnifeStance::VaeSant) => KnifeStance::Rizet,
+            (ComboAttack::Pinprick, KnifeStance::Rizet) => KnifeStance::VaeSant,
+            (ComboAttack::Pinprick, KnifeStance::EinFasit) => stance,
+            (ComboAttack::Pinprick, KnifeStance::Laesan) => KnifeStance::Gyanis,
             // Lateral
-            (ComboAttack::Lateral, Stance::None) => Stance::Gyanis,
-            (ComboAttack::Lateral, Stance::Gyanis) => Stance::VaeSant,
-            (ComboAttack::Lateral, Stance::VaeSant) => Stance::EinFasit,
-            (ComboAttack::Lateral, Stance::Rizet) => Stance::EinFasit,
-            (ComboAttack::Lateral, Stance::EinFasit) => Stance::Laesan,
-            (ComboAttack::Lateral, Stance::Laesan) => stance,
+            (ComboAttack::Lateral, KnifeStance::None) => KnifeStance::Gyanis,
+            (ComboAttack::Lateral, KnifeStance::Gyanis) => KnifeStance::VaeSant,
+            (ComboAttack::Lateral, KnifeStance::VaeSant) => KnifeStance::EinFasit,
+            (ComboAttack::Lateral, KnifeStance::Rizet) => KnifeStance::EinFasit,
+            (ComboAttack::Lateral, KnifeStance::EinFasit) => KnifeStance::Laesan,
+            (ComboAttack::Lateral, KnifeStance::Laesan) => stance,
             // Vertical
-            (ComboAttack::Vertical, Stance::None) => Stance::Laesan,
-            (ComboAttack::Vertical, Stance::Gyanis) => Stance::Laesan,
-            (ComboAttack::Vertical, Stance::VaeSant) => Stance::Rizet,
-            (ComboAttack::Vertical, Stance::Rizet) => Stance::EinFasit,
-            (ComboAttack::Vertical, Stance::EinFasit) => Stance::VaeSant,
-            (ComboAttack::Vertical, Stance::Laesan) => stance,
+            (ComboAttack::Vertical, KnifeStance::None) => KnifeStance::Laesan,
+            (ComboAttack::Vertical, KnifeStance::Gyanis) => KnifeStance::Laesan,
+            (ComboAttack::Vertical, KnifeStance::VaeSant) => KnifeStance::Rizet,
+            (ComboAttack::Vertical, KnifeStance::Rizet) => KnifeStance::EinFasit,
+            (ComboAttack::Vertical, KnifeStance::EinFasit) => KnifeStance::VaeSant,
+            (ComboAttack::Vertical, KnifeStance::Laesan) => stance,
             // Crescentcut
-            (ComboAttack::Crescentcut, Stance::None) => Stance::VaeSant,
-            (ComboAttack::Crescentcut, Stance::Gyanis) => Stance::EinFasit,
-            (ComboAttack::Crescentcut, Stance::VaeSant) => stance,
-            (ComboAttack::Crescentcut, Stance::Rizet) => Stance::Laesan,
-            (ComboAttack::Crescentcut, Stance::EinFasit) => Stance::Gyanis,
-            (ComboAttack::Crescentcut, Stance::Laesan) => Stance::VaeSant,
+            (ComboAttack::Crescentcut, KnifeStance::None) => KnifeStance::VaeSant,
+            (ComboAttack::Crescentcut, KnifeStance::Gyanis) => KnifeStance::EinFasit,
+            (ComboAttack::Crescentcut, KnifeStance::VaeSant) => stance,
+            (ComboAttack::Crescentcut, KnifeStance::Rizet) => KnifeStance::Laesan,
+            (ComboAttack::Crescentcut, KnifeStance::EinFasit) => KnifeStance::Gyanis,
+            (ComboAttack::Crescentcut, KnifeStance::Laesan) => KnifeStance::VaeSant,
             // Spinslash
-            (ComboAttack::Spinslash, Stance::None) => Stance::VaeSant,
-            (ComboAttack::Spinslash, Stance::Gyanis) => Stance::VaeSant,
-            (ComboAttack::Spinslash, Stance::VaeSant) => Stance::EinFasit,
-            (ComboAttack::Spinslash, Stance::Rizet) => Stance::Laesan,
-            (ComboAttack::Spinslash, Stance::EinFasit) => stance,
-            (ComboAttack::Spinslash, Stance::Laesan) => Stance::EinFasit,
+            (ComboAttack::Spinslash, KnifeStance::None) => KnifeStance::VaeSant,
+            (ComboAttack::Spinslash, KnifeStance::Gyanis) => KnifeStance::VaeSant,
+            (ComboAttack::Spinslash, KnifeStance::VaeSant) => KnifeStance::EinFasit,
+            (ComboAttack::Spinslash, KnifeStance::Rizet) => KnifeStance::Laesan,
+            (ComboAttack::Spinslash, KnifeStance::EinFasit) => stance,
+            (ComboAttack::Spinslash, KnifeStance::Laesan) => KnifeStance::EinFasit,
             // Lowhook
-            (ComboAttack::Lowhook, Stance::None) => Stance::VaeSant,
-            (ComboAttack::Lowhook, Stance::Gyanis) => Stance::VaeSant,
-            (ComboAttack::Lowhook, Stance::VaeSant) => Stance::Gyanis,
-            (ComboAttack::Lowhook, Stance::Rizet) => stance,
-            (ComboAttack::Lowhook, Stance::EinFasit) => Stance::Gyanis,
-            (ComboAttack::Lowhook, Stance::Laesan) => Stance::Gyanis,
+            (ComboAttack::Lowhook, KnifeStance::None) => KnifeStance::VaeSant,
+            (ComboAttack::Lowhook, KnifeStance::Gyanis) => KnifeStance::VaeSant,
+            (ComboAttack::Lowhook, KnifeStance::VaeSant) => KnifeStance::Gyanis,
+            (ComboAttack::Lowhook, KnifeStance::Rizet) => stance,
+            (ComboAttack::Lowhook, KnifeStance::EinFasit) => KnifeStance::Gyanis,
+            (ComboAttack::Lowhook, KnifeStance::Laesan) => KnifeStance::Gyanis,
             // Butterfly
-            (ComboAttack::Butterfly, Stance::None) => Stance::Rizet,
-            (ComboAttack::Butterfly, Stance::Gyanis) => stance,
-            (ComboAttack::Butterfly, Stance::VaeSant) => Stance::Gyanis,
-            (ComboAttack::Butterfly, Stance::Rizet) => Stance::Gyanis,
-            (ComboAttack::Butterfly, Stance::EinFasit) => Stance::Laesan,
-            (ComboAttack::Butterfly, Stance::Laesan) => Stance::Rizet,
+            (ComboAttack::Butterfly, KnifeStance::None) => KnifeStance::Rizet,
+            (ComboAttack::Butterfly, KnifeStance::Gyanis) => stance,
+            (ComboAttack::Butterfly, KnifeStance::VaeSant) => KnifeStance::Gyanis,
+            (ComboAttack::Butterfly, KnifeStance::Rizet) => KnifeStance::Gyanis,
+            (ComboAttack::Butterfly, KnifeStance::EinFasit) => KnifeStance::Laesan,
+            (ComboAttack::Butterfly, KnifeStance::Laesan) => KnifeStance::Rizet,
             // Flashkick
-            (ComboAttack::Flashkick, Stance::None) => Stance::Rizet,
-            (ComboAttack::Flashkick, Stance::Gyanis) => Stance::Rizet,
-            (ComboAttack::Flashkick, Stance::VaeSant) => Stance::Laesan,
-            (ComboAttack::Flashkick, Stance::Rizet) => stance,
-            (ComboAttack::Flashkick, Stance::EinFasit) => Stance::Laesan,
-            (ComboAttack::Flashkick, Stance::Laesan) => Stance::VaeSant,
+            (ComboAttack::Flashkick, KnifeStance::None) => KnifeStance::Rizet,
+            (ComboAttack::Flashkick, KnifeStance::Gyanis) => KnifeStance::Rizet,
+            (ComboAttack::Flashkick, KnifeStance::VaeSant) => KnifeStance::Laesan,
+            (ComboAttack::Flashkick, KnifeStance::Rizet) => stance,
+            (ComboAttack::Flashkick, KnifeStance::EinFasit) => KnifeStance::Laesan,
+            (ComboAttack::Flashkick, KnifeStance::Laesan) => KnifeStance::VaeSant,
             // Trip
-            (ComboAttack::Trip, Stance::None) => Stance::EinFasit,
-            (ComboAttack::Trip, Stance::Gyanis) => Stance::VaeSant,
-            (ComboAttack::Trip, Stance::VaeSant) => stance,
-            (ComboAttack::Trip, Stance::Rizet) => Stance::Gyanis,
-            (ComboAttack::Trip, Stance::EinFasit) => Stance::Gyanis,
-            (ComboAttack::Trip, Stance::Laesan) => Stance::Rizet,
+            (ComboAttack::Trip, KnifeStance::None) => KnifeStance::EinFasit,
+            (ComboAttack::Trip, KnifeStance::Gyanis) => KnifeStance::VaeSant,
+            (ComboAttack::Trip, KnifeStance::VaeSant) => stance,
+            (ComboAttack::Trip, KnifeStance::Rizet) => KnifeStance::Gyanis,
+            (ComboAttack::Trip, KnifeStance::EinFasit) => KnifeStance::Gyanis,
+            (ComboAttack::Trip, KnifeStance::Laesan) => KnifeStance::Rizet,
             // Veinrip
-            (ComboAttack::Veinrip, Stance::None) => stance,
-            (ComboAttack::Veinrip, Stance::Gyanis) => Stance::EinFasit,
-            (ComboAttack::Veinrip, Stance::VaeSant) => Stance::EinFasit,
-            (ComboAttack::Veinrip, Stance::Rizet) => Stance::Gyanis,
-            (ComboAttack::Veinrip, Stance::EinFasit) => Stance::Laesan,
-            (ComboAttack::Veinrip, Stance::Laesan) => Stance::VaeSant,
+            (ComboAttack::Veinrip, KnifeStance::None) => stance,
+            (ComboAttack::Veinrip, KnifeStance::Gyanis) => KnifeStance::EinFasit,
+            (ComboAttack::Veinrip, KnifeStance::VaeSant) => KnifeStance::EinFasit,
+            (ComboAttack::Veinrip, KnifeStance::Rizet) => KnifeStance::Gyanis,
+            (ComboAttack::Veinrip, KnifeStance::EinFasit) => KnifeStance::Laesan,
+            (ComboAttack::Veinrip, KnifeStance::Laesan) => KnifeStance::VaeSant,
             // Feint
-            (ComboAttack::Feint, Stance::None) => Stance::EinFasit,
-            (ComboAttack::Feint, Stance::Gyanis) => Stance::EinFasit,
-            (ComboAttack::Feint, Stance::VaeSant) => Stance::Laesan,
-            (ComboAttack::Feint, Stance::Rizet) => stance,
-            (ComboAttack::Feint, Stance::EinFasit) => Stance::Gyanis,
-            (ComboAttack::Feint, Stance::Laesan) => Stance::EinFasit,
+            (ComboAttack::Feint, KnifeStance::None) => KnifeStance::EinFasit,
+            (ComboAttack::Feint, KnifeStance::Gyanis) => KnifeStance::EinFasit,
+            (ComboAttack::Feint, KnifeStance::VaeSant) => KnifeStance::Laesan,
+            (ComboAttack::Feint, KnifeStance::Rizet) => stance,
+            (ComboAttack::Feint, KnifeStance::EinFasit) => KnifeStance::Gyanis,
+            (ComboAttack::Feint, KnifeStance::Laesan) => KnifeStance::EinFasit,
             // Raze
-            (ComboAttack::Raze, Stance::None) => Stance::Laesan,
-            (ComboAttack::Raze, Stance::Gyanis) => Stance::Laesan,
-            (ComboAttack::Raze, Stance::VaeSant) => stance,
-            (ComboAttack::Raze, Stance::Rizet) => Stance::VaeSant,
-            (ComboAttack::Raze, Stance::EinFasit) => Stance::Rizet,
-            (ComboAttack::Raze, Stance::Laesan) => Stance::EinFasit,
+            (ComboAttack::Raze, KnifeStance::None) => KnifeStance::Laesan,
+            (ComboAttack::Raze, KnifeStance::Gyanis) => KnifeStance::Laesan,
+            (ComboAttack::Raze, KnifeStance::VaeSant) => stance,
+            (ComboAttack::Raze, KnifeStance::Rizet) => KnifeStance::VaeSant,
+            (ComboAttack::Raze, KnifeStance::EinFasit) => KnifeStance::Rizet,
+            (ComboAttack::Raze, KnifeStance::Laesan) => KnifeStance::EinFasit,
             // Gouge
-            (ComboAttack::Gouge, Stance::None) => Stance::Laesan,
-            (ComboAttack::Gouge, Stance::Gyanis) => Stance::EinFasit,
-            (ComboAttack::Gouge, Stance::VaeSant) => Stance::Gyanis,
-            (ComboAttack::Gouge, Stance::Rizet) => Stance::VaeSant,
-            (ComboAttack::Gouge, Stance::EinFasit) => Stance::Rizet,
-            (ComboAttack::Gouge, Stance::Laesan) => stance,
+            (ComboAttack::Gouge, KnifeStance::None) => KnifeStance::Laesan,
+            (ComboAttack::Gouge, KnifeStance::Gyanis) => KnifeStance::EinFasit,
+            (ComboAttack::Gouge, KnifeStance::VaeSant) => KnifeStance::Gyanis,
+            (ComboAttack::Gouge, KnifeStance::Rizet) => KnifeStance::VaeSant,
+            (ComboAttack::Gouge, KnifeStance::EinFasit) => KnifeStance::Rizet,
+            (ComboAttack::Gouge, KnifeStance::Laesan) => stance,
             // Bleed
-            (ComboAttack::Bleed, Stance::None) => stance,
-            (ComboAttack::Bleed, Stance::Gyanis) => Stance::Laesan,
-            (ComboAttack::Bleed, Stance::VaeSant) => Stance::Rizet,
-            (ComboAttack::Bleed, Stance::Rizet) => Stance::EinFasit,
-            (ComboAttack::Bleed, Stance::EinFasit) => stance,
-            (ComboAttack::Bleed, Stance::Laesan) => Stance::VaeSant,
+            (ComboAttack::Bleed, KnifeStance::None) => stance,
+            (ComboAttack::Bleed, KnifeStance::Gyanis) => KnifeStance::Laesan,
+            (ComboAttack::Bleed, KnifeStance::VaeSant) => KnifeStance::Rizet,
+            (ComboAttack::Bleed, KnifeStance::Rizet) => KnifeStance::EinFasit,
+            (ComboAttack::Bleed, KnifeStance::EinFasit) => stance,
+            (ComboAttack::Bleed, KnifeStance::Laesan) => KnifeStance::VaeSant,
             // Swiftkick
-            (ComboAttack::Swiftkick, Stance::None) => Stance::Gyanis,
-            (ComboAttack::Swiftkick, Stance::Gyanis) => Stance::Laesan,
-            (ComboAttack::Swiftkick, Stance::VaeSant) => Stance::EinFasit,
-            (ComboAttack::Swiftkick, Stance::Rizet) => stance,
-            (ComboAttack::Swiftkick, Stance::EinFasit) => Stance::VaeSant,
-            (ComboAttack::Swiftkick, Stance::Laesan) => Stance::Rizet,
+            (ComboAttack::Swiftkick, KnifeStance::None) => KnifeStance::Gyanis,
+            (ComboAttack::Swiftkick, KnifeStance::Gyanis) => KnifeStance::Laesan,
+            (ComboAttack::Swiftkick, KnifeStance::VaeSant) => KnifeStance::EinFasit,
+            (ComboAttack::Swiftkick, KnifeStance::Rizet) => stance,
+            (ComboAttack::Swiftkick, KnifeStance::EinFasit) => KnifeStance::VaeSant,
+            (ComboAttack::Swiftkick, KnifeStance::Laesan) => KnifeStance::Rizet,
         }
     }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
-pub struct PredatorCombo(Stance, Vec<ComboAttack>);
+pub struct PredatorCombo(KnifeStance, Vec<ComboAttack>);
 
 impl PredatorCombo {
-    pub fn new(stance: Stance, attacks: Vec<ComboAttack>) -> Self {
+    pub fn new(stance: KnifeStance, attacks: Vec<ComboAttack>) -> Self {
         Self(stance, attacks)
     }
 
@@ -424,7 +423,7 @@ impl PredatorCombo {
         &self.1
     }
 
-    pub fn get_starting_stance(&self) -> Stance {
+    pub fn get_starting_stance(&self) -> KnifeStance {
         self.0
     }
 
@@ -432,7 +431,7 @@ impl PredatorCombo {
         self.1.iter().any(|attack| attack.can_use_venom())
     }
 
-    pub fn get_final_stance(&self) -> Stance {
+    pub fn get_final_stance(&self) -> KnifeStance {
         self.1
             .iter()
             .fold(self.0, |stance, attack| attack.get_next_stance(stance))
@@ -493,17 +492,17 @@ impl PredatorCombo {
         damage as f32 / balance as f32
     }
 
-    pub fn score_combo(&self, graders: &Vec<ComboGrader>) -> i32 {
-        graders
-            .iter()
-            .fold(0, |score, grader| score + grader.grade(self))
+    pub fn score_combo(&self, graders: &Vec<ComboGrader>, start_parrying: Option<LType>) -> i32 {
+        graders.iter().fold(0, |score, grader| {
+            score + grader.grade(self, start_parrying)
+        })
     }
 }
 
 #[derive(Debug)]
 pub struct ComboSolver {
     attacks: Vec<ComboAttack>,
-    starting_stance: Stance,
+    starting_stance: KnifeStance,
     start_parry: bool,
     start_prone: bool,
     start_rebounds: u32,
@@ -514,12 +513,12 @@ pub struct ComboSolver {
 
 impl Default for ComboSolver {
     fn default() -> Self {
-        Self::new(Stance::None)
+        Self::new(KnifeStance::None)
     }
 }
 
 impl ComboSolver {
-    pub fn new(stance: Stance) -> Self {
+    pub fn new(stance: KnifeStance) -> Self {
         Self {
             attacks: vec![],
             starting_stance: stance,
@@ -532,7 +531,7 @@ impl ComboSolver {
         }
     }
 
-    pub fn set_stance(&mut self, stance: Stance) -> &mut Self {
+    pub fn set_stance(&mut self, stance: KnifeStance) -> &mut Self {
         self.starting_stance = stance;
         self
     }
@@ -580,7 +579,7 @@ impl ComboSolver {
         &self,
         combos: &mut Vec<PredatorCombo>,
         balance_time: CType,
-        current_stance: Stance,
+        current_stance: KnifeStance,
         attack: ComboAttack,
         previous_attacks: Vec<ComboAttack>,
         mut parrying: bool,
@@ -600,8 +599,8 @@ impl ComboSolver {
             ));
         }
         if new_attacks.len() == 3
-            && next_stance != Stance::Laesan
-            && next_stance != Stance::Bladesurge
+            && next_stance != KnifeStance::Laesan
+            && next_stance != KnifeStance::Bladesurge
         {
             return;
         } else if new_attacks.len() == 4 {
@@ -631,7 +630,7 @@ impl ComboSolver {
         combos: &mut Vec<PredatorCombo>,
         balance_time: CType,
         next_attack: &ComboAttack,
-        next_stance: Stance,
+        next_stance: KnifeStance,
         new_attacks: &Vec<ComboAttack>,
         parrying: bool,
         prone: bool,
@@ -684,7 +683,7 @@ pub struct ComboSet(Vec<PredatorCombo>);
 pub enum ComboPredicate {
     HasVenom,
     WithAttack(ComboAttack),
-    EndsInStance(Stance),
+    EndsInStance(KnifeStance),
     MinimumAttacks(usize),
     MaxBalanceTime(CType),
     ScoreOver(i32),
@@ -696,7 +695,7 @@ impl ComboPredicate {
             ComboPredicate::HasVenom => combo.has_venom(),
             ComboPredicate::WithAttack(attack) => combo.get_attacks().contains(attack),
             ComboPredicate::EndsInStance(stance) => {
-                combo.0 == Stance::Bladesurge || combo.get_final_stance() == *stance
+                combo.0 == KnifeStance::Bladesurge || combo.get_final_stance() == *stance
             }
             ComboPredicate::MinimumAttacks(minimum) => combo.get_attacks().len() >= *minimum,
             ComboPredicate::MaxBalanceTime(max_balance) => combo.get_balance_time() <= *max_balance,
@@ -716,14 +715,14 @@ pub enum ComboGrader {
     Reuse(i32),
     Hits(LType, i32),
     ValueMove(ComboAttack, i32, i32),
-    ValueMoveUnparried(ComboAttack, i32),
-    ValueMoveInStance(ComboAttack, Stance, i32),
+    ValueMoveUnparried(ComboAttack, i32, i32),
+    ValueMoveInStance(ComboAttack, KnifeStance, i32),
     HasVenom(i32),
-    EndsInStance(Stance, i32),
+    EndsInStance(KnifeStance, i32),
 }
 
 impl ComboGrader {
-    pub fn grade(&self, combo: &PredatorCombo) -> i32 {
+    pub fn grade(&self, combo: &PredatorCombo, start_parrying: Option<LType>) -> i32 {
         match self {
             ComboGrader::Reuse(value) => {
                 let mut seen_hits = vec![];
@@ -762,20 +761,28 @@ impl ComboGrader {
                     })
                     .0
             }
-            ComboGrader::ValueMoveUnparried(attack, unparried_value) => {
+            ComboGrader::ValueMoveUnparried(attack, unparried_value, off_limb) => {
                 combo
                     .get_attacks()
                     .iter()
-                    .fold((0, true), |(total, mut parrying), combo_attack| {
-                        if combo_attack.can_drop_parry() {
-                            parrying = false;
-                        }
-                        if !parrying && combo_attack == attack {
-                            (total + *unparried_value, parrying)
-                        } else {
-                            (total, parrying)
-                        }
-                    })
+                    .fold(
+                        (0, start_parrying),
+                        |(total, mut parrying), combo_attack| {
+                            if combo_attack.can_drop_parry() {
+                                parrying = None;
+                            }
+                            if parrying.is_none() && combo_attack == attack {
+                                (total + *unparried_value, parrying)
+                            } else if parrying.is_some()
+                                && combo_attack == attack
+                                && !attack.can_hit(parrying.unwrap())
+                            {
+                                (total + *off_limb, parrying)
+                            } else {
+                                (total, parrying)
+                            }
+                        },
+                    )
                     .0
             }
             ComboGrader::ValueMoveInStance(attack, stance, value) => {
@@ -784,7 +791,7 @@ impl ComboGrader {
                     .iter()
                     .fold((combo.0, 0), |(current_stance, total), combo_attack| {
                         if combo_attack == attack {
-                            if combo.0 == Stance::Bladesurge || combo.0 == *stance {
+                            if combo.0 == KnifeStance::Bladesurge || combo.0 == *stance {
                                 (combo_attack.get_next_stance(current_stance), total + *value)
                             } else {
                                 (combo_attack.get_next_stance(current_stance), total)
@@ -803,7 +810,7 @@ impl ComboGrader {
                 }
             }
             ComboGrader::EndsInStance(stance, value) => {
-                if combo.0 == Stance::Bladesurge || combo.get_final_stance() == *stance {
+                if combo.0 == KnifeStance::Bladesurge || combo.get_final_stance() == *stance {
                     *value
                 } else {
                     0
@@ -897,12 +904,14 @@ impl ComboSet {
         predicates: &Vec<ComboPredicate>,
         base_graders: &Vec<ComboGrader>,
         graders: &Vec<ComboGrader>,
+        start_parrying: Option<LType>,
     ) -> Option<PredatorCombo> {
         let mut highest_combo = None;
         let mut highest_score = 0.0;
         for combo in self.0.iter() {
             let mut valid = true;
-            let score = combo.score_combo(base_graders) + combo.score_combo(graders);
+            let score = combo.score_combo(base_graders, start_parrying)
+                + combo.score_combo(graders, start_parrying);
             for predicate in predicates.iter() {
                 if !predicate.matches(combo, Some(score)) {
                     valid = false;
@@ -926,7 +935,7 @@ mod predator_tests {
 
     #[test]
     pub fn test_find_combos() {
-        let mut solver = ComboSolver::new(Stance::Rizet);
+        let mut solver = ComboSolver::new(KnifeStance::Rizet);
         solver
             .set_attacks(vec![
                 ComboAttack::Jab,
@@ -950,7 +959,7 @@ mod predator_tests {
         }
         assert!(combos.0.contains(
             (&PredatorCombo::new(
-                Stance::Rizet,
+                KnifeStance::Rizet,
                 vec![
                     ComboAttack::Pinprick,
                     ComboAttack::Pheromones,
@@ -960,7 +969,7 @@ mod predator_tests {
         ));
         assert!(combos.0.contains(
             (&PredatorCombo::new(
-                Stance::Rizet,
+                KnifeStance::Rizet,
                 vec![
                     ComboAttack::Raze,
                     ComboAttack::Gouge,
@@ -986,7 +995,7 @@ mod predator_tests {
             ComboAttack::Feint,
             ComboAttack::Raze,
         ];
-        let mut solver = ComboSolver::new(Stance::EinFasit);
+        let mut solver = ComboSolver::new(KnifeStance::EinFasit);
         solver.set_attacks(attacks).set_parry(true).set_rebounds(1);
         let combos = solver.find_combos();
         assert_eq!(combos.0.len(), 57);

@@ -1,5 +1,8 @@
 use super::*;
 use crate::alpha_beta::ActionPlanner;
+use crate::classes::group::call_venom;
+use crate::classes::group::call_venoms;
+use crate::classes::group::should_call_venoms;
 use crate::classes::*;
 use crate::curatives::get_cure_depth;
 use crate::observables::*;
@@ -17,22 +20,22 @@ use std::collections::HashMap;
 pub struct DoublestabAction {
     pub caster: String,
     pub target: String,
-    pub venoms: (String, String),
+    pub venoms: (VenomType, VenomType),
 }
 
 impl DoublestabAction {
-    pub fn new(caster: String, target: String, v1: String, v2: String) -> Self {
+    pub fn new(caster: String, target: String, v1: VenomType, v2: VenomType) -> Self {
         DoublestabAction {
             caster,
             target,
             venoms: (v1, v2),
         }
     }
-    pub fn new_asp(caster: String, target: String, v1: String) -> Self {
+    pub fn new_asp(caster: String, target: String, v1: VenomType) -> Self {
         DoublestabAction {
             caster,
             target,
-            venoms: (v1, "".to_string()),
+            venoms: (v1, ""),
         }
     }
 }
@@ -43,18 +46,29 @@ impl ActiveTransition for DoublestabAction {
     }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         if self.venoms.1.eq("") {
-            Ok(get_dstab_asp_action(
-                &timeline,
-                &self.target,
-                &self.venoms.0,
-            ))
+            let action = format!("wipe dirk;;dstab {} {}", self.target, self.venoms.0);
+            let action = if should_call_venoms(timeline) {
+                format!(
+                    "{};;{}",
+                    call_venoms(&self.target, self.venoms.0, "asp", None),
+                    action
+                )
+            } else {
+                action
+            };
+            Ok(action)
         } else {
-            Ok(get_dstab_action(
-                &timeline,
-                &self.target,
-                &self.venoms.0,
-                &self.venoms.1,
-            ))
+            let action = format!("dstab {} {} {}", self.target, self.venoms.0, self.venoms.1);
+            let action = if should_call_venoms(timeline) {
+                format!(
+                    "{};;{}",
+                    call_venoms(&self.target, self.venoms.0, self.venoms.1, None),
+                    action
+                )
+            } else {
+                action
+            };
+            Ok(action)
         }
     }
 }
@@ -63,11 +77,11 @@ pub struct FlayAction {
     pub caster: String,
     pub target: String,
     pub annotation: String,
-    pub venom: String,
+    pub venom: VenomType,
 }
 
 impl FlayAction {
-    pub fn new(caster: String, target: String, annotation: String, venom: String) -> Self {
+    pub fn new(caster: String, target: String, annotation: String, venom: VenomType) -> Self {
         FlayAction {
             caster,
             target,
@@ -76,7 +90,7 @@ impl FlayAction {
         }
     }
 
-    pub fn fangbarrier(caster: String, target: String, venom: String) -> Self {
+    pub fn fangbarrier(caster: String, target: String, venom: VenomType) -> Self {
         FlayAction {
             caster,
             target,
@@ -99,28 +113,30 @@ impl ActiveTransition for FlayAction {
             && (self.annotation.eq_ignore_ascii_case("shield")
                 || self.annotation.eq_ignore_ascii_case("rebounding"))
         {
-            observations.push(AetObservation::Devenoms(self.venom.clone()));
+            observations.push(AetObservation::Devenoms(self.venom.to_string()));
         }
         ProbableEvent::certain(observations)
     }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
-        Ok(get_flay_action(
-            &timeline,
-            &self.target,
-            self.annotation.clone(),
-            self.venom.clone(),
-        ))
+        let action = format!("envenom whip with {};;flay {}", self.venom, self.target);
+        let action = if should_call_venoms(timeline) && !self.venom.eq_ignore_ascii_case("") {
+            format!("{};;{}", call_venom(&self.target, self.venom, None), action)
+        } else {
+            action
+        };
+
+        Ok(action)
     }
 }
 
 pub struct SlitAction {
     pub caster: String,
     pub target: String,
-    pub venom: String,
+    pub venom: VenomType,
 }
 
 impl SlitAction {
-    pub fn new(caster: String, target: String, venom: String) -> Self {
+    pub fn new(caster: String, target: String, venom: VenomType) -> Self {
         SlitAction {
             caster,
             target,
@@ -138,15 +154,17 @@ impl ActiveTransition for SlitAction {
             &"",
             &self.target,
         )];
-        observations.push(AetObservation::Devenoms(self.venom.clone()));
+        observations.push(AetObservation::Devenoms(self.venom.to_string()));
         ProbableEvent::certain(observations)
     }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
-        Ok(get_slit_action(
-            &timeline,
-            &self.target,
-            &self.venom.clone(),
-        ))
+        let action = format!("slit {} {}", self.target, self.venom);
+        let action = if should_call_venoms(timeline) {
+            format!("{};;{}", call_venom(&self.target, self.venom, None), action)
+        } else {
+            action
+        };
+        Ok(action)
     }
 }
 
@@ -173,33 +191,17 @@ impl ActiveTransition for BindAction {
         ProbableEvent::certain(observations)
     }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
-        Ok(get_bind_action(&timeline, &self.target))
+        Ok(format!("outc rope;;bind {};;inc rope", self.target))
     }
 }
 
 pub struct ShruggingAction {
     pub caster: String,
-    pub shrugged: String,
 }
 
 impl ShruggingAction {
-    pub fn shrug_asthma(caster: String) -> Self {
-        ShruggingAction {
-            caster,
-            shrugged: "asthma".to_string(),
-        }
-    }
-    pub fn shrug_anorexia(caster: String) -> Self {
-        ShruggingAction {
-            caster,
-            shrugged: "anorexia".to_string(),
-        }
-    }
-    pub fn shrug_slickness(caster: String) -> Self {
-        ShruggingAction {
-            caster,
-            shrugged: "slickness".to_string(),
-        }
+    pub fn new(caster: String) -> Self {
+        ShruggingAction { caster }
     }
 }
 
@@ -209,37 +211,37 @@ impl ActiveTransition for ShruggingAction {
             &self.caster,
             &"Assassination",
             &"Shrugging",
-            &self.shrugged,
+            &"",
             &"",
         )])
     }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
-        Ok(format!("light pipes;;shrug {}", self.shrugged))
+        Ok(format!("light pipes;;shrug"))
     }
 }
 
 pub struct BiteAction {
     pub caster: String,
     pub target: String,
-    pub venom: String,
+    pub venom: VenomType,
     pub limb: Option<String>,
 }
 
 impl BiteAction {
-    pub fn new(caster: &str, target: &str, venom: &str) -> Self {
+    pub fn new(caster: impl ToString, target: impl ToString, venom: VenomType) -> Self {
         BiteAction {
             caster: caster.to_string(),
             target: target.to_string(),
-            venom: venom.to_string(),
+            venom,
             limb: None,
         }
     }
 
-    pub fn camus(caster: &str, target: &str, limb: &str) -> Self {
+    pub fn camus(caster: impl ToString, target: impl ToString, limb: impl ToString) -> Self {
         BiteAction {
             caster: caster.to_string(),
             target: target.to_string(),
-            venom: "camus".to_string(),
+            venom: "camus",
             limb: Some(limb.to_string()),
         }
     }
@@ -274,7 +276,7 @@ pub struct GarroteAction {
 }
 
 impl GarroteAction {
-    pub fn new(caster: &str, target: &str) -> Self {
+    pub fn new(caster: impl ToString, target: impl ToString) -> Self {
         GarroteAction {
             caster: caster.to_string(),
             target: target.to_string(),
@@ -304,7 +306,7 @@ pub struct BedazzleAction {
 }
 
 impl BedazzleAction {
-    pub fn new(caster: &str, target: &str) -> Self {
+    pub fn new(caster: impl ToString, target: impl ToString) -> Self {
         BedazzleAction {
             caster: caster.to_string(),
             target: target.to_string(),
@@ -318,7 +320,7 @@ impl ActiveTransition for BedazzleAction {
     }
 
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
-        Ok(format!("stand;;bedazzle {}", self.target))
+        Ok(format!("bedazzle {}", self.target))
     }
 }
 
@@ -328,7 +330,7 @@ pub struct HypnotiseAction {
 }
 
 impl HypnotiseAction {
-    pub fn new(caster: &str, target: &str) -> Self {
+    pub fn new(caster: impl ToString, target: impl ToString) -> Self {
         HypnotiseAction {
             caster: caster.to_string(),
             target: target.to_string(),
@@ -358,7 +360,7 @@ pub struct SuggestAction {
 }
 
 impl SuggestAction {
-    pub fn new(caster: &str, target: &str, suggestion: Hypnosis) -> Self {
+    pub fn new(caster: impl ToString, target: impl ToString, suggestion: Hypnosis) -> Self {
         SuggestAction {
             caster: caster.to_string(),
             target: target.to_string(),
@@ -397,7 +399,7 @@ pub struct SealAction {
 }
 
 impl SealAction {
-    pub fn new(caster: &str, target: &str, duration: usize) -> Self {
+    pub fn new(caster: impl ToString, target: impl ToString, duration: usize) -> Self {
         SealAction {
             caster: caster.to_string(),
             target: target.to_string(),
@@ -424,7 +426,7 @@ pub struct SnapAction {
 }
 
 impl SnapAction {
-    pub fn new(caster: &str, target: &str) -> Self {
+    pub fn new(caster: impl ToString, target: impl ToString) -> Self {
         SnapAction {
             caster: caster.to_string(),
             target: target.to_string(),
@@ -451,7 +453,7 @@ pub struct SleightAction {
 }
 
 impl SleightAction {
-    pub fn new(caster: &str, target: &str, sleight: &str) -> Self {
+    pub fn new(caster: impl ToString, target: impl ToString, sleight: impl ToString) -> Self {
         SleightAction {
             caster: caster.to_string(),
             target: target.to_string(),

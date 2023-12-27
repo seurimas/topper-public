@@ -675,6 +675,8 @@ pub enum LockType {
     Buffered,
     // Asthma, slickness, anorexia, paralysis, and focus blocked
     Hard,
+    // Only the venom affs
+    HardVenom,
 }
 
 impl LockType {
@@ -685,6 +687,12 @@ impl LockType {
                 FType::Anorexia,
                 FType::Slickness,
                 FType::Stupidity,
+                FType::Asthma,
+                FType::Paresis,
+            ],
+            LockType::HardVenom => vec![
+                FType::Anorexia,
+                FType::Slickness,
                 FType::Asthma,
                 FType::Paresis,
             ],
@@ -896,8 +904,10 @@ pub fn remove_through(you: &mut AgentState, end: FType, order: &Vec<FType>) {
     }
 }
 
-pub fn is_susceptible(target: &AgentState, affliction: &FType) -> bool {
-    !target.is(*affliction) && !(*affliction == FType::Paresis && target.is(FType::Paralysis))
+pub fn is_susceptible(target: &AgentState, affliction: &FType, afflicted: &Vec<FType>) -> bool {
+    !target.is(*affliction)
+        && !(*affliction == FType::Paresis && target.is(FType::Paralysis))
+        && !afflicted.contains(affliction)
 }
 
 #[macro_export]
@@ -941,7 +951,6 @@ pub fn add_buffers<'s>(ready: &mut Vec<&'s str>, buffers: &Vec<&'s str>) {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum VenomPlan {
     Stick(FType),
-    StickThisIfThat(FType, FType),
     OnTree(FType),
     OffTree(FType),
     OnFocus(FType),
@@ -957,7 +966,6 @@ impl VenomPlan {
     pub fn affliction(&self) -> FType {
         match self {
             VenomPlan::Stick(aff)
-            | VenomPlan::StickThisIfThat(aff, _)
             | VenomPlan::OnTree(aff)
             | VenomPlan::OffTree(aff)
             | VenomPlan::OnFocus(aff)
@@ -980,74 +988,79 @@ pub fn get_simple_plan(afflictions: Vec<FType>) -> Vec<VenomPlan> {
 #[macro_export]
 macro_rules! affliction_plan_stacker {
     ($add_name:ident, $get_name:ident, $stack:expr, $returned:ty) => {
-        pub fn $add_name(item: &VenomPlan, target: &AgentState, venoms: &mut Vec<$returned>) {
+        pub fn $add_name(
+            item: &VenomPlan,
+            target: &AgentState,
+            venoms: &mut Vec<$returned>,
+            afflicted: &mut Vec<FType>,
+        ) {
             match item {
                 VenomPlan::Stick(aff) => {
-                    if is_susceptible(target, aff) {
+                    if is_susceptible(target, aff, afflicted) {
                         if let Some(venom) = $stack.get(aff) {
                             venoms.insert(0, *venom);
-                        }
-                    }
-                }
-                VenomPlan::StickThisIfThat(this, that) => {
-                    if target.is(*this) && is_susceptible(target, that) {
-                        if let Some(venom) = $stack.get(that) {
-                            venoms.insert(0, *venom);
+                            afflicted.push(*aff);
                         }
                     }
                 }
                 VenomPlan::OnTree(aff) => {
                     if (target.balanced(BType::Tree) || target.get_balance(BType::Tree) < 1.5)
-                        && is_susceptible(target, aff)
+                        && is_susceptible(target, aff, afflicted)
                     {
                         if let Some(venom) = $stack.get(aff) {
                             venoms.insert(0, *venom);
+                            afflicted.push(*aff);
                         }
                     }
                 }
                 VenomPlan::OffTree(aff) => {
                     if !(target.balanced(BType::Tree) || target.get_balance(BType::Tree) < 1.5)
-                        && is_susceptible(target, aff)
+                        && is_susceptible(target, aff, afflicted)
                     {
                         if let Some(venom) = $stack.get(aff) {
                             venoms.insert(0, *venom);
+                            afflicted.push(*aff);
                         }
                     }
                 }
                 VenomPlan::OnFocus(aff) => {
                     if (target.balanced(BType::Focus) || target.get_balance(BType::Focus) < 1.5)
-                        && is_susceptible(target, aff)
+                        && is_susceptible(target, aff, afflicted)
                     {
                         if let Some(venom) = $stack.get(aff) {
                             venoms.insert(0, *venom);
+                            afflicted.push(*aff);
                         }
                     }
                 }
                 VenomPlan::OffFocus(aff) => {
                     if !(target.balanced(BType::Focus) || target.get_balance(BType::Focus) < 1.5)
-                        && is_susceptible(target, aff)
+                        && is_susceptible(target, aff, afflicted)
                     {
                         if let Some(venom) = $stack.get(aff) {
                             venoms.insert(0, *venom);
+                            afflicted.push(*aff);
                         }
                     }
                 }
                 VenomPlan::OnFitness(aff) => {
                     if (target.balanced(BType::Fitness) || target.get_balance(BType::Fitness) < 1.5)
-                        && is_susceptible(target, aff)
+                        && is_susceptible(target, aff, afflicted)
                     {
                         if let Some(venom) = $stack.get(aff) {
                             venoms.insert(0, *venom);
+                            afflicted.push(*aff);
                         }
                     }
                 }
                 VenomPlan::OffFitness(aff) => {
                     if !(target.balanced(BType::Fitness)
                         || target.get_balance(BType::Fitness) < 1.5)
-                        && is_susceptible(target, aff)
+                        && is_susceptible(target, aff, afflicted)
                     {
                         if let Some(venom) = $stack.get(aff) {
                             venoms.insert(0, *venom);
+                            afflicted.push(*aff);
                         }
                     }
                 }
@@ -1055,21 +1068,25 @@ macro_rules! affliction_plan_stacker {
                     if let (Some(priority_venom), Some(secondary_venom)) =
                         ($stack.get(priority), $stack.get(secondary))
                     {
-                        if !is_susceptible(target, priority) && is_susceptible(target, secondary) {
+                        if !is_susceptible(target, priority, afflicted)
+                            && is_susceptible(target, secondary, afflicted)
+                        {
                             venoms.insert(0, *secondary_venom);
-                        } else if is_susceptible(target, priority) {
+                            afflicted.push(*secondary);
+                        } else if is_susceptible(target, priority, afflicted) {
                             venoms.insert(0, *priority_venom);
+                            afflicted.push(*priority);
                         }
                     }
                 }
                 VenomPlan::IfDo(when, plan) => {
-                    if !is_susceptible(target, when) {
-                        $add_name(plan, target, venoms);
+                    if !is_susceptible(target, when, afflicted) {
+                        $add_name(plan, target, venoms, afflicted);
                     }
                 }
                 VenomPlan::IfNotDo(when, plan) => {
-                    if is_susceptible(target, when) {
-                        $add_name(plan, target, venoms);
+                    if is_susceptible(target, when, afflicted) {
+                        $add_name(plan, target, venoms, afflicted);
                     }
                 }
             }
@@ -1081,8 +1098,9 @@ macro_rules! affliction_plan_stacker {
             target: &AgentState,
         ) -> Vec<$returned> {
             let mut venoms = Vec::new();
+            let mut afflicted = Vec::new();
             for item in plan.iter() {
-                $add_name(item, target, &mut venoms);
+                $add_name(item, target, &mut venoms, &mut afflicted);
                 if count == venoms.len() {
                     break;
                 }

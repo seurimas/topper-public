@@ -6,7 +6,7 @@ use serde::*;
 pub const FEINT_COOLDOWN: CType = 10 * BALANCE_SCALE as CType;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, EnumIter)]
-pub enum Stance {
+pub enum KnifeStance {
     None,
     Gyanis,
     VaeSant,
@@ -16,33 +16,33 @@ pub enum Stance {
     Bladesurge,
 }
 
-impl Default for Stance {
+impl Default for KnifeStance {
     fn default() -> Self {
-        Stance::None
+        KnifeStance::None
     }
 }
 
-impl Stance {
-    pub fn from_name(name: &str) -> Stance {
+impl KnifeStance {
+    pub fn from_name(name: &str) -> KnifeStance {
         match name {
-            "Gyanis" => Stance::Gyanis,
-            "Vae-Sant" => Stance::VaeSant,
-            "Rizet" => Stance::Rizet,
-            "Ein-Fasit" => Stance::EinFasit,
-            "Laesan" => Stance::Laesan,
-            "Bladesurge" => Stance::Bladesurge,
-            _ => Stance::None,
+            "Gyanis" => KnifeStance::Gyanis,
+            "Vae-Sant" => KnifeStance::VaeSant,
+            "Rizet" => KnifeStance::Rizet,
+            "Ein-Fasit" => KnifeStance::EinFasit,
+            "Laesan" => KnifeStance::Laesan,
+            "Bladesurge" => KnifeStance::Bladesurge,
+            _ => KnifeStance::None,
         }
     }
 
     pub fn to_name(&self) -> &'static str {
         match self {
-            Stance::Gyanis => "Gyanis",
-            Stance::VaeSant => "Vae-Sant",
-            Stance::Rizet => "Rizet",
-            Stance::EinFasit => "Ein-Fasit",
-            Stance::Laesan => "Laesan",
-            Stance::Bladesurge => "Bladesurge",
+            KnifeStance::Gyanis => "Gyanis",
+            KnifeStance::VaeSant => "Vae-Sant",
+            KnifeStance::Rizet => "Rizet",
+            KnifeStance::EinFasit => "Ein-Fasit",
+            KnifeStance::Laesan => "Laesan",
+            KnifeStance::Bladesurge => "Bladesurge",
             _ => "None",
         }
     }
@@ -94,7 +94,7 @@ impl PredatorCompanionState {
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 pub struct PredatorClassState {
     pub apex: u32,
-    pub stance: Stance,
+    pub stance: KnifeStance,
     pub feint_time: CType,
     pub tidalslash: bool,
     pub companion: Option<PredatorCompanionState>,
@@ -168,13 +168,10 @@ impl PredatorClassState {
         }
     }
 
-    pub fn strands_on(&self, target: &Option<String>) -> bool {
-        if target.is_none() {
-            false
-        } else if let Some(PredatorCompanionState::Spider { strands_target, .. }) = &self.companion
-        {
+    pub fn strands_on(&self, target: &String) -> bool {
+        if let Some(PredatorCompanionState::Spider { strands_target, .. }) = &self.companion {
             if let Some(strands_target) = strands_target {
-                strands_target.eq_ignore_ascii_case(target.as_ref().unwrap())
+                strands_target.eq_ignore_ascii_case(target)
             } else {
                 false
             }

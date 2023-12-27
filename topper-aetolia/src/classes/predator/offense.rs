@@ -53,15 +53,15 @@ pub fn get_attack(
     action_plan.get_inputs(&timeline)
 }
 
-fn get_stance_color(stance: &Stance) -> String {
+fn get_stance_color(stance: &KnifeStance) -> String {
     match stance {
-        Stance::None => "white".to_string(),
-        Stance::Gyanis => "red".to_string(),
-        Stance::VaeSant => "orange".to_string(),
-        Stance::Rizet => "yellow".to_string(),
-        Stance::EinFasit => "green".to_string(),
-        Stance::Laesan => "blue".to_string(),
-        Stance::Bladesurge => "purple".to_string(),
+        KnifeStance::None => "white".to_string(),
+        KnifeStance::Gyanis => "red".to_string(),
+        KnifeStance::VaeSant => "orange".to_string(),
+        KnifeStance::Rizet => "yellow".to_string(),
+        KnifeStance::EinFasit => "green".to_string(),
+        KnifeStance::Laesan => "blue".to_string(),
+        KnifeStance::Bladesurge => "purple".to_string(),
     }
 }
 
@@ -88,7 +88,7 @@ pub fn get_class_state(
         .unwrap_or("<white>---".to_string());
     let stance = me
         .check_if_predator(&|predator| predator.stance.clone())
-        .or(Some(Stance::None))
+        .or(Some(KnifeStance::None))
         .map(|stance| format!("<{}>{}", get_stance_color(&stance), stance.to_name()))
         .unwrap();
     let companion = me

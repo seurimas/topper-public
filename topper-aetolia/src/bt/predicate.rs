@@ -4,12 +4,14 @@ use topper_bt::unpowered::*;
 
 use crate::classes::bard::BardPredicate;
 use crate::classes::get_affs_from_plan;
+use crate::classes::infiltrator::InfiltratorPredicate;
 use crate::classes::is_affected_by;
 use crate::classes::predator::PredatorPredicate;
 use crate::classes::Class;
 use crate::classes::LockType;
 use crate::classes::VenomPlan;
 use crate::curatives::get_cure_depth;
+use crate::non_agent::AetTimelineRoomExt;
 use crate::timeline::*;
 use crate::types::*;
 
@@ -49,10 +51,13 @@ impl AetTarget {
         &self,
         model: &'a BehaviorModel,
         controller: &BehaviorController,
-    ) -> Option<String> {
+    ) -> String {
         match self {
-            AetTarget::Me => Some(model.who_am_i()),
-            AetTarget::Target => controller.target.clone(),
+            AetTarget::Me => model.who_am_i(),
+            AetTarget::Target => controller
+                .target
+                .clone()
+                .unwrap_or_else(|| "enemy".to_string()),
         }
     }
 }
@@ -96,6 +101,8 @@ pub enum AetPredicate {
     IsGrounded(AetTarget),
     IsFlying(AetTarget),
     IsClimbing(AetTarget),
+    // Room tags
+    RoomIsTagged(String),
     // Parries
     KnownParry(AetTarget, LimbDescriptor),
     CanParry(AetTarget),
@@ -104,6 +111,7 @@ pub enum AetPredicate {
     ClassIn(AetTarget, Vec<Class>),
     BardPredicate(AetTarget, BardPredicate),
     PredatorPredicate(AetTarget, PredatorPredicate),
+    InfiltratorPredicate(AetTarget, InfiltratorPredicate),
 }
 
 pub trait TargetPredicate {
@@ -367,7 +375,9 @@ impl UnpoweredFunction for AetPredicate {
             }
             AetPredicate::HasFocus(target, buffer) => {
                 if let Some(target) = target.get_target(model, controller) {
-                    if target.get_balance(BType::Focus) < QUEUE_TIME + *buffer {
+                    if target.get_balance(BType::Focus) < QUEUE_TIME + *buffer
+                        && target.can_focus(true)
+                    {
                         return UnpoweredFunctionState::Complete;
                     }
                 }
@@ -393,7 +403,9 @@ impl UnpoweredFunction for AetPredicate {
             }
             AetPredicate::HasTree(target, buffer) => {
                 if let Some(target) = target.get_target(model, controller) {
-                    if target.get_balance(BType::Tree) < QUEUE_TIME + *buffer {
+                    if target.get_balance(BType::Tree) < QUEUE_TIME + *buffer
+                        && target.can_tree(true)
+                    {
                         return UnpoweredFunctionState::Complete;
                     }
                 }
@@ -434,6 +446,13 @@ impl UnpoweredFunction for AetPredicate {
             }
             AetPredicate::PredatorPredicate(target, predator_predicate) => {
                 if predator_predicate.check(target, model, controller) {
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetPredicate::InfiltratorPredicate(target, infiltrator_predicate) => {
+                if infiltrator_predicate.check(target, model, controller) {
                     UnpoweredFunctionState::Complete
                 } else {
                     UnpoweredFunctionState::Failed
@@ -486,6 +505,17 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::IsClimbing(target) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.elevation == Elevation::Trees || target.elevation == Elevation::Roof {
+                        UnpoweredFunctionState::Complete
+                    } else {
+                        UnpoweredFunctionState::Failed
+                    }
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetPredicate::RoomIsTagged(tag) => {
+                if let Some(room) = model.state.get_my_room() {
+                    if room.has_tag(tag) {
                         UnpoweredFunctionState::Complete
                     } else {
                         UnpoweredFunctionState::Failed

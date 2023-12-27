@@ -1,7 +1,7 @@
 use serde::Serialize;
 use std::collections::HashMap;
 use topper_aetolia::classes::infiltrator::{get_hypno_stack, get_hypno_stack_name};
-use topper_aetolia::classes::{get_attack, Class};
+use topper_aetolia::classes::{get_attack, Class, LockType};
 use topper_aetolia::curatives::gather_alerts;
 use topper_aetolia::db::AetDatabaseModule;
 use topper_aetolia::timeline::*;
@@ -26,11 +26,11 @@ pub struct PlayerStats {
 fn get_hypno_warning(state: &AgentState) -> Option<String> {
     if let Some(aff) = state.hypno_state.get_next_hypno_aff() {
         Some(format!("<magenta>Next aff: <red>{:?}", aff))
-    } else if state.hypno_state.hypnotized || state.hypno_state.sealed.is_some() {
+    } else if state.hypno_state.is_hypnotized() || state.hypno_state.is_sealed() {
         Some(format!(
             "<magenta>Stack size: <red>{} {}",
-            state.hypno_state.hypnosis_stack.len(),
-            if state.hypno_state.sealed.is_some() {
+            state.hypno_state.suggestion_count(),
+            if state.hypno_state.is_sealed() {
                 "SEALED"
             } else {
                 ""
@@ -43,15 +43,12 @@ fn get_hypno_warning(state: &AgentState) -> Option<String> {
 
 fn get_lock_warning(state: &AgentState) -> Option<String> {
     use topper_aetolia::classes::get_venoms;
-    use topper_aetolia::classes::infiltrator::{should_lock, SOFT_STACK};
-    if should_lock(
-        None,
-        state,
-        &"".to_string(),
-        &get_venoms(SOFT_STACK.to_vec(), 3, &state),
-        2,
-    ) {
+    if LockType::Soft.affs_to_lock(state) == 1 {
         Some(format!("<pink>Close to a lock!"))
+    } else if LockType::Buffered.affs_to_lock(state) <= 2 {
+        Some(format!("<pink>Close to a lock!"))
+    } else if LockType::Hard.affs_to_lock(state) <= 2 {
+        Some(format!("<magenta>Close to a lock!"))
     } else {
         None
     }

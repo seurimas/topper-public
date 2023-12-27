@@ -3,6 +3,7 @@ use serde::Serialize;
 use topper_bt::unpowered::*;
 
 use crate::classes::bard::BardBehavior;
+use crate::classes::infiltrator::InfiltratorBehavior;
 use crate::classes::predator::PredatorBehavior;
 use crate::classes::LockType;
 use crate::classes::VenomPlan;
@@ -30,6 +31,7 @@ pub enum AetBehavior {
     DefenseBehavior(DefenseBehavior),
     BardBehavior(BardBehavior),
     PredatorBehavior(PredatorBehavior),
+    InfiltratorBehavior(InfiltratorBehavior),
 }
 
 impl UnpoweredFunction for AetBehavior {
@@ -115,6 +117,9 @@ impl UnpoweredFunction for AetBehavior {
             }
             AetBehavior::PredatorBehavior(predator_behavior) => {
                 predator_behavior.resume_with(model, controller)
+            }
+            AetBehavior::InfiltratorBehavior(infiltrator_behavior) => {
+                infiltrator_behavior.resume_with(model, controller)
             }
         }
     }

@@ -21,7 +21,7 @@ use crate::{
     },
     observables::ActionPlan,
     timeline::AetTimeline,
-    types::{AgentState, Stance},
+    types::{AgentState, Hypnosis, KnifeStance, LType},
 };
 
 pub type AetBehaviorTreeDef = UnpoweredTreeDef<AetBehaviorTreeNode>;
@@ -67,6 +67,9 @@ pub enum ClassController {
         predator_combo_store: ComboSolver,
         predator_base_graders: Vec<ComboGrader>,
         predator_combos: ComboSet,
+    },
+    Infiltrator {
+        hypno_stack: Vec<Hypnosis>,
     },
 }
 
@@ -142,6 +145,7 @@ impl BehaviorController {
         &self,
         predicates: &Vec<ComboPredicate>,
         graders: &Vec<ComboGrader>,
+        start_parrying: Option<LType>,
     ) -> Option<PredatorCombo> {
         if let ClassController::Predator {
             predator_combos,
@@ -149,9 +153,28 @@ impl BehaviorController {
             ..
         } = &self.class_controller
         {
-            predator_combos.get_highest_scored_combo(predicates, predator_base_graders, graders)
+            predator_combos.get_highest_scored_combo(
+                predicates,
+                predator_base_graders,
+                graders,
+                start_parrying,
+            )
         } else {
             panic!("Not a predator!")
+        }
+    }
+
+    pub fn init_infiltrator(&mut self) {
+        self.class_controller = ClassController::Infiltrator {
+            hypno_stack: vec![],
+        };
+    }
+
+    pub fn hypno_stack(&mut self) -> &mut Vec<Hypnosis> {
+        if let ClassController::Infiltrator { hypno_stack, .. } = &mut self.class_controller {
+            hypno_stack
+        } else {
+            panic!("Not an infiltrator!")
         }
     }
 }

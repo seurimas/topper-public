@@ -182,6 +182,7 @@ pub enum BType {
     Pacifism,
     Shock,
     Burnout,
+    Voyria,
 
     // Writhe
     WritheDartpinned,
@@ -1134,7 +1135,9 @@ pub enum ClassState {
     Zealot(ZealotClassState),
     Sentinel(SentinelClassState),
     Predator(PredatorClassState),
+    Monk(MonkClassState),
     Bard(BardClassState),
+    Infiltrator(InfiltratorClassState),
     Shifter(HowlingState),
     Other(Class),
     Unknown,
@@ -1159,7 +1162,9 @@ impl ClassState {
             Self::Predator(_) => Some(Class::Predator),
             Self::Sentinel(_) => Some(Class::Sentinel),
             Self::Bard(_) => Some(Class::Bard),
+            Self::Infiltrator(_) => Some(Class::Infiltrator),
             Self::Shifter(_) => Some(Class::Shapeshifter),
+            Self::Monk(_) => Some(Class::Monk),
             Self::Other(class) => Some(*class),
             Self::Unknown => None,
         }
@@ -1173,12 +1178,16 @@ impl ClassState {
             (Self::Bard(_), Class::Bard) => None,
             (Self::Shifter(_), Class::Shapeshifter) => None,
             (Self::Predator(_), Class::Predator) => None,
+            (Self::Infiltrator(_), Class::Infiltrator) => None,
+            (Self::Monk(_), Class::Monk) => None,
             // Changed.
             (_, Class::Zealot) => Some(Self::Zealot(ZealotClassState::default())),
             (_, Class::Sentinel) => Some(Self::Sentinel(SentinelClassState::default())),
             (_, Class::Bard) => Some(Self::Bard(BardClassState::default())),
             (_, Class::Shapeshifter) => Some(Self::Shifter(HowlingState::default())),
             (_, Class::Predator) => Some(Self::Predator(PredatorClassState::default())),
+            (_, Class::Infiltrator) => Some(Self::Infiltrator(InfiltratorClassState::default())),
+            (_, Class::Monk) => Some(Self::Monk(MonkClassState::default())),
             (_, observed) => {
                 // Other initializations should have been covered above.
                 Some(Self::Other(observed))

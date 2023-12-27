@@ -161,8 +161,15 @@ impl UnpoweredFunction for PredatorBehavior {
                 }
             }
             PredatorBehavior::GradedCombo(target, predicates, graders, preferred_limbs) => {
-                let best_combo =
-                    controller.get_highest_scored_predator_combo(&predicates, &graders);
+                let start_parrying = target
+                    .get_target(model, controller)
+                    .map(|you| if you.can_parry() { you.parrying } else { None })
+                    .unwrap_or(Some(LType::TorsoDamage));
+                let best_combo = controller.get_highest_scored_predator_combo(
+                    &predicates,
+                    &graders,
+                    start_parrying,
+                );
                 unsafe {
                     if DEBUG_TREES {
                         println!("Solver: {:?}", controller.predator_combo_store());
@@ -180,7 +187,7 @@ impl UnpoweredFunction for PredatorBehavior {
                     if !me
                         .check_if_predator(&|me| {
                             me.stance == predator_combo.get_starting_stance()
-                                || me.stance == Stance::Bladesurge
+                                || me.stance == KnifeStance::Bladesurge
                         })
                         .unwrap_or(false)
                     {
@@ -596,7 +603,7 @@ impl UnpoweredFunction for PredatorBehavior {
                 controller
                     .plan
                     .add_to_back_of_qeb(Box::new(QuickassessAction::new(
-                        target.get_name(model, controller).unwrap_or("".to_string()),
+                        target.get_name(model, controller),
                     )));
                 UnpoweredFunctionState::Complete
             }

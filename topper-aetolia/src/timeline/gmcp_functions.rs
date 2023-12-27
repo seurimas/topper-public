@@ -86,34 +86,7 @@ fn handle_char_vitals(
             },
         );
     }
-    if let Some(stance) = gmcp
-        .get("knife_stance")
-        .and_then(|stance| stance.as_str())
-        .map(Stance::from_name)
-    {
-        for_agent(
-            timeline,
-            &timeline.me.clone(),
-            &move |me: &mut AgentState| {
-                me.assume_predator(&move |class_state| class_state.stance = stance);
-            },
-        )
-    }
-    if let Some(apex) = gmcp
-        .get("apex")
-        .and_then(|apex| apex.as_str())
-        .and_then(|apex| apex.parse::<u32>().ok())
-    {
-        for_agent(
-            timeline,
-            &timeline.me.clone(),
-            &move |me: &mut AgentState| {
-                if let ClassState::Predator(class_state) = &mut me.class_state {
-                    class_state.apex = apex;
-                }
-            },
-        );
-    }
+    handle_predator_values(gmcp, timeline);
     if let (Some(hp), Some(mp), Some(max_hp), Some(max_mp)) = (
         gmcp.get("hp")
             .and_then(|hp| hp.as_str())
@@ -139,6 +112,74 @@ fn handle_char_vitals(
                     me.set_max_stat(SType::Mana, max_mp);
                 } else if max_mp != mp || max_hp != hp {
                     me.observe_flag(FType::Recklessness, false);
+                }
+            },
+        );
+    }
+}
+
+fn handle_predator_values(
+    gmcp: &serde_json::Value,
+    timeline: &mut TimelineState<AgentState, crate::non_agent::AetNonAgent>,
+) {
+    if let Some(stance) = gmcp
+        .get("knife_stance")
+        .and_then(|stance| stance.as_str())
+        .map(KnifeStance::from_name)
+    {
+        for_agent(
+            timeline,
+            &timeline.me.clone(),
+            &move |me: &mut AgentState| {
+                me.assume_predator(&move |class_state| class_state.stance = stance);
+            },
+        )
+    }
+    if let Some(apex) = gmcp
+        .get("apex")
+        .and_then(|apex| apex.as_str())
+        .and_then(|apex| apex.parse::<u32>().ok())
+    {
+        for_agent(
+            timeline,
+            &timeline.me.clone(),
+            &move |me: &mut AgentState| {
+                if let ClassState::Predator(class_state) = &mut me.class_state {
+                    class_state.apex = apex;
+                }
+            },
+        );
+    }
+}
+
+fn handle_monk_values(
+    gmcp: &serde_json::Value,
+    timeline: &mut TimelineState<AgentState, crate::non_agent::AetNonAgent>,
+) {
+    if let Some(stance) = gmcp
+        .get("stance")
+        .and_then(|stance| stance.as_str())
+        .map(MonkStance::from_name)
+    {
+        for_agent(
+            timeline,
+            &timeline.me.clone(),
+            &move |me: &mut AgentState| {
+                me.assume_monk(&move |class_state| class_state.stance = stance);
+            },
+        )
+    }
+    if let Some(apex) = gmcp
+        .get("kai")
+        .and_then(|apex| apex.as_str())
+        .and_then(|apex| apex.parse::<i32>().ok())
+    {
+        for_agent(
+            timeline,
+            &timeline.me.clone(),
+            &move |me: &mut AgentState| {
+                if let ClassState::Monk(class_state) = &mut me.class_state {
+                    class_state.kai = apex;
                 }
             },
         );

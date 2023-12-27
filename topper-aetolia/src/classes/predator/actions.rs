@@ -182,7 +182,7 @@ impl ActiveTransition for SeriesAttack {
         if should_call_venoms(timeline) {
             Ok(format!(
                 "{};;series {} {} {}",
-                call_venom(&self.target, &self.venom.to_string(), None),
+                call_venom(&self.target, self.venom, None),
                 self.attacks
                     .iter()
                     .map(|attack| attack.get_param_string())
@@ -229,7 +229,7 @@ impl ActiveTransition for BloodscourgeAction {
         if should_call_venoms(timeline) {
             Ok(format!(
                 "{};;bloodscourge {} {}",
-                call_venom(&self.target, &self.venom.to_string(), None),
+                call_venom(&self.target, self.venom, None),
                 self.target,
                 self.venom
             ))
@@ -262,7 +262,7 @@ impl ActiveTransition for FleshbaneAction {
         if should_call_venoms(timline) {
             Ok(format!(
                 "{};;fleshbane {} {}",
-                call_venom(&self.target, &self.venom.to_string(), None),
+                call_venom(&self.target, self.venom, None),
                 self.target,
                 self.venom
             ))
@@ -395,7 +395,7 @@ impl ActiveTransition for DartshotAction {
         if should_call_venoms(timline) {
             Ok(format!(
                 "{};;dartshot {} {}",
-                call_venom(&self.target, &self.venom.to_string(), None),
+                call_venom(&self.target, self.venom, None),
                 self.target,
                 self.venom
             ))
@@ -430,12 +430,7 @@ impl ActiveTransition for TwinshotAction {
         if should_call_venoms(timeline) {
             Ok(format!(
                 "{};;twinshot {} {} {}",
-                call_venoms(
-                    &self.target,
-                    &self.venom_0.to_string(),
-                    &self.venom_1.to_string(),
-                    None
-                ),
+                call_venoms(&self.target, self.venom_0, self.venom_1, None),
                 self.target,
                 self.venom_0,
                 self.venom_1

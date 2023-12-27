@@ -51,6 +51,9 @@ pub fn apply_observation(
         AetObservation::SimpleCureAction(simple_cure) => {
             handle_simple_cure_action(simple_cure, timeline, before, after)?;
         }
+        AetObservation::Cured(affliction) => {
+            timeline.set_flag_for_agent(&timeline.me.clone(), affliction, false)?;
+        }
         AetObservation::DiscernedCure(who, affliction) => {
             for_agent(timeline, who, &|me| {
                 if let Some(aff_flag) = FType::from_name(&affliction) {
@@ -62,15 +65,6 @@ pub fn apply_observation(
                     timeline.set_flag_for_agent(who, &"cirisosis".to_string(), true);
                 }
             }
-        }
-        AetObservation::Cured(affliction) => {
-            for_agent(timeline, &timeline.me.clone(), &|me| {
-                if let Ok((_damage_type, _damage_amount)) = get_damage_barrier(&affliction) {
-                    // Do nothing...
-                } else if let Some(aff_flag) = FType::from_name(&affliction) {
-                    me.toggle_flag(aff_flag, false);
-                }
-            });
         }
         AetObservation::FlameShield(who) => {
             if timeline.borrow_agent(who).get_count(FType::Ablaze) <= 1 {

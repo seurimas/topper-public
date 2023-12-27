@@ -410,19 +410,6 @@ lazy_static! {
 }
 
 lazy_static! {
-    static ref HARD_HYPNO: Vec<Hypnosis> = vec![
-        Hypnosis::Aff(FType::Hypochondria),
-        Hypnosis::Aff(FType::Impatience),
-        Hypnosis::Aff(FType::Loneliness),
-        Hypnosis::Aff(FType::Hypochondria),
-        Hypnosis::Aff(FType::Impatience),
-        Hypnosis::Aff(FType::Vertigo),
-        Hypnosis::Aff(FType::Impatience),
-        Hypnosis::Aff(FType::Loneliness),
-    ];
-}
-
-lazy_static! {
     static ref ERADICATE_STACK: Vec<Hypnosis> = vec![
         Hypnosis::Eradicate,
         Hypnosis::Eradicate,
@@ -585,138 +572,6 @@ fn go_for_thin_blood(_timeline: &AetTimeline, you: &AgentState, _strategy: &Stri
             || you.get_balance(BType::Tree) > 3.0)
 }
 
-pub fn should_lock(
-    me: Option<&AgentState>,
-    you: &AgentState,
-    strategy: &String,
-    lockers: &Vec<&str>,
-    count: usize,
-) -> bool {
-    if let Some(me) = me {
-        if !strategy.eq("aggro")
-            && lockers.len() <= count
-            && ((you.dodge_state.can_dodge_at(me.get_qeb_balance())
-                && you.affs_count(&vec![
-                    FType::Hypochondria,
-                    FType::Clumsiness,
-                    FType::Weariness,
-                ]) < 1)
-                || (you.is(FType::Hypersomnia) && !you.is(FType::Asleep)))
-        {
-            return false;
-        }
-    }
-    (!you.can_focus(true) || you.is(FType::Stupidity) || you.get_balance(BType::Focus) > 2.5)
-        && (!you.can_tree(true) || you.get_balance(BType::Tree) > 2.5)
-        && lockers.len() < 3
-        && lockers.len() > 0
-}
-
-pub fn get_flay_action(timeline: &AetTimeline, target: &String, def: String, v1: String) -> String {
-    let action = if use_one_rag(timeline) && !v1.eq_ignore_ascii_case("") {
-        format!("stand;;hw {};;flay {}", v1, target)
-    } else {
-        format!("stand;;envenom whip with {};;flay {}", v1, target)
-    };
-    let action = if should_call_venoms(timeline) && !v1.eq_ignore_ascii_case("") {
-        format!("{};;{}", call_venom(target, &v1, None), action)
-    } else {
-        action
-    };
-
-    action
-}
-
-pub fn get_dstab_action(
-    timeline: &AetTimeline,
-    target: &String,
-    v1: &String,
-    v2: &String,
-) -> String {
-    let action = if use_one_rag(timeline) {
-        format!("hr {};;hr {};;stand;;dstab {};;dash d", v2, v1, target)
-    } else {
-        format!("stand;;dstab {} {} {};;dash d", target, v1, v2)
-    };
-    if should_call_venoms(timeline) {
-        format!("{};;{}", call_venoms(target, v1, v2, None), action)
-    } else {
-        action
-    }
-}
-
-pub fn get_dstab_asp_action(timeline: &AetTimeline, target: &String, v1: &String) -> String {
-    let action = if use_one_rag(timeline) {
-        format!("wipe dirk;;hr {};;stand;;dstab {};;dash d", v1, target)
-    } else {
-        format!("wipe dirk;;stand;;dstab {} {};;dash d", target, v1)
-    };
-    if should_call_venoms(timeline) {
-        format!("{};;{}", call_venom(target, v1, None), action)
-    } else {
-        action
-    }
-}
-
-pub fn get_slit_action(timeline: &AetTimeline, target: &String, v1: &String) -> String {
-    let action = if use_one_rag(timeline) {
-        format!("stand;;hr {};;dstab {};;dash d", v1, target)
-    } else {
-        format!("stand;;slit {} {};;dash d", target, v1)
-    };
-    if should_call_venoms(timeline) {
-        format!("{};;{}", call_venom(target, v1, None), action)
-    } else {
-        action
-    }
-}
-
-pub fn get_bind_action(timeline: &AetTimeline, target: &String) -> String {
-    format!("stand;;outc rope;;bind {};;inc rope", target)
-}
-
-pub fn add_delphs(
-    timeline: &AetTimeline,
-    me: &AgentState,
-    you: &AgentState,
-    strategy: &String,
-    venoms: &mut Vec<&'static str>,
-    count: usize,
-) {
-    if you.is(FType::Allergies) || you.is(FType::Vomiting) {
-        return;
-    }
-    if you.is(FType::Hypersomnia) {
-        match (
-            you.is(FType::Insomnia),
-            you.is(FType::Asleep),
-            you.is(FType::Instawake),
-        ) {
-            (true, false, true) => {
-                if get_cure_depth(you, FType::Hypersomnia).cures > 1 {
-                    venoms.insert(0, "delphinium");
-                }
-            }
-            (false, false, true) => {
-                if count == 2 {
-                    venoms.insert(0, "delphinium");
-                    venoms.insert(0, "delphinium");
-                }
-            }
-            (true, _, _) | (_, false, _) | (_, _, true) => {
-                venoms.insert(0, "delphinium");
-            }
-            _ => {}
-        }
-        if venoms.len() >= count && Some(&"darkshade") == venoms.get(venoms.len() - count) {
-            venoms.remove(venoms.len() - count);
-        }
-        if venoms.len() >= count && Some(&"euphorbia") == venoms.get(venoms.len() - count) {
-            venoms.remove(venoms.len() - count);
-        }
-    }
-}
-
 pub fn choose_venoms(
     timeline: &AetTimeline,
     who_am_i: &String,
@@ -725,7 +580,7 @@ pub fn choose_venoms(
     venom_plan: &Vec<VenomPlan>,
     db: Option<&impl AetDatabaseModule>,
     count: usize,
-) -> Vec<&'static str> {
+) -> Vec<VenomType> {
     let me = timeline.state.borrow_agent(who_am_i);
     let you = timeline.state.borrow_agent(target);
     let mut venoms = get_venoms_from_plan(&venom_plan.to_vec(), 2, &you);
@@ -749,7 +604,7 @@ pub fn choose_venoms(
                 return vec!["scytherus"];
             }
         } else if you.is(FType::Hypersomnia) {
-            add_delphs(&timeline, &me, &you, &strategy, &mut venoms, count);
+            add_delphs(&you, &mut venoms, count);
         }
         let mut buffer = get_venoms(THIN_BUFFER_STACK.to_vec(), 2, &you);
         if strategy.eq("thin") {
@@ -825,8 +680,8 @@ pub fn get_balance_attack<'s>(
                 target.to_string(),
                 get_venoms_from_plan(&DEFAULT_STACK.to_vec(), 1, &you)
                     .get(0)
-                    .map(|venom| venom.to_string())
-                    .unwrap_or_default(),
+                    .map(|venom| *venom)
+                    .unwrap_or("aconite"),
             ));
         } else {
             return Box::new(BiteAction::new(who_am_i, &target, &"camus"));
@@ -894,7 +749,7 @@ pub fn get_balance_attack<'s>(
             && !should_slit(&me, &you, &strategy)
         {
             if !you.is(FType::Shielded) && should_bedazzle(&me, &you, &strategy, true) {
-                return Box::new(BedazzleAction::new(who_am_i, &target));
+                return Box::new(BedazzleAction::new(who_am_i, target));
             }
             let defense = if you.is(FType::Shielded) {
                 "shield"
@@ -906,19 +761,19 @@ pub fn get_balance_attack<'s>(
                     who_am_i.to_string(),
                     target.to_string(),
                     defense.to_string(),
-                    venom.to_string(),
+                    venom,
                 ));
             } else {
                 return Box::new(FlayAction::new(
                     who_am_i.to_string(),
                     target.to_string(),
                     defense.to_string(),
-                    "".to_string(),
+                    "",
                 ));
             }
         } else {
             if should_bedazzle(&me, &you, &strategy, false) {
-                return Box::new(BedazzleAction::new(who_am_i, &target));
+                return Box::new(BedazzleAction::new(who_am_i, target));
             } else if should_slit(&me, &you, &strategy)
                 && v_one.is_some()
                 && v_one != Some("scytherus")
@@ -926,7 +781,7 @@ pub fn get_balance_attack<'s>(
                 return Box::new(SlitAction::new(
                     who_am_i.to_string(),
                     target.to_string(),
-                    v_one.unwrap().to_string(),
+                    v_one.unwrap(),
                 ));
             } else if should_bind(&me, &you, &strategy) {
                 return Box::new(BindAction::new(who_am_i.to_string(), target.to_string()));
@@ -934,7 +789,7 @@ pub fn get_balance_attack<'s>(
                 return Box::new(FlayAction::fangbarrier(
                     who_am_i.to_string(),
                     target.to_string(),
-                    v_one.map(|venom| venom.to_string()).unwrap_or_default(),
+                    v_one.unwrap_or("aconite"),
                 ));
             } else if v_one
                 .map(|venom| venom.eq_ignore_ascii_case("scytherus"))
@@ -945,20 +800,20 @@ pub fn get_balance_attack<'s>(
                 return Box::new(DoublestabAction::new_asp(
                     who_am_i.to_string(),
                     target.to_string(),
-                    v_one.unwrap_or(&"").to_string(),
+                    v_one.unwrap_or(""),
                 ));
             } else if let (Some(v1), Some(v2)) = (v1, v2) {
                 return Box::new(DoublestabAction::new(
                     who_am_i.to_string(),
                     target.to_string(),
-                    v2.to_string(),
-                    v1.to_string(),
+                    v2,
+                    v1,
                 ));
             } else if you.is(FType::Fangbarrier) {
                 return Box::new(FlayAction::fangbarrier(
                     who_am_i.to_string(),
                     target.to_string(),
-                    v_one.map(|venom| venom.to_string()).unwrap_or_default(),
+                    v_one.unwrap_or(""),
                 ));
             } else {
                 return Box::new(BiteAction::new(who_am_i, &target, &"camus"));
@@ -967,36 +822,6 @@ pub fn get_balance_attack<'s>(
     } else {
         return Box::new(Inactivity);
     }
-}
-
-pub fn get_hypno_stack_name(timeline: &AetTimeline, target: &String, strategy: &String) -> String {
-    timeline
-        .state
-        .get_my_hint(&"HYPNO_STACK".to_string())
-        .unwrap_or(strategy.to_string())
-}
-
-pub fn get_hypno_stack<'s>(
-    timeline: &AetTimeline,
-    target: &String,
-    strategy: &String,
-    db: Option<&impl AetDatabaseModule>,
-) -> Vec<Hypnosis> {
-    db.and_then(|db| {
-        let stack = get_hypno_stack_name(timeline, target, strategy);
-        if stack == "normal" {
-            None // Default to HARD_HYPNO
-        } else if stack == "class" {
-            if let Some(class) = db.get_class(target) {
-                db.get_hypno_plan(&class.to_string())
-            } else {
-                db.get_hypno_plan(&format!("hypno_{}", stack))
-            }
-        } else {
-            db.get_hypno_plan(&format!("hypno_{}", stack))
-        }
-    })
-    .unwrap_or(HARD_HYPNO.to_vec())
 }
 
 pub fn get_equil_attack<'s>(
@@ -1103,10 +928,10 @@ pub fn get_action_plan(
 }
 
 struct InfiltratorActionPlanner;
-const STRATEGIES: [&'static str; 3] = ["phys", "bedazzle", "aggro"];
+const STRATEGIES: [VenomType; 3] = ["phys", "bedazzle", "aggro"];
 
 impl ActionPlanner for InfiltratorActionPlanner {
-    fn get_strategies(&self) -> &'static [&'static str] {
+    fn get_strategies(&self) -> &'static [VenomType] {
         &STRATEGIES
     }
     fn get_plan(

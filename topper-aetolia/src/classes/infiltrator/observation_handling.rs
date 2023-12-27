@@ -327,7 +327,7 @@ pub fn handle_combat_action(
                     for_agent(agent_states, &combat_action.target, &move |you| {
                         you.observe_flag(FType::Shielded, false);
                         you.observe_flag(FType::Rebounding, false);
-                        if annotation.contains("failure") && you.hypno_state.is_hypnotized() {
+                        if annotation.contains("failure") && you.hypno_state.is_firing() {
                             you.hypno_state.desway();
                         }
                     });
@@ -388,7 +388,7 @@ pub fn handle_combat_action(
         }
         "Fizzle" => {
             for_agent(agent_states, &combat_action.target, &|you| {
-                you.hypno_state.pop_suggestion(false);
+                you.hypno_state.lose_suggestion(false);
             });
         }
         "Snap" => {
@@ -396,13 +396,13 @@ pub fn handle_combat_action(
                 agent_states.get_player_hint(&combat_action.caster, &"snap".into())
             {
                 for_agent(agent_states, &combat_action.target, &|you| {
-                    if you.hypno_state.sealed.is_some() {
+                    if you.hypno_state.is_sealed() {
                         you.hypno_state.activate();
                     }
                 });
             } else if !combat_action.target.eq(&"".to_string()) {
                 for_agent(agent_states, &combat_action.target, &|you| {
-                    if you.hypno_state.sealed.is_some() {
+                    if you.hypno_state.is_sealed() {
                         you.hypno_state.activate();
                     }
                 });

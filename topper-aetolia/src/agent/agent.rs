@@ -95,6 +95,9 @@ impl BaseAgentState for AgentState {
         if self.is(FType::WritheWeb) && self.balanced(BType::WritheWeb) {
             self.set_flag(FType::WritheWeb, false);
         }
+        if self.is(FType::Voyria) && self.balanced(BType::Voyria) {
+            self.set_flag(FType::Voyria, false);
+        }
         if self.is(FType::SelfLoathing) {
             let observed = self.get_count(FType::SelfLoathing);
             if (observed <= 2 && self.get_balance(BType::SelfLoathing) < 3.)
@@ -357,6 +360,9 @@ impl AgentState {
         }
         if value && flag == FType::WritheWeb {
             self.set_balance(BType::WritheWeb, 3.0);
+        }
+        if value && flag == FType::Voyria {
+            self.set_balance(BType::Voyria, 12.0);
         }
         match flag {
             FType::Zenith => {
@@ -954,6 +960,40 @@ impl AgentState {
         }
     }
 
+    pub fn assume_monk<R>(&mut self, action: &Fn(&mut MonkClassState) -> R) -> R {
+        if let ClassState::Monk(monk) = &mut self.class_state {
+            action(monk)
+        } else {
+            self.class_state = ClassState::Monk(MonkClassState::default());
+            self.assume_monk(action)
+        }
+    }
+
+    pub fn check_if_monk<R>(&self, action: &Fn(&MonkClassState) -> R) -> Option<R> {
+        if let ClassState::Monk(monk) = &self.class_state {
+            Some(action(monk))
+        } else {
+            None
+        }
+    }
+
+    pub fn assume_infiltrator<R>(&mut self, action: &Fn(&mut InfiltratorClassState) -> R) -> R {
+        if let ClassState::Infiltrator(infiltrator) = &mut self.class_state {
+            action(infiltrator)
+        } else {
+            self.class_state = ClassState::Infiltrator(InfiltratorClassState::default());
+            self.assume_infiltrator(action)
+        }
+    }
+
+    pub fn check_if_infiltrator<R>(&self, action: &Fn(&InfiltratorClassState) -> R) -> Option<R> {
+        if let ClassState::Infiltrator(infiltrator) = &self.class_state {
+            Some(action(infiltrator))
+        } else {
+            None
+        }
+    }
+
     pub fn assume_predator<R>(&mut self, action: &Fn(&mut PredatorClassState) -> R) -> R {
         if let ClassState::Predator(predator) = &mut self.class_state {
             action(predator)
@@ -971,11 +1011,19 @@ impl AgentState {
         }
     }
 
-    pub fn get_predator_stance(&self) -> Stance {
+    pub fn get_predator_stance(&self) -> KnifeStance {
         if let ClassState::Predator(predator) = &self.class_state {
             predator.stance
         } else {
-            Stance::None
+            KnifeStance::None
+        }
+    }
+
+    pub fn get_monk_stance(&self) -> MonkStance {
+        if let ClassState::Monk(monk) = &self.class_state {
+            monk.stance
+        } else {
+            MonkStance::None
         }
     }
 

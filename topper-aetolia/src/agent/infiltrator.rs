@@ -120,113 +120,172 @@ pub enum Hypnosis {
     Trigger(String),
 }
 
-#[derive(Debug, Clone, Default, PartialEq)]
-pub struct HypnoState {
-    pub hypnotized: bool,
-    pub active: bool,
-    pub sealed: Option<f32>,
-    pub hypnosis_stack: Vec<Hypnosis>,
-}
-
-impl Eq for HypnoState {}
-
-impl std::hash::Hash for HypnoState {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.hypnotized.hash(state);
-        self.active.hash(state);
-        self.hypnosis_stack.hash(state);
-        self.sealed.is_some().hash(state);
-    }
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+pub enum HypnoState {
+    #[default]
+    Empty,
+    Hypnotized(Vec<Hypnosis>),
+    Firing(Vec<Hypnosis>, CType),
+    Sealed(Vec<Hypnosis>, CType),
 }
 
 impl HypnoState {
+    pub fn wait(&mut self, duration: CType) {
+        match self {
+            HypnoState::Firing(_, time) => {
+                *time -= duration;
+            }
+            _ => {}
+        }
+    }
     pub fn suggestion_count(&self) -> usize {
-        self.hypnosis_stack.len()
+        match self {
+            HypnoState::Empty => 0,
+            HypnoState::Hypnotized(suggestions) => suggestions.len(),
+            HypnoState::Firing(suggestions, _) => suggestions.len(),
+            HypnoState::Sealed(suggestions, _) => suggestions.len(),
+        }
     }
 
     pub fn fire(&mut self) -> Option<Hypnosis> {
-        if self.hypnosis_stack.len() <= 1 {
-            self.active = false;
-        } else if !self.active {
-            self.activate();
-        }
-        if self.hypnosis_stack.len() > 0 {
-            let top = self.hypnosis_stack.get(0).cloned();
-            self.hypnosis_stack.remove(0);
-            top
-        } else {
-            self.desway();
-            None
+        match self {
+            HypnoState::Firing(suggestions, timer) => {
+                if suggestions.len() > 0 {
+                    let top = suggestions.get(0).cloned();
+                    *timer = 600;
+                    suggestions.remove(0);
+                    top
+                } else {
+                    None
+                }
+            }
+            _ => None,
         }
     }
 
-    pub fn pop_suggestion(&mut self, active: bool) -> Option<Hypnosis> {
-        if self.hypnosis_stack.len() > 0 {
-            if active {
-                if self.hypnosis_stack.len() == 1 {
-                    self.active = false;
-                } else if !self.active {
-                    self.active = true;
+    pub fn lose_suggestion(&mut self, active: bool) -> Option<Hypnosis> {
+        match self {
+            HypnoState::Hypnotized(suggestions) => {
+                if suggestions.len() > 0 {
+                    let top = suggestions.get(0).cloned();
+                    suggestions.remove(0);
+                    top
+                } else {
+                    None
                 }
             }
-            self.hypnosis_stack.pop()
-        } else {
-            None
+            _ => None,
         }
     }
 
     pub fn push_suggestion(&mut self, suggestion: Hypnosis) {
-        self.hypnosis_stack.push(suggestion);
-        self.active = false;
-        self.hypnotized = true;
-        self.sealed = None;
+        match self {
+            HypnoState::Empty => {
+                *self = HypnoState::Hypnotized(vec![suggestion]);
+            }
+            HypnoState::Hypnotized(suggestions) => {
+                suggestions.push(suggestion);
+            }
+            HypnoState::Firing(suggestions, _) => {
+                *self = HypnoState::Hypnotized(vec![suggestion]);
+            }
+            HypnoState::Sealed(suggestions, _) => {
+                suggestions.push(suggestion);
+                *self = HypnoState::Hypnotized(suggestions.clone());
+            }
+        }
     }
 
     pub fn get_next_hypno_aff(&self) -> Option<FType> {
-        if !self.active {
-            return None;
-        }
-        if let Some(Hypnosis::Aff(aff)) = self.hypnosis_stack.get(0) {
-            Some(*aff)
-        } else {
-            None
+        match self {
+            HypnoState::Firing(suggestions, _) => {
+                suggestions.get(0).and_then(|suggestion| match suggestion {
+                    Hypnosis::Aff(aff) => Some(*aff),
+                    _ => None,
+                })
+            }
+            _ => None,
         }
     }
 
     pub fn activate(&mut self) {
-        self.active = true;
-        self.sealed = None;
-        self.hypnosis_stack = self
-            .hypnosis_stack
-            .iter()
-            .filter(|item| match item {
-                Hypnosis::Trigger(_) => false,
-                _ => true,
-            })
-            .cloned()
-            .collect();
+        match self {
+            HypnoState::Sealed(suggestions, time) => {
+                *self = HypnoState::Firing(suggestions.clone(), *time);
+            }
+            _ => {}
+        }
     }
 
     pub fn is_hypnotized(&self) -> bool {
-        self.hypnotized
+        match self {
+            HypnoState::Hypnotized(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_sealed(&self) -> bool {
+        match self {
+            HypnoState::Sealed(_, _) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_firing(&self) -> bool {
+        match self {
+            HypnoState::Firing(_, _) => true,
+            _ => false,
+        }
     }
 
     pub fn hypnotize(&mut self) {
-        self.hypnotized = true;
-        self.active = false;
-        self.sealed = None;
+        match self {
+            HypnoState::Empty | HypnoState::Firing(_, _) => {
+                *self = HypnoState::Hypnotized(Vec::new());
+            }
+            HypnoState::Hypnotized(_) => {}
+            HypnoState::Sealed(suggestions, _) => {
+                *self = HypnoState::Hypnotized(suggestions.clone());
+            }
+        }
     }
 
     pub fn desway(&mut self) {
-        self.hypnotized = false;
-        self.active = false;
-        self.sealed = None;
-        self.hypnosis_stack = Vec::new();
+        *self = HypnoState::Empty;
     }
 
     pub fn seal(&mut self, length: f32) {
-        self.sealed = Some(length);
-        self.hypnotized = false;
-        self.active = false;
+        match self {
+            HypnoState::Empty | HypnoState::Firing(_, _) => {
+                *self = HypnoState::Sealed(Vec::new(), (length * BALANCE_SCALE as f32) as CType);
+            }
+            HypnoState::Hypnotized(suggestions) => {
+                *self = HypnoState::Sealed(
+                    suggestions.clone(),
+                    (length * BALANCE_SCALE as f32) as CType,
+                );
+            }
+            HypnoState::Sealed(_, _) => {}
+        }
+    }
+
+    pub fn get_suggestion(&self, idx: usize) -> Option<&Hypnosis> {
+        match self {
+            HypnoState::Hypnotized(suggestions) => suggestions.get(idx),
+            HypnoState::Firing(suggestions, _) => suggestions.get(idx),
+            HypnoState::Sealed(suggestions, _) => suggestions.get(idx),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Eq, Hash)]
+pub struct InfiltratorClassState {
+    pub finesse: u32,
+}
+
+impl Default for InfiltratorClassState {
+    fn default() -> Self {
+        InfiltratorClassState { finesse: 0 }
     }
 }
