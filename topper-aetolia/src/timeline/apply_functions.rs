@@ -43,10 +43,10 @@ pub fn apply_observation(
                         .initialize_for_normalized_class(class.normal());
                 });
             }
-            handle_combat_action(combat_action, timeline, before, after)?;
+            handle_combat_action(combat_action, timeline, before, after, db)?;
         }
         AetObservation::Proc(combat_action) => {
-            handle_combat_action(combat_action, timeline, before, after)?;
+            handle_combat_action(combat_action, timeline, before, after, db)?;
         }
         AetObservation::SimpleCureAction(simple_cure) => {
             handle_simple_cure_action(simple_cure, timeline, before, after)?;
@@ -384,7 +384,8 @@ pub fn apply_observation(
                 &timeline.me.clone(),
                 &move |me: &mut AgentState| {
                     me.hidden_state.add_unknown();
-                    if !me.is(FType::Recklessness)
+                    if me.hidden_state.unknown() > 0
+                        && !me.is(FType::Recklessness)
                         && me.get_health_percent() == 1.
                         && me.get_mana_percent() == 1.
                     {
@@ -670,6 +671,23 @@ pub fn attack_hit(observations: &Vec<AetObservation>) -> bool {
         }
     }
     return true;
+}
+
+pub fn attack_parried(observations: &Vec<AetObservation>) -> bool {
+    for (i, observation) in observations.iter().enumerate() {
+        match (i, observation) {
+            (0, AetObservation::CombatAction(_)) => {}
+            (_, AetObservation::CombatAction(_)) => {
+                // If we see another combat message, assume we're good to apply limb damage.
+                return false;
+            }
+            (_, AetObservation::Parry(_, _)) => {
+                return true;
+            }
+            _ => {}
+        }
+    }
+    return false;
 }
 
 pub fn limb_broken(observations: &Vec<AetObservation>, limb: LType) -> bool {

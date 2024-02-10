@@ -46,3 +46,29 @@ pub fn handle_combat_action(
     }
     Ok(())
 }
+
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_handle_shatter_and_focus_for_stupidity() {
+        let mut timeline = AetTimeline::new();
+        let combat_action = CombatAction::observation("A", "Fury", "Shatter", "", "B");
+        let hidden = AetObservation::HiddenAff;
+        timeline.test_push_time_slice(AetTimeSlice::new(
+            "B".to_string(),
+            0,
+            vec![combat_action, hidden],
+        ));
+        assert_eq!(timeline.state.get_agent(&"B".to_string()).unwrap().len(), 4);
+        let combat_action = CombatAction::observation("B", "Survival", "Focus", "", "");
+        let cure = AetObservation::Cured("stupidity".to_string());
+        timeline.test_push_time_slice(AetTimeSlice::new(
+            "B".to_string(),
+            10,
+            vec![combat_action, cure],
+        ));
+        timeline.state.strikeout();
+        assert_eq!(timeline.state.get_agent(&"B".to_string()).unwrap().len(), 1);
+    }
+}

@@ -2,7 +2,6 @@ mod infiltrator_timeline_tests {
     use crate::timeline::*;
     use crate::types::*;
     use topper_core::timeline::db::DummyDatabaseModule;
-    use topper_core::timeline::BaseTimeline;
 
     #[test]
     fn test_dstab_3p() {
@@ -737,8 +736,8 @@ mod infiltrator_timeline_tests {
         assert_eq!(seur_state.balanced(BType::Equil), false);
         let bene_state = timeline.state.borrow_agent(&"Benedicto".to_string());
         assert_eq!(
-            bene_state.hypno_state.hypnosis_stack.get(0),
-            Some(&Hypnosis::Aff(FType::Stupidity))
+            bene_state.hypno_state.get_next_hypno_aff(),
+            Some(FType::Stupidity)
         );
     }
 
@@ -767,8 +766,8 @@ mod infiltrator_timeline_tests {
         timeline.push_time_slice(suggest_slice, None as Option<&DummyDatabaseModule>);
         let bene_state = timeline.state.borrow_agent(&"Benedicto".to_string());
         assert_eq!(
-            bene_state.hypno_state.hypnosis_stack.get(0),
-            Some(&Hypnosis::Aff(FType::Stupidity))
+            bene_state.hypno_state.get_next_hypno_aff(),
+            Some(FType::Stupidity)
         );
     }
 

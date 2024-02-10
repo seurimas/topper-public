@@ -9,7 +9,35 @@ use super::*;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum MonkBehavior {
+    // Class cure.
+    Push(Option<AetTarget>),
+    // Combo attacks
+    AddComboAttacks(Vec<MonkComboAttack>),
+    Combo(AetTarget, Vec<MonkComboGrader>, Option<CType>),
+    // Non-combo Tekura actions
+    Backbreaker(AetTarget),
+    // Kaido attacks
+    Choke(AetTarget),
+    Cripple(AetTarget),
+    Strike(AetTarget),
+    Ripple(AetTarget),
+    Enfeeble(AetTarget),
+    // Telepathy actions
     MindLock(AetTarget),
+    // Telepathy attacks
+    Fear(AetTarget),
+    Paralyse(AetTarget),
+    Confuse(AetTarget),
+    Recklessness(AetTarget),
+    Epilepsy(AetTarget),
+    Pacify(AetTarget),
+    Stupidity(AetTarget),
+    Anorexia(AetTarget),
+    Amnesia(AetTarget),
+    Deadening(AetTarget),
+    Strip(AetTarget),
+    Crush(AetTarget),
+    Batter(AetTarget),
 }
 
 impl UnpoweredFunction for MonkBehavior {
@@ -29,6 +57,7 @@ impl UnpoweredFunction for MonkBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
+            _ => UnpoweredFunctionState::Failed,
         }
     }
 

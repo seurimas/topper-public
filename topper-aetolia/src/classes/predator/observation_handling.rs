@@ -1,7 +1,10 @@
 use crate::classes::remove_through;
 use crate::curatives::RANDOM_CURES;
+use crate::db::AetDatabaseModule;
 use crate::timeline::*;
 use crate::types::*;
+
+use super::MAWCRUSH_FREELY_HINT;
 
 lazy_static! {
     static ref RAZE_ORDER: Vec<FType> = vec![
@@ -50,6 +53,7 @@ pub fn handle_combat_action(
     agent_states: &mut AetTimelineState,
     _before: &Vec<AetObservation>,
     after: &Vec<AetObservation>,
+    db: Option<&impl AetDatabaseModule>,
 ) -> Result<(), String> {
     let first_person = combat_action.caster.eq(&agent_states.me);
     let hints = agent_states.get_player_hint(&combat_action.caster, &"CALLED_VENOMS".to_string());
@@ -154,6 +158,14 @@ pub fn handle_combat_action(
                 after,
             );
             sitara_strike(agent_states, &combat_action.target, after, 1);
+            let mut parried = attack_parried(after);
+            if agent_states
+                .borrow_agent(&combat_action.target)
+                .is(FType::TorsoBroken)
+                && parried
+            {
+                toggle_mawcrush_freely(db, true);
+            }
         }
         "Lowhook" => {
             let limb = LType::from_name(&combat_action.annotation);
@@ -164,6 +176,14 @@ pub fn handle_combat_action(
                 after,
             );
             sitara_strike(agent_states, &combat_action.target, after, 1);
+            let mut parried = attack_parried(after);
+            if agent_states
+                .borrow_agent(&combat_action.target)
+                .is(FType::TorsoBroken)
+                && parried
+            {
+                toggle_mawcrush_freely(db, true);
+            }
         }
         "Spinslash" => {
             let limb = LType::from_name(&combat_action.annotation);
@@ -191,6 +211,13 @@ pub fn handle_combat_action(
                 after,
             );
             sitara_strike(agent_states, &combat_action.target, after, 1);
+            let mut parried = attack_parried(after);
+            if agent_states
+                .borrow_agent(&combat_action.target)
+                .is(FType::TorsoBroken)
+            {
+                toggle_mawcrush_freely(db, !parried);
+            }
         }
         "Vertical" | "Crescentcut" | "Butterfly" => {
             apply_weapon_hits(
@@ -242,6 +269,14 @@ pub fn handle_combat_action(
                 (LType::HeadDamage, FLASHKICK_DAMAGE, true),
                 after,
             );
+            let mut parried = attack_parried(after);
+            if agent_states
+                .borrow_agent(&combat_action.target)
+                .is(FType::TorsoBroken)
+                && parried
+            {
+                toggle_mawcrush_freely(db, true);
+            }
         }
         "Flashkicked" => {
             let aff = FType::from_name(&combat_action.annotation);
@@ -259,6 +294,14 @@ pub fn handle_combat_action(
                 after,
             );
             sitara_strike(agent_states, &combat_action.target, after, 1);
+            let mut parried = attack_parried(after);
+            if agent_states
+                .borrow_agent(&combat_action.target)
+                .is(FType::TorsoBroken)
+                && parried
+            {
+                toggle_mawcrush_freely(db, true);
+            }
         }
         "Veinripped" => {
             if combat_action.annotation.eq_ignore_ascii_case("hit") {
@@ -320,6 +363,14 @@ pub fn handle_combat_action(
                 (LType::TorsoDamage, GOUGE_DAMAGE, true),
                 after,
             );
+            let mut parried = attack_parried(after);
+            if agent_states
+                .borrow_agent(&combat_action.target)
+                .is(FType::TorsoBroken)
+                && parried
+            {
+                toggle_mawcrush_freely(db, true);
+            }
         }
         "Tidalslash" => {
             if combat_action.annotation.eq_ignore_ascii_case("full") {
@@ -496,6 +547,9 @@ pub fn handle_combat_action(
                 for_agent(agent_states, &combat_action.target, &|me| {
                     me.observe_flag(FType::TorsoBroken, false);
                 });
+            } else {
+                let mut parried = attack_parried(after);
+                toggle_mawcrush_freely(db, !parried);
             }
         }
         "Rake" => {
@@ -519,4 +573,10 @@ pub fn handle_combat_action(
         _ => {}
     }
     Ok(())
+}
+
+fn toggle_mawcrush_freely(db: Option<&impl AetDatabaseModule>, value: bool) {
+    if let Some(db) = db {
+        db.insert_hint(&MAWCRUSH_FREELY_HINT.to_string(), &value.to_string());
+    }
 }

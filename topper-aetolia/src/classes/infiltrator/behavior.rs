@@ -346,10 +346,10 @@ impl UnpoweredFunction for InfiltratorBehavior {
                 ) {
                     if !me.balanced(BType::Secondary) {
                         return UnpoweredFunctionState::Failed;
-                    } else if you.is(FType::Weakvoid) || you.is(FType::Void) {
-                        if *sleight == SleightType::Void {
-                            return UnpoweredFunctionState::Failed;
-                        }
+                    } else if *sleight == SleightType::Void
+                        && (you.is(FType::Weakvoid) || you.is(FType::Void))
+                    {
+                        return UnpoweredFunctionState::Failed;
                     } else if you.is(FType::Asthma) && *sleight == SleightType::Invasion {
                         return UnpoweredFunctionState::Failed;
                     } else if you.is(FType::Slickness) && *sleight == SleightType::Abrasion {

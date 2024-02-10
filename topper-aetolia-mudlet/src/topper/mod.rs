@@ -12,7 +12,6 @@ use topper_aetolia::timeline::*;
 use topper_aetolia::types::AgentState;
 use topper_core::observations;
 use topper_core::observations::{ObservationParser, BENCHMARKS};
-use topper_core::timeline::BaseTimeline;
 use topper_core_mudlet::topper::{
     TelnetModule, TimelineModule, Topper, TopperCore, TopperHandler, TopperMessage, TopperModule,
     TopperRequest, TopperResponse,

@@ -146,7 +146,7 @@ pub fn handle_combat_action(
                     agent_states,
                     &combat_action.caster,
                     &move |me: &mut AgentState| {
-                        me.set_channel(ChannelState::Heelrush(limb, 325));
+                        me.set_channel(ChannelState::Heelrush(limb, Timer::CountDown(325)));
                     },
                 );
             }
@@ -170,6 +170,21 @@ pub fn handle_combat_action(
                     after,
                 );
             }
+        }
+        "Direblow" => {
+            apply_combo_balance(
+                agent_states,
+                &combat_action.caster,
+                (BType::Balance, 3.5),
+                after,
+            );
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &move |me: &mut AgentState| {
+                    me.set_channel(ChannelState::Direblow(Timer::CountDown(200)));
+                },
+            );
         }
         "Direblow Weak" => {
             attack_limb_damage(
@@ -1498,7 +1513,7 @@ fn main_stack(
             if me.get_balance(BType::Secondary) < 3.0 {
                 0.0
             } else if let Some(class) = db_class(db) {
-                if is_affected_by(&class, FType::Clumsiness) && !you.is(FType::BlurryVision) {
+                if is_affected_by(class, FType::Clumsiness) && !you.is(FType::BlurryVision) {
                     25.0
                 } else {
                     0.0
@@ -1582,7 +1597,7 @@ fn main_stack(
             {
                 35.0
             } else if let Some(class) = db_class(db) {
-                if is_affected_by(&class, FType::Clumsiness) {
+                if is_affected_by(class, FType::Clumsiness) {
                     25.0
                 } else {
                     0.0

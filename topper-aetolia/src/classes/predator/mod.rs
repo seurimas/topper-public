@@ -13,6 +13,8 @@ pub use predicate::*;
 
 use crate::types::KnifeStance;
 
+pub const MAWCRUSH_FREELY_HINT: &str = "MAWCRUSH_FREELY";
+
 #[cfg(test)]
 #[path = "../tests/predator_tests.rs"]
 mod predator_timeline_tests;

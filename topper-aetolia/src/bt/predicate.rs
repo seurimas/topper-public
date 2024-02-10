@@ -538,7 +538,7 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::IsAffectedBy(target, aff) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if let Some(class) = target.class_state.get_normalized_class() {
-                        if is_affected_by(&class, *aff) {
+                        if is_affected_by(class, *aff) {
                             return UnpoweredFunctionState::Complete;
                         }
                     }

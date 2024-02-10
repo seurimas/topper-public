@@ -24,6 +24,7 @@ pub fn get_action_plan(
 ) -> ActionPlan {
     let mut controller = get_controller("predator", me, target, timeline, strategy, db);
     controller.init_predator();
+    add_hints(db, &mut controller);
     let tree_name = if strategy.eq("class") {
         format!("predator/base")
     } else {
@@ -41,6 +42,14 @@ pub fn get_action_plan(
         tree.resume_with(&timeline, &mut controller);
     }
     controller.plan
+}
+
+fn add_hints(db: Option<&impl AetDatabaseModule>, controller: &mut BehaviorController) {
+    if let Some(db) = db {
+        if let Some(mawcrush_freely) = db.get_hint(&MAWCRUSH_FREELY_HINT.to_string()) {
+            controller.hint_plan(MAWCRUSH_FREELY_HINT.to_string(), mawcrush_freely);
+        }
+    }
 }
 
 pub fn get_attack(

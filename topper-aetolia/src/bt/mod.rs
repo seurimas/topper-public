@@ -14,6 +14,7 @@ use topper_bt::unpowered::*;
 use crate::{
     classes::{
         get_venoms_from_plan,
+        monk::{self, MonkComboGenerator, MonkComboSet},
         predator::{
             ComboAttack, ComboGrader, ComboPredicate, ComboSet, ComboSolver, PredatorCombo,
         },
@@ -70,6 +71,10 @@ pub enum ClassController {
     },
     Infiltrator {
         hypno_stack: Vec<Hypnosis>,
+    },
+    Monk {
+        monk_combo_generator: MonkComboGenerator,
+        monk_combos: MonkComboSet,
     },
 }
 
@@ -136,6 +141,33 @@ impl BehaviorController {
         } = &mut self.class_controller
         {
             predator_combos
+        } else {
+            panic!("Not a predator!")
+        }
+    }
+
+    pub fn init_monk(&mut self) {
+        self.class_controller = ClassController::Monk {
+            monk_combo_generator: MonkComboGenerator::default(),
+            monk_combos: MonkComboSet::default(),
+        };
+    }
+
+    pub fn monk_combo_generator(&mut self) -> &mut MonkComboGenerator {
+        if let ClassController::Monk {
+            monk_combo_generator,
+            ..
+        } = &mut self.class_controller
+        {
+            monk_combo_generator
+        } else {
+            panic!("Not a predator!")
+        }
+    }
+
+    pub fn monk_combos(&mut self) -> &mut MonkComboSet {
+        if let ClassController::Monk { monk_combos, .. } = &mut self.class_controller {
+            monk_combos
         } else {
             panic!("Not a predator!")
         }

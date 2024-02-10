@@ -1,4 +1,5 @@
 use super::*;
+use crate::classes::Class;
 use crate::curatives::statics::RESTORE_CURE_ORDERS;
 use num_enum::TryFromPrimitive;
 use serde::{Deserialize, Serialize};
@@ -1033,6 +1034,10 @@ impl AgentState {
 
     pub fn register_hit(&mut self, attacker: Option<&String>) {
         self.aggro.register_hit(attacker);
+    }
+
+    pub fn get_normalized_class(&self) -> Option<Class> {
+        self.class_state.get_normalized_class()
     }
 }
 

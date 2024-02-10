@@ -2,6 +2,8 @@ pub mod observation_handling;
 pub use observation_handling::*;
 pub mod actions;
 pub use actions::*;
+pub mod damage;
+pub use damage::*;
 pub mod combos;
 pub use combos::*;
 pub mod offense;

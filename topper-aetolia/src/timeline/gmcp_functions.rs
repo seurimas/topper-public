@@ -67,6 +67,7 @@ fn handle_char_vitals(
             timeline,
             &timeline.me.clone(),
             &move |me: &mut AgentState| {
+                me.unwield_multi(true, true);
                 me.wield_multi(left.clone(), right.clone());
             },
         );

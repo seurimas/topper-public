@@ -278,9 +278,9 @@ pub fn has_special_cure(class: &Class, affliction: FType) -> bool {
     }
 }
 
-pub fn is_affected_by(class: &Class, affliction: FType) -> bool {
+pub fn is_affected_by(class: Class, affliction: FType) -> bool {
     if class.is_mirror() {
-        return is_affected_by(&class.normal(), affliction);
+        return is_affected_by(class.normal(), affliction);
     }
     match (affliction, class) {
         (FType::Clumsiness, Class::Infiltrator) => true,
@@ -304,6 +304,11 @@ pub fn is_affected_by(class: &Class, affliction: FType) -> bool {
         (FType::Lethargy, Class::Sentinel) => true,
         (FType::Lethargy, Class::Carnifex) => true,
         (FType::Lethargy, Class::Templar) => true,
+        // Class cures get blocked!
+        (FType::Paresis, Class::Indorani) => true,
+        (FType::Paresis, Class::Sciomancer) => true,
+        (FType::Paresis, Class::Ascendril) => true,
+        (FType::Paresis, Class::Teradrim) => true,
         _ => false,
     }
 }
@@ -337,6 +342,7 @@ pub fn get_attack(
             Class::Bard => bard::get_attack(timeline, target, strategy, db),
             Class::Zealot => zealot::get_attack(timeline, target, strategy, db),
             Class::Predator => predator::get_attack(timeline, target, strategy, db),
+            Class::Monk => monk::get_attack(timeline, target, strategy, db),
             _ => infiltrator::get_attack(timeline, target, strategy, db),
         }
     } else {
@@ -349,10 +355,17 @@ pub fn handle_combat_action(
     agent_states: &mut AetTimelineState,
     before: &Vec<AetObservation>,
     after: &Vec<AetObservation>,
+    db: Option<&impl AetDatabaseModule>,
 ) -> Result<(), String> {
     if let Some(class) = get_skill_class(&combat_action.category) {
         if class.is_mirror() {
-            return handle_combat_action(&combat_action.normalized(), agent_states, before, after);
+            return handle_combat_action(
+                &combat_action.normalized(),
+                agent_states,
+                before,
+                after,
+                db,
+            );
         }
     }
     if !combat_action.target.is_empty() && !combat_action.caster.eq(&combat_action.target) {
@@ -420,7 +433,7 @@ pub fn handle_combat_action(
             bard::handle_combat_action(combat_action, agent_states, before, after)
         }
         "Knifeplay" | "Predation" | "Beastmastery" => {
-            predator::handle_combat_action(combat_action, agent_states, before, after)
+            predator::handle_combat_action(combat_action, agent_states, before, after, db)
         }
         "Purification" | "Zeal" | "Psionics" => {
             zealot::handle_combat_action(combat_action, agent_states, before, after)
@@ -960,6 +973,8 @@ pub enum VenomPlan {
     OneOf(FType, FType),
     IfDo(FType, Box<VenomPlan>),
     IfNotDo(FType, Box<VenomPlan>),
+    IfClassHates(FType, Box<VenomPlan>),
+    IfNotClassHates(FType, Box<VenomPlan>),
 }
 
 impl VenomPlan {
@@ -974,6 +989,9 @@ impl VenomPlan {
             | VenomPlan::OffFitness(aff)
             | VenomPlan::OneOf(aff, _) => *aff,
             VenomPlan::IfDo(_pred, plan) | VenomPlan::IfNotDo(_pred, plan) => plan.affliction(),
+            VenomPlan::IfClassHates(aff, plan) | VenomPlan::IfNotClassHates(aff, plan) => {
+                plan.affliction()
+            }
         }
     }
 }
@@ -1086,6 +1104,22 @@ macro_rules! affliction_plan_stacker {
                 }
                 VenomPlan::IfNotDo(when, plan) => {
                     if is_susceptible(target, when, afflicted) {
+                        $add_name(plan, target, venoms, afflicted);
+                    }
+                }
+                VenomPlan::IfClassHates(when, plan) => {
+                    if let Some(class) = target.get_normalized_class() {
+                        if is_affected_by(class, *when) {
+                            $add_name(plan, target, venoms, afflicted);
+                        }
+                    }
+                }
+                VenomPlan::IfNotClassHates(when, plan) => {
+                    if let Some(class) = target.get_normalized_class() {
+                        if !is_affected_by(class, *when) {
+                            $add_name(plan, target, venoms, afflicted);
+                        }
+                    } else {
                         $add_name(plan, target, venoms, afflicted);
                     }
                 }

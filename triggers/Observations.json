@@ -234,7 +234,7 @@
     "observation_name": "DiscernedCure"
   },
   {
-    "regex": "^(\\w+) swoons? as (\\w+) ?\\w* suffers? a toxic relapse.$",
+    "regex": "^(\\w+) swoons? as [\\w ]* suffers? a toxic relapse.$",
     "args": [
       {
         "GroupAsTarget": 1

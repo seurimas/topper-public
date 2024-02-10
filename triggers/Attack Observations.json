@@ -1,6 +1,6 @@
 [
   {
-    "regex": "^(\\w+) (parries|parry) the attack (to|on) (\\w+) ?\\w* (head|torso|left arm|right arm|left leg|right leg|legs|arms) with a deft maneuver.$",
+    "regex": "^(\\w+) (parries|parry) the attack (to|on) (.*) (head|torso|left arm|right arm|left leg|right leg|legs|arms) with a deft maneuver.$",
     "args": [
       {
         "GroupAsTarget": 1
@@ -18,7 +18,7 @@
     "observation_name": "Parry"
   },
   {
-    "regex": "^With a free hand, (\\w+) fends? off the attack (to|on) (\\w+) ?\\w* (head|torso|left arm|right arm|left leg|right leg|legs|arms).$",
+    "regex": "^With a free hand, (\\w+) fends? off the attack (to|on) (.*) (head|torso|left arm|right arm|left leg|right leg|legs|arms).$",
     "args": [
       {
         "GroupAsTarget": 1
@@ -36,7 +36,7 @@
     "observation_name": "Parry"
   },
   {
-    "regex": "^With a predatory growl, (\\w+) opposes? the attack (to|on) (\\w+) ?\\w* (head|torso|left arm|right arm|left leg|right leg|legs|arms), denying it purchase.$",
+    "regex": "^With a predatory growl, (\\w+) opposes? the attack (to|on) (.*) (head|torso|left arm|right arm|left leg|right leg|legs|arms), denying it purchase.$",
     "args": [
       {
         "GroupAsTarget": 1
@@ -90,7 +90,7 @@
     "observation_name": "Damaged"
   },
   {
-    "regex": "^(\\w+)'?s? (head|torso|left arm|right arm|left leg|right leg) is shredded into meaty ribbons.$",
+    "regex": "^(\\w+)(:?'s|) (head|torso|left arm|right arm|left leg|right leg) is shredded into meaty ribbons.$",
     "args": [
       {
         "GroupAsTarget": 1
@@ -270,7 +270,7 @@
     "observation_name": "Devenoms"
   },
   {
-    "regex": "^Your fangs won't penetrate the odd waxy coating protecting (\\w+) ?\\w*.$",
+    "regex": "^Your fangs won't penetrate the odd waxy coating protecting (.*).$",
     "args": [
       {
         "Literal": ""
@@ -324,7 +324,7 @@
     "observation_name": "OtherAfflicted"
   },
   {
-    "regex": "^(\\w+) twists and turns (\\w+) ?\\w* body, dodging the attack.$",
+    "regex": "^(\\w+) twists and turns (.*) body, dodging the attack.$",
     "args": [
       {
         "GroupAsTarget": 1
@@ -450,7 +450,7 @@
     "observation_name": "Absorbed"
   },
   {
-    "regex": "^(\\w+)'s face flushes as (\\w+) ?\\w* body purges the (\\w+) venom.",
+    "regex": "^(\\w+)'s face flushes as (.*) body purges the (\\w+) venom.",
     "args": [
       {
         "GroupAsTarget": 1

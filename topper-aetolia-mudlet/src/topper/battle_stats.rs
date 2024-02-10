@@ -15,7 +15,7 @@ use super::db::AetMudletDatabaseModule;
 pub struct PlayerStats {
     name: String,
     afflictions: Vec<String>,
-    unknowns: usize,
+    unknowns: isize,
     limbs: HashMap<String, LimbState>,
     balances: HashMap<String, f32>,
     warnings: Vec<String>,

@@ -1207,17 +1207,23 @@ impl Default for ClassState {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum ChannelState {
     Inactive,
-    Heelrush(LType, CType),
+    Heelrush(LType, Timer),
+    Direblow(Timer),
 }
 
 impl ChannelState {
     pub fn wait(&mut self, duration: CType) {
         match self {
             ChannelState::Heelrush(_, remaining) => {
-                if *remaining < duration {
+                remaining.wait(duration);
+                if !remaining.is_active() {
                     *self = ChannelState::Inactive;
-                } else {
-                    *remaining = *remaining - duration;
+                }
+            }
+            ChannelState::Direblow(remaining) => {
+                remaining.wait(duration);
+                if !remaining.is_active() {
+                    *self = ChannelState::Inactive;
                 }
             }
             _ => {}

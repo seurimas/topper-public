@@ -216,7 +216,7 @@ impl ActiveTransition for ShruggingAction {
         )])
     }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
-        Ok(format!("light pipes;;shrug"))
+        Ok(format!("light pipes;;shrug venom"))
     }
 }
 

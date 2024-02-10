@@ -81,7 +81,8 @@ pub struct BardClassState {
 }
 
 const SONG_FUDGE: CType = (0.33 * BALANCE_SCALE) as CType;
-const RUNEBAND_TIMEOUT: CType = (8.0 * BALANCE_SCALE) as CType;
+const RUNEBAND_DELAY: CType = (8.0 * BALANCE_SCALE) as CType;
+const RUNEBAND_TIMEOUT: CType = (10.0 * BALANCE_SCALE) as CType;
 const IMPETUS_TIMEOUT: CType = (30.0 * BALANCE_SCALE) as CType;
 const VOICE_SONG_TIMEOUT: CType = (8.0 * BALANCE_SCALE) as CType;
 const INSTRUMENT_SONG_TIMEOUT: CType = (6.0 * BALANCE_SCALE) as CType;
@@ -186,7 +187,7 @@ impl RunebandState {
     }
 
     pub fn initial() -> Self {
-        Self::Normal(0, Timer::count_up(RUNEBAND_TIMEOUT))
+        Self::Normal(0, Timer::count_up_observe(RUNEBAND_DELAY, RUNEBAND_TIMEOUT))
     }
 
     pub fn reverse(&mut self) {
@@ -204,7 +205,7 @@ impl RunebandState {
     pub fn is_active(&self) -> bool {
         match self {
             Self::Inactive => false,
-            _ => true,
+            Self::Normal(_, timer) | Self::Reverse(_, timer) => timer.is_active(),
         }
     }
 
@@ -483,8 +484,10 @@ impl BardBoard {
                 } else {
                     aff_idx + 1
                 };
-                self.runeband_state =
-                    RunebandState::Normal(new_idx, Timer::count_up(RUNEBAND_TIMEOUT));
+                self.runeband_state = RunebandState::Normal(
+                    new_idx,
+                    Timer::count_up_observe(RUNEBAND_DELAY, RUNEBAND_TIMEOUT),
+                );
                 Some(RUNEBAND_AFFS[aff_idx])
             }
             RunebandState::Reverse(aff_idx, _) => {
@@ -493,8 +496,10 @@ impl BardBoard {
                 } else {
                     aff_idx - 1
                 };
-                self.runeband_state =
-                    RunebandState::Reverse(new_idx, Timer::count_up(RUNEBAND_TIMEOUT));
+                self.runeband_state = RunebandState::Reverse(
+                    new_idx,
+                    Timer::count_up_observe(RUNEBAND_DELAY, RUNEBAND_TIMEOUT),
+                );
                 Some(RUNEBAND_AFFS[aff_idx])
             }
             _ => None,
