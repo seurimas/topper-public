@@ -85,7 +85,7 @@ impl Component for ExplainerModel {
             }
             Self::Published(published) => html!(<div key="welcome" class="welcome">
                 <span class="info">
-                {"Welcome to Seurimas' Explainer tool's personal, publish logs.
+                {"Welcome to Seurimas' Explainer tool's personal, published logs.
                 
                 The main page for this tool (for use with your own logs) is here: "}
                 <a href="?">{"Seurimas' Explainer"}</a>

@@ -18,6 +18,10 @@ body {
 
 .published {
     color: gold;
+
+    &:visited {
+        color: red;
+    }
 }
 
 .page {
