@@ -4,11 +4,12 @@ use yew::{prelude::*, virtual_dom::VNode};
 
 use crate::{
     bindings::{export_json, get_time, is_unlocked, log},
-    explainer::{comment::CommentBlock, line::PageLine, state::StateBlock},
+    explainer::ExplainerPage,
+    models::{comment::CommentBlock, line::PageLine, state::StateBlock},
     sect_parser::{build_time_slices, get_timeline_state, parse_me_and_you},
 };
 
-use super::{Comment, ExplainerModel, Mutation};
+use crate::explainer::{Comment, Mutation};
 
 #[derive(Default, Debug)]
 pub struct ExplainerPageModel {
@@ -33,78 +34,6 @@ pub enum ExplainerPageMessage {
     ToggleEditMode,
     ToggleExpanded,
     Export,
-}
-
-#[derive(Default, Debug, Clone, Deserialize, Serialize)]
-pub struct ExplainerPage {
-    pub id: String,
-    body: Vec<String>,
-    #[serde(default)]
-    comments: Vec<Comment>,
-    #[serde(default)]
-    locked: bool,
-    #[serde(default)]
-    mutations: Vec<Mutation>,
-}
-
-impl PartialEq for ExplainerPage {
-    fn eq(&self, other: &Self) -> bool {
-        true
-        // if !self.id.eq(&other.id) {
-        //     false
-        // } else if self.body.len() != other.body.len() {
-        //     false
-        // } else {
-        //     self.comments.eq(&other.comments)
-        // }
-    }
-}
-
-impl ExplainerPage {
-    pub fn new(id: String, body: Vec<String>) -> Self {
-        Self {
-            id,
-            body,
-            comments: Vec::new(),
-            locked: false,
-            mutations: Vec::new(),
-        }
-    }
-
-    pub fn get_body(&self) -> &Vec<String> {
-        &self.body
-    }
-
-    pub fn len(&self) -> usize {
-        self.body.len()
-    }
-
-    pub fn get_comment(&self, line: usize) -> Option<Comment> {
-        self.comments
-            .iter()
-            .filter(|comment| comment.is_for_line(line))
-            .cloned()
-            .next()
-    }
-
-    pub fn get_comment_lines(&self) -> Vec<usize> {
-        self.comments
-            .iter()
-            .map(|comment| comment.get_line())
-            .collect()
-    }
-
-    pub fn update_comment(&mut self, line: usize, new_val: String) {
-        self.comments
-            .iter_mut()
-            .filter(|comment| comment.is_for_line(line))
-            .next()
-            .map(move |comment| comment.update_body(new_val));
-    }
-
-    pub fn delete_comment(&mut self, line: usize) {
-        self.comments.retain(|comment| !comment.is_for_line(line));
-    }
 }
 
 impl ExplainerPageModel {

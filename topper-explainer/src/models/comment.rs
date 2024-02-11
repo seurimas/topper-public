@@ -1,41 +1,8 @@
-use crate::bindings::log;
+use crate::{bindings::log, explainer::Comment};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
-use web_sys::{HtmlDivElement, HtmlInputElement};
+use web_sys::HtmlDivElement;
 use yew::prelude::*;
-
-#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
-pub struct Comment {
-    body: String,
-    reference_line: usize,
-    added: i32,
-}
-
-impl Comment {
-    pub fn new(reference_line: usize, time: i32) -> Self {
-        Self {
-            body: String::new(),
-            reference_line,
-            added: time,
-        }
-    }
-
-    pub fn get_line(&self) -> usize {
-        self.reference_line
-    }
-
-    pub fn is_for_line(&self, line: usize) -> bool {
-        self.reference_line == line
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.body.is_empty()
-    }
-
-    pub fn update_body(&mut self, body: String) {
-        self.body = body;
-    }
-}
 
 pub struct CommentBlock {
     editing: bool,

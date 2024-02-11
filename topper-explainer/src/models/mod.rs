@@ -5,28 +5,26 @@ use web_sys::HtmlInputElement;
 use yew::prelude::*;
 mod comment;
 mod line;
-pub mod page;
+mod page;
 mod state;
 
 use crate::{
     bindings::*,
+    explainer::ExplainerPage,
     links::{check_for_link, load_file, load_page},
     msg::ExplainerMessage,
     sect_parser::{load_sect_into_iframe, AetoliaSectParser},
 };
 
-pub use self::comment::Comment;
-pub use self::page::ExplainerPage;
 use self::page::ExplainerPageModel;
-pub use self::state::Mutation;
 
 #[derive(Debug)]
 pub enum ExplainerModel {
     Welcome,
     Loading,
     Parsing(AetoliaSectParser),
-    Cleared,
     LoadedPage(ExplainerPage),
+    Published(Vec<String>),
 }
 
 impl Default for ExplainerModel {
@@ -84,6 +82,23 @@ impl Component for ExplainerModel {
                   page={page.clone()}
                 />)
             }
+            Self::Published(published) => html!(<div key="welcome" class="welcome">
+                <span class="info">
+                {"Welcome to Seurimas' Explainer tool.
+                
+                The purpose of this tool is to provide a means of explaining concepts in the MUD Aetolia, using inline comments. The commented logs can be exported to JSON, shared, and then loaded into this tool to view the comments again.
+                
+                As an added utility, Sect logs can be loaded into this tool. The tool will parse the log and provide inline insights into the state of the fight: afflictions, limb state, and critical balances.
+                
+                While viewing a Sect log, this icon shows up with every prompt to show the battle state: "}
+                <div class="page__view_state">{"?"}</div>
+                <br/>
+                {"The following logs are available for viewing:"}
+                <ul>
+                { for published.iter().map(|id| html!(<li><a href="?my_logs/{id}.json">{id}</a></li>)) }
+                </ul>
+                </span>
+            </div>),
             unrendered => html!(<div key="unknown">{ format!("No view: {:?}", unrendered) }</div>),
         }
     }
@@ -112,10 +127,16 @@ impl Component for ExplainerModel {
                         set_title(&page.id);
                         *self = Self::LoadedPage(page);
                     }
-                    _ => {
-                        log("Assuming non-page file is Sect log!");
-                        *self = Self::Parsing(AetoliaSectParser::new(loaded));
-                    }
+                    _ => match serde_json::from_str::<Vec<String>>(&loaded) {
+                        Ok(published_logs) => {
+                            log("Found published logs!");
+                            *self = Self::Published(published_logs);
+                        }
+                        _ => {
+                            log("Assuming non-page file is Sect log!");
+                            *self = Self::Parsing(AetoliaSectParser::new(loaded));
+                        }
+                    },
                 }
                 true
             }
