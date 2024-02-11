@@ -95,8 +95,13 @@ impl AetoliaSectParser {
         }
 
         let id = format!(
-            "{}_{}_vs_{}_{}_{}",
-            self.me, self.my_class, self.you, self.your_class, self.time
+            "{}_{}_vs_{}_{}_{}_{}",
+            self.me,
+            self.my_class,
+            self.you,
+            self.your_class,
+            self.time,
+            self.lines.len()
         );
         Ok(ExplainerPage::new(id, self.lines.clone()))
     }
