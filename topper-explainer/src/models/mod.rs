@@ -127,16 +127,10 @@ impl Component for ExplainerModel {
                         set_title(&page.id);
                         *self = Self::LoadedPage(page);
                     }
-                    _ => match serde_json::from_str::<Vec<String>>(&loaded) {
-                        Ok(published_logs) => {
-                            log("Found published logs!");
-                            *self = Self::Published(published_logs);
-                        }
-                        _ => {
-                            log("Assuming non-page file is Sect log!");
-                            *self = Self::Parsing(AetoliaSectParser::new(loaded));
-                        }
-                    },
+                    _ => {
+                        log("Assuming non-page file is Sect log!");
+                        *self = Self::Parsing(AetoliaSectParser::new(loaded));
+                    }
                 }
                 true
             }
@@ -144,6 +138,11 @@ impl Component for ExplainerModel {
                 log(&format!("Loaded {}!", loaded.len()));
                 set_title(&loaded.id);
                 *self = Self::LoadedPage(loaded);
+                true
+            }
+            ExplainerMessage::LoadedPublished(published) => {
+                log(&format!("Loaded published {}!", published.len()));
+                *self = Self::Published(published);
                 true
             }
             ExplainerMessage::InitializeSect(iframe) => match self {

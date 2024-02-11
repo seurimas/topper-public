@@ -7,6 +7,7 @@ pub enum ExplainerMessage {
     Noop,
     LoadPage(JsFuture),
     LoadedPage(ExplainerPage),
+    LoadedPublished(Vec<String>),
     LoadFile(JsFuture),
     LoadedFile(String),
     InitializeSect(HtmlIFrameElement),

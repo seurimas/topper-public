@@ -32,7 +32,10 @@ pub async fn load_page(result: Result<JsValue, JsValue>) -> ExplainerMessage {
             let link_str = loaded.as_string().unwrap_or("Not a string".to_string());
             match serde_json::from_str(&link_str) {
                 Ok(loaded) => ExplainerMessage::LoadedPage(loaded),
-                Err(err) => ExplainerMessage::Error(format!("{:?}", err)),
+                Err(_) => match serde_json::from_str(&link_str) {
+                    Ok(loaded) => ExplainerMessage::LoadedPublished(loaded),
+                    Err(err) => ExplainerMessage::Error(format!("{:?}", err)),
+                },
             }
         }
         Err(error) => ExplainerMessage::Error(format!("Could not parse: {:?}", error)),
