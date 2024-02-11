@@ -90,12 +90,14 @@ impl Component for ExplainerModel {
                 
                 As an added utility, Sect logs can be loaded into this tool. The tool will parse the log and provide inline insights into the state of the fight: afflictions, limb state, and critical balances.
                 
+                NOTE: Logs may take several seconds to display! This is normal!
+
                 While viewing a Sect log, this icon shows up with every prompt to show the battle state: "}
                 <div class="page__view_state">{"?"}</div>
                 <br/>
                 {"The following logs are available for viewing:"}
                 <ul>
-                { for published.iter().map(|id| html!(<li><a href={format!("?my_logs/{id}.json")}>{id}</a></li>)) }
+                { for published.iter().map(|id| html!(<li><a class="published" href={format!("?my_logs/{id}.json")}>{id}</a></li>)) }
                 </ul>
                 </span>
             </div>),
