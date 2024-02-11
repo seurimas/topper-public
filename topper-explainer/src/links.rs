@@ -14,7 +14,7 @@ pub fn check_for_link<T: Component>(
             let window = window().unwrap();
             let location = window.location();
             if let Ok(mut link) = location.search() {
-                if link.len() == 0 {
+                if link.len() > 1 {
                     return None;
                 }
                 link.remove(0);

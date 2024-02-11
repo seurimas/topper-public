@@ -85,18 +85,21 @@ impl Component for ExplainerModel {
             }
             Self::Published(published) => html!(<div key="welcome" class="welcome">
                 <span class="info">
-                {"Welcome to Seurimas' Explainer tool.
+                {"Welcome to Seurimas' Explainer tool's personal, publish logs.
                 
+                The main page for this tool (for use with your own logs) is here: "}
+                <a href="?">{"Seurimas' Explainer"}</a>
+                {"
+
                 The purpose of this tool is to provide a means of explaining concepts in the MUD Aetolia, using inline comments. The commented logs can be exported to JSON, shared, and then loaded into this tool to view the comments again.
                 
                 As an added utility, Sect logs can be loaded into this tool. The tool will parse the log and provide inline insights into the state of the fight: afflictions, limb state, and critical balances.
-                
-                NOTE: Logs may take several seconds to display! This is normal!
 
                 While viewing a Sect log, this icon shows up with every prompt to show the battle state: "}
                 <div class="page__view_state">{"?"}</div>
                 <br/>
                 {"This battle state is only supported: for some classes offensively; with simple config options defensively; and will not work after the target leaves the room."}
+                <br/>
                 <br/>
                 {"The following logs are available for viewing:"}
                 <ul>
