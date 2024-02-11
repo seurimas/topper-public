@@ -95,7 +95,7 @@ impl Component for ExplainerModel {
                 <br/>
                 {"The following logs are available for viewing:"}
                 <ul>
-                { for published.iter().map(|id| html!(<li><a href="?my_logs/{id}.json">{id}</a></li>)) }
+                { for published.iter().map(|id| html!(<li><a href={format!("?my_logs/{id}.json")}>{id}</a></li>)) }
                 </ul>
                 </span>
             </div>),
@@ -140,8 +140,9 @@ impl Component for ExplainerModel {
                 *self = Self::LoadedPage(loaded);
                 true
             }
-            ExplainerMessage::LoadedPublished(published) => {
+            ExplainerMessage::LoadedPublished(mut published) => {
                 log(&format!("Loaded published {}!", published.len()));
+                published.reverse();
                 *self = Self::Published(published);
                 true
             }
