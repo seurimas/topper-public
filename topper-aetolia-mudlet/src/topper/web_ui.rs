@@ -87,7 +87,7 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for WebModule {
                                         publish_location, explainer_page.id
                                     ))
                                     .unwrap();
-                                    serde_json::to_writer(&file, &explainer_page).unwrap();
+                                    serde_json::to_writer_pretty(&file, &explainer_page).unwrap();
                                     let published_file = std::fs::File::open(format!(
                                         "{}/published.json",
                                         publish_location
@@ -102,7 +102,7 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for WebModule {
                                             publish_location
                                         ))
                                         .unwrap();
-                                        serde_json::to_writer(&published_file, &published);
+                                        serde_json::to_writer_pretty(&published_file, &published);
                                     }
                                 } else {
                                     println!("No publish location set");
