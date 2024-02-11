@@ -67,6 +67,19 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for WebModule {
                             if let Ok(mut explainer_page) = parser.parse_nodes(sect_log) {
                                 println!("Explainer page parsed successfully!");
                                 explainer_page.filter_out_from_body("Tells");
+                                explainer_page.filter_out_command("tell");
+                                explainer_page.filter_out_command("gtells");
+                                explainer_page.filter_out_command("gtstells");
+                                explainer_page.filter_out_command("clan");
+                                explainer_page.filter_out_command("gw");
+                                explainer_page.filter_out_command("cw");
+                                explainer_page.filter_out_command("who");
+                                explainer_page.filter_out_command("rm");
+                                explainer_page.filter_out_command("rn");
+                                explainer_page.filter_out_command("nstat");
+                                explainer_page.filter_out_command("message");
+                                explainer_page.filter_out_command("msg");
+                                explainer_page.filter_out_command("tell");
                                 explainer_page.locked = true;
                                 if let Some(publish_location) = &self.publish_location {
                                     let mut file = std::fs::File::create(format!(

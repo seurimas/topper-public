@@ -46,6 +46,27 @@ impl ExplainerPage {
         self.body.retain(|line| !line.contains(filter))
     }
 
+    pub fn filter_out_command(&mut self, command: &str) {
+        let has_command =
+            |line: &String| line.contains(&format!("<#ffff00>>>> <white>{}", command));
+        let mut in_command = false;
+        self.body.retain(|line| {
+            if has_command(line) {
+                in_command = true;
+                false
+            } else if in_command {
+                if line.contains("<#ffff00>>>> <white>") {
+                    in_command = false;
+                    true
+                } else {
+                    false
+                }
+            } else {
+                true
+            }
+        });
+    }
+
     pub fn len(&self) -> usize {
         self.body.len()
     }
