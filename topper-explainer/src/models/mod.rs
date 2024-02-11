@@ -64,6 +64,7 @@ impl Component for ExplainerModel {
                   While editing or viewing a Sect log, this icon shows up with every prompt to show the battle state: "}
                   <div class="page__view_state">{"?"}</div>
                   <br/>
+                  {"This battle state is only supported: for some classes offensively; with simple config options defensively; and will not work after the target leaves the room."}
                   <br/>
                   </span>
                   <label for="sect_log">{"Select an exported JSON file or a downloaded Sect log:"}</label>
@@ -94,6 +95,8 @@ impl Component for ExplainerModel {
 
                 While viewing a Sect log, this icon shows up with every prompt to show the battle state: "}
                 <div class="page__view_state">{"?"}</div>
+                <br/>
+                {"This battle state is only supported: for some classes offensively; with simple config options defensively; and will not work after the target leaves the room."}
                 <br/>
                 {"The following logs are available for viewing:"}
                 <ul>
