@@ -112,6 +112,7 @@ impl Component for TimeControl {
                 </div>
                 <div class="time_control__end" onclick={Callback::from(move |_| {
                     on_time_change_end.emit(end_time);
+                    update_playback_time(end_time);
                     autoscroll_once();
                 })}>{"Go To End"}</div>
             </div>

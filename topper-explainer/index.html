@@ -7,6 +7,7 @@
   <link data-trunk rel="copy-dir" href="helps" />
   <link data-trunk rel="copy-dir" href="my_logs" />
   <script type="text/javascript">
+    let paused = false;
     let playbackSpeed;
     let playbackTime;
     let playingBack;
@@ -27,8 +28,11 @@
         playingBack = setInterval(() => {
           const currentTime = new Date().getTime();
           const delta = (currentTime - lastTime) / 10;
-          playbackTime += delta * playbackSpeed;
           lastTime = currentTime;
+          if (paused) {
+            return;
+          }
+          playbackTime += delta * playbackSpeed;
           playbackCb(playbackTime);
           window.scrollTo(0, document.body.scrollHeight);
         }, 40);
@@ -118,6 +122,11 @@
       } else if (e.key === "PageUp") {
         playbackTime -= 1000;
         if (playingBack) {
+          e.preventDefault();
+        }
+      } else if (e.key === " ") {
+        if (playingBack) {
+          paused = !paused;
           e.preventDefault();
         }
       }
