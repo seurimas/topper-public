@@ -4,6 +4,8 @@ use topper_core::{
     timeline::{db::DummyDatabaseModule, BaseTimeline},
 };
 
+use crate::bindings::log;
+
 use crate::explainer::ExplainerPage;
 
 use super::{
@@ -36,6 +38,21 @@ pub fn build_time_slices(page: &ExplainerPage) -> Vec<AetTimeSlice> {
         }
     }
     slices
+}
+
+pub fn build_line_times(page: &ExplainerPage) -> Vec<(usize, i32)> {
+    let mut times = Vec::new();
+    let mut last_time = 0;
+    for (line_idx, line_text) in page.get_body().iter().enumerate() {
+        let line_text = get_content_of_raw_colored_text(line_text);
+        if let Some(time) = parse_prompt_time(&line_text, last_time) {
+            times.push((line_idx, time));
+            last_time = time;
+        }
+    }
+    times.push((page.get_body().len(), last_time));
+    log(&format!("{:?}", times));
+    times
 }
 
 pub fn get_timeline_state(

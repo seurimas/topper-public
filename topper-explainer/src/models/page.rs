@@ -6,7 +6,7 @@ use crate::{
     bindings::{export_json, get_time, is_unlocked, log},
     explainer::ExplainerPage,
     models::{comment::CommentBlock, line::PageLine, state::StateBlock},
-    sect_parser::{build_time_slices, get_timeline_state, parse_me_and_you},
+    sect_parser::{build_line_times, build_time_slices, get_timeline_state, parse_me_and_you},
 };
 
 use crate::explainer::{Comment, Mutation};
@@ -17,6 +17,7 @@ pub struct ExplainerPageModel {
     me: String,
     you: String,
     time_slices: Vec<AetTimeSlice>,
+    line_times: Vec<(usize, i32)>,
     viewing_state: Option<(usize, AetTimelineState)>,
     viewing_comments: Vec<usize>,
     edit_mode: bool,
@@ -98,16 +99,31 @@ impl ExplainerPageModel {
           {state_block}
         </PageLine>)
     }
+
+    fn get_last_line_for_time(&self, ctx: &Context<ExplainerPageModel>) -> Option<usize> {
+        ctx.props().time.map(|time| {
+            let mut last_line = 0;
+            for (line_idx, line_time) in self.line_times.iter() {
+                if *line_time > time {
+                    break;
+                }
+                last_line = *line_idx;
+            }
+            last_line
+        })
+    }
 }
 
 #[derive(Properties, PartialEq)]
 pub struct ExplainerPageProperties {
     pub page: ExplainerPage,
+    pub time: Option<i32>,
 }
 
 impl Component for ExplainerPageModel {
     type Message = ExplainerPageMessage;
     type Properties = ExplainerPageProperties;
+
     fn create(ctx: &Context<Self>) -> Self {
         let page = &ctx.props().page;
         let locked = page.locked && !is_unlocked();
@@ -124,16 +140,26 @@ impl Component for ExplainerPageModel {
             me,
             you,
             time_slices: build_time_slices(&page),
+            line_times: build_line_times(&page),
             pass_msg: ctx.link().callback(|msg| msg),
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
+        let last_time_line = self.get_last_line_for_time(ctx);
+        log(&format!("{:?}", last_time_line));
         let page_lines = self
             .page
             .body
             .iter()
             .enumerate()
+            .filter(|(line_idx, _)| {
+                if let Some(last_line) = last_time_line {
+                    *line_idx <= last_line
+                } else {
+                    true
+                }
+            })
             .map(|(idx, line)| self.render_line(ctx, idx, line, self.pass_msg.clone()));
         let edit_section = if self.page.locked && !is_unlocked() {
             None

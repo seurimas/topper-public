@@ -7,23 +7,33 @@ mod comment;
 mod line;
 mod page;
 mod state;
+mod time_control;
 
 use crate::{
     bindings::*,
     explainer::ExplainerPage,
     links::{check_for_link, load_file, load_page},
+    models::time_control::TimeControl,
     msg::ExplainerMessage,
     sect_parser::{load_sect_into_iframe, AetoliaSectParser},
 };
 
-use self::page::ExplainerPageModel;
+use self::{
+    page::ExplainerPageModel,
+    time_control::{_TimeControlProperties::end_time, get_start_and_end_time},
+};
 
 #[derive(Debug)]
 pub enum ExplainerModel {
     Welcome,
     Loading,
     Parsing(AetoliaSectParser),
-    LoadedPage(ExplainerPage),
+    LoadedPage {
+        page: ExplainerPage,
+        first_time: i32,
+        last_time: i32,
+        time: Option<i32>,
+    },
     Published(Vec<String>),
 }
 
@@ -77,11 +87,25 @@ impl Component for ExplainerModel {
                     {load_sect_into_iframe(ctx, &parser.text)}
                 </>
             ),
-            Self::LoadedPage(page) => {
+            Self::LoadedPage {
+                page,
+                first_time,
+                last_time,
+                time,
+            } => {
                 log("Rendering page...");
-                html!(<ExplainerPageModel
-                  page={page.clone()}
-                />)
+                html!(<>
+                    <ExplainerPageModel
+                      page={page.clone()}
+                      time={time.clone()}
+                    />
+                    <TimeControl
+                      start_time={first_time}
+                      end_time={last_time}
+                      time={time.clone()}
+                      on_time_change={ctx.link().callback(|time| ExplainerMessage::SetTime(time))}
+                    />
+                </>)
             }
             Self::Published(published) => html!(<div key="welcome" class="welcome">
                 <span class="info">
@@ -133,7 +157,13 @@ impl Component for ExplainerModel {
                     Ok(page) => {
                         log("Found page from file!");
                         set_title(&page.id);
-                        *self = Self::LoadedPage(page);
+                        let start_and_end_time = get_start_and_end_time(&page).unwrap_or((0, 0));
+                        *self = Self::LoadedPage {
+                            page,
+                            first_time: start_and_end_time.0,
+                            last_time: start_and_end_time.1,
+                            time: None,
+                        };
                     }
                     _ => {
                         log("Assuming non-page file is Sect log!");
@@ -145,9 +175,22 @@ impl Component for ExplainerModel {
             ExplainerMessage::LoadedPage(loaded) => {
                 log(&format!("Loaded {}!", loaded.len()));
                 set_title(&loaded.id);
-                *self = Self::LoadedPage(loaded);
+                let start_and_end_time = get_start_and_end_time(&loaded).unwrap_or((0, 0));
+                *self = Self::LoadedPage {
+                    page: loaded,
+                    first_time: start_and_end_time.0,
+                    last_time: start_and_end_time.1,
+                    time: None,
+                };
                 true
             }
+            ExplainerMessage::SetTime(new_time) => match self {
+                Self::LoadedPage { time, .. } => {
+                    *time = Some(new_time);
+                    true
+                }
+                _ => false,
+            },
             ExplainerMessage::LoadedPublished(mut published) => {
                 log(&format!("Loaded published {}!", published.len()));
                 published.reverse();
@@ -159,7 +202,13 @@ impl Component for ExplainerModel {
                     parser.parse_nodes(&iframe);
                     log("Parsed!");
                     let page = parser.get_page();
-                    *self = Self::LoadedPage(page);
+                    let start_and_end_time = get_start_and_end_time(&page).unwrap_or((0, 0));
+                    *self = Self::LoadedPage {
+                        page,
+                        first_time: start_and_end_time.0,
+                        last_time: start_and_end_time.1,
+                        time: None,
+                    };
                     true
                 }
                 _ => {

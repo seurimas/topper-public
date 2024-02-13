@@ -8,8 +8,10 @@ extern "C" {
     #[wasm_bindgen(js_namespace = console)]
     pub fn log(s: &str);
 
-    // Delays an event to try and fix something
-    pub fn bounce(cb: &Closure<dyn Fn()>);
+    pub fn toggle_playback(speed: f32, time: i32);
+    pub fn remember_playback_cb(f: &Closure<dyn Fn(i32)>);
+    pub fn update_playback_time(time: i32);
+    pub fn update_playback_speed(time: f32);
 
     // Log a node for debugging purposes.
     pub fn debug_node(val: &JsValue);
@@ -22,6 +24,9 @@ extern "C" {
 
     // Returns true if the page is unlocked for editing, despite the JSON value.
     pub fn is_unlocked() -> bool;
+
+    // Autoscrolls the page to the bottom, once.
+    pub fn autoscroll_once();
 
     // Sets the document title text.
     pub fn set_title(s: &str);
