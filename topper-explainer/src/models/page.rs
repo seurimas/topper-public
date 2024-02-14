@@ -12,7 +12,7 @@ use crate::{
 
 use crate::explainer::{Comment, Mutation};
 
-use super::ttsSpeak;
+use super::{ttsQueue, ttsSpeak};
 
 #[derive(Default, Debug)]
 pub struct ExplainerPageModel {
@@ -168,7 +168,7 @@ impl ExplainerPageModel {
     }
 
     fn callout_combat_actions(&self, new_slices: Vec<AetTimeSlice>) {
-        if new_slices.len() > 3 {
+        if new_slices.len() > 10 {
             return;
         }
         for slice in new_slices {
@@ -176,7 +176,7 @@ impl ExplainerPageModel {
                 match observation {
                     AetObservation::CombatAction(action) => {
                         if action.caster == self.you {
-                            ttsSpeak(&format!("{}", action.skill));
+                            ttsQueue(&format!("{}", action.skill));
                         }
                         trace(&format!("{:?}", action));
                     }
