@@ -8,6 +8,8 @@ extern "C" {
     #[wasm_bindgen(js_namespace = console)]
     pub fn log(s: &str);
 
+    pub fn trace(s: &str);
+
     pub fn toggle_playback(speed: f32, time: i32);
     pub fn remember_playback_cb(f: &Closure<dyn Fn(i32)>);
     pub fn update_playback_time(time: i32);

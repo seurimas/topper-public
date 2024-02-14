@@ -1,12 +1,13 @@
 use serde::{Deserialize, Serialize};
-use topper_aetolia::timeline::{AetTimeSlice, AetTimelineState};
+use topper_aetolia::timeline::{AetTimeSlice, AetTimeline, AetTimelineState};
+use topper_core::timeline::{db::DummyDatabaseModule, BaseTimeline};
 use yew::{prelude::*, virtual_dom::VNode};
 
 use crate::{
-    bindings::{export_json, get_time, is_unlocked, log},
+    bindings::{export_json, get_time, is_unlocked, log, trace},
     explainer::ExplainerPage,
     models::{comment::CommentBlock, line::PageLine, state::StateBlock},
-    sect_parser::{build_line_times, build_time_slices, get_timeline_state, parse_me_and_you},
+    sect_parser::{build_line_times, build_time_slices, parse_me_and_you},
 };
 
 use crate::explainer::{Comment, Mutation};
@@ -18,7 +19,7 @@ pub struct ExplainerPageModel {
     you: String,
     time_slices: Vec<AetTimeSlice>,
     line_times: Vec<(usize, i32)>,
-    viewing_state: Option<(usize, AetTimelineState)>,
+    viewing_state: Option<(usize, AetTimeline)>,
     viewing_comments: Vec<usize>,
     edit_mode: bool,
     pass_msg: Callback<ExplainerPageMessage>,
@@ -48,6 +49,7 @@ impl ExplainerPageModel {
         idx: usize,
         line: &String,
         on_msg: Callback<ExplainerPageMessage>,
+        last_line: bool,
     ) -> VNode {
         let comment = self.page.get_comment(idx);
         let has_comment = comment.is_some();
@@ -74,11 +76,11 @@ impl ExplainerPageModel {
             None
         };
         let state_block = if let Some((viewing_idx, viewing_state)) = self.viewing_state.as_ref() {
-            if *viewing_idx != idx {
+            if *viewing_idx != idx || last_line {
                 None
             } else {
                 Some(html!(<StateBlock
-                    state={viewing_state.clone()}
+                    timeline={viewing_state.clone()}
                     me={self.me.clone()}
                     you={self.you.clone()}
                 />))
@@ -100,8 +102,8 @@ impl ExplainerPageModel {
         </PageLine>)
     }
 
-    fn get_last_line_for_time(&self, ctx: &Context<ExplainerPageModel>) -> Option<usize> {
-        ctx.props().time.map(|time| {
+    fn get_last_line_for_time(&self, time: Option<i32>) -> Option<usize> {
+        time.map(|time| {
             let mut last_line = 0;
             for (line_idx, line_time) in self.line_times.iter() {
                 if *line_time > time {
@@ -111,6 +113,46 @@ impl ExplainerPageModel {
             }
             last_line
         })
+    }
+
+    fn get_timeline_state(&mut self, me: String, prompt_line_idx: u32) -> AetTimeline {
+        if let Some((last_line_idx, last_timeline)) = self.viewing_state.as_mut() {
+            if *last_line_idx > prompt_line_idx as usize {
+                for slice in &self.time_slices {
+                    if slice
+                        .lines
+                        .iter()
+                        .find(|(_line, idx)| *idx > prompt_line_idx)
+                        .is_some()
+                    {
+                        break;
+                    }
+                    last_timeline
+                        .push_time_slice(slice.clone(), None as Option<&DummyDatabaseModule>);
+                }
+                return last_timeline.clone();
+            }
+        }
+        let mut timeline = AetTimeline::new();
+        timeline.state.me = me;
+        for slice in &self.time_slices {
+            if slice
+                .lines
+                .iter()
+                .find(|(_line, idx)| *idx > prompt_line_idx)
+                .is_some()
+            {
+                break;
+            }
+            timeline.push_time_slice(slice.clone(), None as Option<&DummyDatabaseModule>);
+        }
+        timeline
+    }
+
+    fn view_state(&mut self, line_idx: usize) {
+        let (me, _you) = parse_me_and_you(&self.page);
+        let timeline_state = self.get_timeline_state(me, line_idx as u32);
+        self.viewing_state = Some((line_idx, timeline_state));
     }
 }
 
@@ -145,8 +187,33 @@ impl Component for ExplainerPageModel {
         }
     }
 
+    fn changed(&mut self, ctx: &Context<Self>, old_props: &Self::Properties) -> bool {
+        let last_time = old_props.time;
+        let new_time = ctx.props().time;
+        if let (Some(last_time), Some(new_time)) = (last_time, new_time) {
+            if new_time != last_time {
+                let last_last_line = self.get_last_line_for_time(Some(last_time));
+                let new_last_line = self.get_last_line_for_time(Some(new_time));
+                if let (Some(last_last_line), Some(new_last_line)) = (last_last_line, new_last_line)
+                {
+                    if last_last_line != new_last_line {
+                        self.view_state(new_last_line);
+                        return true;
+                    }
+                }
+            }
+        }
+        if ctx.props().page != old_props.page {
+            true
+        } else if old_props.time.is_none() && ctx.props().time.is_some() {
+            true
+        } else {
+            false
+        }
+    }
+
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let last_time_line = self.get_last_line_for_time(ctx);
+        let last_time_line = self.get_last_line_for_time(ctx.props().time);
         log(&format!("{:?}", last_time_line));
         let page_lines = self
             .page
@@ -160,7 +227,15 @@ impl Component for ExplainerPageModel {
                     true
                 }
             })
-            .map(|(idx, line)| self.render_line(ctx, idx, line, self.pass_msg.clone()));
+            .map(|(idx, line)| {
+                self.render_line(
+                    ctx,
+                    idx,
+                    line,
+                    self.pass_msg.clone(),
+                    Some(idx) == last_time_line,
+                )
+            });
         let edit_section = if self.page.locked && !is_unlocked() {
             None
         } else {
@@ -183,6 +258,19 @@ impl Component for ExplainerPageModel {
                 .callback(|_| ExplainerPageMessage::ToggleExpanded);
             html!(<div class="page__expand_button" onclick={toggle_expand}>{if expanded { "Collapse Comments" } else { "Open All Comments" }}</div>)
         };
+        let end_state = if let Some((prompt_line, timeline)) = self.viewing_state.as_ref() {
+            if Some(*prompt_line) == last_time_line {
+                Some(html!(<StateBlock
+                    timeline={timeline.clone()}
+                    me={self.me.clone()}
+                    you={self.you.clone()}
+                />))
+            } else {
+                None
+            }
+        } else {
+            None
+        };
         html!(
             <>
                 <a id="export"></a>
@@ -190,6 +278,7 @@ impl Component for ExplainerPageModel {
                     {edit_section}
                     {expand_button}
                     <div class="page__lines">{ for page_lines }</div>
+                    {end_state}
                 </div>
             </>
         )
@@ -222,8 +311,7 @@ impl Component for ExplainerPageModel {
             }
             ExplainerPageMessage::ToggleState(line_idx) => {
                 let (me, _you) = parse_me_and_you(&self.page);
-                let timeline_state = get_timeline_state(me, &self.time_slices, line_idx as u32);
-                log(&format!("{:?}", timeline_state.borrow_me()));
+                let timeline_state = self.get_timeline_state(me, line_idx as u32);
                 self.viewing_state = Some((line_idx, timeline_state));
                 true
             }

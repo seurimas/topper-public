@@ -20,8 +20,11 @@
     function toggle_playback(speed, time) {
       if (playingBack) {
         clearInterval(playingBack);
+        autoscroll_off();
         playingBack = null;
       } else {
+        paused = false;
+        autoscroll_on();
         playbackSpeed = speed;
         playbackTime = time;
         let lastTime = new Date().getTime();
@@ -34,7 +37,6 @@
           }
           playbackTime += delta * playbackSpeed;
           playbackCb(playbackTime);
-          window.scrollTo(0, document.body.scrollHeight);
         }, 40);
       }
     }
@@ -69,6 +71,26 @@
       return location.hash === "#unlocked";
     }
 
+    const resizeObserver = new ResizeObserver(entries => {
+      for (let entry of entries)
+        console.log(entry, autoscrolling);
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+    let autoscrolling = false;
+    let observing = false;
+
+    function autoscroll_on() {
+      if (!observing) {
+        resizeObserver.observe(document.querySelector(".page"));
+        observing = true;
+      }
+      autoscrolling = true;
+    }
+
+    function autoscroll_off() {
+      autoscrolling = false;
+    }
+
     function autoscroll_once() {
       const intervalTime = 10;
       const currentHeight = document.body.scrollHeight;
@@ -95,6 +117,10 @@
       return new Date().getTime() / 1000;
     }
 
+    function trace(message) {
+      console.log(message, get_time());
+    }
+
     function fetch_file(link) {
       return fetch(link).then(response => {
         if (response.ok) {
@@ -113,7 +139,6 @@
     }
 
     document.onkeydown = (e) => {
-      console.log(e);
       if (e.key === "PageDown") {
         playbackTime += 1000;
         if (playingBack) {
@@ -127,6 +152,11 @@
       } else if (e.key === " ") {
         if (playingBack) {
           paused = !paused;
+          if (paused) {
+            autoscroll_off();
+          } else {
+            autoscroll_on();
+          }
           e.preventDefault();
         }
       }

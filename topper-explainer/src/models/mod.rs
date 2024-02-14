@@ -93,7 +93,6 @@ impl Component for ExplainerModel {
                 last_time,
                 time,
             } => {
-                log("Rendering page...");
                 html!(<>
                     <ExplainerPageModel
                       page={page.clone()}

@@ -54,24 +54,3 @@ pub fn build_line_times(page: &ExplainerPage) -> Vec<(usize, i32)> {
     log(&format!("{:?}", times));
     times
 }
-
-pub fn get_timeline_state(
-    me: String,
-    slices: &Vec<AetTimeSlice>,
-    prompt_line_idx: u32,
-) -> AetTimelineState {
-    let mut timeline = AetTimeline::new();
-    timeline.state.me = me;
-    for slice in slices {
-        if slice
-            .lines
-            .iter()
-            .find(|(_line, idx)| *idx > prompt_line_idx)
-            .is_some()
-        {
-            break;
-        }
-        timeline.push_time_slice(slice.clone(), None as Option<&DummyDatabaseModule>);
-    }
-    timeline.state
-}
