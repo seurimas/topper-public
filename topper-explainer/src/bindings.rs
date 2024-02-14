@@ -38,4 +38,7 @@ extern "C" {
 
     // Fetches a log based on the URL provided.
     pub fn fetch_file(s: &str) -> Promise;
+
+    pub fn ttsSpeak(s: &str);
+    pub fn ttsQueue(s: &str);
 }

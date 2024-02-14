@@ -72,8 +72,6 @@
     }
 
     const resizeObserver = new ResizeObserver(entries => {
-      for (let entry of entries)
-        console.log(entry, autoscrolling);
       window.scrollTo(0, document.body.scrollHeight);
     });
     let autoscrolling = false;
@@ -138,17 +136,72 @@
       });
     }
 
+    const synth = window.speechSynthesis;
+    const voices = synth.getVoices();
+    let voiceId = 0;
+    let rate = 2;
+
+    function ttsSpeak(text) {
+      if (voiceId === -1) {
+        return;
+      }
+      synth.cancel();
+      const utterThis = new SpeechSynthesisUtterance(text);
+      utterThis.voice = voices[voiceId];
+      utterThis.rate = rate;
+      synth.speak(utterThis);
+    }
+
+    function ttsQueue(text) {
+      if (voiceId === -1) {
+        return;
+      }
+      const utterThis = new SpeechSynthesisUtterance(text);
+      utterThis.voice = voices[voiceId];
+      utterThis.rate = rate;
+      synth.speak(utterThis);
+    }
+
     document.onkeydown = (e) => {
       if (e.key === "PageDown") {
         playbackTime += 1000;
+        playbackCb(playbackTime);
         if (playingBack) {
           e.preventDefault();
         }
       } else if (e.key === "PageUp") {
         playbackTime -= 1000;
+        playbackCb(playbackTime);
         if (playingBack) {
           e.preventDefault();
         }
+      } else if (e.key === "1" || e.key === "2" || e.key === "3" || e.key === "4" || e.key === "5") {
+        if (voiceId < voices.length) {
+          voiceId = parseInt(e.key) - 1;
+          ttsSpeak("Voice changed");
+        }
+      } else if (e.key === "0") {
+        if (voiceId === -1) {
+          voiceId = 0;
+          ttsSpeak("Voice on");
+        } else {
+          ttsSpeak("Voice off");
+          voiceId = -1;
+        }
+      } else if (e.key === "-") {
+        rate -= 0.1;
+        if (rate < 0.1) {
+          rate = 0.1;
+        }
+        synth.rate = rate;
+        ttsSpeak("Speed down");
+      } else if (e.key === "+" || e.key === "=") {
+        rate += 0.1;
+        if (rate > 3) {
+          rate = 3;
+        }
+        synth.rate = rate;
+        ttsSpeak("Speed up");
       } else if (e.key === " ") {
         if (playingBack) {
           paused = !paused;

@@ -43,6 +43,10 @@ impl Default for ExplainerModel {
     }
 }
 
+const PLAYBACK_TEXT: &str = "Playback controls on the right enable realtime-like viewing of logs. Press the play button to begin. Page Down/Page Up move forward and backwards in time by 10 seconds.";
+const TTS_TEXT: &str = "TTS calls out enemy combat actions during playback. 1-5 change the voice. -/+ change the speed. 0 toggles this on and off.";
+const BATTLESTATE_TEXT: &str = "This battle state is only supported: for some classes offensively; with simple config options defensively; and will not work after the target leaves the room.";
+
 #[derive(Properties, PartialEq, Default)]
 pub struct ExplainerProps;
 
@@ -74,7 +78,12 @@ impl Component for ExplainerModel {
                   While editing or viewing a Sect log, this icon shows up with every prompt to show the battle state: "}
                   <div class="page__view_state">{"?"}</div>
                   <br/>
-                  {"This battle state is only supported: for some classes offensively; with simple config options defensively; and will not work after the target leaves the room."}
+                  {BATTLESTATE_TEXT}
+                  <br/>
+                  <br/>
+                  {PLAYBACK_TEXT}
+                  <br/>
+                  {TTS_TEXT}
                   <br/>
                   </span>
                   <label for="sect_log">{"Select an exported JSON file or a downloaded Sect log:"}</label>
@@ -121,7 +130,12 @@ impl Component for ExplainerModel {
                 While viewing a Sect log, this icon shows up with every prompt to show the battle state: "}
                 <div class="page__view_state">{"?"}</div>
                 <br/>
-                {"This battle state is only supported: for some classes offensively; with simple config options defensively; and will not work after the target leaves the room."}
+                {BATTLESTATE_TEXT}
+                <br/>
+                <br/>
+                {PLAYBACK_TEXT}
+                <br/>
+                {TTS_TEXT}
                 <br/>
                 <br/>
                 {"The following logs are available for viewing:"}

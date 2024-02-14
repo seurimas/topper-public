@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use topper_aetolia::timeline::{AetTimeSlice, AetTimeline, AetTimelineState};
+use topper_aetolia::timeline::{AetObservation, AetTimeSlice, AetTimeline, AetTimelineState};
 use topper_core::timeline::{db::DummyDatabaseModule, BaseTimeline};
 use yew::{prelude::*, virtual_dom::VNode};
 
@@ -11,6 +11,8 @@ use crate::{
 };
 
 use crate::explainer::{Comment, Mutation};
+
+use super::ttsSpeak;
 
 #[derive(Default, Debug)]
 pub struct ExplainerPageModel {
@@ -115,22 +117,32 @@ impl ExplainerPageModel {
         })
     }
 
-    fn get_timeline_state(&mut self, me: String, prompt_line_idx: u32) -> AetTimeline {
+    fn set_timeline_state(&mut self, me: String, prompt_line_idx: usize) -> Vec<AetTimeSlice> {
         if let Some((last_line_idx, last_timeline)) = self.viewing_state.as_mut() {
-            if *last_line_idx > prompt_line_idx as usize {
+            if prompt_line_idx > *last_line_idx {
+                let mut new_time_slices = Vec::new();
                 for slice in &self.time_slices {
                     if slice
                         .lines
                         .iter()
-                        .find(|(_line, idx)| *idx > prompt_line_idx)
+                        .find(|(_line, idx)| *idx > prompt_line_idx as u32)
                         .is_some()
                     {
                         break;
                     }
-                    last_timeline
-                        .push_time_slice(slice.clone(), None as Option<&DummyDatabaseModule>);
+                    if slice
+                        .lines
+                        .iter()
+                        .find(|(_line, idx)| *idx > *last_line_idx as u32)
+                        .is_some()
+                    {
+                        last_timeline
+                            .push_time_slice(slice.clone(), None as Option<&DummyDatabaseModule>);
+                        new_time_slices.push(slice.clone());
+                    }
                 }
-                return last_timeline.clone();
+                *last_line_idx = prompt_line_idx as usize;
+                return new_time_slices;
             }
         }
         let mut timeline = AetTimeline::new();
@@ -139,20 +151,39 @@ impl ExplainerPageModel {
             if slice
                 .lines
                 .iter()
-                .find(|(_line, idx)| *idx > prompt_line_idx)
+                .find(|(_line, idx)| *idx > prompt_line_idx as u32)
                 .is_some()
             {
                 break;
             }
             timeline.push_time_slice(slice.clone(), None as Option<&DummyDatabaseModule>);
         }
-        timeline
+        self.viewing_state = Some((prompt_line_idx as usize, timeline.clone()));
+        vec![]
     }
 
-    fn view_state(&mut self, line_idx: usize) {
+    fn view_state(&mut self, line_idx: usize) -> Vec<AetTimeSlice> {
         let (me, _you) = parse_me_and_you(&self.page);
-        let timeline_state = self.get_timeline_state(me, line_idx as u32);
-        self.viewing_state = Some((line_idx, timeline_state));
+        self.set_timeline_state(me, line_idx)
+    }
+
+    fn callout_combat_actions(&self, new_slices: Vec<AetTimeSlice>) {
+        if new_slices.len() > 3 {
+            return;
+        }
+        for slice in new_slices {
+            for observation in slice.observations.iter().flatten() {
+                match observation {
+                    AetObservation::CombatAction(action) => {
+                        if action.caster == self.you {
+                            ttsSpeak(&format!("{}", action.skill));
+                        }
+                        trace(&format!("{:?}", action));
+                    }
+                    _ => {}
+                }
+            }
+        }
     }
 }
 
@@ -197,7 +228,8 @@ impl Component for ExplainerPageModel {
                 if let (Some(last_last_line), Some(new_last_line)) = (last_last_line, new_last_line)
                 {
                     if last_last_line != new_last_line {
-                        self.view_state(new_last_line);
+                        let new_slices = self.view_state(new_last_line);
+                        self.callout_combat_actions(new_slices);
                         return true;
                     }
                 }
@@ -214,7 +246,6 @@ impl Component for ExplainerPageModel {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let last_time_line = self.get_last_line_for_time(ctx.props().time);
-        log(&format!("{:?}", last_time_line));
         let page_lines = self
             .page
             .body
@@ -310,9 +341,7 @@ impl Component for ExplainerPageModel {
                 true
             }
             ExplainerPageMessage::ToggleState(line_idx) => {
-                let (me, _you) = parse_me_and_you(&self.page);
-                let timeline_state = self.get_timeline_state(me, line_idx as u32);
-                self.viewing_state = Some((line_idx, timeline_state));
+                self.view_state(line_idx);
                 true
             }
             ExplainerPageMessage::ToggleEditMode => {
