@@ -166,13 +166,13 @@
       if (e.key === "PageDown") {
         playbackTime += 1000;
         playbackCb(playbackTime);
-        if (playingBack) {
+        if (playingBack && !paused) {
           e.preventDefault();
         }
       } else if (e.key === "PageUp") {
         playbackTime -= 1000;
         playbackCb(playbackTime);
-        if (playingBack) {
+        if (playingBack && !paused) {
           e.preventDefault();
         }
       } else if (e.key === "1" || e.key === "2" || e.key === "3" || e.key === "4" || e.key === "5") {

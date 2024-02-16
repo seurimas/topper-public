@@ -454,7 +454,7 @@ impl AgentState {
             BType::Induce => self
                 .check_if_bard(&|bard| bard.induce_ready())
                 .unwrap_or(false),
-            _ => self.balances[balance as usize].is_active(),
+            _ => !self.balances[balance as usize].is_active(),
         }
     }
 
