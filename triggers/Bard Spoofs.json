@@ -231,6 +231,27 @@
         "observation_name": "Proc"
     },
     {
+        "regex": "^(\\w+) falters, a blush lightly reddening .* face.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Performance"
+            },
+            {
+                "Literal": "Seduce"
+            },
+            {
+                "Literal": "happy"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
         "regex": "^With a final, flourishing note, (\\w+)'?s? powerful song awakens the inner emotions of those around .*.$",
         "args": [
             {

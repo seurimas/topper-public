@@ -42,6 +42,8 @@ pub enum BardBehavior {
     PlaySong(Song),
     SingOrPlaySong(Song),
     Induce(Emotion),
+    TurnHourglass,
+    GiveHourglass(AetTarget),
 }
 
 impl UnpoweredFunction for BardBehavior {
@@ -83,6 +85,13 @@ impl UnpoweredFunction for BardBehavior {
                     {
                         return UnpoweredFunctionState::Failed;
                     } else if !assure_weapon_wielded_only(&me, model, controller) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                } else if *weavable == Weavable::Horologe {
+                    if !me
+                        .check_if_bard(&|bard: &BardClassState| bard.horologe.can_craft())
+                        .unwrap_or(false)
+                    {
                         return UnpoweredFunctionState::Failed;
                     }
                 }
@@ -464,6 +473,38 @@ impl UnpoweredFunction for BardBehavior {
                     return UnpoweredFunctionState::Failed;
                 }
             }
+            BardBehavior::TurnHourglass => {
+                let me = model.state.borrow_me();
+                if let Some(target) = &controller.target {
+                    if me
+                        .check_if_bard(&|bard| bard.horologe.can_turn())
+                        .unwrap_or(false)
+                    {
+                        controller.plan.add_to_qeb(Box::new(HorologeAction::turn(
+                            model.who_am_i(),
+                            target.clone(),
+                        )));
+                    } else {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                } else {
+                    return UnpoweredFunctionState::Failed;
+                }
+            }
+            BardBehavior::GiveHourglass(target) => {
+                let me = model.state.borrow_me();
+                if me
+                    .check_if_bard(&|bard| bard.horologe.can_give(model.who_am_i()))
+                    .unwrap_or(false)
+                {
+                    controller.plan.add_to_qeb(Box::new(HorologeAction::pass(
+                        model.who_am_i(),
+                        target.get_name(model, controller),
+                    )));
+                } else {
+                    return UnpoweredFunctionState::Failed;
+                }
+            }
         }
         UnpoweredFunctionState::Complete
     }
@@ -525,18 +566,26 @@ fn assure_unwielded(
             }
         }
         if me.can_wield(prefer_left, !prefer_left) {
-            controller.plan.add_to_qeb(Box::new(UnwieldAction::unwield(
-                model.who_am_i(),
-                prefer_left,
-            )));
+            controller
+                .plan
+                .add_to_front_of_qeb(Box::new(UnwieldAction::unwield(
+                    model.who_am_i(),
+                    prefer_left,
+                )));
         } else if me.can_wield(!prefer_left, prefer_left) {
-            controller.plan.add_to_qeb(Box::new(UnwieldAction::unwield(
-                model.who_am_i(),
-                !prefer_left,
-            )));
+            controller
+                .plan
+                .add_to_front_of_qeb(Box::new(UnwieldAction::unwield(
+                    model.who_am_i(),
+                    !prefer_left,
+                )));
         } else {
             return false;
         }
+    } else if me.wield_state.hands_empty(true, false) {
+        controller.shifted_left_hand = true;
+    } else if me.wield_state.hands_empty(false, true) {
+        controller.shifted_right_hand = true;
     }
     true
 }
@@ -596,18 +645,40 @@ fn assure_wielded(
         }
     }
     if !me.wield_state.is_wielding(wielded) {
-        if me.can_wield(prefer_left, !prefer_left) {
+        let prefered_hand_shifted = if prefer_left {
+            controller.shifted_left_hand
+        } else {
+            controller.shifted_right_hand
+        };
+        let off_hand_shifted = if !prefer_left {
+            controller.shifted_left_hand
+        } else {
+            controller.shifted_right_hand
+        };
+        if me.can_wield(prefer_left, !prefer_left) && !prefered_hand_shifted {
+            controller.wielding = format!("{},{}", controller.wielding, wielded);
+            if prefer_left {
+                controller.shifted_left_hand = true;
+            } else {
+                controller.shifted_right_hand = true;
+            }
             controller
                 .plan
-                .add_to_qeb(Box::new(WieldAction::quick_wield(
+                .add_to_front_of_qeb(Box::new(WieldAction::quick_wield(
                     model.who_am_i(),
                     wielded.to_string(),
                     prefer_left,
                 )));
-        } else if me.can_wield(!prefer_left, prefer_left) {
+        } else if me.can_wield(!prefer_left, prefer_left) && !off_hand_shifted {
+            controller.wielding = format!("{},{}", controller.wielding, wielded);
+            if !prefer_left {
+                controller.shifted_left_hand = true;
+            } else {
+                controller.shifted_right_hand = true;
+            }
             controller
                 .plan
-                .add_to_qeb(Box::new(WieldAction::quick_wield(
+                .add_to_front_of_qeb(Box::new(WieldAction::quick_wield(
                     model.who_am_i(),
                     wielded.to_string(),
                     !prefer_left,
@@ -619,6 +690,10 @@ fn assure_wielded(
         return false;
     } else if me.wield_state.is_wielding_right(wielded) && !me.arm_free_right() {
         return false;
+    } else if me.wield_state.is_wielding_left(wielded) {
+        controller.shifted_left_hand = true;
+    } else if me.wield_state.is_wielding_right(wielded) {
+        controller.shifted_right_hand = true;
     }
     true
 }
@@ -638,22 +713,73 @@ fn assure_weapon_wielded_only(
     } else if !me.wield_state.is_wielding(wielded) {
         controller
             .plan
-            .add_to_qeb(Box::new(WieldAction::quick_wield(
+            .add_to_front_of_qeb(Box::new(WieldAction::quick_wield(
                 model.who_am_i(),
                 wielded.to_string(),
                 true,
             )));
         controller
             .plan
-            .add_to_qeb(Box::new(UnwieldAction::unwield(model.who_am_i(), false)));
+            .add_to_front_of_qeb(Box::new(UnwieldAction::unwield(model.who_am_i(), false)));
     } else if me.wield_state.is_wielding_left(wielded) {
         controller
             .plan
-            .add_to_qeb(Box::new(UnwieldAction::unwield(model.who_am_i(), false)));
+            .add_to_front_of_qeb(Box::new(UnwieldAction::unwield(model.who_am_i(), false)));
     } else if me.wield_state.is_wielding_right(wielded) {
         controller
             .plan
-            .add_to_qeb(Box::new(UnwieldAction::unwield(model.who_am_i(), true)));
+            .add_to_front_of_qeb(Box::new(UnwieldAction::unwield(model.who_am_i(), true)));
     }
     true
+}
+
+pub struct BardWrapper {
+    pub tree: Box<
+        dyn UnpoweredFunction<Model = BehaviorModel, Controller = BehaviorController> + Sync + Send,
+    >,
+}
+
+impl BardWrapper {
+    pub fn new(
+        tree: Box<
+            dyn UnpoweredFunction<Model = BehaviorModel, Controller = BehaviorController>
+                + Sync
+                + Send,
+        >,
+    ) -> Self {
+        BardWrapper { tree }
+    }
+}
+
+impl UnpoweredFunction for BardWrapper {
+    type Model = BehaviorModel;
+    type Controller = BehaviorController;
+
+    fn resume_with(
+        self: &mut Self,
+        model: &Self::Model,
+        controller: &mut Self::Controller,
+    ) -> UnpoweredFunctionState {
+        let result = self.tree.resume_with(model, controller);
+        if controller.plan.is_empty() {
+            return result;
+        }
+        let me = model.state.borrow_me();
+        if !me.wield_state.is_wielding("falchion") && !controller.wielding.contains("falchion") {
+            assure_weapon_wielded(&me, model, controller, true);
+        }
+        if !me.wield_state.is_wielding("thurible") && !controller.wielding.contains("thurible") {
+            if me
+                .check_if_bard(&|bard: &BardClassState| bard.thurible_location.in_hand())
+                .unwrap_or(false)
+            {
+                assure_wielded(&me, model, controller, "thurible", false);
+            }
+        }
+        result
+    }
+
+    fn reset(self: &mut Self, parameter: &Self::Model) {
+        self.tree.reset(parameter);
+    }
 }

@@ -349,16 +349,42 @@ pub fn handle_weaving_action(
                 },
             ),
         },
-        "Horologe" => for_agent(
-            agent_states,
-            &combat_action.caster,
-            &|me: &mut AgentState| {
-                me.assume_bard(&|bard: &mut BardClassState| {
-                    bard.dithering = HOROLOGE_DITHER;
-                });
-                me.wield_state.weave(HOROLOGE);
-            },
-        ),
+        "Horologe" => {
+            if combat_action.annotation.eq("turn") {
+                let my_name = combat_action.caster.clone();
+                for_agent(
+                    agent_states,
+                    &combat_action.caster,
+                    &|me: &mut AgentState| {
+                        me.assume_bard(&|bard: &mut BardClassState| {
+                            bard.horologe.turn(my_name.clone());
+                        });
+                    },
+                );
+            } else if combat_action.annotation.eq("hit") {
+                for_agent(
+                    agent_states,
+                    &combat_action.caster,
+                    &|me: &mut AgentState| {
+                        me.set_balance(BType::Rebounding, 0.0);
+                        me.set_flag(FType::Rebounding, false);
+                        me.set_flag(FType::AssumedRebounding, false);
+                    },
+                )
+            } else {
+                for_agent(
+                    agent_states,
+                    &combat_action.caster,
+                    &|me: &mut AgentState| {
+                        me.assume_bard(&|bard: &mut BardClassState| {
+                            bard.dithering = HOROLOGE_DITHER;
+                            bard.horologe.craft();
+                        });
+                        me.wield_state.weave(HOROLOGE);
+                    },
+                );
+            }
+        }
         "Nullstone" => for_agent(
             agent_states,
             &combat_action.caster,
@@ -560,6 +586,16 @@ pub fn handle_performance_action(
                     apply_or_infer_balance(me, (BType::Balance, 2.8), &observations);
                 },
             );
+        }
+        "Seduce" => {
+            if combat_action.annotation.eq("happy") {
+                attack_afflictions(
+                    agent_states,
+                    &combat_action.caster,
+                    vec![FType::LoversEffect],
+                    after,
+                );
+            }
         }
         "Quip" => {
             if combat_action.annotation.eq("angry") {

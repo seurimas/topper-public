@@ -3,22 +3,24 @@ use serde::{Deserialize, Serialize};
 use super::{nodes::*, UnpoweredFunction};
 
 #[derive(Serialize, Deserialize, Clone)]
-pub enum UnpoweredTreeDef<U: UserNodeDefinition> {
-    Sequence(Vec<UnpoweredTreeDef<U>>),
-    Selector(Vec<UnpoweredTreeDef<U>>),
-    Executor(Vec<UnpoweredTreeDef<U>>),
-    Repeat(Box<UnpoweredTreeDef<U>>, usize),
-    RepeatUntilSuccess(Box<UnpoweredTreeDef<U>>),
-    RepeatUntilFail(Box<UnpoweredTreeDef<U>>),
-    Succeeder(Box<UnpoweredTreeDef<U>>),
-    Failer(Box<UnpoweredTreeDef<U>>),
-    Inverter(Box<UnpoweredTreeDef<U>>),
+pub enum UnpoweredTreeDef<U: UserNodeDefinition, W: UserWrapperDefinition<U>> {
+    Sequence(Vec<UnpoweredTreeDef<U, W>>),
+    Selector(Vec<UnpoweredTreeDef<U, W>>),
+    Executor(Vec<UnpoweredTreeDef<U, W>>),
+    Repeat(Box<UnpoweredTreeDef<U, W>>, usize),
+    RepeatUntilSuccess(Box<UnpoweredTreeDef<U, W>>),
+    RepeatUntilFail(Box<UnpoweredTreeDef<U, W>>),
+    Succeeder(Box<UnpoweredTreeDef<U, W>>),
+    Failer(Box<UnpoweredTreeDef<U, W>>),
+    Inverter(Box<UnpoweredTreeDef<U, W>>),
     User(U),
+    Wrapper(W, Vec<UnpoweredTreeDef<U, W>>),
 }
 
 pub trait UserNodeDefinition {
     type Model: 'static;
     type Controller: 'static;
+
     fn create_node(
         &self,
     ) -> Box<dyn UnpoweredFunction<Model = Self::Model, Controller = Self::Controller> + Send + Sync>;
@@ -39,7 +41,28 @@ where
     }
 }
 
-impl<U: UserNodeDefinition> UnpoweredTreeDef<U> {
+pub trait UserWrapperDefinition<U: UserNodeDefinition> {
+    fn create_node_and_wrap(
+        &self,
+        nodes: Vec<
+            Box<dyn UnpoweredFunction<Model = U::Model, Controller = U::Controller> + Send + Sync>,
+        >,
+    ) -> Box<dyn UnpoweredFunction<Model = U::Model, Controller = U::Controller> + Send + Sync>;
+}
+
+impl<U: UserNodeDefinition> UserWrapperDefinition<U> for () {
+    fn create_node_and_wrap(
+        &self,
+        _nodes: Vec<
+            Box<dyn UnpoweredFunction<Model = U::Model, Controller = U::Controller> + Send + Sync>,
+        >,
+    ) -> Box<dyn UnpoweredFunction<Model = U::Model, Controller = U::Controller> + Send + Sync>
+    {
+        panic!("Cannot create a wrapper with no definition");
+    }
+}
+
+impl<U: UserNodeDefinition, W: UserWrapperDefinition<U>> UnpoweredTreeDef<U, W> {
     pub fn create_tree(
         &self,
     ) -> Box<dyn UnpoweredFunction<Model = U::Model, Controller = U::Controller> + Send + Sync>
@@ -91,6 +114,13 @@ impl<U: UserNodeDefinition> UnpoweredTreeDef<U> {
                 Box::new(Failer::new(node))
             }
             UnpoweredTreeDef::User(node_def) => node_def.create_node(),
+            UnpoweredTreeDef::Wrapper(wrapper_def, node_defs) => {
+                let nodes = node_defs
+                    .iter()
+                    .map(|node_def| node_def.create_tree())
+                    .collect();
+                wrapper_def.create_node_and_wrap(nodes)
+            }
         }
     }
 }

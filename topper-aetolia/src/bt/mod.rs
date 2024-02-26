@@ -13,6 +13,7 @@ use topper_bt::unpowered::*;
 
 use crate::{
     classes::{
+        bard::BardWrapper,
         get_venoms_from_plan,
         monk::{self, MonkComboGenerator, MonkComboSet},
         predator::{
@@ -25,7 +26,7 @@ use crate::{
     types::{AgentState, Hypnosis, KnifeStance, LType},
 };
 
-pub type AetBehaviorTreeDef = UnpoweredTreeDef<AetBehaviorTreeNode>;
+pub type AetBehaviorTreeDef = UnpoweredTreeDef<AetBehaviorTreeNode, AetBehaviorTreeWrapper>;
 
 pub static mut DEBUG_TREES: bool = false;
 
@@ -42,6 +43,11 @@ pub enum AetBehaviorTreeNode {
     SubTree(String),
 }
 
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+pub enum AetBehaviorTreeWrapper {
+    BardWrapper,
+}
+
 pub type BehaviorModel = AetTimeline;
 
 #[derive(Default, Debug)]
@@ -50,6 +56,7 @@ pub struct BehaviorController {
     pub used_balance: bool,
     pub used_equilibrium: bool,
     pub used_secondary_balance: bool,
+    pub wielding: String,
     pub shifted_left_hand: bool,
     pub shifted_right_hand: bool,
     pub aff_priorities: Option<Vec<VenomPlan>>,
@@ -241,6 +248,25 @@ impl UnpoweredFunction for AetBehaviorTreeNode {
             Self::Action(action) => action.reset(model),
             Self::Predicate(predicate) => predicate.reset(model),
             Self::SubTree(sub_tree) => get_tree(sub_tree).lock().unwrap().reset(model),
+        }
+    }
+}
+
+impl UserWrapperDefinition<AetBehaviorTreeNode> for AetBehaviorTreeWrapper {
+    fn create_node_and_wrap(
+        &self,
+        mut nodes: Vec<
+            Box<
+                dyn UnpoweredFunction<Model = BehaviorModel, Controller = BehaviorController>
+                    + Send
+                    + Sync,
+            >,
+        >,
+    ) -> Box<
+        dyn UnpoweredFunction<Model = BehaviorModel, Controller = BehaviorController> + Send + Sync,
+    > {
+        match self {
+            Self::BardWrapper => Box::new(BardWrapper::new(nodes.pop().unwrap())),
         }
     }
 }

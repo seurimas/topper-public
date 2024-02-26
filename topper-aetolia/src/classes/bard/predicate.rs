@@ -34,6 +34,8 @@ pub enum BardPredicate {
     EmotionLevel(Emotion, CType),
     Bladestorm,
     HasAnelace(Option<usize>),
+    HorologeTurnable,
+    HorologeNear(AetTarget, CType),
     Needled(Option<String>),
     NeedleAlmostPending(f32),
     RunebandTimerNear(CType),
@@ -163,6 +165,17 @@ impl TargetPredicate for BardPredicate {
                 BardPredicate::NeedleAlmostPending(time) => {
                     target.bard_board.almost_needling(*time)
                 }
+                BardPredicate::HorologeTurnable => target
+                    .check_if_bard(&|bard| bard.horologe.can_turn())
+                    .unwrap_or(false),
+                BardPredicate::HorologeNear(other_target, time) => target
+                    .check_if_bard(&|bard| {
+                        bard.horologe
+                            .get_timer_for(&other_target.get_name(model, controller))
+                    })
+                    .flatten()
+                    .map(|timer| timer.abs_diff(*time) < (BALANCE_SCALE as CType))
+                    .unwrap_or(false),
                 BardPredicate::NeedlePending => target.bard_board.needling(),
                 BardPredicate::RunebandTimerNear(time) => target
                     .bard_board

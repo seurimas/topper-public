@@ -99,6 +99,86 @@ pub enum ThuribleState {
     InRoom(Timer),
 }
 
+impl ThuribleState {
+    pub fn in_hand(&self) -> bool {
+        matches!(self, ThuribleState::InHand)
+    }
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum HorologeState {
+    #[default]
+    Inactive,
+    InHand,
+    OnTarget(String, Timer),
+}
+
+impl HorologeState {
+    pub fn wait(&mut self, time: CType) {
+        match self {
+            HorologeState::OnTarget(_, timer) => {
+                timer.wait(time);
+                if !timer.is_active() {
+                    *self = HorologeState::Inactive;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    pub fn can_craft(&self) -> bool {
+        match self {
+            HorologeState::Inactive => true,
+            _ => false,
+        }
+    }
+
+    pub fn craft(&mut self) {
+        *self = HorologeState::InHand;
+    }
+
+    pub fn can_turn(&self) -> bool {
+        match self {
+            HorologeState::InHand => true,
+            _ => false,
+        }
+    }
+
+    pub fn can_give(&self, me: String) -> bool {
+        match self {
+            HorologeState::OnTarget(target, _) => *target == me,
+            _ => false,
+        }
+    }
+
+    pub fn turn(&mut self, me: String) {
+        *self = HorologeState::OnTarget(me, Timer::count_down(HOROLOGE_TIMEOUT));
+    }
+
+    pub fn give(&mut self, target: String) {
+        match self {
+            HorologeState::OnTarget(me, _) => {
+                *me = target;
+            }
+            _ => {}
+        }
+    }
+
+    pub fn get_timer(&self) -> Option<Timer> {
+        match self {
+            HorologeState::OnTarget(_, timer) => Some(*timer),
+            _ => None,
+        }
+    }
+
+    pub fn get_timer_for(&self, me: &String) -> Option<Timer> {
+        match self {
+            HorologeState::OnTarget(target, timer) if target == me => Some(*timer),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 pub struct BardClassState {
     pub dithering: usize,
@@ -110,6 +190,7 @@ pub struct BardClassState {
     pub impetus_timer: CType,
     pub half_beat: HalfbeatState,
     pub anelaces: usize,
+    pub horologe: HorologeState,
     pub thurible_location: ThuribleState,
     pub induce_timer: Timer,
 }
@@ -122,6 +203,7 @@ const VOICE_SONG_TIMEOUT: CType = (8.0 * BALANCE_SCALE) as CType;
 const INSTRUMENT_SONG_TIMEOUT: CType = (6.0 * BALANCE_SCALE) as CType;
 const NEEDLE_TIMEOUT: CType = (3.25 * BALANCE_SCALE) as CType;
 const HALFBEAT_TIMEOUT: CType = (20.0 * BALANCE_SCALE) as CType;
+const HOROLOGE_TIMEOUT: CType = (5.0 * BALANCE_SCALE) as CType;
 
 impl BardClassState {
     pub fn wait(&mut self, duration: i32) {
@@ -142,6 +224,7 @@ impl BardClassState {
             self.instrument_song = None;
         }
         self.induce_timer.wait(duration);
+        self.horologe.wait(duration);
         self.half_beat.wait(duration);
     }
 

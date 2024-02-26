@@ -50,6 +50,10 @@ impl ActionPlan {
         }
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.qeb.is_none() && self.back_qeb.is_none() && self.other.is_empty()
+    }
+
     pub fn join(
         old_qeb: Box<dyn ActiveTransition>,
         action: Box<dyn ActiveTransition>,

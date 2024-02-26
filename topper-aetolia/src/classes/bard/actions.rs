@@ -692,3 +692,41 @@ impl ActiveTransition for ColdReadAction {
         Ok(format!("coldread {}", self.target))
     }
 }
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+pub struct HorologeAction {
+    pub caster: String,
+    pub target: String,
+    pub turn: bool,
+}
+
+impl HorologeAction {
+    pub fn turn(caster: String, target: String) -> Self {
+        HorologeAction {
+            caster,
+            target,
+            turn: true,
+        }
+    }
+
+    pub fn pass(caster: String, target: String) -> Self {
+        HorologeAction {
+            caster,
+            target,
+            turn: false,
+        }
+    }
+}
+
+impl ActiveTransition for HorologeAction {
+    fn simulate(&self, timeline: &AetTimeline) -> Vec<ProbableEvent> {
+        vec![]
+    }
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        if self.turn {
+            Ok(format!("turn hourglass"))
+        } else {
+            Ok(format!("give hourglass to {}", self.target))
+        }
+    }
+}
