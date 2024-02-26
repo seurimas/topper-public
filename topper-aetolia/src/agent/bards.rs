@@ -94,14 +94,138 @@ impl HalfbeatState {
 pub enum ThuribleState {
     #[default]
     Inactive,
-    Missing,
-    InHand,
-    InRoom(Timer),
+    Missing {
+        time_left: Timer,
+        item_id: Option<i64>,
+    },
+    InHand {
+        time_left: Timer,
+        item_id: Option<i64>,
+    },
+    InRoom {
+        item_id: i64,
+        room_id: i64,
+        last_seen_timer: Timer,
+        time_left: Timer,
+    },
 }
 
 impl ThuribleState {
+    pub fn wait(&mut self, time: CType) {
+        match self {
+            ThuribleState::InRoom {
+                last_seen_timer,
+                time_left,
+                item_id,
+                ..
+            } => {
+                last_seen_timer.wait(time);
+                time_left.wait(time);
+                match (last_seen_timer.is_active(), time_left.is_active()) {
+                    (false, false) => *self = ThuribleState::Inactive,
+                    (false, true) => {
+                        *self = ThuribleState::Missing {
+                            item_id: Some(*item_id),
+                            time_left: *time_left,
+                        }
+                    }
+                    (true, false) => *self = ThuribleState::Inactive,
+                    _ => {}
+                }
+            }
+            ThuribleState::Missing { time_left, .. } => {
+                time_left.wait(time);
+                if !time_left.is_active() {
+                    *self = ThuribleState::Inactive;
+                }
+            }
+            ThuribleState::InHand { time_left, .. } => {
+                time_left.wait(time);
+                if !time_left.is_active() {
+                    *self = ThuribleState::Inactive;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    pub fn get_time_left(&self) -> Timer {
+        match self {
+            ThuribleState::InRoom { time_left, .. } => *time_left,
+            ThuribleState::Missing { time_left, .. } => *time_left,
+            ThuribleState::InHand { time_left, .. } => *time_left,
+            _ => Timer::count_down(0),
+        }
+    }
+
     pub fn in_hand(&self) -> bool {
-        matches!(self, ThuribleState::InHand)
+        matches!(self, ThuribleState::InHand { .. })
+    }
+
+    pub fn can_craft(&self) -> bool {
+        matches!(self, ThuribleState::Inactive)
+    }
+
+    pub fn craft(&mut self) {
+        *self = ThuribleState::InHand {
+            item_id: None,
+            time_left: Timer::count_down(THURIBLE_DESPAWN_TIMEOUT),
+        };
+    }
+
+    pub fn uncraft(&mut self) {
+        *self = ThuribleState::Inactive;
+    }
+
+    pub fn is_in_room(&self, room: i64) -> bool {
+        match self {
+            ThuribleState::InRoom { room_id, .. } => *room_id == room,
+            _ => false,
+        }
+    }
+
+    pub fn put_in_hand(&mut self, item: i64) {
+        *self = ThuribleState::InHand {
+            item_id: Some(item),
+            time_left: self.get_time_left(),
+        }
+    }
+
+    pub fn put_in_room(&mut self, item: i64, room: i64) {
+        *self = ThuribleState::InRoom {
+            item_id: item,
+            room_id: room,
+            last_seen_timer: Timer::count_down(THURIBLE_MISSING_TIMEOUT),
+            time_left: self.get_time_left(),
+        }
+    }
+
+    pub fn go_missing(&mut self) {
+        match self {
+            ThuribleState::InHand { item_id, time_left } => {
+                *self = ThuribleState::Missing {
+                    item_id: item_id.take(),
+                    time_left: *time_left,
+                };
+            }
+            ThuribleState::InRoom {
+                item_id, time_left, ..
+            } => {
+                *self = ThuribleState::Missing {
+                    item_id: Some(*item_id),
+                    time_left: *time_left,
+                };
+            }
+            _ => {}
+        }
+    }
+
+    pub fn is_mine(&self, item: i64) -> bool {
+        match self {
+            ThuribleState::InHand { item_id, .. } => item == item_id.unwrap_or(0),
+            ThuribleState::InRoom { item_id, .. } => *item_id == item,
+            _ => false,
+        }
     }
 }
 
@@ -135,6 +259,10 @@ impl HorologeState {
 
     pub fn craft(&mut self) {
         *self = HorologeState::InHand;
+    }
+
+    pub fn uncraft(&mut self) {
+        *self = HorologeState::Inactive;
     }
 
     pub fn can_turn(&self) -> bool {
@@ -204,6 +332,8 @@ const INSTRUMENT_SONG_TIMEOUT: CType = (6.0 * BALANCE_SCALE) as CType;
 const NEEDLE_TIMEOUT: CType = (3.25 * BALANCE_SCALE) as CType;
 const HALFBEAT_TIMEOUT: CType = (20.0 * BALANCE_SCALE) as CType;
 const HOROLOGE_TIMEOUT: CType = (5.0 * BALANCE_SCALE) as CType;
+const THURIBLE_DESPAWN_TIMEOUT: CType = (240.0 * BALANCE_SCALE) as CType;
+const THURIBLE_MISSING_TIMEOUT: CType = (6.0 * BALANCE_SCALE) as CType;
 
 impl BardClassState {
     pub fn wait(&mut self, duration: i32) {
@@ -242,6 +372,29 @@ impl BardClassState {
 
     pub fn is_on_tempo(&self) -> bool {
         self.tempo.is_some()
+    }
+
+    pub fn can_drop_tempo(&self, you: &AgentState) -> bool {
+        if let Some((hit, time_til)) = self.tempo {
+            let aff = match hit {
+                1 => FType::Paresis,
+                2 => FType::Shyness,
+                3 => FType::Besilence,
+                _ => {
+                    return false;
+                }
+            };
+            if you.is(aff) {
+                return true;
+            } else if you.bard_board.needle_timer < time_til {
+                match (aff, &you.bard_board.needle_venom) {
+                    (FType::Paresis, Some(venom)) if venom == "curare" => return true,
+                    (FType::Shyness, Some(venom)) if venom == "digitalis" => return true,
+                    _ => return false,
+                }
+            }
+        }
+        false
     }
 
     pub fn half_beat_pickup(&mut self) {
@@ -699,5 +852,49 @@ impl BardBoard {
 
     pub fn observe_dumbness(&mut self, dumb: bool) {
         self.dumb = Some(dumb);
+    }
+}
+
+pub fn bard_add_item(
+    id: i64,
+    name: &str,
+    in_room: Option<i64>,
+) -> Box<dyn Fn(&mut BardClassState)> {
+    if name.contains("thurible") {
+        Box::new(move |state: &mut BardClassState| {
+            println!("Adding thurible: {:?}", in_room);
+            if in_room.is_none() {
+                state.thurible_location.put_in_hand(id);
+            } else {
+                state.thurible_location.put_in_room(id, in_room.unwrap());
+            }
+        })
+    } else {
+        Box::new(move |_| {})
+    }
+}
+
+pub fn bard_remove_item(
+    id: i64,
+    name: &str,
+    in_room: Option<i64>,
+) -> Box<dyn Fn(&mut BardClassState)> {
+    if name.contains("thurible") {
+        Box::new(move |state: &mut BardClassState| {
+            println!("Removing thurible: {:?}", in_room);
+            if state.thurible_location.is_mine(id) {
+                match (in_room, &state.thurible_location) {
+                    (Some(room), ThuribleState::InRoom { item_id, .. }) if *item_id == id => {
+                        state.thurible_location.go_missing();
+                    }
+                    (None, ThuribleState::InHand { item_id, .. }) if *item_id == Some(id) => {
+                        state.thurible_location.go_missing();
+                    }
+                    _ => {}
+                }
+            }
+        })
+    } else {
+        Box::new(move |_| {})
     }
 }

@@ -93,12 +93,18 @@ pub fn get_class_state(
     } else {
         format!("")
     };
-    let (anelace, halfbeat, dithering, singing, playing) = me
+    let (anelace, thurible, halfbeat, dithering, singing, playing) = me
         .check_if_bard(&|me| {
             let anelace = if me.anelaces > 0 {
                 format!("<green>A{} ", me.anelaces)
             } else {
                 format!("<red>A0 ")
+            };
+            let thurible = match me.thurible_location {
+                ThuribleState::Inactive => format!("<gray>T"),
+                ThuribleState::Missing { .. } => format!("<white>T"),
+                ThuribleState::InHand { .. } => format!("<yellow>T"),
+                ThuribleState::InRoom { .. } => format!("<green>T"),
             };
             let halfbeat = if me.half_beat.active() {
                 format!("<green>½ ")
@@ -128,7 +134,7 @@ pub fn get_class_state(
             } else {
                 format!("")
             };
-            (anelace, halfbeat, dithering, singing, playing)
+            (anelace, thurible, halfbeat, dithering, singing, playing)
         })
         .unwrap_or_default();
     let ironcollar = if you.bard_board.iron_collar_state.is_active() {
@@ -180,5 +186,5 @@ pub fn get_class_state(
     } else {
         "<red>DB??".to_string()
     };
-    format!("{dumbness}{globes}{runeband}{anelace}{dithering}\n{needle}{halfbeat}{singing}{playing}\n{ironcollar}{self_loathing}{primary}{pipelocks}\n{missing_hints}")
+    format!("{dumbness}{globes}{runeband}{anelace}{thurible}{dithering}\n{needle}{halfbeat}{singing}{playing}\n{ironcollar}{self_loathing}{primary}{pipelocks}\n{missing_hints}")
 }

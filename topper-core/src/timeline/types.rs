@@ -122,6 +122,12 @@ impl<A: BaseAgentState + Clone, N: Clone> TimelineState<A, N> {
         }
     }
 
+    pub fn for_all_agents(&mut self, act: &Fn(&mut A)) {
+        for you in self.agent_states.values_mut().flatten() {
+            act(you);
+        }
+    }
+
     pub fn for_agent_uncertain(&mut self, who: &String, act: fn(&mut A) -> Option<Vec<A>>) {
         let mut branches = Vec::new();
         let mut unbranched = Vec::new();

@@ -457,6 +457,20 @@ pub fn handle_weaving_action(
                                 }
                             });
                         }
+                        HOROLOGE => {
+                            me.assume_bard(&move |bard: &mut BardClassState| {
+                                if !bard.horologe.can_craft() {
+                                    bard.horologe.uncraft();
+                                }
+                            });
+                        }
+                        THURIBLE => {
+                            me.assume_bard(&move |bard: &mut BardClassState| {
+                                if !bard.thurible_location.can_craft() {
+                                    bard.thurible_location.uncraft();
+                                }
+                            });
+                        }
                         _ => {}
                     };
                     if in_hands {

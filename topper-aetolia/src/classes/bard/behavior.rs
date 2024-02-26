@@ -3,8 +3,8 @@ use topper_bt::unpowered::*;
 
 use crate::{
     bt::*,
-    classes::get_venoms_from_plan,
-    classes::group::*,
+    classes::{get_venoms_from_plan, group::*},
+    curatives::get_cure_depth,
     items::{UnwieldAction, WieldAction},
     non_agent::AetTimelineRoomExt,
     observables::PlainAction,
@@ -90,6 +90,20 @@ impl UnpoweredFunction for BardBehavior {
                 } else if *weavable == Weavable::Horologe {
                     if !me
                         .check_if_bard(&|bard: &BardClassState| bard.horologe.can_craft())
+                        .unwrap_or(false)
+                    {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                } else if *weavable == Weavable::Anelace {
+                    if me
+                        .check_if_bard(&|bard| bard.anelaces == 2)
+                        .unwrap_or(false)
+                    {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                } else if *weavable == Weavable::Thurible {
+                    if !me
+                        .check_if_bard(&|bard| bard.thurible_location.can_craft())
                         .unwrap_or(false)
                     {
                         return UnpoweredFunctionState::Failed;
@@ -256,13 +270,6 @@ impl UnpoweredFunction for BardBehavior {
                     } else if performance_attack.needs_voice() && me.is(FType::CrippledThroat) {
                         return UnpoweredFunctionState::Failed;
                     } else if performance_attack.needs_weapon() {
-                        if me
-                            .check_if_bard(&|me: &BardClassState| me.is_on_tempo())
-                            .unwrap_or(false)
-                        {
-                            // If it's a weapon attack, we cannot use while in rhythm.
-                            return UnpoweredFunctionState::Failed;
-                        }
                         if !assure_weapon_wielded(&me, model, controller, true) {
                             return UnpoweredFunctionState::Failed;
                         }
@@ -768,12 +775,25 @@ impl UnpoweredFunction for BardWrapper {
         if !me.wield_state.is_wielding("falchion") && !controller.wielding.contains("falchion") {
             assure_weapon_wielded(&me, model, controller, true);
         }
-        if !me.wield_state.is_wielding("thurible") && !controller.wielding.contains("thurible") {
-            if me
-                .check_if_bard(&|bard: &BardClassState| bard.thurible_location.in_hand())
+        if let Some(target) = AetTarget::Target.get_target(model, controller) {
+            if get_cure_depth(target, FType::Perplexed).cures > 1 {
+                if me
+                    .check_if_bard(&|bard: &BardClassState| bard.thurible_location.in_hand())
+                    .unwrap_or(false)
+                {
+                    controller
+                        .plan
+                        .add_to_front_of_qeb(Box::new(PlainAction::new(
+                            "unwield thurible;;drop thurible".to_string(),
+                        )));
+                }
+            } else if me
+                .check_if_bard(&|bard| bard.thurible_location.is_in_room(me.room_id))
                 .unwrap_or(false)
             {
-                assure_wielded(&me, model, controller, "thurible", false);
+                controller
+                    .plan
+                    .add_to_front_of_qeb(Box::new(PlainAction::new("get thurible".to_string())));
             }
         }
         result

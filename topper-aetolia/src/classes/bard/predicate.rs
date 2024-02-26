@@ -2,7 +2,10 @@ use serde::*;
 use topper_bt::unpowered::*;
 use topper_core::timeline::CType;
 
-use crate::{bt::*, classes::VENOM_AFFLICTS, timeline::apply_functions::apply_venom, types::*};
+use crate::{
+    bt::*, classes::VENOM_AFFLICTS, non_agent::AetTimelineRoomExt,
+    timeline::apply_functions::apply_venom, types::*,
+};
 
 use super::actions::*;
 
@@ -16,6 +19,7 @@ pub enum BardPredicate {
     InWholeBeat,
     WholebeatWithin(f32),
     WholebeatNear(f32),
+    Boundaried,
     Runebanded,
     RunebandForward,
     RunebandReversed,
@@ -34,6 +38,8 @@ pub enum BardPredicate {
     EmotionLevel(Emotion, CType),
     Bladestorm,
     HasAnelace(Option<usize>),
+    ThuribleReady,
+    HorologeReady,
     HorologeTurnable,
     HorologeNear(AetTarget, CType),
     Needled(Option<String>),
@@ -110,6 +116,23 @@ impl TargetPredicate for BardPredicate {
                 BardPredicate::HasAnelace(min) => target
                     .check_if_bard(&|bard| bard.anelaces > min.unwrap_or(0))
                     .unwrap_or(false),
+                BardPredicate::ThuribleReady => target
+                    .check_if_bard(&|bard| !bard.thurible_location.can_craft())
+                    .unwrap_or(false),
+                BardPredicate::HorologeReady => target
+                    .check_if_bard(&|bard| !bard.horologe.can_craft())
+                    .unwrap_or(false),
+                BardPredicate::Boundaried => {
+                    if let Some(room) = model.state.get_my_room() {
+                        if room.has_tag("boundary") {
+                            true
+                        } else {
+                            false
+                        }
+                    } else {
+                        false
+                    }
+                }
                 BardPredicate::Runebanded => target.bard_board.runeband_state.is_active(),
                 BardPredicate::RunebandForward => target.bard_board.runeband_state.is_forward(),
                 BardPredicate::RunebandReversed => target.bard_board.runeband_state.is_reversed(),

@@ -1,6 +1,7 @@
 use topper_core::timeline::*;
 
 use crate::{
+    classes::Class,
     db::*,
     non_agent::{AetTimelineRoomExt, Direction, Room},
     types::*,
@@ -21,6 +22,8 @@ pub fn apply_gmcp<DB: AetDatabaseModule>(
             handle_room_players(&gmcp.1, timeline);
         }
         "gmcp.Char.Vitals" => handle_char_vitals(&gmcp.1, timeline),
+        "gmcp.Char.Items.Add" => handle_item_added(&gmcp.1, timeline),
+        "gmcp.Char.Items.Remove" => handle_item_removed(&gmcp.1, timeline),
         _ => {}
     }
     Ok(())
@@ -224,6 +227,64 @@ fn handle_room_players(
         if let Some(player) = player_list.get("name").and_then(|player| player.as_str()) {
             let my_room = timeline.borrow_me().room_id;
             timeline.set_player_room(my_room, player);
+        }
+    }
+}
+
+fn handle_item_added(
+    gmcp: &serde_json::Value,
+    timeline: &mut TimelineState<crate::types::AgentState, crate::non_agent::AetNonAgent>,
+) {
+    if let Some(location) = gmcp.get("location").and_then(|location| location.as_str()) {
+        if let Some(item) = gmcp.get("item") {
+            if let (Some(id), Some(name)) = (
+                item.get("id")
+                    .and_then(|id| id.as_str())
+                    .and_then(|id| id.parse::<i64>().ok()),
+                item.get("name").and_then(|name| name.as_str()),
+            ) {
+                let in_room = if location.eq("room") {
+                    Some(timeline.borrow_me().room_id)
+                } else {
+                    None
+                };
+                timeline.for_all_agents(&|agent| {
+                    if agent.class_state.get_normalized_class() == Some(Class::Bard) {
+                        agent.assume_bard(&bard_add_item(id, name, in_room));
+                    }
+                });
+            } else {
+                println!("Item added without name or id");
+            }
+        }
+    }
+}
+
+fn handle_item_removed(
+    gmcp: &serde_json::Value,
+    timeline: &mut TimelineState<crate::types::AgentState, crate::non_agent::AetNonAgent>,
+) {
+    if let Some(location) = gmcp.get("location").and_then(|location| location.as_str()) {
+        if let Some(item) = gmcp.get("item") {
+            if let (Some(id), Some(name)) = (
+                item.get("id")
+                    .and_then(|id| id.as_str())
+                    .and_then(|id| id.parse::<i64>().ok()),
+                item.get("name").and_then(|name| name.as_str()),
+            ) {
+                let in_room = if location.eq("room") {
+                    Some(timeline.borrow_me().room_id)
+                } else {
+                    None
+                };
+                timeline.for_all_agents(&|agent| {
+                    if agent.class_state.get_normalized_class() == Some(Class::Bard) {
+                        agent.assume_bard(&bard_remove_item(id, name, in_room));
+                    }
+                });
+            } else {
+                println!("Item removed without name or id");
+            }
         }
     }
 }
