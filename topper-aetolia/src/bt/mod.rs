@@ -2,6 +2,7 @@ mod behavior;
 mod limb_desc;
 mod predicate;
 mod sub_trees;
+mod wrappers;
 use std::collections::{HashMap, HashSet};
 
 pub use behavior::*;
@@ -23,8 +24,10 @@ use crate::{
     },
     observables::ActionPlan,
     timeline::AetTimeline,
-    types::{AgentState, Hypnosis, KnifeStance, LType},
+    types::{AgentState, FType, Hypnosis, KnifeStance, LType},
 };
+
+use self::wrappers::WithoutAffsInStack;
 
 pub type AetBehaviorTreeDef = UnpoweredTreeDef<AetBehaviorTreeNode, AetBehaviorTreeWrapper>;
 
@@ -46,6 +49,7 @@ pub enum AetBehaviorTreeNode {
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum AetBehaviorTreeWrapper {
     BardWrapper,
+    WithoutAffsInStack(Vec<FType>),
 }
 
 pub type BehaviorModel = AetTimeline;
@@ -267,6 +271,9 @@ impl UserWrapperDefinition<AetBehaviorTreeNode> for AetBehaviorTreeWrapper {
     > {
         match self {
             Self::BardWrapper => Box::new(BardWrapper::new(nodes.pop().unwrap())),
+            Self::WithoutAffsInStack(affs) => {
+                Box::new(WithoutAffsInStack::new(nodes.pop().unwrap(), affs.clone()))
+            }
         }
     }
 }

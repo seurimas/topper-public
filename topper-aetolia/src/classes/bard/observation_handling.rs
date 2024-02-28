@@ -30,6 +30,8 @@ pub const HOROLOGE: &str = "a faded hourglass";
 pub const THURIBLE: &str = "a golden thurible";
 pub const ANELACE: &str = "a sharp anelace";
 
+pub const BRAVADO_COOLDOWN: f32 = 10.0;
+
 lazy_static! {
     static ref PIERCE_ORDER: Vec<FType> = vec![
         FType::Reflection,
@@ -754,7 +756,11 @@ pub fn handle_performance_action(
                             perspective,
                             (1, RANDOM_CURES.to_vec()),
                         );
-                        apply_or_infer_balance(me, (BType::ClassCure1, 15.0), &observations);
+                        apply_or_infer_balance(
+                            me,
+                            (BType::ClassCure1, BRAVADO_COOLDOWN),
+                            &observations,
+                        );
                     },
                 );
             }
