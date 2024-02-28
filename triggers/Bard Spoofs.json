@@ -252,6 +252,27 @@
         "observation_name": "Proc"
     },
     {
+        "regex": "^Coughing, the billowing smoke from a golden thurible makes (\\w+)'s lungs seize.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Weaving"
+            },
+            {
+                "Literal": "Thurible"
+            },
+            {
+                "Literal": "hit"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
         "regex": "^With a final, flourishing note, (\\w+)'?s? powerful song awakens the inner emotions of those around .*.$",
         "args": [
             {
