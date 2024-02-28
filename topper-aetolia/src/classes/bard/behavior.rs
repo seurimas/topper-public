@@ -776,7 +776,10 @@ impl UnpoweredFunction for BardWrapper {
             assure_weapon_wielded(&me, model, controller, true);
         }
         if let Some(target) = AetTarget::Target.get_target(model, controller) {
-            if get_cure_depth(target, FType::Perplexed).cures > 1 {
+            if (get_cure_depth(target, FType::Paresis).cures
+                + get_cure_depth(target, FType::Perplexed).cures)
+                > 1
+            {
                 if me
                     .check_if_bard(&|bard: &BardClassState| bard.thurible_location.in_hand())
                     .unwrap_or(false)

@@ -380,7 +380,9 @@ impl AgentState {
             FType::Halfbeat => {
                 if value {
                     self.assume_bard(&|bard: &mut BardClassState| {
-                        bard.half_beat_slowdown();
+                        if !bard.half_beat.active() && !bard.half_beat.resting() {
+                            bard.half_beat_slowdown();
+                        }
                     });
                 } else {
                     self.assume_bard(&|bard: &mut BardClassState| {

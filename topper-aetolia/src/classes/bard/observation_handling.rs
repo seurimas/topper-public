@@ -288,16 +288,27 @@ pub fn handle_weaving_action(
                 );
             }
         }
-        "Thurible" => for_agent(
-            agent_states,
-            &combat_action.caster,
-            &|me: &mut AgentState| {
-                me.assume_bard(&|bard: &mut BardClassState| {
-                    bard.dithering = THURIBLE_DITHER;
-                });
-                me.wield_state.weave(THURIBLE);
-            },
-        ),
+        "Thurible" => {
+            if combat_action.annotation.eq("hit") {
+                attack_afflictions(
+                    agent_states,
+                    &combat_action.caster,
+                    vec![FType::Asthma],
+                    after,
+                );
+            } else {
+                for_agent(
+                    agent_states,
+                    &combat_action.caster,
+                    &|me: &mut AgentState| {
+                        me.assume_bard(&|bard: &mut BardClassState| {
+                            bard.dithering = THURIBLE_DITHER;
+                        });
+                        me.wield_state.weave(THURIBLE);
+                    },
+                );
+            }
+        }
         "Impetus" => for_agent(
             agent_states,
             &combat_action.caster,
