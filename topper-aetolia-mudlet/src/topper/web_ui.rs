@@ -82,6 +82,10 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for WebModule {
                                 explainer_page.filter_out_command("message");
                                 explainer_page.filter_out_command("msg");
                                 explainer_page.filter_out_command("tell");
+                                explainer_page.filter_out_command("ghelp");
+                                explainer_page.filter_out_command("chelp");
+                                explainer_page.filter_out_command("clhelp");
+                                explainer_page.filter_out_command("clanhelp");
                                 explainer_page.locked = true;
                                 if let Some(publish_location) = &self.publish_location {
                                     let mut file = std::fs::File::create(format!(

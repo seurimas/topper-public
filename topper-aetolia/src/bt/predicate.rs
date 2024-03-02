@@ -84,6 +84,8 @@ pub enum AetPredicate {
     // Timing
     ReboundingWindow(AetTarget, CType),
     SalveBlocked(AetTarget, CType),
+    Channeling(AetTarget, Option<ChannelType>),
+    ChannelStoppedBy(AetTarget, FType),
     // Hints
     LimbHintIs(String, LType),
     HintSet(String, String),
@@ -351,6 +353,30 @@ impl UnpoweredFunction for AetPredicate {
                 if let Some(target) = target.get_target(model, controller) {
                     if let Some(restore) = target.limb_damage.restore_timer {
                         if restore.get_time_left() > *minimum {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::Channeling(target, channel) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if channel.is_some() {
+                        if target.channel_state.is_channeling(channel.unwrap()) {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    } else {
+                        if target.channel_state.is_channeling_any() {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::ChannelStoppedBy(target, aff) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if let Some(channel) = target.channel_state.get_channel_type() {
+                        if channel.stopped_by(*aff) {
                             return UnpoweredFunctionState::Complete;
                         }
                     }

@@ -7,6 +7,7 @@ use self::akkari::map_mentis;
 
 mod akkari;
 mod executor;
+mod oneiromancer;
 mod ravager;
 mod revenant;
 mod voidseer;
@@ -21,14 +22,6 @@ lazy_static! {
         mapping.insert(
             ("Ancestry".to_string(), "Shield".to_string()),
             ("Deathlore".to_string(), "Shield".to_string()),
-        );
-        mapping.insert(
-            ("Hyalincuru".to_string(), "Sphere".to_string()),
-            ("Tarot".to_string(), "Sun".to_string()),
-        );
-        mapping.insert(
-            ("Hyalincuru".to_string(), "Hypercube".to_string()),
-            ("Tarot".to_string(), "Moon".to_string()),
         );
         mapping.insert(
             ("Subjugation".to_string(), "Subdue".to_string()),
@@ -46,6 +39,7 @@ lazy_static! {
             ("Riving".to_string(), "Rage".to_string()),
             ("Battlefury".to_string(), "Rage".to_string()),
         );
+        oneiromancer::add_mappings(&mut mapping);
         revenant::add_mappings(&mut mapping);
         ravager::add_mappings(&mut mapping);
         akkari::add_mappings(&mut mapping);

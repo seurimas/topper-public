@@ -26,6 +26,7 @@ pub struct AetoliaSectParser {
     you: String,
     my_class: String,
     your_class: String,
+    winner: Option<String>,
 }
 
 fn get_pre_block(body: &VDom) -> Option<NodeHandle> {
@@ -43,6 +44,7 @@ impl AetoliaSectParser {
             you: String::new(),
             my_class: String::new(),
             your_class: String::new(),
+            winner: None,
         }
     }
 
@@ -92,13 +94,28 @@ impl AetoliaSectParser {
                 }
             }
             self.append_colored_text(text.to_string(), color);
+            if text
+                .contains("Your insignia glows vividly as your triumph is notated in the records.")
+            {
+                self.winner = Some(self.me.clone());
+            } else if text.contains("You have been slain by") {
+                self.winner = Some(self.you.clone());
+            }
         }
 
         let id = format!(
             "{}_{}_vs_{}_{}_{}_{}",
-            self.me,
+            if self.winner == Some(self.me.clone()) {
+                format!("({})", self.me)
+            } else {
+                self.me.clone()
+            },
             self.my_class,
-            self.you,
+            if self.winner == Some(self.you.clone()) {
+                format!("({})", self.you)
+            } else {
+                self.you.clone()
+            },
             self.your_class,
             self.time,
             self.lines.len()

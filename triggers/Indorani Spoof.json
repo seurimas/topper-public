@@ -104,4 +104,46 @@
     ],
     "observation_name": "Proc"
   }
+  {
+    "regex": "^The ominous silence lifts.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Tarot"
+      },
+      {
+        "Literal": "Death"
+      },
+      {
+        "Literal": "end"
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
+    "regex": "^Raven's shadows fade from the surroundings.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Hyalincuru"
+      },
+      {
+        "Literal": "Raven"
+      },
+      {
+        "Literal": "end"
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  }
 ]

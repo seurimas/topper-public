@@ -57,6 +57,21 @@ pub fn handle_combat_action(
                 after,
             );
         }
+        "Death" => {
+            if combat_action.annotation.eq("end") {
+                agent_states.for_all_agents(&|you| {
+                    if you.channel_state.is_channeling(ChannelType::Death) {
+                        you.set_channel(ChannelType::Death, 0.0);
+                    }
+                });
+            } else {
+                for_agent(agent_states, &combat_action.caster, &|you| {
+                    you.set_channel(ChannelType::Death, 7.0);
+                    you.observe_flag(FType::Shielded, false);
+                    you.observe_flag(FType::Rebounding, false);
+                });
+            }
+        }
         "Sun" | "Moon" => {
             if !combat_action.annotation.eq("dodge") {
                 let observations = after.clone();

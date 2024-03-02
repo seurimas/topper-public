@@ -146,7 +146,7 @@ pub fn handle_combat_action(
                     agent_states,
                     &combat_action.caster,
                     &move |me: &mut AgentState| {
-                        me.set_channel(ChannelState::Heelrush(limb, Timer::CountDown(325)));
+                        me.set_channel_with_limb(ChannelType::Heelrush, 3.25, limb);
                     },
                 );
             }
@@ -182,7 +182,7 @@ pub fn handle_combat_action(
                 agent_states,
                 &combat_action.caster,
                 &move |me: &mut AgentState| {
-                    me.set_channel(ChannelState::Direblow(Timer::CountDown(200)));
+                    me.set_channel(ChannelType::Direblow, 2.0);
                 },
             );
         }

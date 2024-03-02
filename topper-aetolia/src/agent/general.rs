@@ -1206,29 +1206,93 @@ impl Default for ClassState {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum ChannelType {
+    Heelrush,
+    Direblow,
+    Death,
+}
+
+impl ChannelType {
+    pub fn stopped_by(&self, aff: FType) -> bool {
+        match (self, aff) {
+            (_, FType::Asleep) => true,
+            (ChannelType::Heelrush, FType::Paresis) => true,
+            (ChannelType::Direblow, FType::Paresis) => true,
+            _ => false,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum ChannelState {
     Inactive,
-    Heelrush(LType, Timer),
-    Direblow(Timer),
+    ChannelWithLimb {
+        channel_type: ChannelType,
+        timer: Timer,
+        limb: LType,
+    },
+    Channeling {
+        channel_type: ChannelType,
+        timer: Timer,
+    },
 }
 
 impl ChannelState {
     pub fn wait(&mut self, duration: CType) {
         match self {
-            ChannelState::Heelrush(_, remaining) => {
-                remaining.wait(duration);
-                if !remaining.is_active() {
+            ChannelState::ChannelWithLimb { timer, .. } => {
+                timer.wait(duration);
+                if !timer.is_active() {
                     *self = ChannelState::Inactive;
                 }
             }
-            ChannelState::Direblow(remaining) => {
-                remaining.wait(duration);
-                if !remaining.is_active() {
+            ChannelState::Channeling { timer, .. } => {
+                timer.wait(duration);
+                if !timer.is_active() {
                     *self = ChannelState::Inactive;
                 }
             }
             _ => {}
+        }
+    }
+
+    pub fn channel_with_limb(&mut self, channel_type: ChannelType, limb: LType, duration: CType) {
+        *self = ChannelState::ChannelWithLimb {
+            channel_type,
+            limb,
+            timer: Timer::count_up_observe(duration, duration),
+        };
+    }
+
+    pub fn channel(&mut self, channel_type: ChannelType, duration: CType) {
+        *self = ChannelState::Channeling {
+            channel_type,
+            timer: Timer::count_up_observe(duration, duration),
+        };
+    }
+
+    pub fn get_channel_type(&self) -> Option<ChannelType> {
+        match self {
+            ChannelState::ChannelWithLimb { channel_type, .. } => Some(*channel_type),
+            ChannelState::Channeling { channel_type, .. } => Some(*channel_type),
+            _ => None,
+        }
+    }
+
+    pub fn is_channeling(&self, channel: ChannelType) -> bool {
+        match self {
+            ChannelState::ChannelWithLimb { channel_type, .. } => channel == *channel_type,
+            ChannelState::Channeling { channel_type, .. } => channel == *channel_type,
+            _ => false,
+        }
+    }
+
+    pub fn is_channeling_any(&self) -> bool {
+        match self {
+            ChannelState::ChannelWithLimb { .. } => true,
+            ChannelState::Channeling { .. } => true,
+            _ => false,
         }
     }
 }

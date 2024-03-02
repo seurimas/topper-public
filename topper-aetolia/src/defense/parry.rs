@@ -105,8 +105,15 @@ pub fn get_preferred_parry<DB: AetDatabaseModule + ?Sized>(
             Class::Zealot => {
                 let them = timeline.state.borrow_agent(target);
                 match them.channel_state {
-                    ChannelState::Heelrush(limb, _) => Ok(limb),
-                    ChannelState::Direblow(_) => Ok(LType::TorsoDamage),
+                    ChannelState::ChannelWithLimb {
+                        limb,
+                        channel_type: ChannelType::Heelrush,
+                        ..
+                    } => Ok(limb),
+                    ChannelState::Channeling {
+                        channel_type: ChannelType::Direblow,
+                        ..
+                    } => Ok(LType::TorsoDamage),
                     _ => {
                         let myself = timeline.state.borrow_agent(me);
                         if myself.is(FType::Heatspear) {

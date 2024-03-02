@@ -951,8 +951,19 @@ impl AgentState {
         count
     }
 
-    pub fn set_channel(&mut self, channel: ChannelState) {
-        self.channel_state = channel;
+    pub fn set_channel(&mut self, channel_type: ChannelType, time: f32) {
+        self.channel_state = ChannelState::Channeling {
+            channel_type,
+            timer: Timer::count_down_seconds(time),
+        };
+    }
+
+    pub fn set_channel_with_limb(&mut self, channel_type: ChannelType, time: f32, limb: LType) {
+        self.channel_state = ChannelState::ChannelWithLimb {
+            channel_type,
+            timer: Timer::count_down_seconds(time),
+            limb,
+        };
     }
 
     pub fn assume_zealot(&mut self, action: fn(&mut ZealotClassState)) {
