@@ -200,8 +200,8 @@ lazy_static! {
         FType::Hallucinations,
         FType::Paranoia,
         FType::Hatred,
-        FType::Addiction,
         FType::Hypersomnia,
+        FType::Addiction,
         FType::BloodCurse,
         FType::Blighted,
     ];
@@ -421,7 +421,8 @@ lazy_static! {
 }
 
 lazy_static! {
-    pub static ref CALORIC_TORSO_ORDER: Vec<FType> = vec![FType::Frozen, FType::Shivering,];
+    pub static ref CALORIC_TORSO_ORDER: Vec<FType> =
+        vec![FType::Frozen, FType::Shivering, FType::Frigid];
 }
 
 lazy_static! {

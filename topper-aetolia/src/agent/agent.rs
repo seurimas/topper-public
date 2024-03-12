@@ -668,6 +668,7 @@ impl AgentState {
             && !self.is(FType::Paralysis)
             && !(self.is(FType::LeftArmCrippled) && self.is(FType::RightArmCrippled))
             && !self.is(FType::NumbArms)
+            && !self.is(FType::Frozen)
     }
 
     pub fn can_tree(&self, ignore_bal: bool) -> bool {

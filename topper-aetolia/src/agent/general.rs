@@ -289,7 +289,7 @@ pub enum FType {
     Wrath,
 
     // Bard defences
-    Destiny,
+    SongDestiny,
     Sheath,
     Aurora,
     Equipoise,
@@ -501,6 +501,7 @@ pub enum FType {
     IceEncased,
     Frozen,
     Shivering,
+    Frigid,
 
     // Immunity
     Voyria,

@@ -1155,13 +1155,7 @@ pub fn apply_or_infer_cure(
             }
             SimpleCure::Salve(salve_name, salve_loc) => {
                 who.observe_flag(FType::Slickness, false);
-                if salve_name == "caloric" {
-                    if who.some(CALORIC_TORSO_ORDER.to_vec()) {
-                        remove_in_order(CALORIC_TORSO_ORDER.to_vec(), who);
-                    } else {
-                        who.set_flag(FType::Insulation, true);
-                    }
-                } else if salve_name == "mass" {
+                if salve_name == "mass" {
                     who.set_flag(FType::Density, true);
                 } else if salve_name == "restoration" {
                     let limb = get_limb_damage(salve_loc)?;

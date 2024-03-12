@@ -293,6 +293,7 @@ pub fn is_affected_by(class: Class, affliction: FType) -> bool {
         (FType::Clumsiness, Class::Zealot) => true,
         (FType::Weariness, Class::Carnifex) => true,
         (FType::Weariness, Class::Sciomancer) => true,
+        (FType::Weariness, Class::Praenomen) => true,
         (FType::Peace, Class::Luminary) => true,
         (FType::Disfigurement, Class::Sentinel) => true,
         (FType::Disfigurement, Class::Carnifex) => true,

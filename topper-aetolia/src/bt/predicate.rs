@@ -11,9 +11,11 @@ use crate::classes::Class;
 use crate::classes::LockType;
 use crate::classes::VenomPlan;
 use crate::curatives::get_cure_depth;
+use crate::defense::DEFENSE_DATABASE;
 use crate::non_agent::AetTimelineRoomExt;
 use crate::timeline::*;
 use crate::types::*;
+use crate::with_defense_db;
 
 use super::BehaviorController;
 use super::BehaviorModel;
@@ -562,8 +564,15 @@ impl UnpoweredFunction for AetPredicate {
                 }
             }
             AetPredicate::IsAffectedBy(target, aff) => {
-                if let Some(target) = target.get_target(model, controller) {
-                    if let Some(class) = target.class_state.get_normalized_class() {
+                if let Some(target_agent) = target.get_target(model, controller) {
+                    if let Some(class) =
+                        target_agent.class_state.get_normalized_class().or_else(|| {
+                            with_defense_db!(db, {
+                                return db.get_class(&target.get_name(model, controller));
+                            });
+                            None
+                        })
+                    {
                         if is_affected_by(class, *aff) {
                             return UnpoweredFunctionState::Complete;
                         }

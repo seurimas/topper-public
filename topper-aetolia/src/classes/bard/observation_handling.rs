@@ -531,10 +531,10 @@ pub fn handle_weaving_action(
 }
 
 fn use_destiny_eq(me: &mut AgentState, observations: &Vec<AetObservation>) {
-    if !me.is(FType::Destiny) {
+    if !me.is(FType::SongDestiny) {
         apply_or_infer_balance(me, (BType::Equil, 2.0), observations);
     } else {
-        me.set_flag(FType::Destiny, false);
+        me.set_flag(FType::SongDestiny, false);
     }
 }
 
@@ -1016,7 +1016,7 @@ pub fn handle_songcalling_action(
                             bard.end_song(song);
                         });
                         if song == Song::Destiny {
-                            me.set_flag(FType::Destiny, true);
+                            me.set_flag(FType::SongDestiny, true);
                         }
                     },
                 );

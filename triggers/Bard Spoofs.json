@@ -912,6 +912,15 @@
         "observation_name": "Discovered"
     },
     {
+        "regex": "^Your music already produces euphony in those who listen.$",
+        "args": [
+            {
+                "Literal": "Euphonia"
+            }
+        ],
+        "observation_name": "Discovered"
+    },
+    {
         "regex": "^You are already playing your songs at a half beat tempo.$",
         "args": [
             {
