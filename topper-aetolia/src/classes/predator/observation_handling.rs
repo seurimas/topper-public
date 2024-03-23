@@ -491,6 +491,39 @@ pub fn handle_combat_action(
                 });
             });
         }
+        "Swoop" => {
+            let target = combat_action.target.clone();
+            for_agent(agent_states, &combat_action.caster, &|me| {
+                me.assume_predator(&|class_state| {
+                    class_state.orel_swoop(target.clone());
+                });
+            });
+        }
+        "TalonEnvenom" => {
+            let venoms = combat_action.annotation.split(' ').collect::<Vec<&str>>();
+            // "Curare" 0
+            let venom_0 = venoms.get(0).unwrap_or(&"").to_string();
+            // "and"    1
+            // "Kalmia" 2
+            let venom_1 = venoms.get(2).unwrap_or(&"").to_string();
+            for_agent(agent_states, &combat_action.caster, &|me| {
+                me.assume_predator(&|class_state| {
+                    class_state.orel_envenom(venom_0.clone(), venom_1.clone());
+                });
+            });
+        }
+        "Swooped" => {
+            let perspective = agent_states.get_perspective(&combat_action);
+            if perspective == Perspective::Attacker {
+                let (venom_0, venom_1) = agent_states
+                    .borrow_me()
+                    .assume_predator(&|class_state| class_state.orel_swooped());
+                for_agent(agent_states, &combat_action.target, &|me| {
+                    apply_venom(me, &venom_0, false);
+                    apply_venom(me, &venom_1, false);
+                });
+            }
+        }
         "Negate" => {
             attack_afflictions(
                 agent_states,

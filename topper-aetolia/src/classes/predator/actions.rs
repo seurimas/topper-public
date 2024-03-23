@@ -36,6 +36,7 @@ pub enum ParamComboAttack {
     Gouge,
     Bleed,
     Swiftkick,
+    Ferocity,
 }
 
 impl ParamComboAttack {
@@ -78,6 +79,7 @@ impl ParamComboAttack {
             ParamComboAttack::Gouge => "gouge".to_string(),
             ParamComboAttack::Bleed => "bleed".to_string(),
             ParamComboAttack::Swiftkick => "swiftkick".to_string(),
+            ParamComboAttack::Ferocity => "ferocity".to_string(),
         }
     }
 }
@@ -165,6 +167,7 @@ impl SeriesAttack {
             ComboAttack::Flashkick => ParamComboAttack::Flashkick,
             ComboAttack::Trip => ParamComboAttack::Trip,
             ComboAttack::Veinrip => ParamComboAttack::Veinrip,
+            ComboAttack::Ferocity => ParamComboAttack::Ferocity,
         });
         Self {
             attacks: attacks.collect(),
@@ -415,6 +418,46 @@ impl ActiveTransition for TwinshotAction {
 }
 
 // ==================
+// Orel
+// ==================
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct SwoopAction {
+    pub target: String,
+    pub venom_0: VenomType,
+    pub venom_1: VenomType,
+}
+
+impl SwoopAction {
+    pub fn new(target: String, venom_0: VenomType, venom_1: VenomType) -> Self {
+        Self {
+            target,
+            venom_0,
+            venom_1,
+        }
+    }
+}
+
+impl ActiveTransition for SwoopAction {
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        if should_call_venoms(timeline) {
+            Ok(format!(
+                "{};;envenom talons of orel with {} and {};;orel swoop {}",
+                call_venoms(&self.target, self.venom_0, self.venom_1, Some("Orel")),
+                self.venom_0,
+                self.venom_1,
+                self.target
+            ))
+        } else {
+            Ok(format!(
+                "envenom talons of orel with {} and {};;orel swoop {}",
+                self.venom_0, self.venom_1, self.target
+            ))
+        }
+    }
+}
+
+// ==================
 // Orgyuk
 // ==================
 
@@ -537,21 +580,6 @@ impl ActiveTransition for PummelAction {
             self.target,
             self.limb.to_string()
         ))
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct FerocityAction;
-
-impl FerocityAction {
-    pub fn new() -> Self {
-        Self
-    }
-}
-
-impl ActiveTransition for FerocityAction {
-    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
-        Ok(format!("ferocity"))
     }
 }
 

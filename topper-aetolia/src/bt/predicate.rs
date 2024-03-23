@@ -97,6 +97,8 @@ pub enum AetPredicate {
     HasBalanceEquilibrium(AetTarget),
     HasBalance(AetTarget),
     HasEquilibrium(AetTarget),
+    BalanceUnder(AetTarget, BType, f32),
+    BalanceOver(AetTarget, BType, f32),
     HasTree(AetTarget, f32),
     HasFocus(AetTarget, f32),
     HasFitness(AetTarget, f32),
@@ -424,6 +426,22 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::CanParry(target) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.can_parry() {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::BalanceUnder(target, balance, maximum) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.get_balance(*balance) < *maximum {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::BalanceOver(target, balance, minimum) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.get_balance(*balance) > *minimum {
                         return UnpoweredFunctionState::Complete;
                     }
                 }

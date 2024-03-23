@@ -163,16 +163,16 @@
     }
 
     document.onkeydown = (e) => {
-      if (e.key === "PageDown") {
+      if (e.key === "PageDown" && playingBack) {
         playbackTime += 1000;
         playbackCb(playbackTime);
-        if (playingBack && !paused) {
+        if (!paused) {
           e.preventDefault();
         }
-      } else if (e.key === "PageUp") {
+      } else if (e.key === "PageUp" && playingBack) {
         playbackTime -= 1000;
         playbackCb(playbackTime);
-        if (playingBack && !paused) {
+        if (!paused) {
           e.preventDefault();
         }
       } else if (e.key === "1" || e.key === "2" || e.key === "3" || e.key === "4" || e.key === "5") {
@@ -202,16 +202,14 @@
         }
         synth.rate = rate;
         ttsSpeak("Speed up");
-      } else if (e.key === " ") {
-        if (playingBack) {
-          paused = !paused;
-          if (paused) {
-            autoscroll_off();
-          } else {
-            autoscroll_on();
-          }
-          e.preventDefault();
+      } else if (e.key === " " && playingBack) {
+        paused = !paused;
+        if (paused) {
+          autoscroll_off();
+        } else {
+          autoscroll_on();
         }
+        e.preventDefault();
       }
     }
   </script>

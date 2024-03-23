@@ -3,8 +3,7 @@ use topper_bt::unpowered::*;
 
 use crate::{
     bt::*,
-    classes::get_venoms_from_plan,
-    classes::group::*,
+    classes::{get_venoms_from_plan, group::*, VenomType, AFFLICT_VENOMS, VENOM_AFFLICTS},
     items::{UnwieldAction, WieldAction},
     non_agent::AetTimelineRoomExt,
     observables::PlainAction,
@@ -16,7 +15,6 @@ use super::*;
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum PredatorBehavior {
     // Class cure.
-    Ferocity,
     Arouse,
     // Combo attacks
     FastestCombo(AetTarget, Vec<ComboPredicate>, Vec<LimbDescriptor>),
@@ -44,6 +42,9 @@ pub enum PredatorBehavior {
     CirisosisDart(AetTarget),
     // Predation
     Quickassess(AetTarget),
+    // Orel
+    SwoopStack(AetTarget),
+    Swoop(AetTarget, FType, FType),
     // Spider
     Web(AetTarget),
     Acid(AetTarget),
@@ -70,15 +71,6 @@ impl UnpoweredFunction for PredatorBehavior {
         controller: &mut Self::Controller,
     ) -> UnpoweredFunctionState {
         match self {
-            PredatorBehavior::Ferocity => {
-                let me = model.state.borrow_me();
-                if me.balanced(BType::ClassCure1) {
-                    controller.plan.add_to_qeb(Box::new(FerocityAction::new()));
-                    UnpoweredFunctionState::Complete
-                } else {
-                    UnpoweredFunctionState::Failed
-                }
-            }
             PredatorBehavior::Arouse => {
                 let me = model.state.borrow_me();
                 if me.balanced(BType::ClassCure2) {
@@ -264,6 +256,43 @@ impl UnpoweredFunction for PredatorBehavior {
                     controller.plan.add_to_qeb(Box::new(FleshbaneAction::new(
                         controller.target.clone().unwrap_or("".to_string()),
                         if venom.is_empty() { "" } else { venom[0] },
+                    )));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            PredatorBehavior::SwoopStack(target) => {
+                if let Some(you) = target.get_target(model, controller) {
+                    let me = model.state.borrow_me();
+                    if me.is(FType::Disfigurement) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    let venoms = controller.get_venoms_from_plan(2, you);
+                    if let (Some(venom_0), Some(venom_1)) = (venoms.get(0), venoms.get(1)) {
+                        controller.plan.add_to_qeb(Box::new(SwoopAction::new(
+                            controller.target.clone().unwrap_or("".to_string()),
+                            venom_1,
+                            venom_0,
+                        )));
+                        UnpoweredFunctionState::Complete
+                    } else {
+                        UnpoweredFunctionState::Failed
+                    }
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            PredatorBehavior::Swoop(target, venom_0, venom_1) => {
+                if let Some(you) = target.get_target(model, controller) {
+                    let me = model.state.borrow_me();
+                    if me.is(FType::Disfigurement) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    controller.plan.add_to_qeb(Box::new(SwoopAction::new(
+                        controller.target.clone().unwrap_or("".to_string()),
+                        AFFLICT_VENOMS.get(venom_0).unwrap_or(&"curare"),
+                        AFFLICT_VENOMS.get(venom_1).unwrap_or(&"kalmia"),
                     )));
                     UnpoweredFunctionState::Complete
                 } else {

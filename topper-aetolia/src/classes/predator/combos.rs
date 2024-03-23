@@ -27,6 +27,7 @@ pub enum ComboAttack {
     Gouge,
     Bleed,
     Swiftkick,
+    Ferocity,
 }
 
 impl ComboAttack {
@@ -211,6 +212,7 @@ impl ComboAttack {
             ComboAttack::Freefall => true,
             ComboAttack::Pindown => true,
             ComboAttack::Butterfly => true,
+            ComboAttack::Ferocity => true,
             _ => false,
         }
     }
@@ -245,6 +247,7 @@ impl ComboAttack {
             ComboAttack::Freefall => 391,
             ComboAttack::Flashkick => 391,
             ComboAttack::Veinrip => 391,
+            ComboAttack::Ferocity => 270,
         };
         if !self.is_good_combo_attack(stance) {
             base + 98
@@ -295,6 +298,7 @@ impl ComboAttack {
             (ComboAttack::Pheromones, _) => stance,
             (ComboAttack::Pindown, _) => stance,
             (ComboAttack::Mindnumb, _) => stance,
+            (ComboAttack::Ferocity, _) => stance,
             // Jab
             (ComboAttack::Jab, KnifeStance::None) => KnifeStance::Gyanis,
             (ComboAttack::Jab, KnifeStance::Gyanis) => KnifeStance::Rizet,
@@ -953,7 +957,7 @@ mod predator_tests {
             .set_parry(false)
             .set_rebounds(0);
         let combos = solver.find_combos();
-        assert_eq!(combos.0.len(), 921);
+        assert_eq!(combos.0.len(), 1001);
         for combo in combos.0.iter() {
             println!("{:?}", combo);
         }
@@ -964,17 +968,6 @@ mod predator_tests {
                     ComboAttack::Pinprick,
                     ComboAttack::Pheromones,
                     ComboAttack::Vertical,
-                ]
-            ))
-        ));
-        assert!(combos.0.contains(
-            (&PredatorCombo::new(
-                KnifeStance::Rizet,
-                vec![
-                    ComboAttack::Raze,
-                    ComboAttack::Gouge,
-                    ComboAttack::Vertical,
-                    ComboAttack::Trip,
                 ]
             ))
         ));
@@ -998,7 +991,7 @@ mod predator_tests {
         let mut solver = ComboSolver::new(KnifeStance::EinFasit);
         solver.set_attacks(attacks).set_parry(true).set_rebounds(1);
         let combos = solver.find_combos();
-        assert_eq!(combos.0.len(), 57);
+        assert_eq!(combos.0.len(), 108);
         for combo in combos.0.iter() {
             println!("{:?}", combo);
         }

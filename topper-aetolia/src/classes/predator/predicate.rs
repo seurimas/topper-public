@@ -2,7 +2,12 @@ use serde::*;
 use topper_bt::unpowered::*;
 use topper_core::timeline::CType;
 
-use crate::{bt::*, classes::VENOM_AFFLICTS, timeline::apply_functions::apply_venom, types::*};
+use crate::{
+    bt::*,
+    classes::{AFFLICT_VENOMS, VENOM_AFFLICTS},
+    timeline::apply_functions::apply_venom,
+    types::*,
+};
 
 use super::actions::*;
 
@@ -15,6 +20,8 @@ pub enum PredatorPredicate {
     Bloodscourged,
     TidalslashReady,
     Veinripped,
+    OrelAboutToHit(AetTarget, f32, Vec<FType>),
+    OrelSwooping(Option<AetTarget>),
     Intoxicating(AetTarget),
     Intoxicated,
     Negated,
@@ -48,6 +55,39 @@ impl TargetPredicate for PredatorPredicate {
                     .check_if_predator(&|predator| predator.tidalslash)
                     .unwrap_or(false),
                 PredatorPredicate::Veinripped => target.predator_board.veinrip.is_active(),
+                PredatorPredicate::OrelAboutToHit(attack_target, buffer, venom_check) => target
+                    .check_if_predator(&|predator| {
+                        if let Some((target_name, timer, (venom_0, venom_1))) =
+                            predator.get_swooping()
+                        {
+                            if timer.get_time_left_seconds() > *buffer {
+                                return false;
+                            }
+                            if target_name != attack_target.get_name(model, controller) {
+                                return false;
+                            }
+                            return venom_check.iter().all(|aff| {
+                                venom_0.eq_ignore_ascii_case(AFFLICT_VENOMS.get(aff).unwrap_or(&""))
+                                    || venom_1.eq_ignore_ascii_case(
+                                        AFFLICT_VENOMS.get(aff).unwrap_or(&""),
+                                    )
+                            });
+                        }
+                        false
+                    })
+                    .unwrap_or(false),
+                PredatorPredicate::OrelSwooping(attack_target) => target
+                    .check_if_predator(&|predator| {
+                        if let Some((target_name, _, _)) = predator.get_swooping() {
+                            if let Some(attack_target) = attack_target {
+                                return target_name == attack_target.get_name(model, controller);
+                            } else {
+                                return true;
+                            }
+                        }
+                        false
+                    })
+                    .unwrap_or(false),
                 PredatorPredicate::Intoxicating(other_target) => target
                     .check_if_predator(&|predator| {
                         predator.is_intoxicating(&other_target.get_name(model, controller))

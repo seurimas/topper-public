@@ -51,8 +51,8 @@ impl KnifeStance {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PredatorCompanionState {
     Orel {
-        venoms: Vec<String>,
-        swooping: Option<Timer>,
+        venoms: (String, String),
+        swooping: Option<(String, Timer)>,
     },
     Orgyuk {
         roaring: Option<Timer>,
@@ -68,9 +68,12 @@ pub enum PredatorCompanionState {
 impl PredatorCompanionState {
     pub fn wait(&mut self, time: CType) {
         match self {
-            PredatorCompanionState::Orel { swooping, .. } => {
-                if let Some(swooping) = swooping {
-                    swooping.wait(time);
+            PredatorCompanionState::Orel { swooping, venoms } => {
+                if let Some((_who, swooping_timer)) = swooping {
+                    swooping_timer.wait(time);
+                    if !swooping_timer.is_active() {
+                        *swooping = None;
+                    }
                 }
             }
             PredatorCompanionState::Orgyuk { roaring, raking } => {
@@ -234,9 +237,49 @@ impl PredatorClassState {
     pub fn get_orel(&mut self) {
         if !self.has_orel() {
             self.companion = Some(PredatorCompanionState::Orel {
-                venoms: Vec::new(),
+                venoms: (String::new(), String::new()),
                 swooping: None,
             });
+        }
+    }
+
+    pub fn orel_swoop(&mut self, target: String) {
+        self.get_orel();
+        if let Some(PredatorCompanionState::Orel { swooping, .. }) = &mut self.companion {
+            *swooping = Some((target, Timer::count_up_observe_seconds(5., 6.)));
+        }
+    }
+
+    pub fn orel_envenom(&mut self, venom_0: String, venom_1: String) {
+        self.get_orel();
+        if let Some(PredatorCompanionState::Orel { venoms, .. }) = &mut self.companion {
+            venoms.0 = venom_0;
+            venoms.1 = venom_1;
+        }
+    }
+
+    pub fn orel_swooped(&mut self) -> (String, String) {
+        if let Some(PredatorCompanionState::Orel { swooping, venoms }) = &mut self.companion {
+            if let Some((_who, swooping)) = swooping {
+                swooping.expire();
+            }
+            let results = (venoms.0.clone(), venoms.1.clone());
+            *venoms = (String::new(), String::new());
+            results
+        } else {
+            (String::new(), String::new())
+        }
+    }
+
+    pub fn get_swooping(&self) -> Option<(String, Timer, (String, String))> {
+        if let Some(PredatorCompanionState::Orel { swooping, venoms }) = &self.companion {
+            if let Some((who, swooping)) = swooping {
+                Some((who.clone(), swooping.clone(), venoms.clone()))
+            } else {
+                None
+            }
+        } else {
+            None
         }
     }
 

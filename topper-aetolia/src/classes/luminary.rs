@@ -17,7 +17,7 @@ lazy_static! {
         FType::Dementia,
         FType::Hypochondria,
         FType::Lethargy,
-        FType::Loneliness,
+        FType::SelfLoathing,
         FType::Masochism,
         FType::Paranoia,
         FType::Recklessness,
@@ -37,9 +37,13 @@ pub fn handle_combat_action(
     match combat_action.skill.as_ref() {
         "Aura" => {
             let observations = after.clone();
-            for_agent(agent_states, &combat_action.caster, &move |me: &mut AgentState| {
-                apply_or_infer_balance(me, (BType::Equil, 3.0), &observations);
-            });
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &move |me: &mut AgentState| {
+                    apply_or_infer_balance(me, (BType::Equil, 3.0), &observations);
+                },
+            );
             let mut affected = if combat_action.target == "" {
                 &combat_action.caster
             } else {

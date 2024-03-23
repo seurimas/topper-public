@@ -142,7 +142,7 @@ impl Timer {
 }
 
 // Balances
-#[derive(Deserialize, Debug, PartialEq, Eq, Hash, Clone, Copy, TryFromPrimitive)]
+#[derive(Deserialize, Debug, PartialEq, Eq, Hash, Clone, Copy, TryFromPrimitive, Serialize)]
 #[repr(usize)]
 pub enum BType {
     // Actions

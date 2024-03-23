@@ -9,8 +9,8 @@ use topper_core_mudlet::topper::*;
 
 #[derive(Debug, Default)]
 pub struct FirstAidModule {
-    active: FirstAid,
-    in_flight: FirstAid,
+    active: FirstAidConfig,
+    in_flight: FirstAidConfig,
 }
 
 impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for FirstAidModule {

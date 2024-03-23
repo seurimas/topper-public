@@ -111,15 +111,6 @@ impl PlayerStats {
             state.get_balance(BType::Rebounding),
         );
         let lock_duration = state.lock_duration();
-        /* let first_aid_cure = DEFAULT_FIRST_AID
-        .get_next_cure(&"", state)
-        .map(|(aff, action)| {
-            if action.is_tree() {
-                "Tree".to_string()
-            } else {
-                format!("{:?}", aff)
-            }
-        }); */
         PlayerStats {
             name,
             afflictions,

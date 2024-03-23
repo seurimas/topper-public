@@ -8,7 +8,7 @@ mod cure_depth_tests {
         agent.set_flag(FType::Asthma, true);
         let cure_depth = get_cure_depth(&agent, FType::Asthma);
         assert_eq!(cure_depth.affs, vec![FType::Clumsiness, FType::Asthma]);
-        assert_eq!(cure_depth.time, 150);
+        assert_eq!(cure_depth.time, 120);
         assert_eq!(cure_depth.cures, 2);
     }
 
@@ -20,7 +20,7 @@ mod cure_depth_tests {
         agent.set_balance(BType::Pill, 1.0);
         let cure_depth = get_cure_depth(&agent, FType::Asthma);
         assert_eq!(cure_depth.affs, vec![FType::Clumsiness, FType::Asthma]);
-        assert_eq!(cure_depth.time, 250);
+        assert_eq!(cure_depth.time, 220);
         assert_eq!(cure_depth.cures, 2);
     }
 
@@ -87,7 +87,7 @@ mod cure_depth_tests {
             cure_depth.affs,
             vec![FType::Clumsiness, FType::Asthma, FType::Aeon]
         );
-        assert_eq!(cure_depth.time, 150);
+        assert_eq!(cure_depth.time, 120);
         assert_eq!(cure_depth.cures, 3);
     }
 }

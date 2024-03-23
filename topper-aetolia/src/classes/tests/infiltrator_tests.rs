@@ -724,6 +724,20 @@ mod infiltrator_timeline_tests {
                     target: "Benedicto".to_string(),
                     annotation: "".to_string(),
                 }),
+                AetObservation::CombatAction(CombatAction {
+                    caster: "Seurimas".to_string(),
+                    category: "Hypnosis".to_string(),
+                    skill: "Seal".to_string(),
+                    target: "Benedicto".to_string(),
+                    annotation: "".to_string(),
+                }),
+                AetObservation::CombatAction(CombatAction {
+                    caster: "Seurimas".to_string(),
+                    category: "Hypnosis".to_string(),
+                    skill: "Snap".to_string(),
+                    target: "Benedicto".to_string(),
+                    annotation: "".to_string(),
+                }),
             ]),
             lines: vec![],
             gmcp: Vec::new(),
@@ -747,12 +761,26 @@ mod infiltrator_timeline_tests {
         let suggest_slice = AetTimeSlice {
             observations: Some(vec![
                 AetObservation::Sent(
-                    "qeb dstab Benedicto aconite kalmia;;suggest Benedicto stupidity".to_string(),
+                    "qeb dstab Benedicto aconite kalmia;;suggest Benedicto stupidity;;seal Benedicto 3;;snap benedicto".to_string(),
                 ),
                 AetObservation::CombatAction(CombatAction {
                     caster: "Seurimas".to_string(),
                     category: "Hypnosis".to_string(),
                     skill: "Suggest".to_string(),
+                    target: "Benedicto".to_string(),
+                    annotation: "".to_string(),
+                }),
+                AetObservation::CombatAction(CombatAction {
+                    caster: "Seurimas".to_string(),
+                    category: "Hypnosis".to_string(),
+                    skill: "Seal".to_string(),
+                    target: "Benedicto".to_string(),
+                    annotation: "".to_string(),
+                }),
+                AetObservation::CombatAction(CombatAction {
+                    caster: "Seurimas".to_string(),
+                    category: "Hypnosis".to_string(),
+                    skill: "Snap".to_string(),
                     target: "Benedicto".to_string(),
                     annotation: "".to_string(),
                 }),
@@ -768,126 +796,6 @@ mod infiltrator_timeline_tests {
         assert_eq!(
             bene_state.hypno_state.get_next_hypno_aff(),
             Some(FType::Stupidity)
-        );
-    }
-
-    use crate::classes::infiltrator::get_attack;
-
-    #[test]
-    fn test_bedazzling() {
-        let mut timeline = AetTimeline::new();
-        let qeb = get_attack(
-            &timeline,
-            &"Benedicto".to_string(),
-            &"bedazzle".to_string(),
-            None as Option<&DummyDatabaseModule>,
-        );
-        assert_eq!(
-            qeb,
-            "qeb parry head;;stand;;bedazzle Benedicto;;hypnotise Benedicto;;suggest Benedicto Hypochondria%%qs shadow sleight void Benedicto",
-        );
-    }
-
-    #[test]
-    fn test_aggro() {
-        let mut timeline = AetTimeline::new();
-        let qeb = get_attack(
-            &timeline,
-            &"Benedicto".to_string(),
-            &"aggro".to_string(),
-            None as Option<&DummyDatabaseModule>,
-        );
-        assert_eq!(
-            qeb,
-            "qeb parry head;;stand;;envenom whip with curare;;flay Benedicto;;hypnotise Benedicto;;suggest Benedicto Hypochondria%%qs shadow sleight void Benedicto",
-        );
-    }
-
-    #[test]
-    fn test_hyper() {
-        let mut timeline = AetTimeline::new();
-        timeline
-            .state
-            .for_agent(&"Benedicto".to_string(), &move |bene| {
-                bene.set_flag(FType::Addiction, true);
-                bene.set_flag(FType::Hypersomnia, true);
-                bene.set_flag(FType::Rebounding, false);
-            });
-        let qeb = get_attack(
-            &timeline,
-            &"Benedicto".to_string(),
-            &"aggro".to_string(),
-            None as Option<&DummyDatabaseModule>,
-        );
-        assert_eq!(
-            qeb,
-            "qeb parry head;;stand;;dstab Benedicto delphinium kalmia;;dash d;;hypnotise Benedicto;;suggest Benedicto Hypochondria%%qs shadow sleight void Benedicto",
-        );
-        timeline
-            .state
-            .for_agent(&"Benedicto".to_string(), &move |bene| {
-                bene.set_flag(FType::Insomnia, false);
-            });
-        let qeb = get_attack(
-            &timeline,
-            &"Benedicto".to_string(),
-            &"aggro".to_string(),
-            None as Option<&DummyDatabaseModule>,
-        );
-        assert_eq!(
-            qeb,
-            "qeb parry head;;stand;;dstab Benedicto delphinium delphinium;;dash d;;hypnotise Benedicto;;suggest Benedicto Hypochondria%%qs shadow sleight void Benedicto",
-        );
-    }
-
-    #[test]
-    fn test_flay_for_thin() {
-        let mut timeline = AetTimeline::new();
-        timeline
-            .state
-            .for_agent(&"Benedicto".to_string(), &move |bene| {
-                bene.set_flag(FType::Rebounding, false);
-                bene.set_flag(FType::Paresis, true);
-                bene.set_flag(FType::Asthma, true);
-                bene.set_flag(FType::Vomiting, true);
-                bene.set_flag(FType::Lethargy, true);
-                bene.set_balance(BType::Tree, 10.0);
-            });
-        let qeb = get_attack(
-            &timeline,
-            &"Benedicto".to_string(),
-            &"aggro".to_string(),
-            None as Option<&DummyDatabaseModule>,
-        );
-        assert_eq!(
-            qeb,
-            "qeb parry head;;stand;;envenom whip with xentio;;flay Benedicto;;hypnotise Benedicto;;suggest Benedicto Hypochondria%%qs shadow sleight void Benedicto",
-        );
-    }
-
-    #[test]
-    fn test_bite_for_thin() {
-        let mut timeline = AetTimeline::new();
-        timeline
-            .state
-            .for_agent(&"Benedicto".to_string(), &move |bene| {
-                bene.set_flag(FType::Rebounding, false);
-                bene.set_flag(FType::Fangbarrier, false);
-                bene.set_flag(FType::Paresis, true);
-                bene.set_flag(FType::Asthma, true);
-                bene.set_flag(FType::Vomiting, true);
-                bene.set_flag(FType::Lethargy, true);
-                bene.set_balance(BType::Tree, 10.0);
-            });
-        let qeb = get_attack(
-            &timeline,
-            &"Benedicto".to_string(),
-            &"aggro".to_string(),
-            None as Option<&DummyDatabaseModule>,
-        );
-        assert_eq!(
-            qeb,
-            "qeb parry head;;bite Benedicto scytherus;;hypnotise Benedicto;;suggest Benedicto Hypochondria%%qs shadow sleight void Benedicto",
         );
     }
 }

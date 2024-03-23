@@ -334,5 +334,68 @@
       }
     ],
     "observation_name": "Proc"
+  },
+  {
+    "regex": "^(You) order .* to swoop down at (\\w+).$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Beastmastery"
+      },
+      {
+        "Literal": "Swoop"
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "GroupAsTarget": 2
+      }
+    ],
+    "observation_name": "CombatAction"
+  },
+  {
+    "regex": "^(You) coat the talons of your orel with (.*).$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Beastmastery"
+      },
+      {
+        "Literal": "TalonEnvenom"
+      },
+      {
+        "GroupAsTarget": 2
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "CombatAction"
+  },
+  {
+    "regex": "(You)r orel has successfully swooped down at (\\w+).$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Beastmastery"
+      },
+      {
+        "Literal": "Swooped"
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "GroupAsTarget": 2
+      }
+    ],
+    "observation_name": "CombatAction"
   }
 ]
