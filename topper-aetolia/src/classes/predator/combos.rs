@@ -68,7 +68,16 @@ impl ComboAttack {
             ComboAttack::Pheromones => false,
             ComboAttack::Pindown => false,
             ComboAttack::Mindnumb => false,
+            ComboAttack::Ferocity => false,
             _ => true,
+        }
+    }
+
+    pub fn bypass_shield(&self) -> bool {
+        match self {
+            ComboAttack::Swiftkick => true,
+            ComboAttack::Raze => true,
+            _ => false,
         }
     }
 
@@ -509,7 +518,8 @@ pub struct ComboSolver {
     starting_stance: KnifeStance,
     start_parry: bool,
     start_prone: bool,
-    start_rebounds: u32,
+    start_rebounds: bool,
+    start_shielded: bool,
     blade_surge: bool,
     allow_bad_stances: bool,
     allow_parries: bool,
@@ -528,7 +538,8 @@ impl ComboSolver {
             starting_stance: stance,
             start_parry: false,
             start_prone: false,
-            start_rebounds: 0,
+            start_rebounds: false,
+            start_shielded: false,
             blade_surge: false,
             allow_bad_stances: false,
             allow_parries: false,
@@ -554,12 +565,17 @@ impl ComboSolver {
         self
     }
 
+    pub fn set_shielded(&mut self, shielded: bool) -> &mut Self {
+        self.start_shielded = shielded;
+        self
+    }
+
     pub fn set_prone(&mut self, prone: bool) -> &mut Self {
         self.start_prone = prone;
         self
     }
 
-    pub fn set_rebounds(&mut self, rebounds: u32) -> &mut Self {
+    pub fn set_rebounds(&mut self, rebounds: bool) -> &mut Self {
         self.start_rebounds = rebounds;
         self
     }
@@ -588,7 +604,8 @@ impl ComboSolver {
         previous_attacks: Vec<ComboAttack>,
         mut parrying: bool,
         mut prone: bool,
-        mut rebounds: u32,
+        mut rebounds: bool,
+        mut shielded: bool,
     ) {
         if combos.len() > 1000 {
             return;
@@ -612,8 +629,10 @@ impl ComboSolver {
         }
         parrying &= !attack.can_drop_parry();
         prone |= attack.can_prone();
-        if attack.strips_rebounding() && rebounds > 0 {
-            rebounds -= 1;
+        if attack.strips_rebounding() && shielded {
+            shielded = false;
+        } else if attack.strips_rebounding() {
+            rebounds = false;
         }
         for next_attack in self.attacks.iter() {
             self.add_next_attack(
@@ -625,6 +644,7 @@ impl ComboSolver {
                 parrying,
                 prone,
                 rebounds,
+                shielded,
             );
         }
     }
@@ -638,7 +658,8 @@ impl ComboSolver {
         new_attacks: &Vec<ComboAttack>,
         parrying: bool,
         prone: bool,
-        rebounds: u32,
+        rebounds: bool,
+        shielded: bool,
     ) {
         if (self.allow_bad_stances
             || next_attack.is_good_combo_attack(next_stance)
@@ -647,7 +668,8 @@ impl ComboSolver {
             && (!next_attack.idempotent() || !new_attacks.contains(&next_attack))
             && (!parrying || !next_attack.parryable() || self.allow_parries)
             && (prone || !next_attack.requires_prone())
-            && (rebounds == 0 || !next_attack.rebounds())
+            && (!rebounds || !next_attack.rebounds())
+            && (!shielded || next_attack.bypass_shield())
         {
             self.add_combos(
                 combos,
@@ -658,6 +680,7 @@ impl ComboSolver {
                 parrying,
                 prone,
                 rebounds,
+                shielded,
             );
         }
     }
@@ -674,6 +697,7 @@ impl ComboSolver {
                 self.start_parry,
                 self.start_prone,
                 self.start_rebounds,
+                self.start_shielded,
             );
         }
         ComboSet(combos)
@@ -989,7 +1013,10 @@ mod predator_tests {
             ComboAttack::Raze,
         ];
         let mut solver = ComboSolver::new(KnifeStance::EinFasit);
-        solver.set_attacks(attacks).set_parry(true).set_rebounds(1);
+        solver
+            .set_attacks(attacks)
+            .set_parry(true)
+            .set_rebounds(true);
         let combos = solver.find_combos();
         assert_eq!(combos.0.len(), 108);
         for combo in combos.0.iter() {
