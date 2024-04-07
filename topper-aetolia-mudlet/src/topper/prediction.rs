@@ -14,7 +14,6 @@ pub struct PredictionModule {
 }
 impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for PredictionModule {
     type Siblings = (
-        &'s String,
         &'s Option<String>,
         &'s AetTimeline,
         &'s AetMudletDatabaseModule,
@@ -22,9 +21,10 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for PredictionModule {
     fn handle_message(
         &mut self,
         message: &TopperMessage<AetTimeSlice>,
-        (me, target, timeline, db): Self::Siblings,
+        (target, timeline, db): Self::Siblings,
     ) -> Result<TopperResponse<BattleStats>, String> {
-        Ok(prioritize_cures(self, &timeline, me, &target, db))
+        let me = timeline.who_am_i();
+        Ok(prioritize_cures(self, &timeline, &me, &target, db))
     }
 }
 

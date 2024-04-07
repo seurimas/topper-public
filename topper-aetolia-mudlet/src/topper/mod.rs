@@ -84,7 +84,6 @@ pub struct BattleModule;
 impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for BattleModule {
     type Siblings = (
         &'s mut FirstAidModule,
-        &'s String,
         &'s Option<String>,
         &'s AetTimeline,
         &'s AetMudletDatabaseModule,
@@ -92,15 +91,16 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for BattleModule {
     fn handle_message(
         &mut self,
         message: &TopperMessage<AetTimeSlice>,
-        (firstaid, me, target, timeline, db): Self::Siblings,
+        (firstaid, target, timeline, db): Self::Siblings,
     ) -> Result<TopperResponse<BattleStats>, String> {
+        let me = timeline.who_am_i();
         match message {
             TopperMessage::Request(request) => match request {
                 TopperRequest::Attack(strategy) => {
                     if let Some(target) = target {
                         Ok(TopperResponse::qeb(get_attack(
                             &timeline,
-                            me,
+                            &me,
                             &target,
                             &strategy,
                             Some(db),
@@ -250,7 +250,6 @@ impl TopperHandler<BattleStats> for AetTopper {
             .unwrap()
             .handle_message(&topper_msg, (self.timeline_module.timeline.who_am_i()))?;
         let mut database_module = self.database_module.read().unwrap();
-        let me = self.me().clone();
         Ok(self
             .core_module
             .handle_message(&topper_msg, ())?
@@ -270,30 +269,25 @@ impl TopperHandler<BattleStats> for AetTopper {
             )?)
             .then(self.firstaid_module.handle_message(
                 &topper_msg,
-                (&mut self.timeline_module.timeline, &database_module, &me),
+                (
+                    &mut self.timeline_module.timeline,
+                    &database_module,
+                    &self.core_module.target,
+                ),
             )?)
             .then(self.group_module.handle_message(
                 &topper_msg,
-                (
-                    &self.me(),
-                    &mut self.timeline_module.timeline,
-                    &database_module,
-                ),
+                (&mut self.timeline_module.timeline, &database_module),
             )?)
             .then(self.basher_module.handle_message(
                 &topper_msg,
-                (
-                    &self.me(),
-                    &mut self.timeline_module.timeline,
-                    &database_module,
-                ),
+                (&mut self.timeline_module.timeline, &database_module),
             )?)
             .then(self.web_module.handle_message(&topper_msg, ())?)
             .then(self.battle_module.handle_message(
                 &topper_msg,
                 (
                     &mut self.firstaid_module,
-                    &me,
                     &self.core_module.target,
                     &self.timeline_module.timeline,
                     &database_module,
@@ -302,7 +296,6 @@ impl TopperHandler<BattleStats> for AetTopper {
             .then(self.prediction_module.handle_message(
                 &topper_msg,
                 (
-                    &self.me(),
                     &self.core_module.target,
                     &self.timeline_module.timeline,
                     &database_module,

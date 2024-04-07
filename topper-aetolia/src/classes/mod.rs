@@ -1,5 +1,8 @@
 use crate::bt::BehaviorController;
-use crate::curatives::{FirstAidSetting, SafetyAlert, MENTAL_AFFLICTIONS, RANDOM_CURES};
+use crate::curatives::{
+    get_firstaid_settings_for_class, get_firstaid_settings_no_class, FirstAidSetting, SafetyAlert,
+    MENTAL_AFFLICTIONS, RANDOM_CURES,
+};
 use crate::db::AetDatabaseModule;
 use crate::non_agent::AetNonAgent;
 use crate::observables::*;
@@ -354,6 +357,22 @@ pub fn get_attack(
         }
     } else {
         infiltrator::get_attack(timeline, target, strategy, db, first_aid_settings)
+    }
+}
+
+pub fn get_firstaid_settings_for_target(
+    timeline: &AetTimeline,
+    me: &String,
+    target: &Option<String>,
+    db: Option<&impl AetDatabaseModule>,
+) -> Vec<FirstAidSetting> {
+    if let Some(class) = target
+        .as_ref()
+        .and_then(|target| db.and_then(|db| db.get_class(target)))
+    {
+        get_firstaid_settings_for_class(timeline, me, target, class)
+    } else {
+        get_firstaid_settings_no_class(timeline, me, target)
     }
 }
 

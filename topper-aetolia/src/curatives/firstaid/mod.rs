@@ -4,6 +4,8 @@ mod actions;
 pub use actions::*;
 mod config;
 pub use config::*;
+mod trees;
+pub use trees::*;
 
 #[cfg(test)]
 mod firstaid_tests {

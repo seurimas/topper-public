@@ -15,7 +15,11 @@ pub struct FirstAidModule {
 }
 
 impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for FirstAidModule {
-    type Siblings = (&'s mut AetTimeline, &'s AetMudletDatabaseModule, &'s String);
+    type Siblings = (
+        &'s mut AetTimeline,
+        &'s AetMudletDatabaseModule,
+        &'s Option<String>,
+    );
 
     fn handle_message(
         &mut self,
@@ -34,7 +38,9 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for FirstAidModule {
             TopperMessage::TimeSlice(slice) => {
                 self.apply_seen_settings(slice);
                 self.infer_predict_and_elevate_clears(siblings.0);
-                self.send_setting_updates()
+                Ok(self
+                    .send_battle_setting_updates()
+                    .then(self.send_target_class_setting_updates(siblings)))
             }
             _ => Ok(TopperResponse::silent()),
         }
@@ -61,7 +67,6 @@ impl FirstAidModule {
         if let Some((_name, priority_set)) = parse_priority_set(&slice.lines) {
             let settings = priority_set.to_settings();
             for setting in settings {
-                println!("FirstAidModule: {:?}", setting);
                 self.active.update(setting.clone());
                 let previous = self.in_flight.update(setting.clone());
                 if previous != setting {
@@ -96,9 +101,12 @@ impl FirstAidModule {
         }
     }
 
-    fn send_setting_updates(&mut self) -> Result<TopperResponse<BattleStats>, String> {
+    fn send_setting_updates(
+        &mut self,
+        mut settings: Vec<FirstAidSetting>,
+    ) -> TopperResponse<BattleStats> {
         let mut result = TopperResponse::silent();
-        for setting in self.battle_stats_fa_settings.drain(..) {
+        for setting in settings.drain(..) {
             let previous = self.in_flight.update(setting.clone());
             if previous != setting {
                 println!("FirstAidModule sending: {:?}", setting);
@@ -108,6 +116,24 @@ impl FirstAidModule {
                 ));
             }
         }
-        Ok(result)
+        result
+    }
+
+    fn send_battle_setting_updates(&mut self) -> TopperResponse<BattleStats> {
+        let settings = std::mem::replace(&mut self.battle_stats_fa_settings, Vec::new());
+        self.send_setting_updates(settings)
+    }
+
+    fn send_target_class_setting_updates<'s>(
+        &mut self,
+        (timeline, db, target): (
+            &'s mut AetTimeline,
+            &'s AetMudletDatabaseModule,
+            &'s Option<String>,
+        ),
+    ) -> TopperResponse<BattleStats> {
+        let me = timeline.who_am_i();
+        let mut settings = get_firstaid_settings_for_target(timeline, &me, target, Some(db));
+        self.send_setting_updates(settings)
     }
 }

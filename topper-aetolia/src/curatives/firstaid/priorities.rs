@@ -9,101 +9,112 @@ use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::hash::Hash;
+use std::iter::FromIterator;
 use std::ops::{Deref, DerefMut};
 use topper_core::observations::strip_ansi;
 use topper_core::timeline::BaseAgentState;
 
 static FIRST_AID_BLOCK: &'static str = "\x1b[48;5;232mYour affliction curing priorities:
-1)  pipe:     [aeon]
-    poultice: [anorexia, indifference, destroyed_throat]
-    pill:     [paralysis, crippled_body, paresis]
-    special:  [asleep, voyria, writhe_gunk, writhe_grappled, writhe_stasis,
-               writhe_web, writhe_vines, writhe_bind, writhe_transfix,
-               writhe_ropes, writhe_impaled, writhe_thighlock,
-               writhe_armpitlock, writhe_necklock, dazed, writhe_hoist,
-               writhe_lure, itchy]
+1)
+2)  poultice: [anorexia, gorged, destroyed_throat]
+    pill:     [paralysis]
+    special:  [asleep, fear, itchy]
 
-2)  pipe:     [slickness, hellsight]
-    poultice: [head_mangled, crushed_chest, burnt_skin, head_bruised_critical]
-    pill:     [asthma, limp_veins, ringing_ears]
-    special:  [disrupted]
+3)  poultice: [head_mangled, crushed_chest, burnt_skin]
+    pill:     [asthma]
+    special:  [voyria, writhe_impaled, ice_encased]
 
-3)  pipe:     [withering]
-    poultice: [left_arm_amputated, right_arm_amputated, left_leg_amputated,
-               right_leg_amputated, left_leg_damaged, right_leg_damaged,
-               right_leg_mangled, left_leg_mangled, right_arm_mangled,
-               left_arm_mangled, left_leg_bruised_critical,
-               right_leg_bruised_critical, right_arm_bruised_critical,
-               left_arm_bruised_critical, torso_bruised_critical, voidgaze]
-    pill:     [slough, clumsiness, thin_blood]
-    special:  [vinethorns]
+4)  pipe:     [aeon]
+    poultice: [left_leg_bruised_critical, right_leg_bruised_critical,
+               right_arm_bruised_critical, left_arm_bruised_critical,
+               torso_bruised_critical, head_bruised_critical]
+    pill:     [physical_disruption, mental_disruption, paresis, rot_body]
+    special:  [writhe_thighlock, writhe_armpitlock, writhe_necklock,
+               writhe_hoist, writhe_lure]
 
-4)  pipe:     [disfigurement, migraine]
-    poultice: [left_leg_crippled, right_leg_crippled, firstaid_predict_arms,
-               firstaid_predict_legs, firstaid_predict_any_limb]
-    pill:     [impatience, recklessness, baldness, hypochondria, weariness,
-               pacifism, mirroring, infested, patterns]
+5)  pipe:     [slickness]
+    poultice: [hypothermia, cracked_ribs, gloom, voidgaze]
+    pill:     [slough, blood_curse, blood_poison, thin_blood, mirroring]
+    special:  [writhe_gunk, writhe_grappled, writhe_web, writhe_vines,
+               writhe_bind, writhe_transfix, writhe_ropes, writhe_dartpinned]
 
-5)  pipe:     [deadening]
-    poultice: [spinal_rip, head_damaged, torso_damaged, left_arm_damaged,
-               right_arm_damaged, torso_mangled, left_arm_bruised,
-               right_arm_bruised, right_leg_bruised, left_leg_bruised,
-               head_bruised, torso_bruised, left_leg_bruised_moderate,
-               right_leg_bruised_moderate, right_arm_bruised_moderate,
-               left_arm_bruised_moderate, torso_bruised_moderate,
-               head_bruised_moderate, gloom]
-    pill:     [physical_disruption, mental_disruption, confusion, blood_curse,
-               blood_poison, plodding, idiocy, blighted, merciful, accursed,
-               agony]
+6)  pipe:     [besilence]
+    poultice: [left_leg_amputated, right_leg_amputated, left_leg_broken,
+               right_leg_broken, right_leg_mangled, left_leg_mangled]
+    pill:     [stupidity, impatience, stormtouched, patterns]
+    special:  [writhe_stasis]
 
-6)  pipe:     [squelched]
-    poultice: [shivering, frozen, gorged, effused_blood, blurry_vision,
-               smashed_throat, right_arm_crippled, left_arm_crippled, cracked_ribs,
-               whiplash, backstrain, collapsed_lung, left_arm_dislocated,
-               left_leg_dislocated, right_arm_dislocated, right_leg_dislocated,
-               sore_wrist, sore_ankle, muscle_spasms, heatspear]
-    pill:     [sensitivity, rend, epilepsy, masochism, loneliness, haemophilia,
-               lethargy, vomiting, impairment, crippled, allergies,
-               rot_body, rot_benign, rot_spirit, rot_heat,
+7)  pipe:     [hellsight, withering]
+    poultice: [left_arm_amputated, right_arm_amputated, left_arm_broken,
+               right_arm_broken, right_arm_mangled, left_arm_mangled]
+    pill:     [sensitivity, recklessness, nyctophobia, accursed, agony]
+
+8)  pipe:     [migraine]
+    poultice: [shivering, frozen, mauled_face, frigid]
+    pill:     [heartflutter, confusion, epilepsy, dissonance, lethargy,
                rot_wither]
 
-7)  poultice: [ablaze, hypothermia, stuttering, crippled_throat, mauled_face,
-               deepwound, stiffness, weak_grip]
-    pill:     [stupidity, heartflutter, hallucinations, hypersomnia, hatred,
-               peace, berserking, justice, lovers_effect, laxity, egocentric,
-               exhausted]
-    special:  [premonition]
+9)  pipe:     [disfigurement, squelched]
+    poultice: [ablaze, firstaid_predict_any_limb]
+    pill:     [clumsiness, weariness, berserking, laxity, faintness, hollow,
+               perplexed]
+    special:  [disrupted, dazed]
 
-8)  poultice: [burnt_eyes, lightwound]
-    pill:     [dementia, paranoia, dizziness, shyness, dissonance, agoraphobia,
-               vertigo, claustrophobia, faintness]
-    special:  [fear]
+10) pipe:     [deadening]
+    poultice: [left_leg_crippled, right_leg_crippled, firstaid_predict_legs]
+    pill:     [limp_veins, masochism, haemophilia, vomiting, allergies,
+               ringing_ears]
+    special:  [vinethorns, dread]
 
-9)  pill:     [sadness, addiction, self-pity, commitment_fear, hubris,
-               body_odor, magnanimity]
-
-10) poultice: [pre-restore right arm (20%), pre-restore right leg (20%)]
-    pill:     [generosity, superstition, blisters]
+11) poultice: [right_arm_crippled, left_arm_crippled, firstaid_predict_arms]
+    pill:     [dizziness, crippled, crippled_body, merciful]
     special:  [oiled]
 
-11) poultice: [void, weakvoid]
+12) poultice: [head_broken, collapsed_lung]
+    pill:     [dementia, paranoia, hallucinations, addiction, impairment]
 
-12) poultice: [pre-restore head (15%), pre-restore left leg (15%)]
+13) poultice: [left_leg_dislocated, right_leg_dislocated]
+    pill:     [hypochondria, agoraphobia, loneliness, vertigo, claustrophobia,
+               justice, blisters, self_loathing]
 
-13)
-14)
-15) poultice: [pre-restore left arm (20%)]
+14) poultice: [left_arm_dislocated, right_arm_dislocated]
+    pill:     [hatred, rend, blighted, infested, egocentric, magnanimity,
+               exhausted, rot_heat, narcolepsy]
 
-16)
-17)
-18)
-19)
-20)
-21)
-22)
-23)
-24)
-25) poultice: [pre-restore torso (5%)]
+15) poultice: [spinal_rip, torso_broken, torso_mangled, deepwound, heatspear]
+    pill:     [hypersomnia, shyness, pacifism, peace, generosity,
+               lovers_effect, superstition, misery]
+
+16) poultice: [left_leg_bruised_moderate, right_leg_bruised_moderate,
+               right_arm_bruised_moderate, left_arm_bruised_moderate,
+               torso_bruised_moderate, head_bruised_moderate]
+    pill:     [rot_benign, rot_spirit]
+
+17) poultice: [left_arm_bruised, right_arm_bruised, right_leg_bruised,
+               left_leg_bruised, head_bruised, torso_bruised]
+    pill:     [sadness, self-pity, baldness, commitment_fear, hubris,
+               body_odor, worrywart]
+
+18) poultice: [indifference, blurry_vision, smashed_throat]
+    pill:     [plodding, idiocy]
+
+19) poultice: [whiplash, backstrain, sore_wrist, sore_ankle, muscle_spasms,
+               stiffness, weak_grip]
+
+20) poultice: [stuttering, crippled_throat, burnt_eyes, lightwound]
+
+21) poultice: [void, weakvoid]
+
+22) poultice: [pre_restore_left_leg, pre_restore_right_leg,
+               pre-restore torso (22%), pre-restore head (22%)]
+
+23) poultice: [pre_restore_head, pre_restore_left_arm, pre_restore_right_arm,
+               pre-restore left leg (21%), pre-restore right leg (21%)]
+
+24) poultice: [pre_restore_torso, pre-restore right arm (21%),
+               pre-restore left arm (21%)]
+
+25) poultice: [effused_blood]
 
 26)";
 
@@ -116,6 +127,213 @@ lazy_static! {
     static ref PRIORITY_TYPE_LINE: Regex =
         Regex::new(r"^\s+(pipe|poultice|pill|special):\s+\[([a-z_, ]+)\]?$").unwrap();
     static ref PRIORITY_CONTINUITY_LINE: Regex = Regex::new(r"^\s+([a-z_, ]+)\]?$").unwrap();
+    static ref DEFAULT_PRIORITIES: HashMap<FType, u32> = HashMap::from_iter(vec![
+        (FType::Anorexia, 2),
+        (FType::Gorged, 2),
+        (FType::DestroyedThroat, 2),
+        (FType::Paralysis, 2),
+        (FType::Asleep, 2),
+        (FType::Fear, 2),
+        (FType::Itchy, 2),
+        (FType::HeadMangled, 3),
+        (FType::CrushedChest, 3),
+        (FType::BurntSkin, 3),
+        (FType::Asthma, 3),
+        (FType::Voyria, 3),
+        (FType::WritheImpaled, 3),
+        (FType::IceEncased, 3),
+        (FType::Aeon, 4),
+        (FType::LeftLegBruisedCritical, 4),
+        (FType::RightLegBruisedCritical, 4),
+        (FType::RightArmBruisedCritical, 4),
+        (FType::LeftArmBruisedCritical, 4),
+        (FType::TorsoBruisedCritical, 4),
+        (FType::HeadBruisedCritical, 4),
+        (FType::PhysicalDisruption, 4),
+        (FType::MentalDisruption, 4),
+        (FType::Paresis, 4),
+        (FType::RotBody, 4),
+        (FType::WritheThighlock, 4),
+        (FType::WritheArmpitlock, 4),
+        (FType::WritheNecklock, 4),
+        (FType::WritheHoist, 4),
+        (FType::WritheLure, 4),
+        (FType::Slickness, 5),
+        (FType::Hypothermia, 5),
+        (FType::CrackedRibs, 5),
+        (FType::Gloom, 5),
+        (FType::Voidgaze, 5),
+        (FType::Slough, 5),
+        (FType::BloodCurse, 5),
+        (FType::BloodPoison, 5),
+        (FType::ThinBlood, 5),
+        (FType::Mirroring, 5),
+        (FType::WritheGunk, 5),
+        (FType::WritheGrappled, 5),
+        (FType::WritheWeb, 5),
+        (FType::WritheVines, 5),
+        (FType::WritheBind, 5),
+        (FType::WritheTransfix, 5),
+        (FType::WritheRopes, 5),
+        (FType::WritheDartpinned, 5),
+        (FType::Besilence, 6),
+        (FType::LeftLegAmputated, 6),
+        (FType::RightLegAmputated, 6),
+        (FType::LeftLegBroken, 6),
+        (FType::RightLegBroken, 6),
+        (FType::RightLegMangled, 6),
+        (FType::LeftLegMangled, 6),
+        (FType::Stupidity, 6),
+        (FType::Impatience, 6),
+        (FType::Stormtouched, 6),
+        (FType::Patterns, 6),
+        (FType::WritheStasis, 6),
+        (FType::Hellsight, 7),
+        (FType::Withering, 7),
+        (FType::LeftArmAmputated, 7),
+        (FType::RightArmAmputated, 7),
+        (FType::LeftArmBroken, 7),
+        (FType::RightArmBroken, 7),
+        (FType::RightArmMangled, 7),
+        (FType::LeftArmMangled, 7),
+        (FType::Sensitivity, 7),
+        (FType::Recklessness, 7),
+        (FType::Nyctophobia, 7),
+        (FType::Accursed, 7),
+        (FType::Agony, 7),
+        (FType::Migraine, 8),
+        (FType::Shivering, 8),
+        (FType::Frozen, 8),
+        (FType::MauledFace, 8),
+        (FType::Frigid, 8),
+        (FType::Heartflutter, 8),
+        (FType::Confusion, 8),
+        (FType::Epilepsy, 8),
+        (FType::Dissonance, 8),
+        (FType::Lethargy, 8),
+        (FType::RotWither, 8),
+        (FType::Disfigurement, 9),
+        (FType::Squelched, 9),
+        (FType::Ablaze, 9),
+        //(FType::FirstaidPredictAnyLimb, 9),
+        (FType::Clumsiness, 9),
+        (FType::Weariness, 9),
+        (FType::Berserking, 9),
+        (FType::Laxity, 9),
+        (FType::Faintness, 9),
+        (FType::Hollow, 9),
+        (FType::Perplexed, 9),
+        (FType::Disrupted, 9),
+        // (FType::Dazed, 9),
+        (FType::Deadening, 10),
+        (FType::LeftLegCrippled, 10),
+        (FType::RightLegCrippled, 10),
+        //(FType::FirstaidPredictLegs, 10),
+        (FType::LimpVeins, 10),
+        (FType::Masochism, 10),
+        (FType::Haemophilia, 10),
+        (FType::Vomiting, 10),
+        (FType::Allergies, 10),
+        (FType::RingingEars, 10),
+        // (FType::Vinethorns, 10),
+        // (FType::Dread, 10),
+        (FType::RightArmCrippled, 11),
+        (FType::LeftArmCrippled, 11),
+        //(FType::FirstaidPredictArms, 11),
+        (FType::Dizziness, 11),
+        (FType::Crippled, 11),
+        (FType::CrippledBody, 11),
+        (FType::Merciful, 11),
+        // (FType::Oiled, 11),
+        (FType::HeadBroken, 12),
+        (FType::CollapsedLung, 12),
+        (FType::Dementia, 12),
+        (FType::Paranoia, 12),
+        (FType::Hallucinations, 12),
+        (FType::Addiction, 12),
+        (FType::Impairment, 12),
+        (FType::LeftLegDislocated, 13),
+        (FType::RightLegDislocated, 13),
+        (FType::Hypochondria, 13),
+        (FType::Agoraphobia, 13),
+        (FType::Loneliness, 13),
+        (FType::Vertigo, 13),
+        (FType::Claustrophobia, 13),
+        (FType::Justice, 13),
+        (FType::Blisters, 13),
+        (FType::SelfLoathing, 13),
+        (FType::LeftArmDislocated, 14),
+        (FType::RightArmDislocated, 14),
+        (FType::Hatred, 14),
+        (FType::Rend, 14),
+        (FType::Blighted, 14),
+        (FType::Infested, 14),
+        (FType::Egocentric, 14),
+        (FType::Magnanimity, 14),
+        (FType::Exhausted, 14),
+        (FType::RotHeat, 14),
+        (FType::Narcolepsy, 14),
+        (FType::SpinalRip, 15),
+        (FType::TorsoBroken, 15),
+        (FType::TorsoMangled, 15),
+        (FType::Deepwound, 15),
+        (FType::Heatspear, 15),
+        (FType::Hypersomnia, 15),
+        (FType::Shyness, 15),
+        (FType::Pacifism, 15),
+        (FType::Peace, 15),
+        (FType::Generosity, 15),
+        (FType::LoversEffect, 15),
+        (FType::Superstition, 15),
+        (FType::Misery, 15),
+        (FType::LeftLegBruisedModerate, 16),
+        (FType::RightLegBruisedModerate, 16),
+        (FType::RightArmBruisedModerate, 16),
+        (FType::LeftArmBruisedModerate, 16),
+        (FType::TorsoBruisedModerate, 16),
+        (FType::HeadBruisedModerate, 16),
+        (FType::RotBenign, 16),
+        (FType::RotSpirit, 16),
+        (FType::LeftArmBruised, 17),
+        (FType::RightArmBruised, 17),
+        (FType::RightLegBruised, 17),
+        (FType::LeftLegBruised, 17),
+        (FType::HeadBruised, 17),
+        (FType::TorsoBruised, 17),
+        (FType::Sadness, 17),
+        (FType::SelfPity, 17),
+        (FType::Baldness, 17),
+        (FType::CommitmentFear, 17),
+        (FType::Hubris, 17),
+        (FType::BodyOdor, 17),
+        (FType::Worrywart, 17),
+        (FType::Indifference, 18),
+        (FType::BlurryVision, 18),
+        (FType::SmashedThroat, 18),
+        (FType::Plodding, 18),
+        (FType::Idiocy, 18),
+        (FType::Whiplash, 19),
+        (FType::Backstrain, 19),
+        (FType::SoreWrist, 19),
+        (FType::SoreAnkle, 19),
+        (FType::MuscleSpasms, 19),
+        (FType::Stiffness, 19),
+        (FType::WeakGrip, 19),
+        (FType::Stuttering, 20),
+        (FType::CrippledThroat, 20),
+        (FType::BurntEyes, 20),
+        (FType::Lightwound, 20),
+        (FType::Void, 21),
+        (FType::Weakvoid, 21),
+        // (FType::PreRestoreLeftLeg, 22),
+        // (FType::PreRestoreRightLeg, 22),
+        // (FType::PreRestoreHead, 23),
+        // (FType::PreRestoreLeftArm, 23),
+        // (FType::PreRestoreRightArm, 23),
+        // (FType::PreRestoreTorso, 24),
+        (FType::EffusedBlood, 25),
+        (FType::Dead, 26),
+    ]);
 }
 
 fn add_priorities(priorities: &mut FirstAidPriorities, priority: u32, aff_list: &str) {
@@ -251,6 +469,117 @@ impl FirstAidPriorities {
 
     pub fn insert(&mut self, aff: FType, priority: u32) -> Option<u32> {
         self.0.insert(aff, priority)
+    }
+
+    /**
+         * Your affliction curing priorities:
+    1)
+    2)  poultice: [anorexia, gorged, destroyed_throat]
+        pill:     [paralysis]
+        special:  [asleep, fear, itchy]
+
+    3)  poultice: [head_mangled, crushed_chest, burnt_skin]
+        pill:     [asthma]
+        special:  [voyria, writhe_impaled, ice_encased]
+
+    4)  pipe:     [aeon]
+        poultice: [left_leg_bruised_critical, right_leg_bruised_critical,
+                   right_arm_bruised_critical, left_arm_bruised_critical,
+                   torso_bruised_critical, head_bruised_critical]
+        pill:     [physical_disruption, mental_disruption, paresis, rot_body]
+        special:  [writhe_thighlock, writhe_armpitlock, writhe_necklock,
+                   writhe_hoist, writhe_lure]
+
+    5)  pipe:     [slickness]
+        poultice: [hypothermia, cracked_ribs, gloom, voidgaze]
+        pill:     [slough, blood_curse, blood_poison, thin_blood, mirroring]
+        special:  [writhe_gunk, writhe_grappled, writhe_web, writhe_vines,
+                   writhe_bind, writhe_transfix, writhe_ropes, writhe_dartpinned]
+
+    6)  pipe:     [besilence]
+        poultice: [left_leg_amputated, right_leg_amputated, left_leg_broken,
+                   right_leg_broken, right_leg_mangled, left_leg_mangled]
+        pill:     [stupidity, impatience, stormtouched, patterns]
+        special:  [writhe_stasis]
+
+    7)  pipe:     [hellsight, withering]
+        poultice: [left_arm_amputated, right_arm_amputated, left_arm_broken,
+                   right_arm_broken, right_arm_mangled, left_arm_mangled]
+        pill:     [sensitivity, recklessness, nyctophobia, accursed, agony]
+
+    8)  pipe:     [migraine]
+        poultice: [shivering, frozen, mauled_face, frigid]
+        pill:     [heartflutter, confusion, epilepsy, dissonance, lethargy,
+                   rot_wither]
+
+    9)  pipe:     [disfigurement, squelched]
+        poultice: [ablaze, firstaid_predict_any_limb]
+        pill:     [clumsiness, weariness, berserking, laxity, faintness, hollow,
+                   perplexed]
+        special:  [disrupted, dazed]
+
+    10) pipe:     [deadening]
+        poultice: [left_leg_crippled, right_leg_crippled, firstaid_predict_legs]
+        pill:     [limp_veins, masochism, haemophilia, vomiting, allergies,
+                   ringing_ears]
+        special:  [vinethorns, dread]
+
+    11) poultice: [right_arm_crippled, left_arm_crippled, firstaid_predict_arms]
+        pill:     [dizziness, crippled, crippled_body, merciful]
+        special:  [oiled]
+
+    12) poultice: [head_broken, collapsed_lung]
+        pill:     [dementia, paranoia, hallucinations, addiction, impairment]
+
+    13) poultice: [left_leg_dislocated, right_leg_dislocated]
+        pill:     [hypochondria, agoraphobia, loneliness, vertigo, claustrophobia,
+                   justice, blisters, self_loathing]
+
+    14) poultice: [left_arm_dislocated, right_arm_dislocated]
+        pill:     [hatred, rend, blighted, infested, egocentric, magnanimity,
+                   exhausted, rot_heat, narcolepsy]
+
+    15) poultice: [spinal_rip, torso_broken, torso_mangled, deepwound, heatspear]
+        pill:     [hypersomnia, shyness, pacifism, peace, generosity,
+                   lovers_effect, superstition, misery]
+
+    16) poultice: [left_leg_bruised_moderate, right_leg_bruised_moderate,
+                   right_arm_bruised_moderate, left_arm_bruised_moderate,
+                   torso_bruised_moderate, head_bruised_moderate]
+        pill:     [rot_benign, rot_spirit]
+
+    17) poultice: [left_arm_bruised, right_arm_bruised, right_leg_bruised,
+                   left_leg_bruised, head_bruised, torso_bruised]
+        pill:     [sadness, self-pity, baldness, commitment_fear, hubris,
+                   body_odor, worrywart]
+
+    18) poultice: [indifference, blurry_vision, smashed_throat]
+        pill:     [plodding, idiocy]
+
+    19) poultice: [whiplash, backstrain, sore_wrist, sore_ankle, muscle_spasms,
+                   stiffness, weak_grip]
+
+    20) poultice: [stuttering, crippled_throat, burnt_eyes, lightwound]
+
+    21) poultice: [void, weakvoid]
+
+    22) poultice: [pre_restore_left_leg, pre_restore_right_leg]
+
+    23) poultice: [pre_restore_head, pre_restore_left_arm, pre_restore_right_arm]
+
+    24) poultice: [pre_restore_torso]
+
+    25) poultice: [effused_blood]
+
+    26)
+         */
+    pub fn reset(&mut self) -> Option<(FType, u32)> {
+        for (aff, priority) in std::mem::replace(&mut self.0, DEFAULT_PRIORITIES.clone()) {
+            if priority != DEFAULT_PRIORITIES.get(&aff).cloned().unwrap_or(priority) {
+                return Some((aff, priority));
+            }
+        }
+        None
     }
 
     pub fn to_settings(&self) -> Vec<FirstAidSetting> {

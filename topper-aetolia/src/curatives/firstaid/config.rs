@@ -54,7 +54,8 @@ lazy_static! {
 }
 
 lazy_static! {
-    static ref SET_SIMPLE_PRIORITY: Regex = Regex::new(r"You have set the '(\w+)' priority to the (\d+) priority.").unwrap();
+    static ref SET_SIMPLE_PRIORITY: Regex = Regex::new(r"You have set the '(\w+)' (?:affliction|defence) to the (\d+) priority.").unwrap();
+    static ref SET_RESET_PRIORITIES: Regex = Regex::new(r"All your curing affliction priorities have been reset to defaults.").unwrap();
     static ref SET_HEAL_HEALTH: Regex =
         Regex::new(r"You will now heal your health when it drops below (\d+)%.").unwrap();
     static ref SET_HEAL_MANA: Regex =
@@ -155,6 +156,7 @@ pub struct FirstAidConfig {
 #[derive(Debug, PartialEq, Eq, Hash, Serialize, Deserialize, Clone, Copy)]
 pub enum FirstAidSetting {
     SimplePriority(FType, u32),
+    ResetPriorities,
     Predict(FType),
     UnPredict(FType),
     Elevate(FType),
@@ -190,6 +192,13 @@ impl FirstAidConfig {
                     FirstAidSetting::SimplePriority(ft, previous)
                 } else {
                     FirstAidSetting::SimplePriority(ft, 26)
+                }
+            }
+            FirstAidSetting::ResetPriorities => {
+                if let Some((aff, priority)) = self.simple_priorities.reset() {
+                    FirstAidSetting::SimplePriority(aff, priority)
+                } else {
+                    FirstAidSetting::ResetPriorities
                 }
             }
             FirstAidSetting::Predict(ft) => {
@@ -317,8 +326,13 @@ impl FirstAidSetting {
     pub fn get_command(&self) -> String {
         match self {
             FirstAidSetting::SimplePriority(ft, prio) => {
-                format!("firstaid priority {} {}", ft, prio)
+                if ft.is_affliction() {
+                    format!("firstaid priority {} {}", ft, prio)
+                } else {
+                    format!("firstaid priority defense {} {}", ft, prio)
+                }
             }
+            FirstAidSetting::ResetPriorities => "firstaid priority reset".to_string(),
             FirstAidSetting::Predict(ft) => {
                 format!("firstaid predict {}", ft)
             }
@@ -473,6 +487,7 @@ impl FirstAidSetting {
 
     pub fn setting_changed_in_line(line: &str) -> bool {
         SET_SIMPLE_PRIORITY.is_match(line)
+            || SET_RESET_PRIORITIES.is_match(line)
             || SET_HEAL_HEALTH.is_match(line)
             || SET_HEAL_MANA.is_match(line)
             || SET_FORCE_HEALTH.is_match(line)
@@ -502,6 +517,9 @@ impl FirstAidSetting {
                 caps[2].parse().unwrap(),
             )];
         }
+        if SET_RESET_PRIORITIES.is_match(line) {
+            return vec![FirstAidSetting::ResetPriorities];
+        }
         if let Some(caps) = SET_HEAL_HEALTH.captures(line) {
             return vec![FirstAidSetting::HealthPercent(caps[1].parse().unwrap())];
         }
@@ -516,8 +534,8 @@ impl FirstAidSetting {
         if let Some(caps) = SET_FORCE_MANA.captures(line) {
             return vec![FirstAidSetting::ForceManaPercent(caps[1].parse().unwrap())];
         }
-        if SET_VITALS_PRIORITY.is_match(line) {
-            return vec![FirstAidSetting::VitalsPriority(match line {
+        if let Some(caps) = SET_VITALS_PRIORITY.captures(line) {
+            return vec![FirstAidSetting::VitalsPriority(match &caps[0] {
                 "First Aid will now priortize healing health over mana if both are low." => {
                     VitalsPriority::Hp
                 }
@@ -558,8 +576,8 @@ impl FirstAidSetting {
                 line.contains("now attempt to"),
             )];
         }
-        if SET_USE_CLOTTING.is_match(line) {
-            return vec![FirstAidSetting::UseClotting(match line {
+        if let Some(caps) = SET_USE_CLOTTING.captures(line) {
+            return vec![FirstAidSetting::UseClotting(match &caps[0] {
                 "First Aid will no longer attempt to clot your bleeding damage." => ClottingType::Off,
                 "First Aid will clot your bleeding damage only if you do not have haemophilia and alike afflictions." => ClottingType::Safe,
                 _ => ClottingType::On,

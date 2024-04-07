@@ -44,7 +44,8 @@ lazy_static! {
 pub enum AetBehaviorTreeNode {
     Action(AetBehavior),
     Predicate(AetPredicate),
-    AddFirstAidSetting(FirstAidSetting),
+    AddFirstAidSettings(Vec<FirstAidSetting>),
+    ResetFirstAidPriorities,
     SubTree(String),
 }
 
@@ -237,8 +238,14 @@ impl UnpoweredFunction for AetBehaviorTreeNode {
         let result = match self {
             Self::Action(action) => action.resume_with(model, controller),
             Self::Predicate(predicate) => predicate.resume_with(model, controller),
-            Self::AddFirstAidSetting(setting) => {
-                controller.first_aid_settings.push(setting.clone());
+            Self::AddFirstAidSettings(settings) => {
+                controller.first_aid_settings.extend(settings.iter());
+                UnpoweredFunctionState::Complete
+            }
+            Self::ResetFirstAidPriorities => {
+                controller
+                    .first_aid_settings
+                    .push(FirstAidSetting::ResetPriorities);
                 UnpoweredFunctionState::Complete
             }
             Self::SubTree(sub_tree) => get_tree(sub_tree)
@@ -258,7 +265,7 @@ impl UnpoweredFunction for AetBehaviorTreeNode {
         match self {
             Self::Action(action) => action.reset(model),
             Self::Predicate(predicate) => predicate.reset(model),
-            Self::AddFirstAidSetting(_) => {}
+            Self::AddFirstAidSettings(_) | Self::ResetFirstAidPriorities => {}
             Self::SubTree(sub_tree) => get_tree(sub_tree).lock().unwrap().reset(model),
         }
     }

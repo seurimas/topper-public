@@ -175,11 +175,11 @@ impl GroupData for Vec<(&String, &Aggro)> {
 }
 
 impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for GroupModule {
-    type Siblings = (&'s String, &'s mut AetTimeline, &'s AetMudletDatabaseModule);
+    type Siblings = (&'s mut AetTimeline, &'s AetMudletDatabaseModule);
     fn handle_message(
         &mut self,
         message: &TopperMessage<AetTimeSlice>,
-        (me, mut timeline, db): Self::Siblings,
+        (mut timeline, db): Self::Siblings,
     ) -> Result<TopperResponse<BattleStats>, String> {
         let mut calls = None;
         match message {
