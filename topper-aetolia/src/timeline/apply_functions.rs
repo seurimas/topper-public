@@ -818,7 +818,6 @@ pub fn apply_or_infer_relapse(
         RelapseResult::Uncertain(len, venoms, expired) => {
             let possibilities = topper_core::combinatorics::combinations(venoms.as_slice(), len);
             if possibilities.len() > 0 {
-                println!("Branching {} more times...", possibilities.len() - 1);
             } else {
                 println!("Pruning branch for no possible relapses.");
             }
@@ -963,7 +962,6 @@ pub fn apply_or_infer_random_afflictions(
     } else if let Some((len, affs)) = possible_affs {
         let possibilities = topper_core::combinatorics::combinations(affs.as_slice(), len);
         if possibilities.len() > 0 {
-            println!("Branching {} more times...", possibilities.len() - 1);
         } else {
             println!("No branching!");
             return None;

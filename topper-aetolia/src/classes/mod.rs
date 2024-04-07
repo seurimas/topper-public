@@ -1,5 +1,5 @@
 use crate::bt::BehaviorController;
-use crate::curatives::{SafetyAlert, MENTAL_AFFLICTIONS, RANDOM_CURES};
+use crate::curatives::{FirstAidSetting, SafetyAlert, MENTAL_AFFLICTIONS, RANDOM_CURES};
 use crate::db::AetDatabaseModule;
 use crate::non_agent::AetNonAgent;
 use crate::observables::*;
@@ -13,6 +13,7 @@ pub mod archivist;
 pub mod ascendril;
 pub mod bard;
 pub mod carnifex;
+pub mod enchants;
 pub mod group;
 pub mod indorani;
 pub mod infiltrator;
@@ -335,19 +336,24 @@ pub fn get_attack(
     target: &String,
     strategy: &String,
     db: Option<&impl AetDatabaseModule>,
+    first_aid_settings: &mut Vec<FirstAidSetting>,
 ) -> String {
     if let Some(class) = db.and_then(|db| db.get_class(me)) {
         match class {
             Class::Sentinel => sentinel::get_attack(timeline, target, strategy, db),
-            Class::Infiltrator => infiltrator::get_attack(timeline, target, strategy, db),
-            Class::Bard => bard::get_attack(timeline, target, strategy, db),
+            Class::Infiltrator => {
+                infiltrator::get_attack(timeline, target, strategy, db, first_aid_settings)
+            }
+            Class::Bard => bard::get_attack(timeline, target, strategy, db, first_aid_settings),
             Class::Zealot => zealot::get_attack(timeline, target, strategy, db),
-            Class::Predator => predator::get_attack(timeline, target, strategy, db),
-            Class::Monk => monk::get_attack(timeline, target, strategy, db),
-            _ => infiltrator::get_attack(timeline, target, strategy, db),
+            Class::Predator => {
+                predator::get_attack(timeline, target, strategy, db, first_aid_settings)
+            }
+            Class::Monk => monk::get_attack(timeline, target, strategy, db, first_aid_settings),
+            _ => infiltrator::get_attack(timeline, target, strategy, db, first_aid_settings),
         }
     } else {
-        infiltrator::get_attack(timeline, target, strategy, db)
+        infiltrator::get_attack(timeline, target, strategy, db, first_aid_settings)
     }
 }
 
@@ -483,7 +489,7 @@ pub fn handle_combat_action(
                         agent_states,
                         &combat_action.caster,
                         &move |me: &mut AgentState| {
-                            apply_or_infer_balance(me, (BType::Equil, 4.0), &observations);
+                            apply_or_infer_balance(me, (BType::Equil, 3.6), &observations);
                         },
                     );
                 }
@@ -536,6 +542,35 @@ pub fn handle_combat_action(
                 );
                 Ok(())
             }
+            "Pestilence" => {
+                let observations = after.clone();
+                let perspective = agent_states.get_perspective(&combat_action);
+                for_agent_uncertain_closure(
+                    agent_states,
+                    &combat_action.target,
+                    Box::new(move |you| {
+                        apply_or_infer_random_afflictions(
+                            you,
+                            &observations,
+                            perspective,
+                            Some((
+                                1,
+                                vec![
+                                    FType::Disfigurement,
+                                    FType::Stupidity,
+                                    FType::Shivering,
+                                    FType::Epilepsy,
+                                    FType::Paresis,
+                                    FType::Vertigo,
+                                    FType::Agoraphobia,
+                                    FType::Generosity,
+                                ],
+                            )),
+                        )
+                    }),
+                );
+                Ok(())
+            }
             _ => Ok(()),
         },
         "Relic" => match combat_action.skill.as_ref() {
@@ -559,6 +594,7 @@ pub fn handle_combat_action(
                     &combat_action.caster,
                     &move |me: &mut AgentState| {
                         apply_or_infer_cures(me, vec![FType::Asthma], &observations, first_person);
+                        apply_or_infer_balance(me, (BType::Balance, 2.75), &observations);
                         apply_or_infer_balance(me, (BType::Fitness, 20.0), &observations);
                     },
                 );
@@ -683,6 +719,9 @@ pub fn handle_combat_action(
 
 #[derive(Debug, Display, Serialize, Deserialize, PartialEq, Clone)]
 pub enum LockType {
+    // Pipe is empty, only need paresis or perplexed/slickness/anorexia
+    Pipelock,
+    BardPipelock,
     // Just asthma/slickness/anorexia
     Soft,
     // Asthma, slickness, anorexia, paralysis, and stupidity
@@ -696,6 +735,8 @@ pub enum LockType {
 impl LockType {
     pub fn affs(&self) -> Vec<FType> {
         match self {
+            LockType::Pipelock => vec![FType::Anorexia, FType::Slickness, FType::Paresis],
+            LockType::BardPipelock => vec![FType::Anorexia, FType::Slickness],
             LockType::Soft => vec![FType::Anorexia, FType::Slickness, FType::Asthma],
             LockType::Buffered => vec![
                 FType::Anorexia,
@@ -865,6 +906,7 @@ lazy_static! {
         val.insert(FType::ThinBlood, "scytherus");
         val.insert(FType::Peace, "ouabain");
         val.insert(FType::Stupidity, "aconite");
+        val.insert(FType::Asleep, "delphinium");
         val
     };
 }

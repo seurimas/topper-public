@@ -22,6 +22,7 @@ use crate::{
         },
         VenomPlan,
     },
+    curatives::FirstAidSetting,
     observables::ActionPlan,
     timeline::AetTimeline,
     types::{AgentState, FType, Hypnosis, KnifeStance, LType},
@@ -43,6 +44,7 @@ lazy_static! {
 pub enum AetBehaviorTreeNode {
     Action(AetBehavior),
     Predicate(AetPredicate),
+    AddFirstAidSetting(FirstAidSetting),
     SubTree(String),
 }
 
@@ -69,6 +71,7 @@ pub struct BehaviorController {
     pub target: Option<String>,
     pub allies: HashMap<String, i32>,
     pub class_controller: ClassController,
+    pub first_aid_settings: Vec<FirstAidSetting>,
 }
 
 #[derive(Default, Debug)]
@@ -234,6 +237,10 @@ impl UnpoweredFunction for AetBehaviorTreeNode {
         let result = match self {
             Self::Action(action) => action.resume_with(model, controller),
             Self::Predicate(predicate) => predicate.resume_with(model, controller),
+            Self::AddFirstAidSetting(setting) => {
+                controller.first_aid_settings.push(setting.clone());
+                UnpoweredFunctionState::Complete
+            }
             Self::SubTree(sub_tree) => get_tree(sub_tree)
                 .lock()
                 .unwrap()
@@ -251,6 +258,7 @@ impl UnpoweredFunction for AetBehaviorTreeNode {
         match self {
             Self::Action(action) => action.reset(model),
             Self::Predicate(predicate) => predicate.reset(model),
+            Self::AddFirstAidSetting(_) => {}
             Self::SubTree(sub_tree) => get_tree(sub_tree).lock().unwrap().reset(model),
         }
     }

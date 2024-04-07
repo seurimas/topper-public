@@ -1,6 +1,6 @@
 pub mod alerts;
 pub mod behavior;
-pub mod first_aid;
+pub mod firstaid;
 pub mod statics;
 
 use crate::timeline::*;
@@ -8,7 +8,7 @@ use crate::types::*;
 
 pub use alerts::*;
 pub use behavior::*;
-pub use first_aid::*;
+pub use firstaid::*;
 pub use statics::*;
 
 pub fn top_aff(who: &AgentState, afflictions: Vec<FType>) -> Option<FType> {

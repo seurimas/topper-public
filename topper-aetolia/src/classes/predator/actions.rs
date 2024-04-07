@@ -139,6 +139,8 @@ impl SeriesAttack {
                     LType::SIZE
                 })
             }
+            ComboAttack::JabLeft => ParamComboAttack::Jab(LType::LeftArmDamage),
+            ComboAttack::JabRight => ParamComboAttack::Jab(LType::RightArmDamage),
             ComboAttack::Lowhook => {
                 ParamComboAttack::Lowhook(if preferred_limbs.contains(&LType::LeftLegDamage) {
                     LType::LeftLegDamage
@@ -148,6 +150,8 @@ impl SeriesAttack {
                     LType::SIZE
                 })
             }
+            ComboAttack::LowhookLeft => ParamComboAttack::Lowhook(LType::LeftLegDamage),
+            ComboAttack::LowhookRight => ParamComboAttack::Lowhook(LType::RightLegDamage),
             ComboAttack::Feint => ParamComboAttack::Feint(valid_feints[0]),
             ComboAttack::Bleed => ParamComboAttack::Bleed,
             ComboAttack::Gouge => ParamComboAttack::Gouge,

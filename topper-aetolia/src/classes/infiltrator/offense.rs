@@ -941,8 +941,16 @@ impl ActionPlanner for InfiltratorActionPlanner {
         target: &String,
         strategy: &str,
         db: Option<&impl AetDatabaseModule>,
+        first_aid_settings: &mut Vec<FirstAidSetting>,
     ) -> ActionPlan {
-        get_action_plan(timeline, actor, target, &strategy.to_string(), db)
+        get_action_plan(
+            timeline,
+            actor,
+            target,
+            &strategy.to_string(),
+            db,
+            first_aid_settings,
+        )
     }
 }
 

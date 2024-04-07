@@ -7,6 +7,7 @@ use super::*;
 use crate::{
     bt::*,
     classes::{get_controller, get_stack, VenomPlan},
+    curatives::firstaid::{self, FirstAidSetting},
     db::*,
     defense::*,
     non_agent::AetNonAgent,
@@ -21,6 +22,7 @@ pub fn get_action_plan(
     target: &String,
     strategy: &String,
     db: Option<&impl AetDatabaseModule>,
+    first_aid_settings: &mut Vec<FirstAidSetting>,
 ) -> ActionPlan {
     let mut controller = get_controller("monk", me, target, timeline, strategy, db);
     controller.init_monk();
@@ -40,6 +42,7 @@ pub fn get_action_plan(
         }
         tree.resume_with(&timeline, &mut controller);
     }
+    first_aid_settings.extend(controller.first_aid_settings.drain(..));
     controller.plan
 }
 
@@ -48,8 +51,16 @@ pub fn get_attack(
     target: &String,
     strategy: &String,
     db: Option<&impl AetDatabaseModule>,
+    first_aid_settings: &mut Vec<FirstAidSetting>,
 ) -> String {
-    let action_plan = get_action_plan(&timeline, &timeline.who_am_i(), &target, &strategy, db);
+    let action_plan = get_action_plan(
+        &timeline,
+        &timeline.who_am_i(),
+        &target,
+        &strategy,
+        db,
+        first_aid_settings,
+    );
     action_plan.get_inputs(&timeline)
 }
 

@@ -20,7 +20,7 @@ pub mod basher;
 pub mod battle_stats;
 mod behavior_trees;
 pub mod db;
-pub mod first_aid;
+pub mod firstaid;
 pub mod group;
 pub mod prediction;
 pub mod stacks;
@@ -32,7 +32,7 @@ use crate::topper::stacks::initialize_load_stack_func;
 
 use self::battle_stats::BattleStats;
 use self::db::AetMudletDatabaseModule;
-use self::first_aid::FirstAidModule;
+use self::firstaid::FirstAidModule;
 use self::web_ui::WebModule;
 
 pub type AetTimelineModule = TimelineModule<AetObservation, AetPrompt, AgentState, AetNonAgent>;
@@ -83,6 +83,7 @@ pub struct BattleModule;
 
 impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for BattleModule {
     type Siblings = (
+        &'s mut FirstAidModule,
         &'s String,
         &'s Option<String>,
         &'s AetTimeline,
@@ -91,7 +92,7 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for BattleModule {
     fn handle_message(
         &mut self,
         message: &TopperMessage<AetTimeSlice>,
-        (me, target, timeline, db): Self::Siblings,
+        (firstaid, me, target, timeline, db): Self::Siblings,
     ) -> Result<TopperResponse<BattleStats>, String> {
         match message {
             TopperMessage::Request(request) => match request {
@@ -103,6 +104,7 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for BattleModule {
                             &target,
                             &strategy,
                             Some(db),
+                            firstaid.battle_stats_fa_settings_mut(),
                         )))
                     } else {
                         Ok(TopperResponse::error("No target.".into()))
@@ -248,6 +250,7 @@ impl TopperHandler<BattleStats> for AetTopper {
             .unwrap()
             .handle_message(&topper_msg, (self.timeline_module.timeline.who_am_i()))?;
         let mut database_module = self.database_module.read().unwrap();
+        let me = self.me().clone();
         Ok(self
             .core_module
             .handle_message(&topper_msg, ())?
@@ -260,13 +263,14 @@ impl TopperHandler<BattleStats> for AetTopper {
                 &topper_msg,
                 (
                     &mut self.timeline_module.timeline,
+                    &mut self.firstaid_module,
                     &self.core_module.target,
                     &database_module,
                 ),
             )?)
             .then(self.firstaid_module.handle_message(
                 &topper_msg,
-                (&mut self.timeline_module.timeline, &database_module),
+                (&mut self.timeline_module.timeline, &database_module, &me),
             )?)
             .then(self.group_module.handle_message(
                 &topper_msg,
@@ -288,7 +292,8 @@ impl TopperHandler<BattleStats> for AetTopper {
             .then(self.battle_module.handle_message(
                 &topper_msg,
                 (
-                    &self.me(),
+                    &mut self.firstaid_module,
+                    &me,
                     &self.core_module.target,
                     &self.timeline_module.timeline,
                     &database_module,

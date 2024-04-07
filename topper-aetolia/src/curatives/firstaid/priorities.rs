@@ -1,5 +1,6 @@
 use super::super::statics::*;
 use super::FirstAidAction;
+use super::FirstAidSetting;
 use crate::observables::*;
 use crate::timeline::*;
 use crate::types::*;
@@ -246,5 +247,16 @@ impl FirstAidPriorities {
         } else {
             None
         }
+    }
+
+    pub fn insert(&mut self, aff: FType, priority: u32) -> Option<u32> {
+        self.0.insert(aff, priority)
+    }
+
+    pub fn to_settings(&self) -> Vec<FirstAidSetting> {
+        self.0
+            .iter()
+            .map(|(ft, prio)| FirstAidSetting::SimplePriority(*ft, *prio))
+            .collect()
     }
 }

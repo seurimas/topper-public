@@ -12,12 +12,16 @@ pub enum ComboAttack {
     Pindown,
     Mindnumb,
     Jab,
+    JabLeft,
+    JabRight,
     Pinprick,
     Lateral,
     Vertical,
     Crescentcut,
     Spinslash,
     Lowhook,
+    LowhookLeft,
+    LowhookRight,
     Butterfly,
     Flashkick,
     Trip,
@@ -130,8 +134,12 @@ impl ComboAttack {
     pub fn parryable(&self) -> bool {
         match self {
             ComboAttack::Jab
+            | ComboAttack::JabLeft
+            | ComboAttack::JabRight
             | ComboAttack::Lateral
             | ComboAttack::Lowhook
+            | ComboAttack::LowhookLeft
+            | ComboAttack::LowhookRight
             | ComboAttack::Flashkick
             | ComboAttack::Veinrip
             | ComboAttack::Gouge => true,
@@ -156,8 +164,12 @@ impl ComboAttack {
             match (self, limb) {
                 (ComboAttack::Jab, LType::LeftArmDamage) => true,
                 (ComboAttack::Jab, LType::RightArmDamage) => true,
+                (ComboAttack::JabLeft, LType::LeftArmDamage) => true,
+                (ComboAttack::JabRight, LType::RightArmDamage) => true,
                 (ComboAttack::Lowhook, LType::LeftArmDamage) => true,
                 (ComboAttack::Lowhook, LType::RightArmDamage) => true,
+                (ComboAttack::LowhookLeft, LType::LeftArmDamage) => true,
+                (ComboAttack::LowhookRight, LType::RightArmDamage) => true,
                 (ComboAttack::Spinslash, _) => true,
                 _ => false,
             }
@@ -170,8 +182,8 @@ impl ComboAttack {
             ComboAttack::Flashkick => 500,
             ComboAttack::Veinrip => 200,
             ComboAttack::Gouge => 650,
-            ComboAttack::Lowhook => 550,
-            ComboAttack::Jab => 550,
+            ComboAttack::Jab | ComboAttack::JabLeft | ComboAttack::JabRight => 550,
+            ComboAttack::Lowhook | ComboAttack::LowhookLeft | ComboAttack::LowhookRight => 550,
             ComboAttack::Spinslash => 400,
             _ => 0,
         }
@@ -235,10 +247,10 @@ impl ComboAttack {
 
     pub fn get_balance_time(&self, stance: KnifeStance) -> CType {
         let base = match self {
-            ComboAttack::Jab => 205,
+            ComboAttack::Jab | ComboAttack::JabLeft | ComboAttack::JabRight => 205,
             ComboAttack::Pinprick => 205,
             ComboAttack::Lateral => 205,
-            ComboAttack::Lowhook => 205,
+            ComboAttack::Lowhook | ComboAttack::LowhookLeft | ComboAttack::LowhookRight => 205,
             ComboAttack::Feint => 205,
             ComboAttack::Raze => 205,
             ComboAttack::Pheromones => 205,
@@ -309,12 +321,30 @@ impl ComboAttack {
             (ComboAttack::Mindnumb, _) => stance,
             (ComboAttack::Ferocity, _) => stance,
             // Jab
-            (ComboAttack::Jab, KnifeStance::None) => KnifeStance::Gyanis,
-            (ComboAttack::Jab, KnifeStance::Gyanis) => KnifeStance::Rizet,
-            (ComboAttack::Jab, KnifeStance::VaeSant) => KnifeStance::Gyanis,
-            (ComboAttack::Jab, KnifeStance::Rizet) => stance,
-            (ComboAttack::Jab, KnifeStance::EinFasit) => KnifeStance::VaeSant,
-            (ComboAttack::Jab, KnifeStance::Laesan) => KnifeStance::Rizet,
+            (
+                ComboAttack::Jab | ComboAttack::JabLeft | ComboAttack::JabRight,
+                KnifeStance::None,
+            ) => KnifeStance::Gyanis,
+            (
+                ComboAttack::Jab | ComboAttack::JabLeft | ComboAttack::JabRight,
+                KnifeStance::Gyanis,
+            ) => KnifeStance::Rizet,
+            (
+                ComboAttack::Jab | ComboAttack::JabLeft | ComboAttack::JabRight,
+                KnifeStance::VaeSant,
+            ) => KnifeStance::Gyanis,
+            (
+                ComboAttack::Jab | ComboAttack::JabLeft | ComboAttack::JabRight,
+                KnifeStance::Rizet,
+            ) => stance,
+            (
+                ComboAttack::Jab | ComboAttack::JabLeft | ComboAttack::JabRight,
+                KnifeStance::EinFasit,
+            ) => KnifeStance::VaeSant,
+            (
+                ComboAttack::Jab | ComboAttack::JabLeft | ComboAttack::JabRight,
+                KnifeStance::Laesan,
+            ) => KnifeStance::Rizet,
             // Pinprick
             (ComboAttack::Pinprick, KnifeStance::None) => KnifeStance::Gyanis,
             (ComboAttack::Pinprick, KnifeStance::Gyanis) => KnifeStance::Rizet,
@@ -351,12 +381,30 @@ impl ComboAttack {
             (ComboAttack::Spinslash, KnifeStance::EinFasit) => stance,
             (ComboAttack::Spinslash, KnifeStance::Laesan) => KnifeStance::EinFasit,
             // Lowhook
-            (ComboAttack::Lowhook, KnifeStance::None) => KnifeStance::VaeSant,
-            (ComboAttack::Lowhook, KnifeStance::Gyanis) => KnifeStance::VaeSant,
-            (ComboAttack::Lowhook, KnifeStance::VaeSant) => KnifeStance::Gyanis,
-            (ComboAttack::Lowhook, KnifeStance::Rizet) => stance,
-            (ComboAttack::Lowhook, KnifeStance::EinFasit) => KnifeStance::Gyanis,
-            (ComboAttack::Lowhook, KnifeStance::Laesan) => KnifeStance::Gyanis,
+            (
+                ComboAttack::Lowhook | ComboAttack::LowhookLeft | ComboAttack::LowhookRight,
+                KnifeStance::None,
+            ) => KnifeStance::VaeSant,
+            (
+                ComboAttack::Lowhook | ComboAttack::LowhookLeft | ComboAttack::LowhookRight,
+                KnifeStance::Gyanis,
+            ) => KnifeStance::VaeSant,
+            (
+                ComboAttack::Lowhook | ComboAttack::LowhookLeft | ComboAttack::LowhookRight,
+                KnifeStance::VaeSant,
+            ) => KnifeStance::Gyanis,
+            (
+                ComboAttack::Lowhook | ComboAttack::LowhookLeft | ComboAttack::LowhookRight,
+                KnifeStance::Rizet,
+            ) => stance,
+            (
+                ComboAttack::Lowhook | ComboAttack::LowhookLeft | ComboAttack::LowhookRight,
+                KnifeStance::EinFasit,
+            ) => KnifeStance::Gyanis,
+            (
+                ComboAttack::Lowhook | ComboAttack::LowhookLeft | ComboAttack::LowhookRight,
+                KnifeStance::Laesan,
+            ) => KnifeStance::Gyanis,
             // Butterfly
             (ComboAttack::Butterfly, KnifeStance::None) => KnifeStance::Rizet,
             (ComboAttack::Butterfly, KnifeStance::Gyanis) => stance,
@@ -713,6 +761,7 @@ pub enum ComboPredicate {
     WithAttack(ComboAttack),
     EndsInStance(KnifeStance),
     MinimumAttacks(usize),
+    MinimumAffs(usize),
     MaxBalanceTime(CType),
     ScoreOver(i32),
 }
@@ -726,6 +775,13 @@ impl ComboPredicate {
                 combo.0 == KnifeStance::Bladesurge || combo.get_final_stance() == *stance
             }
             ComboPredicate::MinimumAttacks(minimum) => combo.get_attacks().len() >= *minimum,
+            ComboPredicate::MinimumAffs(minimum) => {
+                combo
+                    .get_attacks()
+                    .iter()
+                    .fold(0, |affs, attack| affs + attack.get_aff_count())
+                    >= *minimum
+            }
             ComboPredicate::MaxBalanceTime(max_balance) => combo.get_balance_time() <= *max_balance,
             ComboPredicate::ScoreOver(min_score) => {
                 if let Some(score) = score {
@@ -979,7 +1035,8 @@ mod predator_tests {
             ])
             .set_prone(false)
             .set_parry(false)
-            .set_rebounds(0);
+            .set_rebounds(false)
+            .set_shielded(false);
         let combos = solver.find_combos();
         assert_eq!(combos.0.len(), 1001);
         for combo in combos.0.iter() {

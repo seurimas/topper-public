@@ -105,7 +105,14 @@ where
 impl<BS> TopperResponse<BS> {
     pub fn then(self, next: TopperResponse<BS>) -> Self {
         let mut passive = self.passive;
-        passive.extend(next.passive);
+        for (key, value) in next.passive {
+            if !passive.contains_key(&key) {
+                passive.insert(key, value);
+            } else {
+                let new_value = format!("{};;{}", passive[&key], value);
+                passive.insert(key, new_value);
+            }
+        }
         TopperResponse {
             qeb: self.qeb.or(next.qeb),
             battle_stats: self.battle_stats.or(next.battle_stats),

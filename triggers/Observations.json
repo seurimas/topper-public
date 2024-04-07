@@ -162,6 +162,24 @@
     "observation_name": "BalanceBack"
   },
   {
+    "regex": "^You may influence the shadows once more.$",
+    "args": [
+      {
+        "Literal": "Shadow"
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "BalanceBack"
+  },
+  {
     "regex": "^You have recovered equilibrium.$",
     "args": [
       {

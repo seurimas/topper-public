@@ -2,7 +2,7 @@ use serde::Serialize;
 use std::collections::HashMap;
 use topper_aetolia::classes::infiltrator::{get_hypno_stack, get_hypno_stack_name};
 use topper_aetolia::classes::{get_attack, Class, LockType};
-use topper_aetolia::curatives::gather_alerts;
+use topper_aetolia::curatives::{gather_alerts, FirstAidSetting};
 use topper_aetolia::db::AetDatabaseModule;
 use topper_aetolia::timeline::*;
 use topper_aetolia::types::*;
@@ -10,6 +10,7 @@ use topper_core::timeline::db::DatabaseModule;
 use topper_core_mudlet::topper::{TopperMessage, TopperModule, TopperRequest, TopperResponse};
 
 use super::db::AetMudletDatabaseModule;
+use super::firstaid::FirstAidModule;
 
 #[derive(Serialize)]
 pub struct PlayerStats {
@@ -137,26 +138,35 @@ impl BattleStatsModule {
 impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for BattleStatsModule {
     type Siblings = (
         &'s mut AetTimeline,
+        &'s mut FirstAidModule,
         &'s Option<String>,
         &'s AetMudletDatabaseModule,
     );
     fn handle_message(
         &mut self,
         message: &TopperMessage<AetTimeSlice>,
-        (mut timeline, target, db): Self::Siblings,
+        (mut timeline, firstaid, target, db): Self::Siblings,
     ) -> Result<TopperResponse<BattleStats>, String> {
         match message {
             TopperMessage::Request(request) => match request {
                 TopperRequest::BattleStats(when) => {
                     timeline.update_time(*when);
                     Ok(TopperResponse::battle_stats(get_battle_stats(
-                        timeline, target, db, &self.plan,
+                        timeline,
+                        target,
+                        db,
+                        &self.plan,
+                        firstaid.battle_stats_fa_settings_mut(),
                     )))
                 }
                 TopperRequest::Plan(plan) => {
                     self.plan = Some(plan.to_string());
                     Ok(TopperResponse::battle_stats(get_battle_stats(
-                        timeline, target, db, &self.plan,
+                        timeline,
+                        target,
+                        db,
+                        &self.plan,
+                        firstaid.battle_stats_fa_settings_mut(),
                     )))
                 }
                 _ => Ok(TopperResponse::silent()),
@@ -197,6 +207,7 @@ pub fn get_battle_stats(
     target: &Option<String>,
     db: &AetMudletDatabaseModule,
     plan: &Option<String>,
+    first_aid_settings: &mut Vec<FirstAidSetting>,
 ) -> BattleStats {
     let mut lines = Vec::new();
     let my_stats = PlayerStats::for_player(
@@ -225,7 +236,14 @@ pub fn get_battle_stats(
     }
     let plan_str = if let (Some(plan), Some(target)) = (plan, target) {
         if !plan.eq("") {
-            get_attack(timeline, &timeline.who_am_i(), target, &plan, Some(db))
+            get_attack(
+                timeline,
+                &timeline.who_am_i(),
+                target,
+                &plan,
+                Some(db),
+                first_aid_settings,
+            )
         } else {
             "".to_string()
         }

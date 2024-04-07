@@ -5,7 +5,7 @@ use topper_core::timeline::db::DatabaseModule;
 use crate::{
     agent::Hypnosis,
     classes::{Class, VenomPlan},
-    curatives::first_aid::FirstAidPriorities,
+    curatives::firstaid::FirstAidPriorities,
 };
 
 pub const HINT_TREE: &str = "HINTS";
@@ -70,7 +70,7 @@ impl<T: DatabaseModule> AetDatabaseModule for T {
         priorities: FirstAidPriorities,
     ) {
         self.insert_json::<FirstAidPriorities>(
-            "first_aid",
+            "firstaid",
             &format!("{}_{}", who, priorities_name),
             priorities,
         );
@@ -81,7 +81,7 @@ impl<T: DatabaseModule> AetDatabaseModule for T {
         who: &String,
         priorities_name: &String,
     ) -> Option<FirstAidPriorities> {
-        self.get_json::<FirstAidPriorities>("first_aid", &format!("{}_{}", who, priorities_name))
+        self.get_json::<FirstAidPriorities>("firstaid", &format!("{}_{}", who, priorities_name))
     }
 
     fn insert_hint(&self, key: &String, value: &String) {

@@ -43,7 +43,6 @@ impl BranchState {
         match self {
             BranchState::Single => {}
             BranchState::Branched(Branch { strikes, .. }) => {
-                println!("Striking!");
                 *strikes = *strikes + 1;
             }
         }
@@ -52,7 +51,6 @@ impl BranchState {
         match self {
             BranchState::Single => {}
             BranchState::Branched(Branch { strikes, .. }) => {
-                println!("Striking {:?} {}!", flag, expected);
                 *strikes = *strikes + 1;
             }
         }

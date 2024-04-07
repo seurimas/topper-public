@@ -14,6 +14,7 @@ pub struct Pipe {
 pub enum PipeState {
     UnknownFilled,
     UnknownFilledPuffs(usize),
+    UnknownMaybeUnfilled,
     UnknownUnfilled,
     Known(Pipe),
 }
@@ -56,7 +57,7 @@ impl PipeState {
                 }
                 false
             }
-            Self::UnknownUnfilled => {
+            Self::UnknownUnfilled | Self::UnknownMaybeUnfilled => {
                 *self = Self::UnknownFilledPuffs(9);
                 true
             }
@@ -89,7 +90,7 @@ impl PipeState {
         match self {
             Self::Known(pipe) => pipe.puffs <= 0,
             Self::UnknownFilled | Self::UnknownFilledPuffs(_) => false,
-            Self::UnknownUnfilled => true,
+            Self::UnknownUnfilled | Self::UnknownMaybeUnfilled => true,
         }
     }
 
@@ -195,5 +196,17 @@ impl PipesState {
             empties.push("reishi".to_string());
         }
         empties
+    }
+
+    pub fn observe_can_fill_pipes(&mut self) {
+        if let PipeState::UnknownFilled = self.yarrow {
+            self.yarrow = PipeState::UnknownMaybeUnfilled;
+        }
+        if let PipeState::UnknownFilled = self.willow {
+            self.willow = PipeState::UnknownMaybeUnfilled;
+        }
+        if let PipeState::UnknownFilled = self.reishi {
+            self.reishi = PipeState::UnknownMaybeUnfilled;
+        }
     }
 }

@@ -117,6 +117,9 @@ impl BaseAgentState for AgentState {
         if self.is(FType::Burnout) && self.balanced(BType::Burnout) {
             self.set_flag(FType::Burnout, false);
         }
+        if self.can_fill_pipe() {
+            self.pipe_state.observe_can_fill_pipes();
+        }
     }
     fn get_base_state() -> Self {
         let mut val = AgentState::default();
@@ -669,6 +672,19 @@ impl AgentState {
             && !(self.is(FType::LeftArmCrippled) && self.is(FType::RightArmCrippled))
             && !self.is(FType::NumbArms)
             && !self.is(FType::Frozen)
+    }
+
+    pub fn can_fill_pipe(&self) -> bool {
+        !self.is(FType::Paresis)
+            && !self.is(FType::Paralysis)
+            && !(self.is(FType::LeftArmCrippled) && self.is(FType::RightArmCrippled))
+            && !self.is(FType::Perplexed)
+            && self.balanced(BType::Balance)
+            && self.balanced(BType::Equil)
+    }
+
+    pub fn can_use_enchantment(&self) -> bool {
+        self.can_touch() && !self.is(FType::Superstition)
     }
 
     pub fn can_tree(&self, ignore_bal: bool) -> bool {

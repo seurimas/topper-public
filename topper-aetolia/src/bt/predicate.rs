@@ -83,6 +83,7 @@ pub enum AetPredicate {
     Buffered(AetTarget, FType),
     Locked(AetTarget, bool),
     NearLocked(AetTarget, LockType, usize),
+    PipeEmpty(AetTarget, String),
     // Timing
     ReboundingWindow(AetTarget, CType),
     SalveBlocked(AetTarget, CType),
@@ -305,6 +306,14 @@ impl UnpoweredFunction for AetPredicate {
                 if let Some(target) = target.get_target(model, controller) {
                     let affs_to_lock = lock_type.affs_to_lock(target);
                     if affs_to_lock <= *aff_count {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::PipeEmpty(target, pipe) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.pipe_state.get_empties().contains(&pipe) {
                         return UnpoweredFunctionState::Complete;
                     }
                 }

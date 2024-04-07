@@ -14,7 +14,7 @@ use std::thread::JoinHandle;
 use std::time::{Duration, SystemTime};
 use tokio;
 use topper_aetolia::classes::{Class, VenomPlan};
-use topper_aetolia::curatives::first_aid::{parse_priority_set, FirstAidPriorities};
+use topper_aetolia::curatives::firstaid::{parse_priority_set, FirstAidPriorities};
 use topper_aetolia::db::AetDatabaseModule;
 use topper_aetolia::defense::DEFENSE_DATABASE;
 use topper_aetolia::timeline::*;
@@ -178,7 +178,7 @@ impl AetMudletDatabaseModule {
         priorities: FirstAidPriorities,
     ) {
         self.insert_json::<FirstAidPriorities>(
-            "first_aid",
+            "firstaid",
             &format!("{}_{}", who, priorities_name),
             priorities,
         );

@@ -39,6 +39,7 @@ pub enum PredatorBehavior {
     // Darts
     Dartshot(AetTarget),
     Twinshot(AetTarget),
+    TwinshotVenoms(AetTarget, FType, FType),
     CirisosisDart(AetTarget),
     // Predation
     Quickassess(AetTarget),
@@ -465,6 +466,33 @@ impl UnpoweredFunction for PredatorBehavior {
                     }
                     let venoms = controller.get_venoms_from_plan(2, you);
                     if let (Some(venom_0), Some(venom_1)) = (venoms.get(0), venoms.get(1)) {
+                        controller.plan.add_to_qeb(Box::new(TwinshotAction::new(
+                            controller.target.clone().unwrap_or("".to_string()),
+                            venom_1,
+                            venom_0,
+                        )));
+                        UnpoweredFunctionState::Complete
+                    } else {
+                        UnpoweredFunctionState::Failed
+                    }
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            PredatorBehavior::TwinshotVenoms(target, venom_0, venom_1) => {
+                if let Some(you) = target.get_target(model, controller) {
+                    if you.will_be_rebounding(model.state.borrow_me().get_qeb_balance()) {
+                        return UnpoweredFunctionState::Failed;
+                    } else if you.is(FType::Shielded) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    let me = model.state.borrow_me();
+                    if !me.arm_free() || me.stuck_fallen() {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if let (Some(venom_0), Some(venom_1)) =
+                        (AFFLICT_VENOMS.get(venom_0), AFFLICT_VENOMS.get(venom_1))
+                    {
                         controller.plan.add_to_qeb(Box::new(TwinshotAction::new(
                             controller.target.clone().unwrap_or("".to_string()),
                             venom_1,

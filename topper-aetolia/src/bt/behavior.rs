@@ -3,11 +3,13 @@ use serde::Serialize;
 use topper_bt::unpowered::*;
 
 use crate::classes::bard::BardBehavior;
+use crate::classes::enchants::EnchantmentBehavior;
 use crate::classes::infiltrator::InfiltratorBehavior;
 use crate::classes::predator::PredatorBehavior;
 use crate::classes::LockType;
 use crate::classes::VenomPlan;
 use crate::curatives::CurativeBehavior;
+use crate::curatives::FirstAidSetting;
 use crate::defense::DefenseBehavior;
 use crate::observables::PlainAction;
 use crate::timeline::*;
@@ -27,6 +29,7 @@ pub enum AetBehavior {
     CopyHint(String, String),
     SetLimbHint(AetTarget, LimbDescriptor, String),
     PlainQebBehavior(String),
+    EnchantmentBehavior(EnchantmentBehavior),
     CurativeBehavior(CurativeBehavior),
     DefenseBehavior(DefenseBehavior),
     BardBehavior(BardBehavior),
@@ -105,6 +108,9 @@ impl UnpoweredFunction for AetBehavior {
                     .plan
                     .add_to_qeb(Box::new(PlainAction::new(action.clone())));
                 UnpoweredFunctionState::Complete
+            }
+            AetBehavior::EnchantmentBehavior(enchantment_behavior) => {
+                enchantment_behavior.resume_with(model, controller)
             }
             AetBehavior::CurativeBehavior(curative_behavior) => {
                 curative_behavior.resume_with(model, controller)
