@@ -511,6 +511,10 @@ impl AgentState {
         self.stats[SType::Mana as usize] as f32 / self.max_stats[SType::Mana as usize] as f32
     }
 
+    pub fn get_stat_percent(&self, stat: SType) -> f32 {
+        self.stats[stat as usize] as f32 / self.max_stats[stat as usize] as f32
+    }
+
     pub fn set_limb_damage(&mut self, limb: LType, value: CType, assume_break: bool) {
         let old_value = self.limb_damage.limbs[limb as usize].damage;
         self.limb_damage.set_limb_damage(limb, value, assume_break);

@@ -206,14 +206,12 @@ impl BType {
 }
 
 // Stats
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, TryFromPrimitive)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, TryFromPrimitive, Serialize, Deserialize)]
 #[repr(u8)]
 pub enum SType {
     Health,
     Mana,
     SP,
-    Sips,
-    Shields,
 
     SIZE,
 }

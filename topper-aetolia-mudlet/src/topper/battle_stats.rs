@@ -156,7 +156,7 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for BattleStatsModule {
                         target,
                         db,
                         &self.plan,
-                        firstaid.battle_stats_fa_settings_mut(),
+                        firstaid.start_temporary_fa_settings(),
                     )))
                 }
                 TopperRequest::Plan(plan) => {
@@ -166,7 +166,7 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for BattleStatsModule {
                         target,
                         db,
                         &self.plan,
-                        firstaid.battle_stats_fa_settings_mut(),
+                        firstaid.start_temporary_fa_settings(),
                     )))
                 }
                 _ => Ok(TopperResponse::silent()),

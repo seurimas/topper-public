@@ -191,7 +191,7 @@ impl FirstAidConfig {
                 if let Some(previous) = self.simple_priorities.insert(ft, prio) {
                     FirstAidSetting::SimplePriority(ft, previous)
                 } else {
-                    FirstAidSetting::SimplePriority(ft, 26)
+                    FirstAidSetting::SimplePriority(ft, 0)
                 }
             }
             FirstAidSetting::ResetPriorities => {
@@ -325,7 +325,10 @@ impl FirstAidConfig {
 impl FirstAidSetting {
     pub fn get_command(&self) -> String {
         match self {
-            FirstAidSetting::SimplePriority(ft, prio) => {
+            FirstAidSetting::SimplePriority(ft, mut prio) => {
+                if prio == 0 {
+                    prio = 26;
+                }
                 if ft.is_affliction() {
                     format!("firstaid priority {} {}", ft, prio)
                 } else {

@@ -104,7 +104,7 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for BattleModule {
                             &target,
                             &strategy,
                             Some(db),
-                            firstaid.battle_stats_fa_settings_mut(),
+                            firstaid.start_temporary_fa_settings(),
                         )))
                     } else {
                         Ok(TopperResponse::error("No target.".into()))

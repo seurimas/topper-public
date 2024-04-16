@@ -11,7 +11,7 @@ use topper_core_mudlet::topper::*;
 pub struct FirstAidModule {
     active: FirstAidConfig,
     in_flight: FirstAidConfig,
-    battle_stats_fa_settings: Vec<FirstAidSetting>,
+    temporary_fa_settings: Vec<FirstAidSetting>,
 }
 
 impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for FirstAidModule {
@@ -48,8 +48,9 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for FirstAidModule {
 }
 
 impl FirstAidModule {
-    pub fn battle_stats_fa_settings_mut(&mut self) -> &mut Vec<FirstAidSetting> {
-        &mut self.battle_stats_fa_settings
+    pub fn start_temporary_fa_settings(&mut self) -> &mut Vec<FirstAidSetting> {
+        self.temporary_fa_settings = Vec::new();
+        &mut self.temporary_fa_settings
     }
 
     fn apply_seen_settings(&mut self, slice: &AetTimeSlice) {
@@ -120,7 +121,7 @@ impl FirstAidModule {
     }
 
     fn send_battle_setting_updates(&mut self) -> TopperResponse<BattleStats> {
-        let settings = std::mem::replace(&mut self.battle_stats_fa_settings, Vec::new());
+        let settings = std::mem::replace(&mut self.temporary_fa_settings, Vec::new());
         self.send_setting_updates(settings)
     }
 

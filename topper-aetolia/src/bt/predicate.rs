@@ -93,7 +93,7 @@ pub enum AetPredicate {
     LimbHintIs(String, LType),
     HintSet(String, String),
     // Stats
-    HealthUnder(AetTarget, f32),
+    StatUnderPercent(SType, AetTarget, f32),
     // Balances
     HasBalanceEquilibrium(AetTarget),
     HasBalance(AetTarget),
@@ -579,9 +579,9 @@ impl UnpoweredFunction for AetPredicate {
                     UnpoweredFunctionState::Failed
                 }
             }
-            AetPredicate::HealthUnder(target, percent) => {
+            AetPredicate::StatUnderPercent(stat, target, percent) => {
                 if let Some(target) = target.get_target(model, controller) {
-                    if target.get_health_percent() < *percent {
+                    if target.get_stat_percent(*stat) < *percent {
                         UnpoweredFunctionState::Complete
                     } else {
                         UnpoweredFunctionState::Failed

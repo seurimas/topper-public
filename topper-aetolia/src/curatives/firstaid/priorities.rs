@@ -574,12 +574,18 @@ impl FirstAidPriorities {
     26)
          */
     pub fn reset(&mut self) -> Option<(FType, u32)> {
-        for (aff, priority) in std::mem::replace(&mut self.0, DEFAULT_PRIORITIES.clone()) {
-            if priority != DEFAULT_PRIORITIES.get(&aff).cloned().unwrap_or(priority) {
-                return Some((aff, priority));
+        let mut result = None;
+        for (aff, priority) in &self.0 {
+            if aff.is_affliction()
+                && *priority != DEFAULT_PRIORITIES.get(&aff).cloned().unwrap_or(*priority)
+            {
+                result = Some((*aff, *priority));
             }
         }
-        None
+        for (aff, priority) in DEFAULT_PRIORITIES.iter() {
+            self.0.insert(*aff, *priority);
+        }
+        result
     }
 
     pub fn to_settings(&self) -> Vec<FirstAidSetting> {

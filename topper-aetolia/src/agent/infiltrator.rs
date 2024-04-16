@@ -167,9 +167,7 @@ impl HypnoState {
         match self {
             HypnoState::Hypnotized(suggestions) => {
                 if suggestions.len() > 0 {
-                    let top = suggestions.get(0).cloned();
-                    suggestions.remove(0);
-                    top
+                    suggestions.pop()
                 } else {
                     None
                 }
