@@ -575,7 +575,7 @@ pub fn handle_combat_action(
                 after,
             );
         }
-        "Mawrcrush" => {
+        "Mawcrush" => {
             if combat_action.annotation.eq_ignore_ascii_case("fail") {
                 for_agent(agent_states, &combat_action.target, &|me| {
                     me.observe_flag(FType::TorsoBroken, false);

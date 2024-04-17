@@ -1,8 +1,10 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
 
 use super::*;
-use crate::types::*;
+use crate::{defense::parry, types::*};
 
 #[derive(Debug, Copy, Clone, EnumIter, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ComboAttack {
@@ -153,6 +155,10 @@ impl ComboAttack {
             ComboAttack::Flashkick => Some(LType::HeadDamage),
             ComboAttack::Veinrip => Some(LType::HeadDamage),
             ComboAttack::Gouge => Some(LType::HeadDamage),
+            ComboAttack::JabLeft => Some(LType::LeftArmDamage),
+            ComboAttack::JabRight => Some(LType::RightArmDamage),
+            ComboAttack::LowhookLeft => Some(LType::LeftLegDamage),
+            ComboAttack::LowhookRight => Some(LType::RightLegDamage),
             _ => None,
         }
     }
@@ -172,6 +178,39 @@ impl ComboAttack {
                 (ComboAttack::LowhookRight, LType::RightArmDamage) => true,
                 (ComboAttack::Spinslash, _) => true,
                 _ => false,
+            }
+        }
+    }
+
+    pub fn parried_by(&self, stance: KnifeStance, parry: LType) -> bool {
+        match (self, stance, parry) {
+            (ComboAttack::JabLeft, KnifeStance::Gyanis, parry) => parry == LType::LeftArmDamage,
+            (ComboAttack::JabRight, KnifeStance::Gyanis, parry) => parry == LType::RightArmDamage,
+            (ComboAttack::LowhookLeft, KnifeStance::Gyanis, parry) => parry == LType::LeftLegDamage,
+            (ComboAttack::LowhookRight, KnifeStance::Gyanis, parry) => {
+                parry == LType::RightLegDamage
+            }
+            (ComboAttack::Jab, _, parry) => {
+                parry == LType::LeftArmDamage || parry == LType::RightArmDamage
+            }
+            (ComboAttack::Lowhook, _, parry) => {
+                parry == LType::LeftArmDamage || parry == LType::RightArmDamage
+            }
+            (ComboAttack::JabLeft, _, parry) => {
+                parry == LType::LeftArmDamage || parry == LType::RightArmDamage
+            }
+            (ComboAttack::JabRight, _, parry) => {
+                parry == LType::LeftArmDamage || parry == LType::RightArmDamage
+            }
+            (ComboAttack::LowhookLeft, _, parry) => {
+                parry == LType::LeftLegDamage || parry == LType::RightLegDamage
+            }
+            (ComboAttack::LowhookRight, _, parry) => {
+                parry == LType::LeftLegDamage || parry == LType::RightLegDamage
+            }
+            (ComboAttack::Spinslash, _, _) => false,
+            (other_attack, _, parry) => {
+                other_attack.parryable() && Some(parry) == other_attack.get_single_limb_target()
             }
         }
     }
@@ -553,10 +592,10 @@ impl PredatorCombo {
         damage as f32 / balance as f32
     }
 
-    pub fn score_combo(&self, graders: &Vec<ComboGrader>, start_parrying: Option<LType>) -> i32 {
-        graders.iter().fold(0, |score, grader| {
-            score + grader.grade(self, start_parrying)
-        })
+    pub fn score_combo(&self, graders: &Vec<ComboGrader>, target: &AgentState) -> i32 {
+        graders
+            .iter()
+            .fold(0, |score, grader| score + grader.grade(self, target))
     }
 }
 
@@ -655,7 +694,7 @@ impl ComboSolver {
         mut rebounds: bool,
         mut shielded: bool,
     ) {
-        if combos.len() > 1000 {
+        if combos.len() > 3000 {
             return;
         }
         let next_stance = attack.get_next_stance(current_stance);
@@ -797,16 +836,17 @@ impl ComboPredicate {
 #[derive(Debug, Clone, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub enum ComboGrader {
     Reuse(i32),
-    Hits(LType, i32),
     ValueMove(ComboAttack, i32, i32),
     ValueMoveUnparried(ComboAttack, i32, i32),
     ValueMoveInStance(ComboAttack, KnifeStance, i32),
     HasVenom(i32),
     EndsInStance(KnifeStance, i32),
+    Breaks(Vec<LType>, usize, i32),
+    PerPossibleParry(i32),
 }
 
 impl ComboGrader {
-    pub fn grade(&self, combo: &PredatorCombo, start_parrying: Option<LType>) -> i32 {
+    pub fn grade(&self, combo: &PredatorCombo, target: &AgentState) -> i32 {
         match self {
             ComboGrader::Reuse(value) => {
                 let mut seen_hits = vec![];
@@ -818,15 +858,6 @@ impl ComboGrader {
                     }
                 }
                 0
-            }
-            ComboGrader::Hits(limb, value) => {
-                let mut total_value = 0;
-                for attack in combo.get_attacks().iter() {
-                    if attack.can_hit(*limb) {
-                        total_value += *value;
-                    }
-                }
-                total_value
             }
             ComboGrader::ValueMove(attack, first_value, rest_value) => {
                 combo
@@ -850,24 +881,45 @@ impl ComboGrader {
                     .get_attacks()
                     .iter()
                     .fold(
-                        (0, start_parrying),
-                        |(total, mut parrying), combo_attack| {
+                        (
+                            combo.0,
+                            0,
+                            if target.can_parry() {
+                                target.parrying
+                            } else {
+                                None
+                            },
+                        ),
+                        |(stance, total, mut parrying), combo_attack| {
                             if combo_attack.can_drop_parry() {
+                                parrying = None;
+                            } else if (!target.arm_free_left() || !target.arm_free_right())
+                                && combo_attack.can_use_venom()
+                            {
+                                // Assume we use epteth or whatever.
                                 parrying = None;
                             }
                             if parrying.is_none() && combo_attack == attack {
-                                (total + *unparried_value, parrying)
+                                (
+                                    combo_attack.get_next_stance(stance),
+                                    total + *unparried_value,
+                                    parrying,
+                                )
                             } else if parrying.is_some()
                                 && combo_attack == attack
-                                && !attack.can_hit(parrying.unwrap())
+                                && attack.parried_by(stance, parrying.unwrap())
                             {
-                                (total + *off_limb, parrying)
+                                (
+                                    combo_attack.get_next_stance(stance),
+                                    total + *off_limb,
+                                    parrying,
+                                )
                             } else {
-                                (total, parrying)
+                                (combo_attack.get_next_stance(stance), total, parrying)
                             }
                         },
                     )
-                    .0
+                    .1
             }
             ComboGrader::ValueMoveInStance(attack, stance, value) => {
                 combo
@@ -899,6 +951,61 @@ impl ComboGrader {
                 } else {
                     0
                 }
+            }
+            ComboGrader::Breaks(limbs, min_breaks, value) => {
+                let mut limbs_state = target.get_limbs_state();
+                let mut breaks = 0;
+                for combo_attack in combo.get_attacks().iter() {
+                    if let Some(limb) = combo_attack.get_single_limb_target() {
+                        if limbs.is_empty() || limbs.contains(&limb) {
+                            if !limbs_state[limb].broken {
+                                limbs_state[limb]
+                                    .apply_damage(combo_attack.get_limb_damage() as f32 / 100.);
+                                if limbs_state[limb].broken {
+                                    breaks += 1;
+                                }
+                            }
+                        }
+                    }
+                }
+                if breaks >= *min_breaks {
+                    *value
+                } else {
+                    0
+                }
+            }
+            ComboGrader::PerPossibleParry(value) => {
+                let mut parryable = HashMap::new();
+                if !target.can_parry() {
+                    return 0;
+                }
+                let mut stance = combo.0;
+                for combo_attack in combo.get_attacks().iter() {
+                    if combo_attack.can_drop_parry() {
+                        return parryable.values().max().cloned().unwrap_or(0) * *value;
+                    } else if (!target.arm_free_left() || !target.arm_free_right())
+                        && combo_attack.can_use_venom()
+                    {
+                        // Assume we use epteth or whatever.
+                        return parryable.values().max().cloned().unwrap_or(0) * *value;
+                    }
+                    for limb in [
+                        LType::LeftArmDamage,
+                        LType::RightArmDamage,
+                        LType::LeftLegDamage,
+                        LType::RightLegDamage,
+                        LType::HeadDamage,
+                        LType::TorsoDamage,
+                    ]
+                    .iter()
+                    {
+                        if combo_attack.parried_by(stance, *limb) {
+                            *parryable.entry(*limb).or_insert(0) += 1;
+                        }
+                    }
+                    stance = combo_attack.get_next_stance(stance);
+                }
+                parryable.values().max().cloned().unwrap_or(0) * *value
             }
         }
     }
@@ -988,14 +1095,14 @@ impl ComboSet {
         predicates: &Vec<ComboPredicate>,
         base_graders: &Vec<ComboGrader>,
         graders: &Vec<ComboGrader>,
-        start_parrying: Option<LType>,
+        target: &AgentState,
     ) -> Option<PredatorCombo> {
         let mut highest_combo = None;
         let mut highest_score = 0.0;
         for combo in self.0.iter() {
             let mut valid = true;
-            let score = combo.score_combo(base_graders, start_parrying)
-                + combo.score_combo(graders, start_parrying);
+            let score =
+                combo.score_combo(base_graders, target) + combo.score_combo(graders, target);
             for predicate in predicates.iter() {
                 if !predicate.matches(combo, Some(score)) {
                     valid = false;

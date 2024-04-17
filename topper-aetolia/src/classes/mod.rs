@@ -464,6 +464,40 @@ pub fn handle_combat_action(
         "Purification" | "Zeal" | "Psionics" => {
             zealot::handle_combat_action(combat_action, agent_states, before, after)
         }
+        "Weaponry" => match combat_action.skill.as_ref() {
+            "Shatter" => {
+                if combat_action.annotation.eq("start") {
+                    agent_states.for_all_agents(&|you| {
+                        you.set_channel(ChannelType::Shatter, 3.0);
+                    });
+                } else {
+                    if agent_states.get_perspective(combat_action) == Perspective::Attacker
+                        || agent_states.get_perspective(combat_action) == Perspective::Bystander
+                    {
+                        let limb_hit = match combat_action.annotation.as_ref() {
+                            "left arm" => LType::LeftArmDamage,
+                            "right arm" => LType::RightArmDamage,
+                            "left leg" => LType::LeftLegDamage,
+                            "right leg" => LType::RightLegDamage,
+                            "head" => LType::HeadDamage,
+                            "torso" => LType::TorsoDamage,
+                            _ => LType::SIZE,
+                        };
+                        for_agent(agent_states, &combat_action.target, &|you| {
+                            you.set_limb_damage(limb_hit, DAMAGED_VALUE, true);
+                            you.limb_damage.set_limb_broken(limb_hit, true);
+                        });
+                    }
+                    for_agent(agent_states, &combat_action.caster, &|you| {
+                        you.set_channel(ChannelType::Shatter, 0.0);
+                        you.observe_flag(FType::Shielded, false);
+                        you.observe_flag(FType::Rebounding, false);
+                    });
+                }
+                Ok(())
+            }
+            _ => Ok(()),
+        },
         "Survival" => match combat_action.skill.as_ref() {
             "Focus" => {
                 let observations = after.clone();
@@ -615,6 +649,30 @@ pub fn handle_combat_action(
                         apply_or_infer_cures(me, vec![FType::Asthma], &observations, first_person);
                         apply_or_infer_balance(me, (BType::Balance, 2.75), &observations);
                         apply_or_infer_balance(me, (BType::Fitness, 20.0), &observations);
+                    },
+                );
+                Ok(())
+            }
+            "Restoration" => {
+                let observations = after.clone();
+                for_agent(
+                    agent_states,
+                    &combat_action.caster,
+                    &move |me: &mut AgentState| {
+                        let limbs = vec![
+                            FType::LeftArmCrippled,
+                            FType::RightArmCrippled,
+                            FType::LeftLegCrippled,
+                            FType::RightLegCrippled,
+                        ];
+                        let mut cost = 0.;
+                        for limb in limbs {
+                            if me.is(limb) {
+                                me.toggle_flag(limb, false);
+                                cost += 2.3;
+                            }
+                        }
+                        apply_or_infer_balance(me, (BType::Balance, cost), &observations);
                     },
                 );
                 Ok(())

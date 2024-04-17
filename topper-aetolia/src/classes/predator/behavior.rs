@@ -158,19 +158,23 @@ impl UnpoweredFunction for PredatorBehavior {
                     .get_target(model, controller)
                     .map(|you| if you.can_parry() { you.parrying } else { None })
                     .unwrap_or(Some(LType::TorsoDamage));
-                let best_combo = controller.get_highest_scored_predator_combo(
-                    &predicates,
-                    &graders,
-                    start_parrying,
-                );
-                unsafe {
-                    if DEBUG_TREES {
-                        println!("Solver: {:?}", controller.predator_combo_store());
-                        println!("Value combo: {:?}", best_combo);
-                        println!("All combos: {:?}", controller.predator_combos());
+                if let Some(target_state) = target.get_target(model, controller) {
+                    let best_combo = controller.get_highest_scored_predator_combo(
+                        &predicates,
+                        &graders,
+                        target_state,
+                    );
+                    unsafe {
+                        if DEBUG_TREES {
+                            println!("Solver: {:?}", controller.predator_combo_store());
+                            println!("Value combo: {:?}", best_combo);
+                            println!("All combos: {:?}", controller.predator_combos());
+                        }
                     }
+                    use_combo(model, controller, target, best_combo, preferred_limbs)
+                } else {
+                    UnpoweredFunctionState::Failed
                 }
-                use_combo(model, controller, target, best_combo, preferred_limbs)
             }
             PredatorBehavior::SeriesCombo(aet_target, predator_combo, preferred_limbs) => {
                 if let (me, Some(target)) = (

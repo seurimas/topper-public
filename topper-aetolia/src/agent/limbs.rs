@@ -183,6 +183,18 @@ impl LimbState {
             self.damage -= restore_value;
         }
     }
+
+    pub fn apply_damage(&mut self, damage: f32) {
+        self.damage += damage;
+        if self.damage > 100.0 {
+            self.damage = 100.0;
+            self.mangled = true;
+        } else if self.damage > 66.66 {
+            self.mangled = true;
+        } else if self.damage > 33.33 {
+            self.broken = true;
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -226,6 +238,36 @@ impl LimbsState {
             acc += 1;
         }
         acc
+    }
+}
+
+impl std::ops::Index<LType> for LimbsState {
+    type Output = LimbState;
+
+    fn index(&self, index: LType) -> &Self::Output {
+        match index {
+            LType::HeadDamage => &self.head,
+            LType::TorsoDamage => &self.torso,
+            LType::LeftArmDamage => &self.left_arm,
+            LType::RightArmDamage => &self.right_arm,
+            LType::LeftLegDamage => &self.left_leg,
+            LType::RightLegDamage => &self.right_leg,
+            _ => &self.head,
+        }
+    }
+}
+
+impl std::ops::IndexMut<LType> for LimbsState {
+    fn index_mut(&mut self, index: LType) -> &mut Self::Output {
+        match index {
+            LType::HeadDamage => &mut self.head,
+            LType::TorsoDamage => &mut self.torso,
+            LType::LeftArmDamage => &mut self.left_arm,
+            LType::RightArmDamage => &mut self.right_arm,
+            LType::LeftLegDamage => &mut self.left_leg,
+            LType::RightLegDamage => &mut self.right_leg,
+            _ => &mut self.head,
+        }
     }
 }
 

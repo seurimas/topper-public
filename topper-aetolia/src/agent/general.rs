@@ -1209,6 +1209,7 @@ impl Default for ClassState {
 pub enum ChannelType {
     Heelrush,
     Direblow,
+    Shatter,
     Death,
 }
 

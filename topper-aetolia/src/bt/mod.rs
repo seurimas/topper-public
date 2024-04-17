@@ -192,7 +192,7 @@ impl BehaviorController {
         &self,
         predicates: &Vec<ComboPredicate>,
         graders: &Vec<ComboGrader>,
-        start_parrying: Option<LType>,
+        target: &AgentState,
     ) -> Option<PredatorCombo> {
         if let ClassController::Predator {
             predator_combos,
@@ -204,7 +204,7 @@ impl BehaviorController {
                 predicates,
                 predator_base_graders,
                 graders,
-                start_parrying,
+                target,
             )
         } else {
             panic!("Not a predator!")
