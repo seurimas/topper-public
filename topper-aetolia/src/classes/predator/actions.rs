@@ -117,7 +117,7 @@ impl SeriesAttack {
         valid_feints.retain(|l| {
             !base_attacks
                 .iter()
-                .any(|attack| Some(*l) == attack.get_single_limb_target())
+                .any(|attack| attack.can_be_parried_by(*l))
         });
         valid_feints.retain(|l| !preferred_limbs.contains(l));
         if valid_feints.is_empty() {

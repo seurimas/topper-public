@@ -353,6 +353,9 @@ pub fn get_attack(
                 predator::get_attack(timeline, target, strategy, db, first_aid_settings)
             }
             Class::Monk => monk::get_attack(timeline, target, strategy, db, first_aid_settings),
+            Class::Ascendril => {
+                ascendril::get_attack(timeline, target, strategy, db, first_aid_settings)
+            }
             _ => infiltrator::get_attack(timeline, target, strategy, db, first_aid_settings),
         }
     } else {

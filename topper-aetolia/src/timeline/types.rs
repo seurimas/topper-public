@@ -443,10 +443,9 @@ impl AetTimelineTrait for AetTimeline {
                 agent.branch_state = BranchState::Single;
                 agent.set_flag(FType::Blindness, true);
                 agent.set_flag(FType::Deafness, true);
-                agent.set_flag(FType::Temperance, true);
                 agent.set_flag(FType::Levitation, true);
                 agent.set_flag(FType::Speed, true);
-                agent.set_flag(FType::Temperance, true);
+                agent.set_flag(FType::Arcane, true);
                 agent.set_flag(FType::Vigor, true);
                 agent.set_flag(FType::Rebounding, true);
                 agent.set_flag(FType::Insomnia, true);

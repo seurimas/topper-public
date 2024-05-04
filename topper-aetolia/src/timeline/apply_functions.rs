@@ -1242,6 +1242,24 @@ pub fn attack_afflictions(
     }
 }
 
+pub fn attack_first_affliction(
+    agent_states: &mut AetTimelineState,
+    target: &String,
+    affs: Vec<FType>,
+    after: &Vec<AetObservation>,
+) {
+    if attack_hit(after) {
+        agent_states.for_agent(target, &move |you: &mut AgentState| {
+            for aff in affs.clone().iter() {
+                if !you.is(*aff) {
+                    you.set_flag(*aff, true);
+                    break;
+                }
+            }
+        });
+    }
+}
+
 pub fn attack_strip(
     agent_states: &mut AetTimelineState,
     target: &String,

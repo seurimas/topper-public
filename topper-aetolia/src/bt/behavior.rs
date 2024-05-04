@@ -2,6 +2,7 @@ use serde::Deserialize;
 use serde::Serialize;
 use topper_bt::unpowered::*;
 
+use crate::classes::ascendril::AscendrilBehavior;
 use crate::classes::bard::BardBehavior;
 use crate::classes::enchants::EnchantmentBehavior;
 use crate::classes::infiltrator::InfiltratorBehavior;
@@ -35,6 +36,7 @@ pub enum AetBehavior {
     BardBehavior(BardBehavior),
     PredatorBehavior(PredatorBehavior),
     InfiltratorBehavior(InfiltratorBehavior),
+    AscendrilBehavior(AscendrilBehavior),
 }
 
 impl UnpoweredFunction for AetBehavior {
@@ -126,6 +128,9 @@ impl UnpoweredFunction for AetBehavior {
             }
             AetBehavior::InfiltratorBehavior(infiltrator_behavior) => {
                 infiltrator_behavior.resume_with(model, controller)
+            }
+            AetBehavior::AscendrilBehavior(ascendril_behavior) => {
+                ascendril_behavior.resume_with(model, controller)
             }
         }
     }

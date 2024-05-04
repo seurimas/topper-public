@@ -44,6 +44,7 @@ impl Direction {
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct Room {
+    pub id: i64,
     pub players: HashSet<String>,
     pub denizens: HashSet<i64>,
     pub exits: HashMap<Direction, i64>,
@@ -53,6 +54,7 @@ pub struct Room {
 impl Default for Room {
     fn default() -> Self {
         Room {
+            id: 0,
             players: HashSet::new(),
             denizens: HashSet::new(),
             exits: HashMap::new(),
@@ -62,8 +64,14 @@ impl Default for Room {
 }
 
 impl Room {
-    pub fn default_state() -> AetNonAgent {
-        AetNonAgent::Room(Room::default())
+    pub fn default_state(room_id: i64) -> AetNonAgent {
+        AetNonAgent::Room(Room {
+            id: room_id,
+            players: HashSet::new(),
+            denizens: HashSet::new(),
+            exits: HashMap::new(),
+            tags: HashSet::new(),
+        })
     }
 
     pub fn add_tag(&mut self, tag: impl ToString) {
@@ -88,7 +96,13 @@ pub trait AetTimelineRoomExt {
 
     fn get_my_room(&self) -> Option<&Room>;
 
+    fn get_room_id(&self) -> i64;
+
     fn get_my_room_mut(&mut self) -> Option<&mut Room>;
+
+    fn get_room(&self, room_id: i64) -> Option<&Room>;
+
+    fn get_room_mut(&mut self, room_id: i64) -> Option<&mut Room>;
 
     fn set_player_room(&mut self, room_id: i64, player: &str);
 }
@@ -105,9 +119,13 @@ impl AetTimelineRoomExt for AetTimelineState {
             action(room);
         } else {
             self.non_agent_states
-                .insert(format_room_id(room_id), Room::default_state());
+                .insert(format_room_id(room_id), Room::default_state(room_id));
             self.for_room(room_id, action);
         }
+    }
+
+    fn get_room_id(&self) -> i64 {
+        self.borrow_me().room_id
     }
 
     fn get_my_room(&self) -> Option<&Room> {
@@ -119,6 +137,18 @@ impl AetTimelineRoomExt for AetTimelineState {
 
     fn get_my_room_mut(&mut self) -> Option<&mut Room> {
         let room_id = self.borrow_me().room_id;
+        self.non_agent_states
+            .get_mut(&format_room_id(room_id))
+            .and_then(AetNonAgent::as_room_mut)
+    }
+
+    fn get_room(&self, room_id: i64) -> Option<&Room> {
+        self.non_agent_states
+            .get(&format_room_id(room_id))
+            .and_then(AetNonAgent::as_room)
+    }
+
+    fn get_room_mut(&mut self, room_id: i64) -> Option<&mut Room> {
         self.non_agent_states
             .get_mut(&format_room_id(room_id))
             .and_then(AetNonAgent::as_room_mut)

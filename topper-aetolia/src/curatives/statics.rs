@@ -197,7 +197,6 @@ lazy_static! {
         FType::Confusion,
         FType::Dementia,
         FType::Hallucinations,
-        FType::Hallucinations,
         FType::Paranoia,
         FType::Hatred,
         FType::Hypersomnia,

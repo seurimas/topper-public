@@ -26,6 +26,57 @@ pub trait ActiveTransition {
     }
 }
 
+#[macro_export]
+macro_rules! untargetted_action {
+    ($name:ident, $action:expr) => {
+        pub struct $name {
+            pub caster: String,
+        }
+
+        impl $name {
+            pub fn new(caster: String) -> Self {
+                $name { caster }
+            }
+        }
+
+        impl ActiveTransition for $name {
+            fn act(&self, timline: &AetTimeline) -> ActivateResult {
+                Ok($action.to_string())
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! targetted_action {
+    ($name:ident, $action:expr) => {
+        pub struct $name {
+            pub caster: String,
+            pub target: String,
+        }
+
+        impl $name {
+            pub fn new(caster: String, target: String) -> Self {
+                $name { caster, target }
+            }
+
+            pub fn from_target(
+                target: &AetTarget,
+                model: &BehaviorModel,
+                controller: &BehaviorController,
+            ) -> Self {
+                $name::new(model.who_am_i(), target.get_name(model, controller))
+            }
+        }
+
+        impl ActiveTransition for $name {
+            fn act(&self, timline: &AetTimeline) -> ActivateResult {
+                Ok(format!($action, self.target))
+            }
+        }
+    };
+}
+
 #[derive(Default)]
 pub struct ActionPlan {
     who: String,

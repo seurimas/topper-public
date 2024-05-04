@@ -1,0 +1,212 @@
+[
+    {
+        "regex": "^(You) already have a fulcrum constructed, Mage.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Fulcrum"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You)r fulcrum is already a part of the world, Mage.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Expand"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^Drawing on the essence of hearth, forge, and the deep veins of the world, (you) align your fulcrum's resonance with fire.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Enrich"
+            },
+            {
+                "Literal": "fire"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^Drawing on the essence of hearth, forge, and the deep veins of the world, (you) align your fulcrum's resonance with fire.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Enrich"
+            },
+            {
+                "Literal": "fire"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You)r will sinking into the fluid continuity of rivers and the hammering pulse of the tide, you align your fulcrum's resonance with water.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Enrich"
+            },
+            {
+                "Literal": "water"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You)r breath rising into the crackling potential of the wind and storm, you align your fulcrum's resonance with air.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Enrich"
+            },
+            {
+                "Literal": "air"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You)r fulcrum affects Gherond with (.*).$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Schism"
+            },
+            {
+                "GroupAsTarget": 2
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You)r fulcrum strips Gherond of the arcane defence.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Imbalance"
+            },
+            {
+                "Literal": "hit"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You)r fulcrum is already resonating with a dissonant effect.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Schism"
+            },
+            {
+                "Literal": "on"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You)r fulcrum is already resonating with an imbalancing effect.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Imbalance"
+            },
+            {
+                "Literal": "on"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    }
+]

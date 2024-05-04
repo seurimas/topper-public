@@ -163,20 +163,19 @@ impl ComboAttack {
         }
     }
 
-    pub fn can_hit(&self, limb: LType) -> bool {
+    pub fn can_be_parried_by(&self, limb: LType) -> bool {
         if Some(limb) == self.get_single_limb_target() {
             true
         } else {
             match (self, limb) {
-                (ComboAttack::Jab, LType::LeftArmDamage) => true,
-                (ComboAttack::Jab, LType::RightArmDamage) => true,
-                (ComboAttack::JabLeft, LType::LeftArmDamage) => true,
-                (ComboAttack::JabRight, LType::RightArmDamage) => true,
-                (ComboAttack::Lowhook, LType::LeftArmDamage) => true,
-                (ComboAttack::Lowhook, LType::RightArmDamage) => true,
-                (ComboAttack::LowhookLeft, LType::LeftArmDamage) => true,
-                (ComboAttack::LowhookRight, LType::RightArmDamage) => true,
-                (ComboAttack::Spinslash, _) => true,
+                (
+                    ComboAttack::Jab | ComboAttack::JabLeft | ComboAttack::JabRight,
+                    LType::LeftArmDamage | LType::RightArmDamage,
+                ) => true,
+                (
+                    ComboAttack::Lowhook | ComboAttack::LowhookLeft | ComboAttack::LowhookRight,
+                    LType::LeftLegDamage | LType::RightLegDamage,
+                ) => true,
                 _ => false,
             }
         }

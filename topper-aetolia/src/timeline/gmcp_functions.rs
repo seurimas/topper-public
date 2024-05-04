@@ -3,7 +3,7 @@ use topper_core::timeline::*;
 use crate::{
     classes::Class,
     db::*,
-    non_agent::{AetTimelineRoomExt, Direction, Room},
+    non_agent::{AetTimelineDenizenExt, AetTimelineRoomExt, Direction, Room},
     types::*,
 };
 
@@ -22,6 +22,7 @@ pub fn apply_gmcp<DB: AetDatabaseModule>(
             handle_room_players(&gmcp.1, timeline);
         }
         "gmcp.Char.Vitals" => handle_char_vitals(&gmcp.1, timeline),
+        "gmcp.Char.Items.List" => handle_item_list(&gmcp.1, timeline),
         "gmcp.Char.Items.Add" => handle_item_added(&gmcp.1, timeline),
         "gmcp.Char.Items.Remove" => handle_item_removed(&gmcp.1, timeline),
         _ => {}
@@ -75,22 +76,9 @@ fn handle_char_vitals(
             },
         );
     }
-    if let Some(dithering) = gmcp
-        .get("dithering")
-        .and_then(|dithering| dithering.as_str())
-        .and_then(|dithering| dithering.parse::<usize>().ok())
-    {
-        for_agent(
-            timeline,
-            &timeline.me.clone(),
-            &move |me: &mut AgentState| {
-                if let ClassState::Bard(class_state) = &mut me.class_state {
-                    class_state.dithering = dithering;
-                }
-            },
-        );
-    }
+    handle_bard_values(gmcp, timeline);
     handle_predator_values(gmcp, timeline);
+
     if let (Some(hp), Some(mp), Some(max_hp), Some(max_mp)) = (
         gmcp.get("hp")
             .and_then(|hp| hp.as_str())
@@ -119,6 +107,46 @@ fn handle_char_vitals(
                 }
             },
         );
+    }
+}
+
+fn handle_bard_values(
+    gmcp: &serde_json::Value,
+    timeline: &mut TimelineState<AgentState, crate::non_agent::AetNonAgent>,
+) {
+    if let Some(dithering) = gmcp
+        .get("dithering")
+        .and_then(|dithering| dithering.as_str())
+        .and_then(|dithering| dithering.parse::<usize>().ok())
+    {
+        for_agent(
+            timeline,
+            &timeline.me.clone(),
+            &move |me: &mut AgentState| {
+                if let ClassState::Bard(class_state) = &mut me.class_state {
+                    class_state.dithering = dithering;
+                }
+            },
+        );
+    }
+}
+
+fn handle_ascendril_values(
+    gmcp: &serde_json::Value,
+    timeline: &mut TimelineState<AgentState, crate::non_agent::AetNonAgent>,
+) {
+    if let Some(stance) = gmcp
+        .get("knife_stance")
+        .and_then(|stance| stance.as_str())
+        .map(KnifeStance::from_name)
+    {
+        for_agent(
+            timeline,
+            &timeline.me.clone(),
+            &move |me: &mut AgentState| {
+                me.assume_predator(&move |class_state| class_state.stance = stance);
+            },
+        )
     }
 }
 
@@ -248,9 +276,15 @@ fn handle_item_added(
                 } else {
                     None
                 };
+                if let Some(room_id) = in_room {
+                    println!("Added item");
+                    timeline.add_denizen(id, "".to_string(), room_id, name.to_string(), None);
+                }
                 timeline.for_all_agents(&|agent| {
                     if agent.class_state.get_normalized_class() == Some(Class::Bard) {
                         agent.assume_bard(&bard_add_item(id, name, in_room));
+                    } else if agent.class_state.get_normalized_class() == Some(Class::Ascendril) {
+                        agent.assume_ascendril(&ascendril_add_item(id, name, in_room));
                     }
                 });
             } else {
@@ -277,6 +311,10 @@ fn handle_item_removed(
                 } else {
                     None
                 };
+                if let Some(room_id) = in_room {
+                    println!("Lost item");
+                    timeline.observe_denizen_out_of_room(id, room_id);
+                }
                 timeline.for_all_agents(&|agent| {
                     if agent.class_state.get_normalized_class() == Some(Class::Bard) {
                         agent.assume_bard(&bard_remove_item(id, name, in_room));
@@ -284,6 +322,37 @@ fn handle_item_removed(
                 });
             } else {
                 println!("Item removed without name or id");
+            }
+        }
+    }
+}
+
+fn handle_item_list(
+    gmcp: &serde_json::Value,
+    timeline: &mut TimelineState<crate::types::AgentState, crate::non_agent::AetNonAgent>,
+) {
+    let in_room = if gmcp.get("location").and_then(|location| location.as_str()) == Some("room") {
+        Some(timeline.borrow_me().room_id)
+    } else {
+        None
+    };
+    if let Some(room_id) = in_room {
+        for denizen in timeline.find_denizens_in_room(room_id) {
+            timeline.observe_denizen_out_of_room(denizen, room_id);
+        }
+    }
+    if let Some(items) = gmcp.get("items").and_then(|items| items.as_array()) {
+        for item in items.iter() {
+            if let (Some(id), Some(name)) = (
+                item.get("id")
+                    .and_then(|id| id.as_str())
+                    .and_then(|id| id.parse::<i64>().ok()),
+                item.get("name").and_then(|name| name.as_str()),
+            ) {
+                if let Some(room_id) = in_room {
+                    println!("Counted item");
+                    timeline.add_denizen(id, "".to_string(), room_id, name.to_string(), None);
+                }
             }
         }
     }

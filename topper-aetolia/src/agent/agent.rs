@@ -31,6 +31,7 @@ pub struct AgentState {
     pub pipe_state: PipesState,
     pub bard_board: BardBoard,
     pub predator_board: PredatorBoard,
+    pub ascendril_board: AscendrilBoard,
     pub room_id: i64,
     pub elevation: Elevation,
 }
@@ -43,6 +44,7 @@ impl BaseAgentState for AgentState {
         self.class_state.wait(duration);
         self.dodge_state.wait(duration);
         self.pipe_state.wait(duration);
+        self.ascendril_board.wait(duration);
         self.bard_board.wait(duration);
         self.predator_board.wait(duration);
         self.channel_state.wait(duration);
@@ -129,10 +131,9 @@ impl BaseAgentState for AgentState {
         val.set_flag(FType::Player, true);
         val.set_flag(FType::Blindness, true);
         val.set_flag(FType::Deafness, true);
-        val.set_flag(FType::Temperance, true);
+        val.set_flag(FType::Arcane, true);
         val.set_flag(FType::Levitation, true);
         val.set_flag(FType::Speed, true);
-        val.set_flag(FType::Temperance, true);
         val.set_flag(FType::Vigor, true);
         val.set_flag(FType::Rebounding, true);
         val.set_flag(FType::Insomnia, true);
@@ -986,6 +987,23 @@ impl AgentState {
             timer: Timer::count_down_seconds(time),
             limb,
         };
+    }
+
+    pub fn assume_ascendril(&mut self, action: &Fn(&mut AscendrilClassState)) {
+        if let ClassState::Ascendril(ascendril) = &mut self.class_state {
+            action(ascendril);
+        } else {
+            self.class_state = ClassState::Ascendril(AscendrilClassState::default());
+            self.assume_ascendril(action);
+        }
+    }
+
+    pub fn check_if_ascendril<R>(&self, action: &Fn(&AscendrilClassState) -> R) -> Option<R> {
+        if let ClassState::Ascendril(ascendril) = &self.class_state {
+            Some(action(ascendril))
+        } else {
+            None
+        }
     }
 
     pub fn assume_zealot(&mut self, action: fn(&mut ZealotClassState)) {

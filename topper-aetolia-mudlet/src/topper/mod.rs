@@ -7,7 +7,7 @@ use std::sync::{Arc, RwLock};
 use topper_aetolia::bt::{clear_behavior_trees, DEBUG_TREES};
 use topper_aetolia::classes::{clear_aff_stacks, get_attack, VenomPlan};
 use topper_aetolia::defense::DEFENSE_DATABASE;
-use topper_aetolia::non_agent::{AetNonAgent, AetTimelineRoomExt};
+use topper_aetolia::non_agent::{AetNonAgent, AetTimelineDenizenExt, AetTimelineRoomExt};
 use topper_aetolia::timeline::*;
 use topper_aetolia::types::AgentState;
 use topper_core::observations;
@@ -225,6 +225,24 @@ impl TopperHandler<BattleStats> for AetTopper {
                         println!("{:?}", self.timeline_module.timeline.state.borrow_me());
                     } else {
                         println!("Debug mode off!");
+                    }
+                } else if "core".eq(module) && "debug room".eq(command) {
+                    let room = self.timeline_module.timeline.state.get_my_room();
+                    if let Some(room) = room {
+                        println!("{:?}", room);
+                        let denizens = self
+                            .timeline_module
+                            .timeline
+                            .state
+                            .find_denizens_in_room(room.id);
+                        for denizen in denizens {
+                            println!(
+                                "{:?}",
+                                self.timeline_module.timeline.state.borrow_denizen(denizen)
+                            );
+                        }
+                    } else {
+                        println!("No room.");
                     }
                 } else if "core".eq(module) && "reload triggers".eq(command) {
                     println!("Reloading triggers");

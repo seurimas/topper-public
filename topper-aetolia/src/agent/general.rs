@@ -258,9 +258,8 @@ pub enum FType {
     AssumedRebounding,
     // Elixirs
     Levitation,
-    VenomResistance,
+    Arcane,
     Speed,
-    Temperance,
     Vigor,
     // Salves
     Insulation,
@@ -536,7 +535,15 @@ pub enum FType {
     Seduction,
     Temptation,
 
+    // Newscendril Uncurable
+    AshenFeet,
+    Emberbrand,
+    Frostbrand,
+    Thunderbrand,
+    FrozenFeet,
+
     // Special
+    Unconscious,
     Disrupted,
     Fear,
     Fallen,
@@ -565,6 +572,9 @@ pub enum FType {
     Ablaze,
     SappedStrength,
     SelfLoathing,
+    Hobbled,
+    Direfrost,
+
     FULL,
     // Afflictions stored elsewhere
     HeadMangled,
@@ -1133,6 +1143,7 @@ impl DodgeState {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum ClassState {
+    Ascendril(AscendrilClassState),
     Zealot(ZealotClassState),
     Sentinel(SentinelClassState),
     Predator(PredatorClassState),
@@ -1153,12 +1164,20 @@ impl ClassState {
             }
             ClassState::Bard(bard_class_state) => bard_class_state.wait(duration),
             ClassState::Predator(predator_class_state) => predator_class_state.wait(duration),
+            // ClassState::Sentinel(sentinel_class_state) => sentinel_class_state.wait(duration),
+            ClassState::Infiltrator(infiltrator_class_state) => {
+                // infiltrator_class_state.wait(duration)
+            }
+            // ClassState::Shifter(howling_state) => howling_state.wait(duration),
+            // ClassState::Monk(monk_class_state) => monk_class_state.wait(duration),
+            ClassState::Ascendril(ascendril_class_state) => ascendril_class_state.wait(duration),
             _ => {}
         }
     }
 
     pub fn get_normalized_class(&self) -> Option<Class> {
         match self {
+            Self::Ascendril(_) => Some(Class::Ascendril),
             Self::Zealot(_) => Some(Class::Zealot),
             Self::Predator(_) => Some(Class::Predator),
             Self::Sentinel(_) => Some(Class::Sentinel),
@@ -1174,6 +1193,7 @@ impl ClassState {
     pub fn initialize_for_normalized_class(&mut self, class: Class) {
         if let Some(new_class_state) = match (&self, class) {
             // Already initialized,
+            (Self::Ascendril(_), Class::Ascendril) => None,
             (Self::Zealot(_), Class::Zealot) => None,
             (Self::Sentinel(_), Class::Sentinel) => None,
             (Self::Bard(_), Class::Bard) => None,
@@ -1182,6 +1202,7 @@ impl ClassState {
             (Self::Infiltrator(_), Class::Infiltrator) => None,
             (Self::Monk(_), Class::Monk) => None,
             // Changed.
+            (_, Class::Ascendril) => Some(Self::Ascendril(AscendrilClassState::default())),
             (_, Class::Zealot) => Some(Self::Zealot(ZealotClassState::default())),
             (_, Class::Sentinel) => Some(Self::Sentinel(SentinelClassState::default())),
             (_, Class::Bard) => Some(Self::Bard(BardClassState::default())),

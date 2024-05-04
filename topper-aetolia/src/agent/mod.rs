@@ -1,5 +1,6 @@
 pub mod agent;
 pub mod aggro;
+pub mod ascendril;
 pub mod bards;
 pub mod branching;
 pub mod general;
@@ -14,6 +15,7 @@ pub mod shapeshifter;
 pub mod zealot;
 pub use agent::*;
 pub use aggro::*;
+pub use ascendril::*;
 pub use bards::*;
 pub use branching::*;
 pub use general::*;

@@ -41,9 +41,15 @@ pub trait AetTimelineDenizenExt {
         status: Option<EvalStatus>,
     );
 
+    fn borrow_denizen(&self, denizen_id: i64) -> Option<&Denizen>;
+
     fn for_denizen(&mut self, denizen_id: i64, action: &Fn(&mut Denizen));
 
+    fn find_denizens_in_room(&mut self, room_id: i64) -> Vec<i64>;
+
     fn kill_denizen(&mut self, denizen_id: i64);
+
+    fn observe_denizen_out_of_room(&mut self, denizen_id: i64, room_id: i64);
 
     fn observe_denizen_in_room(&mut self, denizen_id: i64, room_id: i64);
 
@@ -76,6 +82,9 @@ impl AetTimelineDenizenExt for AetTimelineState {
             self.for_room(room_id, &|mut room| {
                 room.denizens.insert(denizen_id);
             });
+            self.for_denizen(denizen_id, &|mut denizen| {
+                denizen.room_id = room_id;
+            });
         } else {
             self.non_agent_states.insert(
                 key,
@@ -94,6 +103,12 @@ impl AetTimelineDenizenExt for AetTimelineState {
         }
     }
 
+    fn borrow_denizen(&self, denizen_id: i64) -> Option<&Denizen> {
+        self.non_agent_states
+            .get(&format_denizen_id(denizen_id))
+            .and_then(AetNonAgent::as_denizen)
+    }
+
     fn kill_denizen(&mut self, denizen_id: i64) {
         if let Some(room_id) = self.check_denizen(denizen_id, &|denizen| denizen.room_id) {
             self.for_room(room_id, &|mut room| {
@@ -103,6 +118,15 @@ impl AetTimelineDenizenExt for AetTimelineState {
         self.non_agent_states.remove(&format_denizen_id(denizen_id));
     }
 
+    fn observe_denizen_out_of_room(&mut self, denizen_id: i64, room_id: i64) {
+        let previous_room_id = self.check_denizen(denizen_id, &|denizen| denizen.room_id);
+        if let Some(previous_room_id) = previous_room_id {
+            self.for_room(previous_room_id, &|mut room| {
+                room.denizens.remove(&denizen_id);
+            });
+        }
+    }
+
     fn observe_denizen_in_room(&mut self, denizen_id: i64, room_id: i64) {
         let previous_room_id = self.check_denizen(denizen_id, &|denizen| denizen.room_id);
         if let Some(previous_room_id) = previous_room_id {
@@ -110,6 +134,9 @@ impl AetTimelineDenizenExt for AetTimelineState {
                 room.denizens.remove(&denizen_id);
             });
         }
+        self.for_denizen(denizen_id, &|mut denizen| {
+            denizen.room_id = room_id;
+        });
         self.for_room(room_id, &|mut room| {
             room.denizens.insert(denizen_id);
         })
@@ -127,6 +154,14 @@ impl AetTimelineDenizenExt for AetTimelineState {
             .and_then(AetNonAgent::as_denizen_mut)
         {
             action(denizen);
+        }
+    }
+
+    fn find_denizens_in_room(&mut self, room_id: i64) -> Vec<i64> {
+        if let Some(room) = self.get_room(room_id) {
+            room.denizens.iter().copied().collect()
+        } else {
+            vec![]
         }
     }
 

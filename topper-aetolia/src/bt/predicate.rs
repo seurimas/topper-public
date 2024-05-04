@@ -2,6 +2,7 @@ use serde::Deserialize;
 use serde::Serialize;
 use topper_bt::unpowered::*;
 
+use crate::classes::ascendril::AscendrilPredicate;
 use crate::classes::bard::BardPredicate;
 use crate::classes::get_affs_from_plan;
 use crate::classes::infiltrator::InfiltratorPredicate;
@@ -70,12 +71,15 @@ pub enum AetPredicate {
     AllAffs(AetTarget, Vec<FType>),
     SomeAffs(AetTarget, Vec<FType>),
     NoAffs(AetTarget, Vec<FType>),
+    AffCountEqual(AetTarget, usize, Vec<FType>),
     AffCountOver(AetTarget, usize, Vec<FType>),
     AffCountUnder(AetTarget, usize, Vec<FType>),
     // Limbs
     IsRestoring(AetTarget, LimbDescriptor),
     CanBreak(AetTarget, LimbDescriptor, f32),
     CanMangled(AetTarget, LimbDescriptor, f32),
+    LimbOver(AetTarget, LimbDescriptor, f32, bool),
+    AtLeastNLimbsOver(AetTarget, Vec<LimbDescriptor>, usize, f32, bool),
     // Priorities
     PriorityAffIs(AetTarget, FType),
     // Buffer/locks
@@ -119,6 +123,7 @@ pub enum AetPredicate {
     BardPredicate(AetTarget, BardPredicate),
     PredatorPredicate(AetTarget, PredatorPredicate),
     InfiltratorPredicate(AetTarget, InfiltratorPredicate),
+    AscendrilPredicate(AetTarget, AscendrilPredicate),
 }
 
 pub trait TargetPredicate {
@@ -240,6 +245,17 @@ impl UnpoweredFunction for AetPredicate {
                     UnpoweredFunctionState::Failed
                 }
             }
+            AetPredicate::AffCountEqual(target, count, affs) => {
+                if let Some(aff_count) = aff_counts(target, model, controller, affs) {
+                    if aff_count == *count {
+                        UnpoweredFunctionState::Complete
+                    } else {
+                        UnpoweredFunctionState::Failed
+                    }
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
             AetPredicate::AffCountOver(target, min_count, affs) => {
                 if let Some(aff_count) = aff_counts(target, model, controller, affs) {
                     if aff_count >= *min_count {
@@ -288,6 +304,56 @@ impl UnpoweredFunction for AetPredicate {
                         if target.get_limb_state(limb).hits_to_mangle(*damage) == 1 {
                             return UnpoweredFunctionState::Complete;
                         }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::LimbOver(target, limb_descriptor, damage, apply_restoration) => {
+                if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
+                    if let Some(target) = target.get_target(model, controller) {
+                        let mut limb_state = target.get_limb_state(limb);
+                        if limb_state.is_restoring && *apply_restoration {
+                            limb_state.assume_restore();
+                        }
+                        if limb_state.damage > *damage {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::AtLeastNLimbsOver(
+                target,
+                limbs,
+                min_count,
+                damage,
+                apply_restoration,
+            ) => {
+                let limbs = if limbs.len() == 0 {
+                    vec![
+                        LimbDescriptor::Static(LType::LeftArmDamage),
+                        LimbDescriptor::Static(LType::RightArmDamage),
+                        LimbDescriptor::Static(LType::LeftLegDamage),
+                        LimbDescriptor::Static(LType::RightLegDamage),
+                    ]
+                } else {
+                    limbs.clone()
+                };
+                if let Some(target_state) = target.get_target(model, controller) {
+                    let mut count = 0;
+                    for limb_descriptor in limbs {
+                        if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
+                            let mut limb_state = target_state.get_limb_state(limb);
+                            if limb_state.is_restoring && *apply_restoration {
+                                limb_state.assume_restore();
+                            }
+                            if limb_state.damage > *damage {
+                                count += 1;
+                            }
+                        }
+                    }
+                    if count >= *min_count {
+                        return UnpoweredFunctionState::Complete;
                     }
                 }
                 UnpoweredFunctionState::Failed
@@ -508,6 +574,13 @@ impl UnpoweredFunction for AetPredicate {
             }
             AetPredicate::InfiltratorPredicate(target, infiltrator_predicate) => {
                 if infiltrator_predicate.check(target, model, controller) {
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetPredicate::AscendrilPredicate(target, ascendril_predicate) => {
+                if ascendril_predicate.check(target, model, controller) {
                     UnpoweredFunctionState::Complete
                 } else {
                     UnpoweredFunctionState::Failed
