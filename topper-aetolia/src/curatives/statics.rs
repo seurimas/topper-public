@@ -420,8 +420,12 @@ lazy_static! {
 }
 
 lazy_static! {
-    pub static ref CALORIC_TORSO_ORDER: Vec<FType> =
-        vec![FType::Frozen, FType::Shivering, FType::Frigid];
+    pub static ref CALORIC_TORSO_ORDER: Vec<FType> = vec![
+        FType::Hypothermia,
+        FType::Frozen,
+        FType::Frigid,
+        FType::Shivering
+    ];
 }
 
 lazy_static! {
@@ -744,6 +748,20 @@ lazy_static! {
         for aff in WILLOW_ORDER.to_vec() {
             val.insert(aff, "willow".into());
         }
+        val
+    };
+}
+
+lazy_static! {
+    pub static ref ELIXIR_CURE_ORDERS: HashMap<String, Vec<FType>> = {
+        let mut val = HashMap::new();
+        val.insert("immunity".into(), vec![FType::Voyria]);
+        val
+    };
+    pub static ref ELIXIR_DEFENCES: HashMap<String, FType> = {
+        let mut val = HashMap::new();
+        val.insert("arcane".into(), FType::Arcane);
+        val.insert("levitation".into(), FType::Levitation);
         val
     };
 }

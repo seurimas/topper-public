@@ -47,7 +47,11 @@ pub fn get_action_plan(
 }
 
 fn add_hints(db: Option<&impl AetDatabaseModule>, controller: &mut BehaviorController) {
-    if let Some(db) = db {}
+    if let Some(db) = db {
+        if let Some(element) = db.get_hint(&"PRIMARY_ELEMENT".to_string()) {
+            controller.hint_plan("PRIMARY_ELEMENT".to_string(), element);
+        }
+    }
 }
 
 pub fn get_attack(

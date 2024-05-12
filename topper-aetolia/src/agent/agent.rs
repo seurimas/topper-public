@@ -90,9 +90,9 @@ impl BaseAgentState for AgentState {
         } else if self.is(FType::Weakvoid) && self.balanced(BType::Void) {
             self.set_flag(FType::Weakvoid, false);
         }
-        if self.is(FType::Manabarbs) && self.balanced(BType::Manabarbs) {
-            self.set_flag(FType::Manabarbs, false);
-        }
+        // if self.is(FType::Manabarbs) && self.balanced(BType::Manabarbs) {
+        //     self.set_flag(FType::Manabarbs, false);
+        // }
         if self.is(FType::WritheDartpinned) && self.balanced(BType::WritheDartpinned) {
             self.set_flag(FType::WritheDartpinned, false);
         }

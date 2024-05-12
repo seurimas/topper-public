@@ -30,6 +30,19 @@ impl LType {
             _ => LType::HeadDamage,
         }
     }
+
+    pub fn try_from_name(name: &String) -> Option<Self> {
+        match name.to_ascii_lowercase().as_ref() {
+            "head" => Some(LType::HeadDamage),
+            "torso" => Some(LType::TorsoDamage),
+            "left arm" => Some(LType::LeftArmDamage),
+            "right arm" => Some(LType::RightArmDamage),
+            "left leg" => Some(LType::LeftLegDamage),
+            "right leg" => Some(LType::RightLegDamage),
+            _ => None,
+        }
+    }
+
     pub fn to_string(&self) -> String {
         match self {
             LType::HeadDamage => "head".to_string(),

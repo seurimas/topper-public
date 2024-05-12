@@ -126,7 +126,7 @@
         "observation_name": "Proc"
     },
     {
-        "regex": "^(You)r fulcrum affects Gherond with (.*).$",
+        "regex": "^(You)r fulcrum affects (\\w+) with (.*).$",
         "args": [
             {
                 "GroupAsTarget": 1
@@ -138,10 +138,10 @@
                 "Literal": "Schism"
             },
             {
-                "GroupAsTarget": 2
+                "GroupAsTarget": 3
             },
             {
-                "Literal": ""
+                "GroupAsTarget": 2
             }
         ],
         "observation_name": "Proc"
@@ -208,5 +208,251 @@
             }
         ],
         "observation_name": "Proc"
+    },
+    {
+        "regex": "^The howling winds crash into either side of (\\w+), flipping them over and smashing them against the ground.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Elemancy"
+            },
+            {
+                "Literal": "Aeroblast"
+            },
+            {
+                "Literal": "hit"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^The brooding, relentless pressure leaves an indent upon (\\w+)'s brow, sinking into the Brand of Thunder.",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Elemancy"
+            },
+            {
+                "Literal": "Thunderclap"
+            },
+            {
+                "Literal": "branded"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^The Brand of Ember seared upon (\\w+) glows, rippling outward as swelting heat eminates from it.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Elemancy"
+            },
+            {
+                "Literal": "Emberbranded"
+            },
+            {
+                "Literal": "hit"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You)r (fire|water|air) glimpse affects (\\w+).$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Glimpsed"
+            },
+            {
+                "GroupAsTarget": 2
+            },
+            {
+                "GroupAsTarget": 3
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^Glowing a brilliant white, the direfrost upon (\\w+)'s skin begins to quickly spread across their body with the sound of snapping ice.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Elemancy"
+            },
+            {
+                "Literal": "Direfrost"
+            },
+            {
+                "Literal": "direfrosted"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^The gleaming fractals of direfrost unite upon (\\w+)'s body, solidifying into the biting Brand of the Frost.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Elemancy"
+            },
+            {
+                "Literal": "Direfrost"
+            },
+            {
+                "Literal": "frostbranded"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^The Brand of the Frost pulses with blue-black light, (\\w+)'s face contorting against the excruciating, bone-deep ache of cold.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Elemancy"
+            },
+            {
+                "Literal": "Frostbrand"
+            },
+            {
+                "Literal": "hit"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^Limned with ice, (\\w+)'s skin becomes a pale blue beneath the Brand of the Frost's chilling grasp.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Elemancy"
+            },
+            {
+                "Literal": "Frostbrand"
+            },
+            {
+                "Literal": "hypothermia"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^Winding through the air, an ice shard buries itself into (\\w+)'s (.*).$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Elemancy"
+            },
+            {
+                "Literal": "Shatter"
+            },
+            {
+                "GroupAsTarget": 2
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^A vicious icicle launches through the sky and pierces into (\\w+)'s stomach with its pointed tip.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Elemancy"
+            },
+            {
+                "Literal": "Icicle"
+            },
+            {
+                "Literal": "hit"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^The Frostbrand fades away from (\\w+)'s body.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "frostbrand"
+            }
+        ],
+        "observation_name": "DiscernedCure"
+    },
+    {
+        "regex": "^The Emberbrand fades away from (\\w+)'s forehead.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "emberbrand"
+            }
+        ],
+        "observation_name": "DiscernedCure"
+    },
+    {
+        "regex": "^The Thunderbrand fades away from (\\w+)'s forehead.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "thunderbrand"
+            }
+        ],
+        "observation_name": "DiscernedCure"
     }
 ]

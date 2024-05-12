@@ -42,6 +42,21 @@
     "observation_name": "SimpleCure"
   },
   {
+    "regex": "^(\\w+) drinks an elixir of the (\\w+) from",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Elixir"
+      },
+      {
+        "GroupAsTarget": 2
+      }
+    ],
+    "observation_name": "SimpleCure"
+  },
+  {
     "regex": "^(\\w+) takes? a long drag off (\\w+) pipe filled with (\\w+).$",
     "args": [
       {

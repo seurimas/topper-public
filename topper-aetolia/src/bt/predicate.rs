@@ -22,7 +22,7 @@ use super::BehaviorController;
 use super::BehaviorModel;
 use super::LimbDescriptor;
 
-pub const QUEUE_TIME: f32 = 0.25;
+pub const QUEUE_TIME: f32 = 0.01;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Copy)]
 pub enum AetTarget {
@@ -102,6 +102,7 @@ pub enum AetPredicate {
     HasBalanceEquilibrium(AetTarget),
     HasBalance(AetTarget),
     HasEquilibrium(AetTarget),
+    HasHandBalance(AetTarget),
     BalanceUnder(AetTarget, BType, f32),
     BalanceOver(AetTarget, BType, f32),
     HasTree(AetTarget, f32),
@@ -473,6 +474,16 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::HasEquilibrium(target) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.get_balance(BType::Equil) < QUEUE_TIME {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::HasHandBalance(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.get_balance(BType::LeftHandBalance) < QUEUE_TIME
+                        || target.get_balance(BType::RightHandBalance) < QUEUE_TIME
+                    {
                         return UnpoweredFunctionState::Complete;
                     }
                 }

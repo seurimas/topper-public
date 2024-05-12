@@ -44,6 +44,7 @@ impl AscendrilBoard {
     pub fn wait(&mut self, time: CType) {
         self.sunspot.wait(time);
         self.icicle_timer.wait(time);
+        self.aeroblast.wait(time);
     }
 
     pub fn sunspot(&mut self) {
@@ -72,7 +73,9 @@ impl AscendrilBoard {
     }
 
     pub fn shatter(&mut self) {
-        self.shattering = true;
+        if self.icicles > 0 {
+            self.shattering = true;
+        }
     }
 
     pub fn shatter_down(&mut self) {
@@ -124,11 +127,12 @@ pub enum Element {
 pub struct AscendrilClassState {
     fulcrum_up: bool,
     fulcrum_expanded: Option<i64>,
+    fulcrum_glimpse: Option<(Timer, Element)>,
     schism: bool,
     imbalance: bool,
     enrich_timer: Timer,
     resonance: Option<(Element, i32)>,
-    fireburst: i32,
+    fireburst: Option<(Timer, i32)>,
     afterburn_raising: Timer,
     afterburn_up: Timer,
     my_phenomenon: Option<Phenomena>,
@@ -140,6 +144,12 @@ impl AscendrilClassState {
         self.afterburn_raising.wait(time);
         self.afterburn_up.wait(time);
         self.enrich_timer.wait(time);
+        if let Some((timer, _)) = &mut self.fulcrum_glimpse {
+            timer.wait(time);
+        }
+        if let Some((timer, _)) = &mut self.fireburst {
+            timer.wait(time);
+        }
     }
 
     pub fn try_claim(&mut self, phenomenon: PhenomenaState) {
@@ -191,6 +201,26 @@ impl AscendrilClassState {
         self.fulcrum_expanded == Some(room_id)
     }
 
+    pub fn fulcrum_glimpse(&mut self, element: Element) {
+        self.fulcrum_glimpse = Some((Timer::count_down_seconds(60.), element));
+    }
+
+    pub fn is_glimpse_active(&self, element: Option<Element>) -> bool {
+        if let Some((timer, glimpse)) = &self.fulcrum_glimpse {
+            if let Some(element) = element {
+                if *glimpse == element {
+                    timer.is_active()
+                } else {
+                    false
+                }
+            } else {
+                timer.is_active()
+            }
+        } else {
+            false
+        }
+    }
+
     pub fn schism_on(&mut self) {
         self.schism = true;
     }
@@ -229,27 +259,37 @@ impl AscendrilClassState {
     }
 
     pub fn fireburst_fill(&mut self) {
-        self.fireburst = 4;
+        self.fireburst = Some((Timer::count_down_seconds(60.), 4));
     }
 
     pub fn fireburst_decrement(&mut self) {
-        self.fireburst -= 1;
-        if self.fireburst < 0 {
-            self.fireburst = 0;
+        if let Some((timer, stacks)) = &mut self.fireburst {
+            *stacks -= 1;
+            if *stacks == 0 {
+                timer.expire();
+            }
         }
     }
 
     pub fn fireburst_stacks(&self) -> i32 {
-        self.fireburst
+        if let Some((timer, stacks)) = &self.fireburst {
+            if timer.is_active() {
+                *stacks
+            } else {
+                0
+            }
+        } else {
+            0
+        }
     }
 
     pub fn raise_afterburn(&mut self) {
-        self.afterburn_raising = Timer::count_down_seconds(2.);
+        self.afterburn_raising = Timer::count_down_seconds(5.);
     }
 
     pub fn get_afterburn(&mut self) {
         self.afterburn_raising.expire();
-        self.afterburn_up = Timer::count_down_seconds(16.);
+        self.afterburn_up = Timer::count_down_seconds(40.);
     }
 
     pub fn lose_afterburn(&mut self) {

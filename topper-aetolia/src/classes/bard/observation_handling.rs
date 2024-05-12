@@ -226,7 +226,7 @@ pub fn handle_weaving_action(
                 &combat_action.target,
                 &|me: &mut AgentState| {
                     me.set_flag(FType::Manabarbs, true);
-                    me.set_balance(BType::Manabarbs, 8.);
+                    // me.set_balance(BType::Manabarbs, 8.);
                 },
             );
         }

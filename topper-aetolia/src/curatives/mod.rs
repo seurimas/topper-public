@@ -64,6 +64,8 @@ pub fn handle_simple_cure_action(
             if let Some(AetObservation::Proc(proc)) = observations.get(1) {
                 if proc.skill.eq("Sear") {
                     seared = true;
+                } else {
+                    apply_or_infer_cure(me, &cure_type, &observations, first_person);
                 }
             } else if let Some(AetObservation::DiscernedCure(who, what)) = observations.get(1) {
                 if what.eq("void") || what.eq("weakvoid") {
@@ -103,6 +105,12 @@ pub fn handle_simple_cure_action(
                         me.pipe_state.puff(&herb);
                     }
                 }
+                SimpleCure::Elixir(elixir_name) => match elixir_name.as_ref() {
+                    "Health" | "Mana" | "Infusion" => {
+                        apply_or_infer_balance(me, (BType::Elixir, 4.75), &observations);
+                    }
+                    _ => apply_or_infer_balance(me, (BType::Elixir, 1.4), &observations),
+                },
             };
         },
     );

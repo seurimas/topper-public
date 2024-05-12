@@ -101,6 +101,7 @@ pub enum SimpleCure {
     Pill(String),
     Salve(String, String),
     Smoke(String),
+    Elixir(String),
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
@@ -124,6 +125,12 @@ impl SimpleCureAction {
     pub fn salve(caster: &str, salve: &str, location: &str) -> Self {
         SimpleCureAction {
             cure_type: SimpleCure::Salve(salve.to_string(), location.to_string()),
+            caster: caster.to_string(),
+        }
+    }
+    pub fn elixir(caster: &str, elixir: &str) -> Self {
+        SimpleCureAction {
+            cure_type: SimpleCure::Elixir(elixir.to_string()),
             caster: caster.to_string(),
         }
     }

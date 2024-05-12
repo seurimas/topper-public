@@ -39,6 +39,38 @@ mod timeline_tests {
     }
 
     #[test]
+    fn test_caloric_with_tree() {
+        let mut timeline = AetTimeline::new();
+        timeline.state.for_agent(
+            &"Benedicto".into(),
+            &move |updated_bene: &mut AgentState| {
+                updated_bene.set_flag(FType::Shivering, true);
+                updated_bene.set_flag(FType::Frigid, true);
+            },
+        );
+        let caloric_tree_slice = AetTimeSlice {
+            observations: Some(vec![
+                AetObservation::SimpleCureAction(SimpleCureAction {
+                    caster: "Benedicto".into(),
+                    cure_type: SimpleCure::Salve("caloric".into(), "torso".into()),
+                }),
+                CombatAction::observation("Benedicto", "Tattoos", "Tree", "", ""),
+                AetObservation::DiscernedCure("Benedicto".into(), "shivering".into()),
+            ]),
+            lines: vec![],
+            gmcp: Vec::new(),
+            prompt: AetPrompt::Blackout,
+            time: 0,
+            me: "Seurimas".into(),
+        };
+        timeline.push_time_slice(caloric_tree_slice, None as Option<&DummyDatabaseModule>);
+        let bene_state = timeline.state.borrow_agent(&"Benedicto".to_string());
+        assert_eq!(bene_state.balanced(BType::Salve), false);
+        assert_eq!(bene_state.is(FType::Frigid), false);
+        assert_eq!(bene_state.is(FType::Shivering), false);
+    }
+
+    #[test]
     fn test_mending() {
         let mut timeline = AetTimeline::new();
         timeline

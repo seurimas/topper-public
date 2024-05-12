@@ -1,13 +1,13 @@
-use crate::bt::BehaviorController;
+use crate::bt::{AetTarget, BehaviorController, BehaviorModel};
 use crate::curatives::{
     get_firstaid_settings_for_class, get_firstaid_settings_no_class, FirstAidSetting, SafetyAlert,
     MENTAL_AFFLICTIONS, RANDOM_CURES,
 };
 use crate::db::AetDatabaseModule;
 use crate::non_agent::AetNonAgent;
-use crate::observables::*;
 use crate::timeline::*;
 use crate::types::*;
+use crate::{observables::*, targetted_action};
 use num_enum::TryFromPrimitive;
 use regex::Regex;
 use std::collections::HashMap;
@@ -582,6 +582,24 @@ pub fn handle_combat_action(
                         );
                     },
                 );
+                Ok(())
+            }
+            _ => Ok(()),
+        },
+        "Vision" => match combat_action.skill.as_ref() {
+            "Contemplate" => {
+                let max = match combat_action.target.parse() {
+                    Ok(max) => max,
+                    Err(_) => 5000,
+                };
+                let current = match combat_action.annotation.parse() {
+                    Ok(current) => current,
+                    Err(_) => 0,
+                };
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.set_stat(SType::Mana, current);
+                    me.set_max_stat(SType::Mana, max);
+                });
                 Ok(())
             }
             _ => Ok(()),
@@ -1301,6 +1319,8 @@ impl ActiveTransition for RestoreAction {
         Ok(format!("restore"))
     }
 }
+
+targetted_action!(Contemplate, "contemplate {}");
 
 pub struct ParryAction {
     caster: String,

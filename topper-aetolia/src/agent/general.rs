@@ -149,6 +149,8 @@ pub enum BType {
     Balance,
     Equil,
     Secondary,
+    LeftHandBalance,
+    RightHandBalance,
 
     // Curatives
     Elixir,
@@ -165,20 +167,20 @@ pub enum BType {
     ClassCure2,
 
     // Cooldowns
-    Wrath,
-    Firefist,
-    Pendulum,
-    Disable,
-    Disabled,
+    ClassAttack1,
+    ClassAttack2,
+    ClassAttack3,
+    ClassAttack4,
 
     // Timers
+    // Disabled,
     Hypnosis,
     Fangbarrier,
     Rebounding,
     Void,
     ParesisParalysis,
     SelfLoathing,
-    Manabarbs,
+    // Manabarbs,
     Pacifism,
     Shock,
     Burnout,
@@ -200,8 +202,26 @@ impl BType {
             "Balance" => BType::Balance,
             "Equilibrium" => BType::Equil,
             "Shadow" => BType::Secondary,
+            "Left Hand Balance" => BType::LeftHandBalance,
+            "Right Hand Balance" => BType::RightHandBalance,
             _ => BType::UNKNOWN,
         }
+    }
+
+    pub fn wrath() -> Self {
+        BType::ClassAttack1
+    }
+
+    pub fn firefist() -> Self {
+        BType::ClassAttack2
+    }
+
+    pub fn pendulum() -> Self {
+        BType::ClassAttack3
+    }
+
+    pub fn disable() -> Self {
+        BType::ClassAttack4
     }
 }
 
@@ -509,6 +529,7 @@ pub enum FType {
     Asleep,
     Shock,
     Burnout,
+    Muddled,
 
     // Monk Uncurable
     NumbArms,
@@ -545,6 +566,7 @@ pub enum FType {
     // Special
     Unconscious,
     Disrupted,
+    Dazed,
     Fear,
     Fallen,
     Itchy,

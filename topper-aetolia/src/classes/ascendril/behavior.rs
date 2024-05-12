@@ -3,7 +3,7 @@ use topper_bt::unpowered::*;
 
 use crate::{
     bt::*,
-    classes::{get_venoms_from_plan, group::*, ActiveTransition},
+    classes::{get_venoms_from_plan, group::*, ActiveTransition, Contemplate},
     curatives::get_cure_depth,
     items::{UnwieldAction, WieldAction},
     non_agent::AetTimelineRoomExt,
@@ -19,20 +19,22 @@ pub enum AscendrilBehavior {
     Spark(AetTarget),
     AshenFeet(AetTarget),
     FireburstCast,
-    Fireburst(AetTarget),
+    Fireburst(AetTarget, bool),
     Blazewhirl(AetTarget),
-    Conflagrate(AetTarget),
+    // Conflagrate(AetTarget),
     Afterburn,
     Sunspot(AetTarget),
     Pyroclast(AetTarget, bool),
     Disintegrate(AetTarget, bool),
     // Water spells
     Coldsnap,
+    Drench(AetTarget, bool),
     Iceray(AetTarget),
     Glazeflow(AetTarget),
-    Direfrost(AetTarget),
+    // Direfrost(AetTarget),
     Icicle(AetTarget),
-    Crystalize(AetTarget, bool),
+    Shatter(AetTarget),
+    Crystalise(AetTarget, bool, bool),
     Winterheart(bool),
     // Air spells
     Windlance(AetTarget),
@@ -52,6 +54,13 @@ pub enum AscendrilBehavior {
     EnrichFire,
     EnrichWater,
     EnrichAir,
+    GlimpseFire,
+    GlimpseWater,
+    GlimpseAir,
+    Flare(AetTarget),
+    Emberbrand(AetTarget, bool),
+    Frostbrand(AetTarget, bool),
+    Thunderbrand(AetTarget, bool),
 }
 
 impl UnpoweredFunction for AscendrilBehavior {
@@ -75,12 +84,30 @@ impl UnpoweredFunction for AscendrilBehavior {
                 UnpoweredFunctionState::Complete
             }
             AscendrilBehavior::FireburstCast => {
+                let me = model.state.borrow_me();
+                if me
+                    .check_if_ascendril(&|me| me.fireburst_stacks() > 0)
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
                 let action = FireburstCast::new(model.who_am_i());
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
-            AscendrilBehavior::Fireburst(target) => {
+            AscendrilBehavior::Fireburst(target, plain) => {
+                let me = model.state.borrow_me();
+                if !me
+                    .check_if_ascendril(&|me| me.fireburst_stacks() > 0)
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
                 let action = Fireburst::from_target(target, model, controller);
+                if *plain {
+                    controller.plan.add_to_plain(Box::new(action));
+                    return UnpoweredFunctionState::Complete;
+                }
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
@@ -89,11 +116,11 @@ impl UnpoweredFunction for AscendrilBehavior {
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
-            AscendrilBehavior::Conflagrate(target) => {
-                let action = Conflagrate::from_target(target, model, controller);
-                controller.plan.add_to_qeb(Box::new(action));
-                UnpoweredFunctionState::Complete
-            }
+            // AscendrilBehavior::Conflagrate(target) => {
+            //     let action = Conflagrate::from_target(target, model, controller);
+            //     controller.plan.add_to_qeb(Box::new(action));
+            //     UnpoweredFunctionState::Complete
+            // }
             AscendrilBehavior::Afterburn => {
                 let action = Afterburn::new(model.who_am_i());
                 controller.plan.add_to_qeb(Box::new(action));
@@ -110,7 +137,7 @@ impl UnpoweredFunction for AscendrilBehavior {
                     &me,
                     model.who_am_i(),
                     controller,
-                    Element::Air,
+                    Element::Fire,
                     *allow_enrich,
                 ) {
                     return UnpoweredFunctionState::Failed;
@@ -149,8 +176,20 @@ impl UnpoweredFunction for AscendrilBehavior {
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
-            AscendrilBehavior::Direfrost(target) => {
-                let action = Direfrost::from_target(target, model, controller);
+            // AscendrilBehavior::Direfrost(target) => {
+            //     let action = Direfrost::from_target(target, model, controller);
+            //     controller.plan.add_to_qeb(Box::new(action));
+            //     UnpoweredFunctionState::Complete
+            // }
+            AscendrilBehavior::Drench(target, contemplate) => {
+                let action = Drench::from_target(target, model, controller);
+                if *contemplate {
+                    controller
+                        .plan
+                        .add_to_plain(Box::new(Contemplate::from_target(
+                            target, model, controller,
+                        )));
+                }
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
@@ -159,18 +198,37 @@ impl UnpoweredFunction for AscendrilBehavior {
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
-            AscendrilBehavior::Crystalize(target, allow_enrich) => {
+            AscendrilBehavior::Shatter(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if !target.ascendril_board.icicles_active()
+                        || target.ascendril_board.shattering_active()
+                    {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                }
+                let action = Shatter::new(model.who_am_i());
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::Crystalise(target, allow_enrich, contemplate) => {
                 let me = model.state.borrow_me();
                 if !resonating_or_enrich(
                     &me,
                     model.who_am_i(),
                     controller,
-                    Element::Air,
+                    Element::Water,
                     *allow_enrich,
                 ) {
                     return UnpoweredFunctionState::Failed;
                 }
-                let action = Crystalize::from_target(target, model, controller);
+                if *contemplate {
+                    controller
+                        .plan
+                        .add_to_front_of_qeb(Box::new(Contemplate::from_target(
+                            target, model, controller,
+                        )));
+                }
+                let action = Crystalise::from_target(target, model, controller);
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
@@ -307,6 +365,107 @@ impl UnpoweredFunction for AscendrilBehavior {
                     return UnpoweredFunctionState::Failed;
                 }
                 let action = EnrichAir::new(model.who_am_i());
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::GlimpseFire => {
+                let me = model.state.borrow_me();
+                if !me.balanced(BType::Secondary) {
+                    return UnpoweredFunctionState::Failed;
+                } else if me
+                    .check_if_ascendril(&|me| me.is_glimpse_active(None))
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let action = GlimpseFire::new(model.who_am_i());
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::GlimpseWater => {
+                let me = model.state.borrow_me();
+                if !me.balanced(BType::Secondary) {
+                    return UnpoweredFunctionState::Failed;
+                } else if me
+                    .check_if_ascendril(&|me| me.is_glimpse_active(None))
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let action = GlimpseWater::new(model.who_am_i());
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::GlimpseAir => {
+                let me = model.state.borrow_me();
+                if !me.balanced(BType::Secondary) {
+                    return UnpoweredFunctionState::Failed;
+                } else if me
+                    .check_if_ascendril(&|me| me.is_glimpse_active(None))
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let action = GlimpseAir::new(model.who_am_i());
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::Flare(target) => {
+                let me = model.state.borrow_me();
+                if !me.balanced(BType::Secondary) {
+                    return UnpoweredFunctionState::Failed;
+                } else if !me
+                    .check_if_ascendril(&|me| me.is_glimpse_active(None))
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let action = Flare::from_target(target, model, controller);
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::Emberbrand(target, allow_enrich) => {
+                let me = model.state.borrow_me();
+                if !resonating_or_enrich(
+                    &me,
+                    model.who_am_i(),
+                    controller,
+                    Element::Fire,
+                    *allow_enrich,
+                ) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let action = Emberbrand::from_target(target, model, controller);
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::Frostbrand(target, allow_enrich) => {
+                let me = model.state.borrow_me();
+                if !resonating_or_enrich(
+                    &me,
+                    model.who_am_i(),
+                    controller,
+                    Element::Water,
+                    *allow_enrich,
+                ) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let action = Frostbrand::from_target(target, model, controller);
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::Thunderbrand(target, allow_enrich) => {
+                let me = model.state.borrow_me();
+                if !resonating_or_enrich(
+                    &me,
+                    model.who_am_i(),
+                    controller,
+                    Element::Air,
+                    *allow_enrich,
+                ) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let action = Thunderbrand::from_target(target, model, controller);
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }

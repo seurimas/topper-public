@@ -423,7 +423,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &move |me: &mut AgentState| {
                     apply_or_infer_balance(me, (BType::Equil, 3.0), &observations);
-                    me.set_balance(BType::Pendulum, 10.0);
+                    me.set_balance(BType::pendulum(), 10.0);
                 },
             );
             let annotation = combat_action.annotation.clone();
@@ -526,7 +526,7 @@ pub fn handle_combat_action(
                 agent_states,
                 &combat_action.caster,
                 &|me: &mut AgentState| {
-                    me.set_balance(BType::Firefist, 80.0);
+                    me.set_balance(BType::firefist(), 80.0);
                 },
             );
         }
@@ -535,7 +535,7 @@ pub fn handle_combat_action(
                 agent_states,
                 &combat_action.caster,
                 &|me: &mut AgentState| {
-                    me.set_balance(BType::Wrath, 30.0);
+                    me.set_balance(BType::wrath(), 30.0);
                 },
             );
         }
@@ -582,14 +582,14 @@ pub fn handle_combat_action(
                 agent_states,
                 &combat_action.caster,
                 &|me: &mut AgentState| {
-                    me.set_balance(BType::Disable, 90.0);
+                    me.set_balance(BType::ClassAttack4, 90.0);
                 },
             );
             for_agent(
                 agent_states,
                 &combat_action.target,
                 &|me: &mut AgentState| {
-                    me.set_balance(BType::Disabled, 12.0);
+                    // me.set_balance(BType::Disabled, 12.0);
                 },
             );
         }
@@ -621,7 +621,7 @@ fn value_pendulum(
     target_limbs: &LimbsState,
     counter: bool,
 ) -> f32 {
-    if me.get_balance(BType::Pendulum) < me.get_qeb_balance() {
+    if me.get_balance(BType::pendulum()) < me.get_qeb_balance() {
         if let (Some(timer), Some(limb)) =
             (you.limb_damage.restore_timer, you.limb_damage.restoring)
         {
@@ -691,7 +691,7 @@ fn value_disable<DB: AetDatabaseModule + ?Sized>(
     db: Option<(&DB, &String)>,
     _strategy: &String,
 ) -> f32 {
-    if !me.balanced(BType::Disable) {
+    if !me.balanced(BType::ClassAttack4) {
         0.0
     } else if (Some("tarot aeon") == disable || disable.is_none())
         && !me.is(FType::Speed)
@@ -975,7 +975,7 @@ fn main_stack(
     match action {
         ZealotAction::Wrath => (
             ComboType::Free,
-            if me.balanced(BType::Wrath) && you.limb_damage.get_total_damage() > 60.0 {
+            if me.balanced(BType::ClassAttack1) && you.limb_damage.get_total_damage() > 60.0 {
                 1.0
             } else {
                 0.0
@@ -1015,7 +1015,7 @@ fn main_stack(
             let target_limbs = you.get_limbs_state();
             (
                 ComboType::Free,
-                if me.is(FType::Firefist) || !me.balanced(BType::Firefist) {
+                if me.is(FType::Firefist) || !me.balanced(BType::firefist()) {
                     0.0
                 } else if me.is(FType::Zenith) && can_punch(me) {
                     1.0

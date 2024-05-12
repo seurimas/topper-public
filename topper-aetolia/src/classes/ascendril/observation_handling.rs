@@ -19,7 +19,7 @@ pub fn handle_combat_action(
             attack_afflictions(
                 agent_states,
                 &combat_action.target,
-                vec![FType::Blisters, FType::LimpVeins],
+                vec![FType::Blisters, FType::Impairment],
                 after,
             );
             for_agent(agent_states, &combat_action.caster, &|me| {
@@ -30,17 +30,26 @@ pub fn handle_combat_action(
         }
         // Afflicts with ashenfeet
         "Ashenfeet" => {
-            attack_afflictions(
-                agent_states,
-                &combat_action.target,
-                vec![FType::AshenFeet],
-                after,
-            );
-            for_agent(agent_states, &combat_action.caster, &|me| {
-                me.assume_ascendril(&|ascendril| {
-                    ascendril.cast_spell(Element::Fire);
+            if combat_action.annotation.eq("proc") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.toggle_flag(FType::AshenFeet, false);
+                    me.set_flag(FType::LeftLegCrippled, true);
+                    me.set_flag(FType::RightLegCrippled, true);
+                    me.set_flag(FType::Fallen, true);
                 });
-            });
+            } else {
+                attack_afflictions(
+                    agent_states,
+                    &combat_action.target,
+                    vec![FType::AshenFeet],
+                    after,
+                );
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.cast_spell(Element::Fire);
+                    });
+                });
+            }
         }
         // Gives me 4 stacks of fireburst, or hits for ablaze
         "Fireburst" => {
@@ -48,13 +57,13 @@ pub fn handle_combat_action(
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.assume_ascendril(&|ascendril| {
                         ascendril.fireburst_fill();
+                        ascendril.cast_spell(Element::Fire);
                     })
                 });
             } else {
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.assume_ascendril(&|ascendril| {
                         ascendril.fireburst_decrement();
-                        ascendril.cast_spell(Element::Fire);
                     });
                 });
                 for_agent(agent_states, &combat_action.target, &|me| {
@@ -82,6 +91,15 @@ pub fn handle_combat_action(
                 me.assume_ascendril(&|ascendril| {
                     ascendril.cast_spell(Element::Fire);
                 });
+            });
+        }
+        "Emberbranded" => {
+            for_agent(agent_states, &combat_action.caster, &|me| {
+                if me.is(FType::Clumsiness) {
+                    me.set_flag(FType::Weariness, true);
+                } else {
+                    me.set_flag(FType::Clumsiness, true);
+                }
             });
         }
         // Gives afterburn after a short wait
@@ -167,6 +185,27 @@ pub fn handle_combat_action(
                 });
             });
         }
+        "Frostbrand" => {
+            for_agent(agent_states, &combat_action.caster, &|me| {
+                me.observe_flag(FType::Frostbrand, true);
+                me.observe_flag(FType::Direfrost, false);
+            });
+            if combat_action.annotation.eq("hypothermia") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.set_flag(FType::Hypothermia, true);
+                    me.observe_flag(FType::Frozen, true);
+                    me.observe_flag(FType::Shivering, true);
+                    me.observe_flag(FType::Frigid, true);
+                });
+            } else {
+                attack_first_affliction(
+                    agent_states,
+                    &combat_action.caster,
+                    vec![FType::Shivering, FType::Frigid, FType::Frozen],
+                    after,
+                );
+            }
+        }
         /**
         If shivering, knock of balance. If frigid, strip levitation. If frozen, give disrupted.
         */
@@ -199,48 +238,84 @@ pub fn handle_combat_action(
         }
         // With shivering, gives direfrost.
         "Direfrost" => {
-            for_agent(agent_states, &combat_action.target, &|me| {
-                if me.is(FType::Shivering) {
+            if combat_action.annotation.eq("direfrosted") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
                     me.set_flag(FType::Direfrost, true);
-                }
-            });
-            for_agent(agent_states, &combat_action.caster, &|me| {
-                me.assume_ascendril(&|ascendril| {
-                    ascendril.cast_spell(Element::Water);
                 });
-            });
+            } else if combat_action.annotation.eq("frostbranded") {
+                for_agent(agent_states, &combat_action.target, &|me| {
+                    me.set_flag(FType::Frostbrand, true);
+                    me.set_flag(FType::Direfrost, false);
+                });
+            } else {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.cast_spell(Element::Water);
+                    });
+                });
+            }
         }
         // Gives 3 icicles.
         "Icicle" => {
-            for_agent(agent_states, &combat_action.target, &|me| {
-                me.ascendril_board.icicles_spawn();
-            });
-            for_agent(agent_states, &combat_action.caster, &|me| {
-                me.assume_ascendril(&|ascendril| {
-                    ascendril.cast_spell(Element::Water);
+            if combat_action.annotation.eq("hit") {
+                if let Some(AetObservation::Parry(who, _what)) = after.get(1) {
+                } else {
+                    attack_limb_damage(
+                        agent_states,
+                        &combat_action.caster,
+                        (LType::TorsoDamage, 10.0, true),
+                        after,
+                    );
+                    for_agent(agent_states, &combat_action.caster, &|me| {
+                        me.ascendril_board.icicles_hit();
+                    });
+                }
+            } else {
+                for_agent(agent_states, &combat_action.target, &|me| {
+                    me.ascendril_board.icicles_spawn();
                 });
-            });
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.cast_spell(Element::Water);
+                    });
+                });
+            }
         }
         // Shatters icicles.
         "Shatter" => {
-            for_agent(agent_states, &combat_action.target, &|me| {
-                me.ascendril_board.shatter();
-            });
-            for_agent(agent_states, &combat_action.caster, &|me| {
-                me.assume_ascendril(&|ascendril| {
-                    ascendril.cast_spell(Element::Water);
+            if let Some(limb) = LType::try_from_name(&combat_action.annotation) {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.ascendril_board.shatter_down();
                 });
-            });
+                if let Some(AetObservation::Parry(who, _what)) = after.get(1) {
+                } else {
+                    attack_limb_damage(
+                        agent_states,
+                        &combat_action.caster,
+                        (limb, 4.0, true),
+                        after,
+                    );
+                }
+            } else {
+                agent_states.for_all_agents(&|me| {
+                    me.ascendril_board.shatter();
+                });
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.cast_spell(Element::Water);
+                    });
+                });
+            }
         }
         // If no leivitation, give ice_encased. If shivering, give hobbled. If glazeflow in room, give frozen_feet.
-        "Crystalize" => {
+        "Crystalise" => {
             let glazeflow_in_room = phenomenon_in_room(
                 agent_states,
                 agent_states.get_room_id(),
                 PhenomenaState::Glazeflow,
             );
             for_agent(agent_states, &combat_action.target, &|me| {
-                if !me.is(FType::Levitation) {
+                if !me.is(FType::Speed) {
                     me.set_flag(FType::IceEncased, true);
                 }
                 if me.is(FType::Shivering) {
@@ -282,14 +357,11 @@ pub fn handle_combat_action(
                 });
             });
         }
-        // Gives vertigo and confusion. If they have thunderbrand, also cause recklessness.
+        // Gives vertigo and confusion.
         "Pressurize" => {
             for_agent(agent_states, &combat_action.target, &|me| {
                 me.set_flag(FType::Vertigo, true);
                 me.set_flag(FType::Confusion, true);
-                if me.is(FType::Thunderbrand) {
-                    me.set_flag(FType::Recklessness, true);
-                }
             });
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
@@ -323,21 +395,21 @@ pub fn handle_combat_action(
         }
         // Gives dizziness and stupidity. If they have both and another mental, give thunderbrand.
         "Thunderclap" => {
-            for_agent(agent_states, &combat_action.target, &|me| {
-                if me.is(FType::Dizziness)
-                    && me.is(FType::Stupidity)
-                    && me.affs_count(&MENTAL_AFFLICTIONS.to_vec()) >= 3
-                {
+            if combat_action.annotation.eq("branded") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
                     me.set_flag(FType::Thunderbrand, true);
-                }
-                me.set_flag(FType::Dizziness, true);
-                me.set_flag(FType::Stupidity, true);
-            });
-            for_agent(agent_states, &combat_action.caster, &|me| {
-                me.assume_ascendril(&|ascendril| {
-                    ascendril.cast_spell(Element::Air);
                 });
-            });
+            } else {
+                for_agent(agent_states, &combat_action.target, &|me| {
+                    me.set_flag(FType::Dizziness, true);
+                    me.set_flag(FType::Stupidity, true);
+                });
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.cast_spell(Element::Air);
+                    });
+                });
+            }
         }
         // Knocks unconcious.
         "Feedback" => {
@@ -353,22 +425,29 @@ pub fn handle_combat_action(
         // Gives vomiting and fallen. Aeroblasts.
         "Aeroblast" => {
             if combat_action.annotation.eq("hit") {
-                for_agent(agent_states, &combat_action.target, &|me| {
-                    me.set_flag(FType::Vomiting, true);
+                for_agent(agent_states, &combat_action.caster, &|me| {
                     me.set_flag(FType::Fallen, true);
+                    if me.is(FType::Confusion) && me.is(FType::Stupidity) {
+                        me.set_flag(FType::Dazed, true);
+                    }
+                    if me.is(FType::Dizziness) && me.is(FType::Vertigo) {
+                        me.set_flag(FType::Disrupted, true);
+                    }
+                    if me.is(FType::TorsoBroken) {
+                        me.set_flag(FType::Speed, false);
+                    }
                     me.ascendril_board.aeroblast_hit();
                 });
             } else {
                 for_agent(agent_states, &combat_action.target, &|me| {
                     me.ascendril_board.aeroblast();
                 });
-            }
-
-            for_agent(agent_states, &combat_action.caster, &move |me| {
-                me.assume_ascendril(&|ascendril| {
-                    ascendril.use_up_resonance();
+                for_agent(agent_states, &combat_action.caster, &move |me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.use_up_resonance();
+                    });
                 });
-            });
+            }
         }
         // Summons a stormwrath here.
         "Stormwrath" => {
@@ -412,6 +491,11 @@ pub fn handle_combat_action(
                 for_agent(agent_states, &combat_action.target, &|me| {
                     me.set_flag(aff, true);
                 });
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.schism_on();
+                    });
+                });
             } else if combat_action.annotation.eq("on") {
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.assume_ascendril(&|ascendril| {
@@ -425,6 +509,11 @@ pub fn handle_combat_action(
             if combat_action.annotation.eq("hit") {
                 for_agent(agent_states, &combat_action.target, &|me| {
                     me.set_flag(FType::Arcane, false);
+                });
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.imbalance_on();
+                    });
                 });
             } else if combat_action.annotation.eq("on") {
                 for_agent(agent_states, &combat_action.caster, &|me| {
@@ -466,6 +555,99 @@ pub fn handle_combat_action(
                     ascendril.enrich(element);
                 });
             });
+        }
+        "Branding" => {
+            let brand = match combat_action.annotation.as_str() {
+                "fire" => FType::Emberbrand,
+                "water" => FType::Frostbrand,
+                "air" => FType::Thunderbrand,
+                _ => {
+                    return Ok(());
+                }
+            };
+            for_agent(agent_states, &combat_action.caster, &|me| {
+                me.assume_ascendril(&|ascendril| {
+                    ascendril.use_up_resonance();
+                });
+            });
+            for_agent(agent_states, &combat_action.target, &|me| {
+                me.set_flag(brand, true);
+            });
+        }
+        // Fire glimpse.
+        "Inferno" => {
+            if combat_action.annotation.eq("start") {
+                let observations = after.clone();
+                for_agent(agent_states, &combat_action.caster, &move |me| {
+                    apply_or_infer_balance(me, (BType::Secondary, 8.0), &observations);
+                });
+            } else {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.fulcrum_glimpse(Element::Fire);
+                    });
+                });
+            }
+        }
+        // Water glimpse.
+        "Maelstrom" => {
+            if combat_action.annotation.eq("start") {
+                let observations = after.clone();
+                for_agent(agent_states, &combat_action.caster, &move |me| {
+                    apply_or_infer_balance(me, (BType::Secondary, 8.0), &observations);
+                });
+            } else {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.fulcrum_glimpse(Element::Water);
+                    });
+                });
+            }
+        }
+        // Air glimpse.
+        "Typhoon" => {
+            if combat_action.annotation.eq("start") {
+                let observations = after.clone();
+                for_agent(agent_states, &combat_action.caster, &move |me| {
+                    apply_or_infer_balance(me, (BType::Secondary, 8.0), &observations);
+                });
+            } else {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.fulcrum_glimpse(Element::Air);
+                    });
+                });
+            }
+        }
+        "Glimpsed" => {
+            match combat_action.annotation.as_str() {
+                "fire" => {
+                    for_agent(agent_states, &combat_action.target, &|me| {
+                        if me.is(FType::Blisters) {
+                            // More damage. Not tracked.
+                        }
+                    });
+                }
+                "water" => {
+                    for_agent(agent_states, &combat_action.target, &|me| {
+                        if me.is(FType::Hypothermia) {
+                            if me.is(FType::Shivering) {
+                                me.set_flag(FType::Frigid, true);
+                            } else if me.is(FType::Frigid) {
+                                me.set_flag(FType::Frozen, true);
+                            }
+                        }
+                    });
+                }
+                "air" => {
+                    for_agent(agent_states, &combat_action.target, &|me| {
+                        if me.is(FType::Vertigo) {
+                            me.set_flag(FType::Muddled, true);
+                        }
+                    });
+                }
+                _ => {}
+            }
         }
         _ => {}
     }

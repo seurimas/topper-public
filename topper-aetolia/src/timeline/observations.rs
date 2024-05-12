@@ -62,6 +62,9 @@ pub fn aet_observation_creator(
                     &arguments.get(2).unwrap(),
                     &arguments.get(3).unwrap(),
                 ),
+                "Elixir" => {
+                    SimpleCureAction::elixir(&arguments.get(0).unwrap(), &arguments.get(2).unwrap())
+                }
                 _ => panic!("Bad SimpleCure: {:?}", arguments),
             })
         }

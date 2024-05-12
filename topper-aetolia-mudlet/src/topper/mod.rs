@@ -230,6 +230,7 @@ impl TopperHandler<BattleStats> for AetTopper {
                     let room = self.timeline_module.timeline.state.get_my_room();
                     if let Some(room) = room {
                         println!("{:?}", room);
+                        let players = room.players.clone();
                         let denizens = self
                             .timeline_module
                             .timeline
@@ -239,6 +240,13 @@ impl TopperHandler<BattleStats> for AetTopper {
                             println!(
                                 "{:?}",
                                 self.timeline_module.timeline.state.borrow_denizen(denizen)
+                            );
+                        }
+                        for player in players.iter() {
+                            println!("{:?}", player);
+                            println!(
+                                "{:?}",
+                                self.timeline_module.timeline.state.borrow_agent(player)
                             );
                         }
                     } else {

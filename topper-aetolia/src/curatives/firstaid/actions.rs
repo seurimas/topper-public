@@ -19,6 +19,7 @@ impl ActiveTransition for SimpleCureAction {
             SimpleCure::Pill(pill) => Ok(format!("eat {}", pill)),
             SimpleCure::Salve(salve, location) => Ok(format!("apply {} to {}", salve, location)),
             SimpleCure::Smoke(herb) => Ok(format!("smoke {}", herb)),
+            SimpleCure::Elixir(elixir) => Ok(format!("sip {}", elixir)),
         }
     }
 }

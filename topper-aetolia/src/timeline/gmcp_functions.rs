@@ -277,7 +277,6 @@ fn handle_item_added(
                     None
                 };
                 if let Some(room_id) = in_room {
-                    println!("Added item");
                     timeline.add_denizen(id, "".to_string(), room_id, name.to_string(), None);
                 }
                 timeline.for_all_agents(&|agent| {
@@ -312,7 +311,6 @@ fn handle_item_removed(
                     None
                 };
                 if let Some(room_id) = in_room {
-                    println!("Lost item");
                     timeline.observe_denizen_out_of_room(id, room_id);
                 }
                 timeline.for_all_agents(&|agent| {
@@ -350,7 +348,6 @@ fn handle_item_list(
                 item.get("name").and_then(|name| name.as_str()),
             ) {
                 if let Some(room_id) = in_room {
-                    println!("Counted item");
                     timeline.add_denizen(id, "".to_string(), room_id, name.to_string(), None);
                 }
             }

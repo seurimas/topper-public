@@ -586,5 +586,26 @@
       }
     ],
     "observation_name": "Proc"
+  },
+  {
+    "regex": "^(\\w+)'s mana stands at (\\d+)/(\\d+).$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Vision"
+      },
+      {
+        "Literal": "Contemplate"
+      },
+      {
+        "GroupAsTarget": 2
+      },
+      {
+        "GroupAsTarget": 3
+      }
+    ],
+    "observation_name": "CombatAction"
   }
 ]

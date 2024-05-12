@@ -3,8 +3,8 @@ use crate::classes::{
     VENOM_AFFLICTS,
 };
 use crate::curatives::{
-    handle_simple_cure_action, remove_in_order, top_aff, CALORIC_TORSO_ORDER, PILL_CURE_ORDERS,
-    PILL_DEFENCES, SALVE_CURE_ORDERS, SMOKE_CURE_ORDERS,
+    handle_simple_cure_action, remove_in_order, top_aff, CALORIC_TORSO_ORDER, ELIXIR_CURE_ORDERS,
+    ELIXIR_DEFENCES, PILL_CURE_ORDERS, PILL_DEFENCES, SALVE_CURE_ORDERS, SMOKE_CURE_ORDERS,
 };
 use crate::db::AetDatabaseModule;
 use crate::non_agent::AetNonAgent;
@@ -357,6 +357,9 @@ pub fn apply_observation(
                 you.observe_flag(FType::Paralysis, false);
                 you.observe_flag(FType::LeftLegCrippled, false);
                 you.observe_flag(FType::RightLegCrippled, false);
+                you.set_flag(FType::Dazed, false);
+                you.set_flag(FType::Disrupted, false);
+                you.set_flag(FType::Unconscious, false);
             });
             if timeline.borrow_agent(who).is(FType::Backstrain) {
                 let after = after.clone();
@@ -1076,6 +1079,21 @@ pub fn apply_or_infer_cure(
                         }
                     }
                 }
+                SimpleCure::Elixir(elixir_name) => {
+                    if aff != FType::Void && aff != FType::Weakvoid {
+                        if let Some(order) = ELIXIR_CURE_ORDERS.get(elixir_name) {
+                            for elixir_aff in order.iter() {
+                                if *elixir_aff == aff {
+                                    break;
+                                } else {
+                                    who.observe_flag(*elixir_aff, false);
+                                }
+                            }
+                        } else if let Some(order) = ELIXIR_DEFENCES.get(elixir_name) {
+                            who.set_flag(*order, true);
+                        }
+                    }
+                }
             }
             who.toggle_flag(aff, false);
             found_cures.push(aff);
@@ -1119,6 +1137,19 @@ pub fn apply_or_infer_cure(
                                 who.observe_flag(*herb_aff, false);
                             }
                         }
+                    }
+                }
+                SimpleCure::Elixir(elixir_name) => {
+                    if let Some(order) = ELIXIR_CURE_ORDERS.get(elixir_name) {
+                        for elixir_aff in order.iter() {
+                            if *elixir_aff == def {
+                                break;
+                            } else {
+                                who.observe_flag(*elixir_aff, false);
+                            }
+                        }
+                    } else if let Some(defence) = ELIXIR_DEFENCES.get(elixir_name) {
+                        who.set_flag(*defence, true);
                     }
                 }
             }
@@ -1202,6 +1233,19 @@ pub fn apply_or_infer_cure(
                     return Err(format!("Could not find smoke {}", herb_name));
                 }
             } // _ => {}
+            SimpleCure::Elixir(elixir_name) => {
+                if let Some(order) = ELIXIR_CURE_ORDERS.get(elixir_name) {
+                    if first_person {
+                        for elixir_aff in order.iter() {
+                            who.observe_flag(*elixir_aff, false);
+                        }
+                    } else {
+                        remove_in_order(order.to_vec(), who);
+                    }
+                } else if let Some(order) = ELIXIR_DEFENCES.get(elixir_name) {
+                    who.set_flag(*order, true);
+                }
+            }
         }
     }
     Ok(found_cures)

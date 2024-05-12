@@ -80,6 +80,7 @@ macro_rules! targetted_action {
 #[derive(Default)]
 pub struct ActionPlan {
     who: String,
+    plain: Option<Box<dyn ActiveTransition>>,
     qeb: Option<Box<dyn ActiveTransition>>,
     back_qeb: Option<Box<dyn ActiveTransition>>,
     other: HashMap<BType, Box<dyn ActiveTransition>>,
@@ -95,6 +96,7 @@ impl ActionPlan {
     pub fn new(who: &str) -> Self {
         ActionPlan {
             who: who.to_string(),
+            plain: None,
             qeb: None,
             back_qeb: None,
             other: HashMap::new(),
@@ -145,6 +147,17 @@ impl ActionPlan {
         }
     }
 
+    pub fn add_to_plain(&mut self, action: Box<dyn ActiveTransition>) {
+        if self.plain.is_some() {
+            self.plain = self
+                .plain
+                .take()
+                .map(|old_plain| ActionPlan::join(old_plain, action));
+        } else {
+            self.plain = Some(action);
+        }
+    }
+
     pub fn queue_for(&mut self, bal: BType, action: Box<dyn ActiveTransition>) {
         self.other.insert(bal, action);
     }
@@ -165,6 +178,9 @@ impl ActionPlan {
             .map(|action| action.act(&timeline))
         {
             inputs = format!("{}%%qs {}", inputs, qs);
+        }
+        if let Some(Ok(plain)) = self.plain.as_ref().map(|action| action.act(&timeline)) {
+            inputs = format!("{};;{}", plain, inputs);
         }
         inputs
     }
