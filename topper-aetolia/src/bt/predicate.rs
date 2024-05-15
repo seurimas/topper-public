@@ -519,7 +519,7 @@ impl UnpoweredFunction for AetPredicate {
             }
             AetPredicate::BalanceUnder(target, balance, maximum) => {
                 if let Some(target) = target.get_target(model, controller) {
-                    if target.get_balance(*balance) < *maximum {
+                    if target.get_balance(*balance) <= *maximum {
                         return UnpoweredFunctionState::Complete;
                     }
                 }

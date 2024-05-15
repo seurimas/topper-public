@@ -210,7 +210,7 @@
         "observation_name": "Proc"
     },
     {
-        "regex": "^The howling winds crash into either side of (\\w+), flipping them over and smashing them against the ground.$",
+        "regex": "^The howling winds crash into either side of (\\w+), flipping .* over and smashing .* against the ground.$",
         "args": [
             {
                 "GroupAsTarget": 1

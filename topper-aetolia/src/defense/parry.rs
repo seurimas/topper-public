@@ -145,6 +145,16 @@ pub fn get_preferred_parry<DB: AetDatabaseModule + ?Sized>(
                     Ok(get_worst_damage(timeline, me).unwrap_or(LType::TorsoDamage))
                 }
             }
+            Class::Ascendril => {
+                let myself = timeline.state.borrow_agent(me);
+                if myself.ascendril_board.icicles_active()
+                    && !myself.ascendril_board.shattering_active()
+                {
+                    Ok(LType::TorsoDamage)
+                } else {
+                    Ok(LType::HeadDamage)
+                }
+            }
             Class::Wayfarer => {
                 let myself = timeline.state.borrow_agent(me);
                 let limbs_state = myself.get_limbs_state();

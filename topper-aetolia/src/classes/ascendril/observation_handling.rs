@@ -649,6 +649,12 @@ pub fn handle_combat_action(
                 _ => {}
             }
         }
+        "Flare" => {
+            let observations = after.clone();
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                apply_or_infer_balance(me, (BType::Secondary, 5.0), &observations);
+            });
+        }
         _ => {}
     }
     Ok(())

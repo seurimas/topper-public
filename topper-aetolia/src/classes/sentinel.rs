@@ -777,7 +777,6 @@ fn get_stack<'s>(
     let mut vec = db
         .and_then(|db| db.get_venom_plan(&format!("sentinel_{}", strategy)))
         .unwrap_or(get_simple_plan(DEFAULT_STACK.to_vec()));
-    println!("{:?}", you.can_parry());
     vec.retain(move |aff| match aff.affliction() {
         FType::Impatience
         | FType::Epilepsy

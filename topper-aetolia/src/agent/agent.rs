@@ -48,6 +48,7 @@ impl BaseAgentState for AgentState {
         self.bard_board.wait(duration);
         self.predator_board.wait(duration);
         self.channel_state.wait(duration);
+        self.flags.wait(duration);
         if let Some((cured_limb, heal_modifier, first_person)) = self.limb_damage.wait(duration) {
             if !first_person {
                 match self.get_restore_cure(cured_limb) {
@@ -99,9 +100,6 @@ impl BaseAgentState for AgentState {
         if self.is(FType::WritheWeb) && self.balanced(BType::WritheWeb) {
             self.set_flag(FType::WritheWeb, false);
         }
-        if self.is(FType::Voyria) && self.balanced(BType::Voyria) {
-            self.set_flag(FType::Voyria, false);
-        }
         if self.is(FType::SelfLoathing) {
             let observed = self.get_count(FType::SelfLoathing);
             if (observed <= 2 && self.get_balance(BType::SelfLoathing) < 3.)
@@ -113,12 +111,6 @@ impl BaseAgentState for AgentState {
                 );
                 self.observe_flag(FType::SelfLoathing, false);
             }
-        }
-        if self.is(FType::Shock) && self.balanced(BType::Shock) {
-            self.set_flag(FType::Shock, false);
-        }
-        if self.is(FType::Burnout) && self.balanced(BType::Burnout) {
-            self.set_flag(FType::Burnout, false);
         }
         if self.can_fill_pipe() {
             self.pipe_state.observe_can_fill_pipes();
@@ -340,12 +332,6 @@ impl AgentState {
             | FType::RightArmAmputated => {}
             _ => self.flags.set_flag(flag, value),
         }
-        if flag == FType::Shock && value {
-            self.set_balance(BType::Shock, SHOCK_TIME);
-        }
-        if flag == FType::Burnout && value {
-            self.set_balance(BType::Burnout, BURNOUT_TIME);
-        }
         if flag == FType::Rebounding {
             self.flags.set_flag(FType::AssumedRebounding, false);
         }
@@ -366,9 +352,6 @@ impl AgentState {
         }
         if value && flag == FType::WritheWeb {
             self.set_balance(BType::WritheWeb, 3.0);
-        }
-        if value && flag == FType::Voyria {
-            self.set_balance(BType::Voyria, 12.0);
         }
         match flag {
             FType::Zenith => {

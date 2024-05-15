@@ -37,7 +37,6 @@ pub struct AscendrilBoard {
     icicle_timer: Timer,
     shattering: bool,
     aeroblast: Timer,
-    aeroblast_electrified: bool,
 }
 
 impl AscendrilBoard {
@@ -89,29 +88,19 @@ impl AscendrilBoard {
     }
 
     pub fn aeroblast(&mut self) {
-        self.aeroblast = Timer::count_down_seconds(3.);
+        self.aeroblast = Timer::count_down_seconds(4.25);
     }
 
     pub fn aeroblast_hit(&mut self) {
         self.aeroblast.expire();
     }
 
-    pub fn aeroblast_hit_electrified(&mut self) {
-        self.aeroblast = Timer::count_down_seconds(3.);
-        self.aeroblast_electrified = true;
-    }
-
     pub fn aeroblast_down(&mut self) {
         self.aeroblast.expire();
-        self.aeroblast_electrified = false;
     }
 
     pub fn aeroblast_active(&self) -> bool {
         self.aeroblast.is_active()
-    }
-
-    pub fn aeroblast_electrified(&self) -> bool {
-        self.aeroblast_electrified
     }
 }
 
@@ -141,7 +130,12 @@ pub struct AscendrilClassState {
 
 impl AscendrilClassState {
     pub fn wait(&mut self, time: CType) {
-        self.afterburn_raising.wait(time);
+        if self.afterburn_raising.is_active() {
+            self.afterburn_raising.wait(time);
+            if !self.afterburn_raising.is_active() {
+                self.afterburn_up = Timer::count_down_seconds(40.);
+            }
+        }
         self.afterburn_up.wait(time);
         self.enrich_timer.wait(time);
         if let Some((timer, _)) = &mut self.fulcrum_glimpse {

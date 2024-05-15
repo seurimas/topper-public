@@ -122,6 +122,13 @@ impl UnpoweredFunction for AscendrilBehavior {
             //     UnpoweredFunctionState::Complete
             // }
             AscendrilBehavior::Afterburn => {
+                let me = model.state.borrow_me();
+                if me
+                    .check_if_ascendril(&|me| me.afterburn_active() || me.afterburn_coming_up())
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
                 let action = Afterburn::new(model.who_am_i());
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete

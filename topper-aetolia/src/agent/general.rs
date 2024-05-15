@@ -182,9 +182,6 @@ pub enum BType {
     SelfLoathing,
     // Manabarbs,
     Pacifism,
-    Shock,
-    Burnout,
-    Voyria,
 
     // Writhe
     WritheDartpinned,
@@ -520,17 +517,6 @@ pub enum FType {
     Shivering,
     Frigid,
 
-    // Immunity
-    Voyria,
-
-    // Timed
-    Blackout,
-    Stun,
-    Asleep,
-    Shock,
-    Burnout,
-    Muddled,
-
     // Monk Uncurable
     NumbArms,
 
@@ -564,9 +550,8 @@ pub enum FType {
     FrozenFeet,
 
     // Special
+    Asleep,
     Unconscious,
-    Disrupted,
-    Dazed,
     Fear,
     Fallen,
     Itchy,
@@ -596,6 +581,18 @@ pub enum FType {
     SelfLoathing,
     Hobbled,
     Direfrost,
+
+    // Timed affs
+    TIMED,
+    Blackout,
+    Stun,
+    Shock,
+    Burnout,
+    Muddled,
+    Disrupted,
+    Dazed,
+    // Immunity
+    Voyria,
 
     FULL,
     // Afflictions stored elsewhere
@@ -639,7 +636,10 @@ lazy_static! {
         let mut afflictions = Vec::new();
         for aff_idx in (FType::Sadness as u16).. {
             if let Ok(affliction) = FType::try_from(aff_idx) {
-                if affliction == FType::SIZE || affliction == FType::FULL {
+                if affliction == FType::SIZE
+                    || affliction == FType::FULL
+                    || affliction == FType::TIMED
+                {
                     continue;
                 }
                 afflictions.push(affliction);
@@ -701,7 +701,24 @@ impl FType {
     }
 
     pub fn is_counter(&self) -> bool {
-        self > &FType::SIZE && self < &FType::FULL
+        self > &FType::SIZE && self < &FType::TIMED
+    }
+
+    pub fn is_timed(&self) -> bool {
+        self > &FType::TIMED && self < &FType::FULL
+    }
+
+    pub fn default_time(&self) -> f32 {
+        match self {
+            FType::Blackout => 3.0,
+            FType::Stun => 1.0,
+            FType::Shock => 20.0,
+            FType::Burnout => 20.0,
+            FType::Muddled => 8.0,
+            FType::Disrupted => 1.8,
+            FType::Dazed => 2.8,
+            _ => 0.0,
+        }
     }
 
     pub fn afflictions() -> Vec<Self> {
@@ -721,20 +738,51 @@ impl FType {
     }
 }
 
-const COUNTERS_SIZE: usize = FType::FULL as usize - FType::SIZE as usize - 1;
+const COUNTERS_SIZE: usize = FType::TIMED as usize - FType::SIZE as usize - 1;
+const TIMERS_SIZE: usize = FType::FULL as usize - FType::TIMED as usize - 1;
 
 #[derive(PartialEq, Eq, Hash)]
 pub struct FlagSet {
     simple: [bool; FType::SIZE as usize],
     counters: [u8; COUNTERS_SIZE],
+    timed: [Timer; TIMERS_SIZE as usize],
 }
 
 impl FlagSet {
+    pub fn wait(&mut self, duration: CType) {
+        let confused = self.is_flag_set(FType::Confusion);
+        for (i, timer) in self.timed.iter_mut().enumerate() {
+            let flag = FType::try_from(i as u16 + FType::TIMED as u16 + 1).unwrap();
+            if flag == FType::Disrupted && confused {
+                continue;
+            }
+            timer.wait(duration);
+        }
+    }
+
+    fn get_counter(&self, flag: FType) -> u8 {
+        self.counters[flag as usize - FType::SIZE as usize - 1]
+    }
+
+    fn get_counter_mut(&mut self, flag: FType) -> &mut u8 {
+        &mut self.counters[flag as usize - FType::SIZE as usize - 1]
+    }
+
+    fn get_timer(&self, flag: FType) -> &Timer {
+        &self.timed[flag as usize - FType::TIMED as usize - 1]
+    }
+
+    fn get_timer_mut(&mut self, flag: FType) -> &mut Timer {
+        &mut self.timed[flag as usize - FType::TIMED as usize - 1]
+    }
+
     pub fn is_flag_set(&self, flag: FType) -> bool {
         if flag.is_mirror() {
             self.is_flag_set(flag.normalize())
         } else if flag.is_counter() {
-            self.counters[flag as usize - FType::SIZE as usize - 1] > 0
+            self.get_counter(flag) > 0
+        } else if flag.is_timed() {
+            self.get_timer(flag).is_active()
         } else {
             self.simple[flag as usize]
         }
@@ -744,7 +792,13 @@ impl FlagSet {
         if flag.is_mirror() {
             self.get_flag_count(flag.normalize())
         } else if flag.is_counter() {
-            self.counters[flag as usize - FType::SIZE as usize - 1]
+            self.get_counter(flag)
+        } else if flag.is_timed() {
+            if self.get_timer(flag).is_active() {
+                1
+            } else {
+                0
+            }
         } else {
             if self.simple[flag as usize] {
                 1
@@ -758,13 +812,18 @@ impl FlagSet {
         if flag.is_mirror() {
             self.set_flag(flag.normalize(), value);
         } else if flag.is_counter() {
-            let counter_idx = flag as usize - FType::SIZE as usize - 1;
-            let old_value = self.counters[counter_idx as usize];
+            let old_value = self.get_counter(flag);
             if value && old_value < 1 {
-                self.counters[counter_idx] = 1;
+                *self.get_counter_mut(flag) = 1;
             } else if !value && old_value > 0 {
-                self.counters[counter_idx] = 0;
+                *self.get_counter_mut(flag) = 0;
             }
+        } else if flag.is_timed() {
+            *self.get_timer_mut(flag) = if value {
+                Timer::count_down_seconds(flag.default_time())
+            } else {
+                Timer::default()
+            };
         } else {
             self.simple[flag as usize] = value;
         }
@@ -774,8 +833,13 @@ impl FlagSet {
         if flag.is_mirror() {
             self.set_flag_count(flag.normalize(), value);
         } else if flag.is_counter() {
-            let counter_idx = flag as usize - FType::SIZE as usize - 1;
-            self.counters[counter_idx] = value;
+            *self.get_counter_mut(flag) = value;
+        } else if flag.is_timed() {
+            *self.get_timer_mut(flag) = if value > 0 {
+                Timer::count_down_seconds(flag.default_time())
+            } else {
+                Timer::default()
+            };
         } else {
             self.simple[flag as usize] = value > 0;
         }
@@ -785,7 +849,7 @@ impl FlagSet {
         if flag.is_mirror() {
             self.tick_counter_up(flag.normalize());
         } else if flag.is_counter() {
-            self.counters[flag as usize - FType::SIZE as usize - 1] += 1;
+            *self.get_counter_mut(flag) += 1;
         } else {
             println!("Tried to tick up non-counter.");
         }
@@ -937,6 +1001,7 @@ impl Default for FlagSet {
         FlagSet {
             simple: [false; FType::SIZE as usize],
             counters: [0; COUNTERS_SIZE],
+            timed: [Timer::default(); TIMERS_SIZE as usize],
         }
     }
 }
@@ -946,6 +1011,7 @@ impl Clone for FlagSet {
         FlagSet {
             simple: self.simple,
             counters: self.counters,
+            timed: self.timed.clone(),
         }
     }
 }

@@ -188,10 +188,6 @@ lazy_static! {
 }
 
 lazy_static! {
-    static ref AFFLICTIONS: Vec<FType> = vec![];
-}
-
-lazy_static! {
     pub static ref ANTIPSYCHOTIC_ORDER: Vec<FType> = vec![
         FType::Sadness,
         FType::Confusion,

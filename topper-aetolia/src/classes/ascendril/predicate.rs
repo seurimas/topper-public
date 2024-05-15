@@ -19,7 +19,6 @@ pub enum AscendrilPredicate {
     IciclesOn,
     ShatteringOn,
     AeroblastOn,
-    AeroblastElectrified,
     FulcrumUp,
     FulcrumExpandedHere,
     AnyResonance(Element),
@@ -30,6 +29,8 @@ pub enum AscendrilPredicate {
     Afterburned,
     SchismOnHere,
     ImbalanceOnHere,
+    GlimpseOnHere(Option<Element>),
+    IsResonantOrCanEnrich(Element),
 }
 
 impl TargetPredicate for AscendrilPredicate {
@@ -64,9 +65,6 @@ impl TargetPredicate for AscendrilPredicate {
                 AscendrilPredicate::IciclesOn => target.ascendril_board.icicles_active(),
                 AscendrilPredicate::ShatteringOn => target.ascendril_board.shattering_active(),
                 AscendrilPredicate::AeroblastOn => target.ascendril_board.aeroblast_active(),
-                AscendrilPredicate::AeroblastElectrified => {
-                    target.ascendril_board.aeroblast_electrified()
-                }
                 AscendrilPredicate::FulcrumUp => target
                     .check_if_ascendril(&|me| me.fulcrum_active())
                     .unwrap_or(false),
@@ -107,6 +105,14 @@ impl TargetPredicate for AscendrilPredicate {
                     .unwrap_or(false),
                 AscendrilPredicate::Afterburned => target
                     .check_if_ascendril(&|me| me.afterburn_active())
+                    .unwrap_or(false),
+                AscendrilPredicate::GlimpseOnHere(element) => target
+                    .check_if_ascendril(&|me| me.is_glimpse_active(*element))
+                    .unwrap_or(false),
+                AscendrilPredicate::IsResonantOrCanEnrich(element) => target
+                    .check_if_ascendril(&|me| {
+                        me.resonance_active(element) || me.can_enrich(element)
+                    })
                     .unwrap_or(false),
             }
         } else {
