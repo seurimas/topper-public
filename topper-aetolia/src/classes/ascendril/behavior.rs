@@ -21,7 +21,7 @@ pub enum AscendrilBehavior {
     FireburstCast,
     Fireburst(AetTarget, bool),
     Blazewhirl(AetTarget),
-    // Conflagrate(AetTarget),
+    Conflagrate(AetTarget),
     Afterburn,
     Sunspot(AetTarget),
     Pyroclast(AetTarget, bool),
@@ -57,7 +57,7 @@ pub enum AscendrilBehavior {
     GlimpseFire,
     GlimpseWater,
     GlimpseAir,
-    Flare(AetTarget),
+    Flare(AetTarget, bool),
     Emberbrand(AetTarget, bool),
     Frostbrand(AetTarget, bool),
     Thunderbrand(AetTarget, bool),
@@ -116,11 +116,11 @@ impl UnpoweredFunction for AscendrilBehavior {
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
-            // AscendrilBehavior::Conflagrate(target) => {
-            //     let action = Conflagrate::from_target(target, model, controller);
-            //     controller.plan.add_to_qeb(Box::new(action));
-            //     UnpoweredFunctionState::Complete
-            // }
+            AscendrilBehavior::Conflagrate(target) => {
+                let action = Conflagrate::from_target(target, model, controller);
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
             AscendrilBehavior::Afterburn => {
                 let me = model.state.borrow_me();
                 if me
@@ -417,7 +417,7 @@ impl UnpoweredFunction for AscendrilBehavior {
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
-            AscendrilBehavior::Flare(target) => {
+            AscendrilBehavior::Flare(target, plain) => {
                 let me = model.state.borrow_me();
                 if !me.balanced(BType::Secondary) {
                     return UnpoweredFunctionState::Failed;
@@ -428,6 +428,10 @@ impl UnpoweredFunction for AscendrilBehavior {
                     return UnpoweredFunctionState::Failed;
                 }
                 let action = Flare::from_target(target, model, controller);
+                if *plain {
+                    controller.plan.add_to_plain(Box::new(action));
+                    return UnpoweredFunctionState::Complete;
+                }
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }

@@ -14,11 +14,13 @@ pub enum MonkComboAttack {
     Sweep,
     MoonkickLeft,
     MoonkickRight,
-    Cometkick,
+    // Cometkick,
+    Spinkick,
     Scythekick,
     Axe,
     Whirlwind,
     Jumpkick,
+    Thunderkick,
     // Throws, valid first attacks.
     Slam,
     WrenchLeftLeg,
@@ -35,6 +37,7 @@ pub enum MonkComboAttack {
     // Punches, non-first attacks.
     Jab,
     Hook,
+    Backfist,
     Uppercut,
     Palmstrike,
     HammerfistLeft,
@@ -55,8 +58,9 @@ impl MonkComboAttack {
             | MonkComboAttack::Sweep
             | MonkComboAttack::MoonkickLeft
             | MonkComboAttack::MoonkickRight
-            | MonkComboAttack::Cometkick
+            | MonkComboAttack::Spinkick
             | MonkComboAttack::Scythekick
+            | MonkComboAttack::Thunderkick
             | MonkComboAttack::Axe
             | MonkComboAttack::Whirlwind
             | MonkComboAttack::Jumpkick => true,
@@ -92,6 +96,7 @@ impl MonkComboAttack {
             MonkComboAttack::Jab
             | MonkComboAttack::Hook
             | MonkComboAttack::Uppercut
+            | MonkComboAttack::Backfist
             | MonkComboAttack::Palmstrike
             | MonkComboAttack::HammerfistLeft
             | MonkComboAttack::HammerfistRight
@@ -120,11 +125,13 @@ impl MonkComboAttack {
             MonkComboAttack::Sweep => "swk",
             MonkComboAttack::MoonkickLeft => "mnk left",
             MonkComboAttack::MoonkickRight => "mnk right",
-            MonkComboAttack::Cometkick => "cmk",
+            // MonkComboAttack::Cometkick => "cmk",
+            MonkComboAttack::Spinkick => "spk",
             MonkComboAttack::Scythekick => "sck",
             MonkComboAttack::Axe => "axk",
             MonkComboAttack::Whirlwind => "wwk",
             MonkComboAttack::Jumpkick => "jpk",
+            MonkComboAttack::Thunderkick => "tnk",
             MonkComboAttack::Slam => "slam",
             MonkComboAttack::WrenchLeftLeg => "wrt left leg",
             MonkComboAttack::WrenchRightLeg => "wrt right leg",
@@ -138,6 +145,7 @@ impl MonkComboAttack {
             MonkComboAttack::FeintTorso => "feint torso",
             MonkComboAttack::Jab => "jbp",
             MonkComboAttack::Hook => "hkp",
+            MonkComboAttack::Backfist => "bfp",
             MonkComboAttack::Uppercut => "ucp",
             MonkComboAttack::Palmstrike => "pmp",
             MonkComboAttack::HammerfistLeft => "hfp left",

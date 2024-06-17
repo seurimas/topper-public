@@ -231,6 +231,48 @@
         "observation_name": "Proc"
     },
     {
+        "regex": "^The powerful pressure causes a lack of blood flow to (\\w+)'s head, leaving .* with a lax expression.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Elemancy"
+            },
+            {
+                "Literal": "Pressurize"
+            },
+            {
+                "Literal": "laxity"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^The heated conflagration surrounds (\\w+), causing .* body to burst into flames.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Elemancy"
+            },
+            {
+                "Literal": "Conflagrate"
+            },
+            {
+                "Literal": "ablaze"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
         "regex": "^The brooding, relentless pressure leaves an indent upon (\\w+)'s brow, sinking into the Brand of Thunder.",
         "args": [
             {

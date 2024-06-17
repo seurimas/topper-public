@@ -11,7 +11,7 @@ targetted_action!(AshenFeet, "cast ashenfeet {}");
 untargetted_action!(FireburstCast, "cast fireburst");
 targetted_action!(Fireburst, "fireburst {}");
 targetted_action!(Blazewhirl, "cast blazewhirl {}");
-// targetted_action!(Conflagrate, "cast conflagrate {}");
+targetted_action!(Conflagrate, "cast conflagrate {}");
 untargetted_action!(Afterburn, "cast afterburn");
 targetted_action!(Sunspot, "cast sunspot {}");
 targetted_action!(Pyroclast, "cast pyroclast {}");

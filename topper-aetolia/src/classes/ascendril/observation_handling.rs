@@ -82,16 +82,27 @@ pub fn handle_combat_action(
         }
         // With ablaze, gives emberbrand.
         "Conflagrate" => {
-            for_agent(agent_states, &combat_action.target, &|me| {
-                if me.is(FType::Ablaze) {
-                    me.set_flag(FType::Emberbrand, true);
-                }
+            let ablaze = after.iter().any(|obs| match obs {
+                AetObservation::CombatAction(action) => action.annotation.eq("ablaze"),
+                _ => false,
             });
-            for_agent(agent_states, &combat_action.caster, &|me| {
-                me.assume_ascendril(&|ascendril| {
-                    ascendril.cast_spell(Element::Fire);
+            if combat_action.annotation.eq("ablaze") {
+                for_agent(agent_states, &combat_action.target, &|me| {
+                    me.set_flag(FType::Ablaze, true);
                 });
-            });
+            } else {
+                for_agent(agent_states, &combat_action.target, &|me| {
+                    me.set_flag(FType::Deafness, false);
+                });
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.cast_spell(Element::Fire);
+                        if ablaze {
+                            ascendril.cast_spell(Element::Fire);
+                        }
+                    });
+                });
+            }
         }
         "Emberbranded" => {
             for_agent(agent_states, &combat_action.caster, &|me| {
@@ -359,15 +370,31 @@ pub fn handle_combat_action(
         }
         // Gives vertigo and confusion.
         "Pressurize" => {
-            for_agent(agent_states, &combat_action.target, &|me| {
-                me.set_flag(FType::Vertigo, true);
-                me.set_flag(FType::Confusion, true);
+            let laxity = after.iter().any(|obs| match obs {
+                AetObservation::CombatAction(action) => action.annotation.eq("laxity"),
+                _ => false,
             });
-            for_agent(agent_states, &combat_action.caster, &|me| {
-                me.assume_ascendril(&|ascendril| {
-                    ascendril.cast_spell(Element::Air);
+            if combat_action.annotation.eq("laxity") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.set_flag(FType::Laxity, true);
                 });
-            });
+            } else {
+                for_agent(agent_states, &combat_action.target, &|me| {
+                    me.set_flag(FType::Vertigo, true);
+                    me.set_flag(FType::Confusion, true);
+                    if laxity {
+                        me.set_flag(FType::Laxity, true);
+                    }
+                });
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.cast_spell(Element::Air);
+                        if laxity {
+                            ascendril.cast_spell(Element::Air);
+                        }
+                    });
+                });
+            }
         }
         // Gives paresis or turns into paralysis.
         "Arcbolt" => {
@@ -427,9 +454,6 @@ pub fn handle_combat_action(
             if combat_action.annotation.eq("hit") {
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.set_flag(FType::Fallen, true);
-                    if me.is(FType::Confusion) && me.is(FType::Stupidity) {
-                        me.set_flag(FType::Dazed, true);
-                    }
                     if me.is(FType::Dizziness) && me.is(FType::Vertigo) {
                         me.set_flag(FType::Disrupted, true);
                     }

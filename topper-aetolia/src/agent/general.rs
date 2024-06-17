@@ -717,6 +717,7 @@ impl FType {
             FType::Muddled => 8.0,
             FType::Disrupted => 1.8,
             FType::Dazed => 2.8,
+            FType::Voyria => 22.0,
             _ => 0.0,
         }
     }
@@ -751,10 +752,13 @@ pub struct FlagSet {
 impl FlagSet {
     pub fn wait(&mut self, duration: CType) {
         let confused = self.is_flag_set(FType::Confusion);
+        let thin_blooded = self.is_flag_set(FType::ThinBlood);
         for (i, timer) in self.timed.iter_mut().enumerate() {
             let flag = FType::try_from(i as u16 + FType::TIMED as u16 + 1).unwrap();
             if flag == FType::Disrupted && confused {
                 continue;
+            } else if flag == FType::Voyria && thin_blooded {
+                timer.wait(duration); // Tick down twice as fast.
             }
             timer.wait(duration);
         }
