@@ -22,7 +22,7 @@ use super::BehaviorController;
 use super::BehaviorModel;
 use super::LimbDescriptor;
 
-pub const QUEUE_TIME: f32 = 0.01;
+pub const QUEUE_TIME: f32 = 0.1;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Copy)]
 pub enum AetTarget {
