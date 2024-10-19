@@ -36,6 +36,24 @@
     "observation_name": "Discovered"
   },
   {
+    "regex": "^Your (.*) has transformed into (.*).$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "GroupAsTarget": 2
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Transformed"
+  },
+  {
     "regex": "^(You) have gained the (.*) defence.$",
     "args": [
       {

@@ -94,6 +94,15 @@ pub fn apply_observation(
                 }
             });
         }
+        AetObservation::Transformed(from, to) => {
+            let who_am_i = timeline.me.clone();
+            timeline.for_agent(&who_am_i, &move |me: &mut AgentState| {
+                if let (Some(old), Some(new)) = (FType::from_name(from), FType::from_name(to)) {
+                    me.toggle_flag(old, false);
+                    me.toggle_flag(new, true);
+                }
+            });
+        }
         AetObservation::OtherAfflicted(who, affliction) => {
             if before.len() > 0 {
                 if let Some(AetObservation::DiscernedCure(b_who, b_afflict)) =

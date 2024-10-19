@@ -203,6 +203,7 @@ pub enum AetObservation {
     Cured(String),
     Gained(String, String),
     Stripped(String),
+    Transformed(String, String),
     // Specific case, non-action
     Relapse(String),
     TickAff(String, String),
