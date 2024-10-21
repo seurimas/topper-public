@@ -1,6 +1,6 @@
+use behavior_bark::unpowered::*;
 use serde::Deserialize;
 use serde::Serialize;
-use topper_bt::unpowered::*;
 
 use crate::classes::ascendril::AscendrilBehavior;
 use crate::classes::bard::BardBehavior;

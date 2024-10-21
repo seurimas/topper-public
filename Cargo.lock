@@ -331,6 +331,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "behavior-bark"
+version = "0.1.0"
+dependencies = [
+ "lazy_static",
+ "serde",
+]
+
+[[package]]
 name = "bincode"
 version = "1.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4858,6 +4866,7 @@ dependencies = [
 name = "topper-aetolia"
 version = "0.1.0"
 dependencies = [
+ "behavior-bark",
  "chrono",
  "lazy_static",
  "log",
@@ -4869,7 +4878,6 @@ dependencies = [
  "simplelog 0.7.6",
  "strum 0.25.0",
  "strum_macros 0.16.0",
- "topper-bt",
  "topper-core",
  "topper-derive",
 ]
@@ -4899,14 +4907,6 @@ dependencies = [
  "topper-core-mudlet",
  "topper-derive",
  "web-view",
-]
-
-[[package]]
-name = "topper-bt"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
 ]
 
 [[package]]

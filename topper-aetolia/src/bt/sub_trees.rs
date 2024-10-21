@@ -3,7 +3,7 @@ use std::{
     sync::{Arc, Mutex, RwLock},
 };
 
-use topper_bt::unpowered::UnpoweredFunction;
+use behavior_bark::unpowered::UnpoweredFunction;
 
 use super::{AetBehaviorTreeDef, BehaviorController, BehaviorModel, DEFAULT_BEHAVIOR_TREE};
 
