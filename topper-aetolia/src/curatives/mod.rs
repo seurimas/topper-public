@@ -95,6 +95,7 @@ pub fn handle_simple_cure_action(
                         .find(|observation| **observation == AetObservation::PipeEmpty)
                         .is_some()
                     {
+                        println!("{} is empty.", herb);
                         me.pipe_state.puff_all(&herb);
                     } else if first_person {
                         me.observe_flag(FType::Addiction, false);

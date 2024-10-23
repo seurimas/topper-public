@@ -209,4 +209,10 @@ impl PipesState {
             self.reishi = PipeState::UnknownMaybeUnfilled;
         }
     }
+
+    pub fn has_unknown_unfilled(&self) -> bool {
+        self.yarrow == PipeState::UnknownUnfilled
+            || self.willow == PipeState::UnknownUnfilled
+            || self.reishi == PipeState::UnknownUnfilled
+    }
 }

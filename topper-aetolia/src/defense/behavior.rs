@@ -92,6 +92,11 @@ impl UnpoweredFunction for DefenseBehavior {
                 for action in refill_actions {
                     controller.plan.add_to_qeb(Box::new(action));
                 }
+                if model.state.borrow_me().pipe_state.has_unknown_unfilled() {
+                    controller
+                        .plan
+                        .add_to_qeb(Box::new(Action::new("pipelist".to_string())));
+                }
             }
             DefenseBehavior::Fitness => {
                 let me = model.state.borrow_me();

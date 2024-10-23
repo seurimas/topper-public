@@ -147,6 +147,27 @@
         "observation_name": "Proc"
     },
     {
+        "regex": "^(You)r soul and body grate against each other, wracked into a deadly schism.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Schism"
+            },
+            {
+                "Literal": "hit"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
         "regex": "^(You)r fulcrum strips Gherond of the arcane defence.$",
         "args": [
             {

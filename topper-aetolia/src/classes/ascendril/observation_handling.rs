@@ -526,6 +526,29 @@ pub fn handle_combat_action(
                         ascendril.schism_on();
                     });
                 });
+            } else if combat_action.annotation.eq("hit") {
+                let observations = after.clone();
+                for_agent_uncertain_closure(
+                    agent_states,
+                    &combat_action.caster,
+                    Box::new(move |you| {
+                        apply_or_infer_random_afflictions(
+                            you,
+                            &observations,
+                            Perspective::Target,
+                            Some((
+                                1,
+                                vec![
+                                    FType::Misery,
+                                    FType::Recklessness,
+                                    FType::Masochism,
+                                    FType::Stupidity,
+                                    FType::Impatience,
+                                ],
+                            )),
+                        )
+                    }),
+                );
             }
         }
         // Strips Arcane.
