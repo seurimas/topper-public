@@ -49,6 +49,14 @@ impl Timer {
         }
     }
 
+    pub fn count_up_seconds_off(up_to: f32) -> Self {
+        Timer::CountUpObserve {
+            up_to: (up_to * BALANCE_SCALE) as CType,
+            expire_at: (up_to * BALANCE_SCALE) as CType,
+            progress: (up_to * BALANCE_SCALE) as CType,
+        }
+    }
+
     pub fn count_up_observe(up_to: CType, expire_at: CType) -> Self {
         Timer::CountUpObserve {
             up_to,
@@ -315,6 +323,9 @@ pub enum FType {
     // Bard uncurable
     Manabarbs, // Don't count as an affliction, it's not in database.
 
+    // Siderealist defences
+    Luminesce,
+
     // Antipsychotic
     Sadness, // MUST BE FIRST AFFLICTION
     Confusion,
@@ -343,6 +354,7 @@ pub enum FType {
     Worrywart,
     Misery,
     Hollow,
+    Echoes,
     Narcolepsy,
     Perplexed,
 
@@ -447,6 +459,8 @@ pub enum FType {
     // Epidermal Toros
     Anorexia,
     Gorged,
+    Gnawing,
+    Manablight,
     EffusedBlood,
 
     // Mending Head
@@ -502,7 +516,8 @@ pub enum FType {
     Deepwound,
 
     // Soothing
-    Whiplash,   // Head
+    Whiplash, // Head
+    Phosphenes,
     Backstrain, // Torso
     MuscleSpasms,
     Stiffness,
@@ -511,6 +526,7 @@ pub enum FType {
     SoreAnkle, // Legs
 
     // Caloric
+    Mindfog,
     Hypothermia,
     IceEncased,
     Frozen,
@@ -581,6 +597,7 @@ pub enum FType {
     SelfLoathing,
     Hobbled,
     Direfrost,
+    Illgrasp,
 
     // Timed affs
     TIMED,
@@ -1242,6 +1259,7 @@ pub enum ClassState {
     Monk(MonkClassState),
     Bard(BardClassState),
     Infiltrator(InfiltratorClassState),
+    Siderealist(SiderealistClassState),
     Shifter(HowlingState),
     Other(Class),
     Unknown,
@@ -1260,6 +1278,9 @@ impl ClassState {
             ClassState::Infiltrator(infiltrator_class_state) => {
                 // infiltrator_class_state.wait(duration)
             }
+            ClassState::Siderealist(siderealist_class_state) => {
+                siderealist_class_state.wait(duration)
+            }
             // ClassState::Shifter(howling_state) => howling_state.wait(duration),
             // ClassState::Monk(monk_class_state) => monk_class_state.wait(duration),
             ClassState::Ascendril(ascendril_class_state) => ascendril_class_state.wait(duration),
@@ -1275,6 +1296,7 @@ impl ClassState {
             Self::Sentinel(_) => Some(Class::Sentinel),
             Self::Bard(_) => Some(Class::Bard),
             Self::Infiltrator(_) => Some(Class::Infiltrator),
+            Self::Siderealist(_) => Some(Class::Siderealist),
             Self::Shifter(_) => Some(Class::Shapeshifter),
             Self::Monk(_) => Some(Class::Monk),
             Self::Other(class) => Some(*class),
@@ -1291,6 +1313,7 @@ impl ClassState {
             (Self::Bard(_), Class::Bard) => None,
             (Self::Shifter(_), Class::Shapeshifter) => None,
             (Self::Predator(_), Class::Predator) => None,
+            (Self::Siderealist(_), Class::Siderealist) => None,
             (Self::Infiltrator(_), Class::Infiltrator) => None,
             (Self::Monk(_), Class::Monk) => None,
             // Changed.
@@ -1300,6 +1323,7 @@ impl ClassState {
             (_, Class::Bard) => Some(Self::Bard(BardClassState::default())),
             (_, Class::Shapeshifter) => Some(Self::Shifter(HowlingState::default())),
             (_, Class::Predator) => Some(Self::Predator(PredatorClassState::default())),
+            (_, Class::Siderealist) => Some(Self::Siderealist(SiderealistClassState::default())),
             (_, Class::Infiltrator) => Some(Self::Infiltrator(InfiltratorClassState::default())),
             (_, Class::Monk) => Some(Self::Monk(MonkClassState::default())),
             (_, observed) => {
@@ -1324,6 +1348,7 @@ pub enum ChannelType {
     Direblow,
     Shatter,
     Death,
+    Moonlet,
 }
 
 impl ChannelType {
@@ -1332,6 +1357,9 @@ impl ChannelType {
             (_, FType::Asleep) => true,
             (ChannelType::Heelrush, FType::Paresis) => true,
             (ChannelType::Direblow, FType::Paresis) => true,
+            (ChannelType::Moonlet, FType::LeftArmCrippled) => true,
+            (ChannelType::Moonlet, FType::RightArmCrippled) => true,
+            (ChannelType::Moonlet, FType::Paresis) => true,
             _ => false,
         }
     }
@@ -1382,6 +1410,13 @@ impl ChannelState {
         *self = ChannelState::Channeling {
             channel_type,
             timer: Timer::count_up_observe(duration, duration),
+        };
+    }
+
+    pub fn channel_seconds(&mut self, channel_type: ChannelType, duration: f32) {
+        *self = ChannelState::Channeling {
+            channel_type,
+            timer: Timer::count_up_seconds(duration),
         };
     }
 

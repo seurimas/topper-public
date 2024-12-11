@@ -32,6 +32,7 @@ pub struct AgentState {
     pub bard_board: BardBoard,
     pub predator_board: PredatorBoard,
     pub ascendril_board: AscendrilBoard,
+    pub siderealist_board: SiderealistBoard,
     pub room_id: i64,
     pub elevation: Elevation,
 }
@@ -47,6 +48,7 @@ impl BaseAgentState for AgentState {
         self.ascendril_board.wait(duration);
         self.bard_board.wait(duration);
         self.predator_board.wait(duration);
+        self.siderealist_board.wait(duration);
         self.channel_state.wait(duration);
         self.flags.wait(duration);
         if let Some((cured_limb, heal_modifier, first_person)) = self.limb_damage.wait(duration) {
@@ -1061,6 +1063,23 @@ impl AgentState {
     pub fn check_if_predator<R>(&self, action: &Fn(&PredatorClassState) -> R) -> Option<R> {
         if let ClassState::Predator(predator) = &self.class_state {
             Some(action(predator))
+        } else {
+            None
+        }
+    }
+
+    pub fn assume_siderealist<R>(&mut self, action: &Fn(&mut SiderealistClassState) -> R) -> R {
+        if let ClassState::Siderealist(siderealist) = &mut self.class_state {
+            action(siderealist)
+        } else {
+            self.class_state = ClassState::Siderealist(SiderealistClassState::default());
+            self.assume_siderealist(action)
+        }
+    }
+
+    pub fn check_if_siderealist<R>(&self, action: &Fn(&SiderealistClassState) -> R) -> Option<R> {
+        if let ClassState::Siderealist(siderealist) = &self.class_state {
+            Some(action(siderealist))
         } else {
             None
         }

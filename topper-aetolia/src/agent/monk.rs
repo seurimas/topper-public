@@ -75,4 +75,27 @@ impl MonkStance {
 pub struct MonkClassState {
     pub stance: MonkStance,
     pub kai: CType,
+    pub mind_lock: Option<String>,
+}
+
+impl MonkClassState {
+    pub fn has_lock(&self, target: &str) -> bool {
+        if let Some(lock) = &self.mind_lock {
+            lock == target
+        } else {
+            false
+        }
+    }
+
+    pub fn set_lock(&mut self, target: &str) {
+        self.mind_lock = Some(target.to_string());
+    }
+
+    pub fn clear_lock(&mut self) {
+        self.mind_lock = None;
+    }
+
+    pub fn has_kai(&self, kai: CType) -> bool {
+        self.kai >= kai
+    }
 }

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
 
 use super::*;
-use crate::{bt::LimbDescriptor, types::*};
+use crate::{bt::LimbDescriptor, classes::predator::ComboGrader, types::*};
 
 #[derive(Debug, Copy, Clone, EnumIter, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum MonkComboAttack {
@@ -180,7 +180,7 @@ impl MonkComboAttack {
         match self {
             MonkComboAttack::ThroatStrike
             | MonkComboAttack::Palmstrike
-            | MonkComboAttack::Bladehand => true,
+            | MonkComboAttack::Backfist => true,
             _ => self.is_first_attack(),
         }
     }
@@ -225,6 +225,10 @@ impl MonkComboGenerator {
 
     pub fn set_valid_attacks(&mut self, valid_attacks: Vec<MonkComboAttack>) {
         self.valid_attacks = valid_attacks;
+    }
+
+    pub fn add_attacks<'a>(&mut self, attacks: impl Iterator<Item = &'a MonkComboAttack>) {
+        self.valid_attacks.extend(attacks);
     }
 
     pub fn generate_from_stance(&self, stance: MonkStance) -> Vec<MonkCombo> {
@@ -316,5 +320,12 @@ impl MonkComboSet {
 
     pub fn add_combo(&mut self, combo: MonkCombo) {
         self.combos.push(combo);
+    }
+}
+
+impl MonkComboGrader {
+    pub fn grade(&self, combo: &MonkCombo, target: &AgentState) -> i32 {
+        // match self {}
+        0
     }
 }

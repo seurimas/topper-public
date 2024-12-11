@@ -17,6 +17,7 @@ lazy_static! {
         FType::Pacifism,
         FType::LoversEffect,
         FType::Laxity,
+        FType::Manablight,
         FType::Hatred,
         FType::Generosity,
         FType::Claustrophobia,
@@ -24,6 +25,8 @@ lazy_static! {
         FType::Faintness,
         FType::Loneliness,
         FType::Agoraphobia,
+        FType::Echoes,
+        FType::Gnawing,
         FType::Masochism,
         FType::Recklessness,
         FType::Weariness,
@@ -221,6 +224,7 @@ lazy_static! {
     pub static ref EUCRASIA_ORDER: Vec<FType> = vec![
         FType::Worrywart,
         FType::Misery,
+        FType::Echoes,
         FType::Hollow,
         FType::Narcolepsy,
         FType::Perplexed,
@@ -396,8 +400,9 @@ lazy_static! {
     pub static ref EPIDERMAL_TORSO_ORDER: Vec<FType> = vec![
         FType::Anorexia,
         FType::Gorged,
+        FType::Manablight,
+        FType::Gnawing,
         FType::EffusedBlood,
-        FType::Hypothermia,
     ];
 }
 
@@ -409,10 +414,15 @@ lazy_static! {
         FType::BurntEyes,
         FType::Gloom,
         FType::Anorexia,
+        FType::Manablight,
+        FType::Gnawing,
         FType::Gorged,
         FType::EffusedBlood,
-        FType::Hypothermia,
     ];
+}
+
+lazy_static! {
+    pub static ref CALORIC_HEAD_ORDER: Vec<FType> = vec![FType::Mindfog];
 }
 
 lazy_static! {
@@ -560,7 +570,7 @@ lazy_static! {
 }
 
 lazy_static! {
-    pub static ref SOOTHING_HEAD_ORDER: Vec<FType> = vec![FType::Whiplash];
+    pub static ref SOOTHING_HEAD_ORDER: Vec<FType> = vec![FType::Phosphenes, FType::Whiplash];
 }
 
 lazy_static! {

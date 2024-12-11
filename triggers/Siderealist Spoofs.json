@@ -1,0 +1,149 @@
+[
+    {
+        "regex": "^(\\w+) is suffering the effects of your (\\w+) ((.*)) vibration.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Crystalism"
+            },
+            {
+                "GroupAsTarget": 2
+            },
+            {
+                "GroupAsTarget": 3
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(\\w+) is suffering the effects of your (\\w+) vibration.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Crystalism"
+            },
+            {
+                "GroupAsTarget": 2
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You) weave a.? (\\w+) spell and set it adrift upon stellar tides, ensuring its return in (\\d+) seconds.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Astranomia"
+            },
+            {
+                "Literal": "Parallax Weave"
+            },
+            {
+                "GroupAsTarget": 2
+            },
+            {
+                "GroupAsTarget": 3
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "Buckling beneath the enervating lash, (\\w+) issues a bloodcurdling scream.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Astranomia"
+            },
+            {
+                "Literal": "Stillness"
+            },
+            {
+                "Literal": "hit"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(\\w+) resists the stellar scourge, .* guard held steady against the cosmic sorcery.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Astranomia"
+            },
+            {
+                "Literal": "Stillness"
+            },
+            {
+                "Literal": "failure"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^A.*glimmercrest swirls around (\\w+), its nebulaic centre emanating whispers.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Astranomia"
+            },
+            {
+                "Literal": "Glimmercrest Hit"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "A.*sprite races around (\\w+) in a corkscrew streak of swirling sidereal light.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Astranomia"
+            },
+            {
+                "Literal": "Sprite Hit"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    }
+]

@@ -22,6 +22,7 @@ impl Salve {
         match (self, limb) {
             (Salve::Epidermal, LType::HeadDamage) => EPIDERMAL_HEAD_ORDER.to_vec(),
             (Salve::Epidermal, LType::TorsoDamage) => EPIDERMAL_TORSO_ORDER.to_vec(),
+            (Salve::Caloric, LType::HeadDamage) => CALORIC_HEAD_ORDER.to_vec(),
             (Salve::Caloric, LType::TorsoDamage) => CALORIC_TORSO_ORDER.to_vec(),
             (Salve::Soothing, LType::TorsoDamage) => SOOTHING_SKIN_ORDER.to_vec(),
             (Salve::Mending, LType::HeadDamage) => MENDING_HEAD_ORDER.to_vec(),

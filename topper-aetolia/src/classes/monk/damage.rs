@@ -3,6 +3,7 @@ use topper_core::timeline::CType;
 use crate::types::LType;
 
 pub const SIDEKICK_DAMAGE: CType = 900;
+pub const SPINKICK_DAMAGE: CType = 600;
 pub const SNAPKICK_DAMAGE: CType = 900;
 pub const MOONKICK_DAMAGE: CType = 900;
 pub const COMETKICK_DAMAGE: CType = 550;
@@ -14,3 +15,6 @@ pub const UPPERCUT_DAMAGE: CType = 550;
 pub const PALMSTRIKE_DAMAGE: CType = 300;
 pub const HAMMERFIST_DAMAGE: CType = 550;
 pub const SPEAR_DAMAGE: CType = 550;
+pub const BACKFIST_DAMAGE: CType = 300;
+pub const THROATSTRIKE_DAMAGE: CType = 300;
+pub const BLADEHAND_DAMAGE: CType = 300;

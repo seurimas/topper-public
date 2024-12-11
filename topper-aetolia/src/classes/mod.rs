@@ -30,6 +30,7 @@ pub mod sciomancer;
 pub mod sentinel;
 pub mod shaman;
 pub mod shapeshifter;
+pub mod siderealist;
 pub mod templar;
 pub mod teradrim;
 pub mod wayfarer;
@@ -81,6 +82,7 @@ pub enum Class {
     Wayfarer,
     Bard,
     Predator,
+    Siderealist,
     Lord,
     // Mirrors
     Revenant,     // Templar
@@ -123,6 +125,7 @@ impl Class {
             "Wayfarer" => Some(Class::Wayfarer),
             "Bard" => Some(Class::Bard),
             "Predator" => Some(Class::Predator),
+            "Siderealist" => Some(Class::Siderealist),
             "Titan Lord" => Some(Class::Lord),
             "Chaos Lord" => Some(Class::Lord),
             "Lord" => Some(Class::Lord),
@@ -167,6 +170,7 @@ impl Class {
             Class::Wayfarer => "Wayfarer",
             Class::Bard => "Bard",
             Class::Predator => "Predator",
+            Class::Siderealist => "Siderealist",
             Class::Lord => "Lord",
             // Mirrors
             Class::Revenant => "Revenant",
@@ -252,6 +256,7 @@ pub fn get_skill_class(category: &String) -> Option<Class> {
         "Tenacity" | "Wayfaring" | "Fury" => Some(Class::Wayfarer),
         "Weaving" | "Performance" | "Songcalling" => Some(Class::Bard),
         "Knifeplay" | "Predation" | "Beastmastery" => Some(Class::Predator),
+        "Ostension" | "Astranomia" | "Crystalism" => Some(Class::Siderealist),
         "Titan" | "Chaos" => Some(Class::Lord),
         // Mirrors
         "Riving" | "Chirography" | "Manifestation" => Some(Class::Revenant),
@@ -463,6 +468,9 @@ pub fn handle_combat_action(
         }
         "Knifeplay" | "Predation" | "Beastmastery" => {
             predator::handle_combat_action(combat_action, agent_states, before, after, db)
+        }
+        "Ostension" | "Astranomia" | "Crystalism" => {
+            siderealist::handle_combat_action(combat_action, agent_states, before, after)
         }
         "Purification" | "Zeal" | "Psionics" => {
             zealot::handle_combat_action(combat_action, agent_states, before, after)

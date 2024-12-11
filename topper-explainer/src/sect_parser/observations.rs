@@ -17,6 +17,8 @@ lazy_static! {
         results.push(include_str!("../../../triggers/CombatActions.json").to_string());
         results.push(include_str!("../../../triggers/Cures.json").to_string());
         results.push(include_str!("../../../triggers/Hypnosis Spoofs.json").to_string());
+        results.push(include_str!("../../../triggers/Ascendril Spoofs.json").to_string());
+        results.push(include_str!("../../../triggers/Siderealist Spoofs.json").to_string());
         results.push(include_str!("../../../triggers/Indorani Spoof.json").to_string());
         results.push(include_str!("../../../triggers/Luminary Spoof.json").to_string());
         results.push(include_str!("../../../triggers/Observations.json").to_string());

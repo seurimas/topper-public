@@ -6,11 +6,11 @@ mod wrappers;
 use std::collections::{HashMap, HashSet};
 
 pub use behavior::*;
+use behavior_bark::unpowered::*;
 pub use limb_desc::*;
 pub use predicate::*;
 use serde::{Deserialize, Serialize};
 pub use sub_trees::*;
-use behavior_bark::unpowered::*;
 
 use crate::{
     classes::{
@@ -176,7 +176,7 @@ impl BehaviorController {
         {
             monk_combo_generator
         } else {
-            panic!("Not a predator!")
+            panic!("Not a monk!")
         }
     }
 

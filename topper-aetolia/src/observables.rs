@@ -67,6 +67,14 @@ macro_rules! targetted_action {
             ) -> Self {
                 $name::new(model.who_am_i(), target.get_name(model, controller))
             }
+
+            pub fn from_target_boxed(
+                target: &AetTarget,
+                model: &BehaviorModel,
+                controller: &BehaviorController,
+            ) -> Box<dyn ActiveTransition> {
+                Box::new($name::from_target(target, model, controller))
+            }
         }
 
         impl ActiveTransition for $name {
