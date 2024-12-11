@@ -1,6 +1,6 @@
+use behavior_bark::unpowered::*;
 use serde::Deserialize;
 use serde::Serialize;
-use behavior_bark::unpowered::*;
 
 use crate::classes::ascendril::AscendrilPredicate;
 use crate::classes::bard::BardPredicate;
@@ -8,10 +8,12 @@ use crate::classes::get_affs_from_plan;
 use crate::classes::infiltrator::InfiltratorPredicate;
 use crate::classes::is_affected_by;
 use crate::classes::predator::PredatorPredicate;
+use crate::classes::siderealist::SiderealistPredicate;
 use crate::classes::Class;
 use crate::classes::LockType;
 use crate::classes::VenomPlan;
 use crate::curatives::get_cure_depth;
+use crate::curatives::RANDOM_CURES;
 use crate::defense::DEFENSE_DATABASE;
 use crate::non_agent::AetTimelineRoomExt;
 use crate::timeline::*;
@@ -74,6 +76,7 @@ pub enum AetPredicate {
     AffCountEqual(AetTarget, usize, Vec<FType>),
     AffCountOver(AetTarget, usize, Vec<FType>),
     AffCountUnder(AetTarget, usize, Vec<FType>),
+    RandomCuresOver(AetTarget, usize),
     // Limbs
     IsRestoring(AetTarget, LimbDescriptor),
     CanBreak(AetTarget, LimbDescriptor, f32),
@@ -125,6 +128,7 @@ pub enum AetPredicate {
     PredatorPredicate(AetTarget, PredatorPredicate),
     InfiltratorPredicate(AetTarget, InfiltratorPredicate),
     AscendrilPredicate(AetTarget, AscendrilPredicate),
+    SiderealistPredicate(AetTarget, SiderealistPredicate),
 }
 
 pub trait TargetPredicate {
@@ -278,6 +282,16 @@ impl UnpoweredFunction for AetPredicate {
                 } else {
                     UnpoweredFunctionState::Failed
                 }
+            }
+            AetPredicate::RandomCuresOver(target, min_cures) => {
+                if let Some(aff_count) =
+                    aff_counts(target, model, controller, RANDOM_CURES.as_ref())
+                {
+                    if aff_count >= *min_cures {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
             }
             AetPredicate::IsRestoring(target, limb_descriptor) => {
                 if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
@@ -592,6 +606,13 @@ impl UnpoweredFunction for AetPredicate {
             }
             AetPredicate::AscendrilPredicate(target, ascendril_predicate) => {
                 if ascendril_predicate.check(target, model, controller) {
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetPredicate::SiderealistPredicate(target, siderealist_predicate) => {
+                if siderealist_predicate.check(target, model, controller) {
                     UnpoweredFunctionState::Complete
                 } else {
                     UnpoweredFunctionState::Failed

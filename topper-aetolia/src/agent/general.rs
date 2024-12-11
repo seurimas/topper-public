@@ -325,6 +325,8 @@ pub enum FType {
 
     // Siderealist defences
     Luminesce,
+    Foresight,
+    Centrum,
 
     // Antipsychotic
     Sadness, // MUST BE FIRST AFFLICTION
@@ -445,6 +447,9 @@ pub enum FType {
     Withering,
     Disfigurement,
     Migraine,
+
+    // Elixir
+    Etherflux,
     Squelched,
 
     // Epidermal Head

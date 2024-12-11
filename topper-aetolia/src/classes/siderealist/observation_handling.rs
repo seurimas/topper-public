@@ -1,7 +1,30 @@
+use regex::Regex;
+
 use crate::curatives::remove_in_order;
 use crate::curatives::RANDOM_CURES;
+use crate::non_agent::AetTimelineRoomExt;
 use crate::timeline::*;
 use crate::types::*;
+
+lazy_static! {
+    static ref EMBED: Regex = Regex::new(r"embed (\w+)").unwrap();
+}
+
+pub fn handle_sent(command: &String, agent_states: &mut AetTimelineState) {
+    if let Some(captures) = EMBED.captures(command) {
+        let me = agent_states.me.clone();
+        agent_states.add_player_hint(
+            &me,
+            &"embedding",
+            captures
+                .get(1)
+                .unwrap()
+                .as_str()
+                .to_string()
+                .to_ascii_lowercase(),
+        );
+    }
+}
 
 pub fn handle_combat_action(
     combat_action: &CombatAction,
@@ -10,6 +33,43 @@ pub fn handle_combat_action(
     after: &Vec<AetObservation>,
 ) -> Result<(), String> {
     match combat_action.skill.as_ref() {
+        "Embed" => {
+            if let Some(embedding) = agent_states
+                .get_player_hint(&combat_action.caster, &"embedding".to_string())
+                .and_then(Vibration::from_name)
+            {
+                if embedding == Vibration::Focus {
+                    // Focus is a special case that doesn't embed.
+                    // Instead, we get all of the vibrations from ourselves!
+                    let who = agent_states.borrow_agent(&combat_action.caster);
+                    let room_id = agent_states.borrow_me().room_id;
+                    let vibrations = who
+                        .check_if_siderealist(&|me| me.vibration_states())
+                        .unwrap_or(vec![]);
+                    for vibration in vibrations {
+                        agent_states.observe_vibration_in_room(
+                            room_id,
+                            vibration.0,
+                            &combat_action.caster,
+                            vibration.1,
+                        );
+                    }
+                    return Ok(());
+                }
+                let room_id = agent_states.borrow_me().room_id;
+                agent_states.observe_vibration_in_room(
+                    room_id,
+                    embedding,
+                    &combat_action.caster,
+                    VibrationState::fresh(),
+                );
+                for_agent(agent_states, &combat_action.caster, &move |me| {
+                    me.assume_siderealist(&|me| {
+                        me.embed(embedding, room_id);
+                    });
+                });
+            }
+        }
         "Tones Tremors" => {
             attack_afflictions(
                 agent_states,
@@ -18,7 +78,7 @@ pub fn handle_combat_action(
                 after,
             );
         }
-        "Creeps" => {
+        "creeps" => {
             if let Some(aff) = FType::from_name(&combat_action.annotation) {
                 attack_afflictions(agent_states, &combat_action.target, vec![aff], after);
             }
@@ -39,7 +99,7 @@ pub fn handle_combat_action(
                 after,
             );
         }
-        "Disorientation" => {
+        "disorientation" => {
             attack_afflictions(
                 agent_states,
                 &combat_action.target,
@@ -64,15 +124,13 @@ pub fn handle_combat_action(
                 }
             });
         }
-        "Dissension" => {
-            if combat_action.annotation.eq_ignore_ascii_case("hit") {
-                attack_afflictions(
-                    agent_states,
-                    &combat_action.target,
-                    vec![FType::Dissonance],
-                    after,
-                );
-            }
+        "Dissension Hit" => {
+            attack_afflictions(
+                agent_states,
+                &combat_action.target,
+                vec![FType::Dissonance],
+                after,
+            );
         }
         "Tones Dissension" => {
             attack_first_affliction(
@@ -82,7 +140,7 @@ pub fn handle_combat_action(
                 after,
             );
         }
-        "Plague" => {
+        "plague" => {
             if let Some(aff) = FType::from_name(&combat_action.annotation) {
                 attack_afflictions(agent_states, &combat_action.target, vec![aff], after);
             }
@@ -92,7 +150,7 @@ pub fn handle_combat_action(
                 attack_afflictions(agent_states, &combat_action.target, vec![aff], after);
             }
         }
-        "Lullaby" => {
+        "lullaby" => {
             for_agent(agent_states, &combat_action.target, &move |me| {
                 if me.is(FType::Insomnia) {
                     me.toggle_flag(FType::Insomnia, false);
@@ -137,12 +195,17 @@ pub fn handle_combat_action(
                     (limb, 15., true),
                     after,
                 );
+                if !attack_parried(after) {
+                    for_agent(agent_states, &combat_action.target, &move |me| {
+                        me.siderealist_board.irradiate(limb);
+                    });
+                }
             }
         }
         "Eja Kodosa Mend" => {
             for_agent(agent_states, &combat_action.caster, &move |me| {
                 me.assume_siderealist(&|me| {
-                    me.use_mend();
+                    me.mended();
                 });
                 for limb in vec![
                     LType::LeftArmDamage,
@@ -179,7 +242,7 @@ pub fn handle_combat_action(
         "Glimmercrest Hit" => {
             attack_afflictions(
                 agent_states,
-                &combat_action.target,
+                &combat_action.caster,
                 vec![FType::Echoes],
                 after,
             );
@@ -187,7 +250,7 @@ pub fn handle_combat_action(
         "Sprite Hit" => {
             attack_afflictions(
                 agent_states,
-                &combat_action.target,
+                &combat_action.caster,
                 vec![FType::Phosphenes],
                 after,
             );
@@ -239,6 +302,21 @@ pub fn handle_combat_action(
                     me.use_gleam();
                 });
             });
+        }
+        "Gleam Inflict" => {
+            if let Some(star) = GleamColor::from_annotation(&combat_action.annotation) {
+                for_agent(agent_states, &combat_action.caster, &move |me| {
+                    me.assume_siderealist(&|me| {
+                        me.inflict(star);
+                    });
+                });
+                attack_afflictions(
+                    agent_states,
+                    &combat_action.target,
+                    vec![star.affliction()],
+                    after,
+                );
+            }
         }
         "Parallax" => {
             if let Some(AetObservation::Proc(weave)) = after.get(0) {
@@ -294,6 +372,22 @@ pub fn handle_combat_action(
                 },
             );
         }
+        "Foresight" => {
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                me.assume_siderealist(&|me| {
+                    me.foresighted();
+                });
+                me.toggle_flag(FType::Foresight, true);
+            });
+        }
+        "Centrum" => {
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                me.assume_siderealist(&|me| {
+                    me.centrumed();
+                });
+                me.toggle_flag(FType::Centrum, true);
+            });
+        }
         "Stillness" => {
             if combat_action.annotation.eq_ignore_ascii_case("hit") {
                 for_agent(agent_states, &combat_action.target, &move |me| {
@@ -306,6 +400,14 @@ pub fn handle_combat_action(
             } else {
                 // Nothing to do.
             }
+        }
+        "Syzygy" => {
+            if combat_action.annotation.eq_ignore_ascii_case("failure") {
+                return Ok(());
+            }
+            for_agent(agent_states, &combat_action.target, &move |me| {
+                me.siderealist_board.syzygy_hit();
+            });
         }
         _ => {}
     }

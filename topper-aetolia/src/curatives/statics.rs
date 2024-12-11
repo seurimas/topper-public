@@ -732,7 +732,6 @@ lazy_static! {
         FType::Withering,
         FType::Disfigurement,
         FType::Migraine,
-        FType::Squelched,
     ];
 }
 
@@ -762,6 +761,7 @@ lazy_static! {
     pub static ref ELIXIR_CURE_ORDERS: HashMap<String, Vec<FType>> = {
         let mut val = HashMap::new();
         val.insert("immunity".into(), vec![FType::Voyria]);
+        val.insert("infusion".into(), vec![FType::Etherflux, FType::Squelched]);
         val
     };
     pub static ref ELIXIR_DEFENCES: HashMap<String, FType> = {

@@ -216,6 +216,24 @@
     "observation_name": "Rebounds"
   },
   {
+    "regex": "^The attack rebounds away from .* aura!$",
+    "args": [
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "SafeRebounds"
+  },
+  {
     "regex": "^You discern that a layer of (\\w+) has rubbed off your weapon.$",
     "args": [
       {

@@ -1,3 +1,5 @@
+use std::{collections::HashMap, hash::Hash};
+
 use super::*;
 use serde::*;
 
@@ -7,6 +9,7 @@ pub struct SiderealistBoard {
     asterism: Timer,
     moonlet: Timer,
     magic_weakness: Option<(Timer, i32)>,
+    irradiated_limb: Option<LType>,
 }
 
 impl Default for SiderealistBoard {
@@ -22,6 +25,7 @@ impl SiderealistBoard {
             asterism: Timer::count_up_seconds_off(150.),
             moonlet: Timer::count_up_seconds_off(150.),
             magic_weakness: None,
+            irradiated_limb: None,
         }
     }
 
@@ -49,6 +53,14 @@ impl SiderealistBoard {
         self.magic_weakness = Some((Timer::count_down_seconds(time), anomalies));
     }
 
+    pub fn irradiate(&mut self, limb: LType) {
+        self.irradiated_limb = Some(limb);
+    }
+
+    pub fn has_irradiated_limb(&self, limb: LType) -> bool {
+        self.irradiated_limb == Some(limb)
+    }
+
     pub fn dustring_hit(&mut self) {
         self.dustring.reset();
     }
@@ -60,9 +72,27 @@ impl SiderealistBoard {
     pub fn moonlet_hit(&mut self) {
         self.moonlet.reset();
     }
+
+    pub fn has_dustring(&self) -> bool {
+        self.dustring.is_active()
+    }
+
+    pub fn has_asterism(&self) -> bool {
+        self.asterism.is_active()
+    }
+
+    pub fn has_moonlet(&self) -> bool {
+        self.moonlet.is_active()
+    }
+
+    pub fn syzygy_hit(&mut self) {
+        self.dustring.expire();
+        self.asterism.expire();
+        self.moonlet.expire();
+    }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum Regalia {
     Artos,
     Cthalut,
@@ -140,13 +170,13 @@ impl Regalia {
     }
 }
 
-#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Display, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum Vibration {
     Dissipate,
     Palpitation,
     Alarm,
     Tremors,
-    Reverbation,
+    Reverberation,
     Revelation,
     Adduction,
     Harmony,
@@ -168,7 +198,83 @@ pub enum Vibration {
     Cataclysm,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+impl Vibration {
+    pub fn from_name(name: String) -> Option<Vibration> {
+        match name.as_ref() {
+            "dissipate" => Some(Self::Dissipate),
+            "palpitation" => Some(Self::Palpitation),
+            "alarm" => Some(Self::Alarm),
+            "tremors" => Some(Self::Tremors),
+            "reverberation" => Some(Self::Reverberation),
+            "revelation" => Some(Self::Revelation),
+            "adduction" => Some(Self::Adduction),
+            "harmony" => Some(Self::Harmony),
+            "creeps" => Some(Self::Creeps),
+            "din" => Some(Self::Din),
+            "skyfall" => Some(Self::Skyfall),
+            "oscillate" => Some(Self::Oscillate),
+            "altering" => Some(Self::Altering),
+            "focus" => Some(Self::Focus),
+            "disorientation" => Some(Self::Disorientation),
+            "energize" => Some(Self::Energize),
+            "stridulation" => Some(Self::Stridulation),
+            "cavitation" => Some(Self::Cavitation),
+            "crystalforest" => Some(Self::Crystalforest),
+            "dissension" => Some(Self::Dissension),
+            "plague" => Some(Self::Plague),
+            "lullaby" => Some(Self::Lullaby),
+            "retrogradation" => Some(Self::Retrogradation),
+            "cataclysm" => Some(Self::Cataclysm),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Copy, PartialEq, Eq, Hash)]
+pub enum VibrationState {
+    Dormant,
+    Active(Timer),
+}
+
+impl VibrationState {
+    pub fn fresh() -> Self {
+        Self::Active(Timer::count_down_seconds(1200.))
+    }
+
+    pub fn is_dormant(&self) -> bool {
+        match self {
+            Self::Dormant => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_active(&self) -> bool {
+        match self {
+            Self::Active(_) => true,
+            _ => false,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq, Hash, Default)]
+pub enum SummonState {
+    #[default]
+    None,
+    Glimmercrest(i64, Option<String>, Timer),
+    Sprite(i64, Option<String>, Timer),
+}
+
+impl SummonState {
+    pub fn wait(&mut self, time: CType) {
+        match self {
+            Self::None => {}
+            Self::Glimmercrest(_, _, timer) => timer.wait(time),
+            Self::Sprite(_, _, timer) => timer.wait(time),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Copy, PartialEq, Eq, Hash)]
 pub enum GleamColor {
     Red,
     Orange,
@@ -191,17 +297,42 @@ impl GleamColor {
             Self::Violet => "violet",
         }
     }
+
+    pub fn from_annotation(annotation: &str) -> Option<Self> {
+        match annotation {
+            "burning" => Some(Self::Red),
+            "crushing" => Some(Self::Orange),
+            "radiant" => Some(Self::Yellow),
+            "noxious" => Some(Self::Green),
+            "frigid" => Some(Self::Blue),
+            "temporal" => Some(Self::Indigo),
+            "twisted" => Some(Self::Violet),
+            _ => None,
+        }
+    }
+
+    pub fn affliction(&self) -> FType {
+        match self {
+            Self::Red => FType::Recklessness,
+            Self::Orange => FType::Gnawing,
+            Self::Yellow => FType::Dizziness,
+            Self::Green => FType::Clumsiness,
+            Self::Blue => FType::Mindfog,
+            Self::Indigo => FType::Paresis,
+            Self::Violet => FType::Paranoia,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct GleamStars {
-    red: Timer,
-    orange: Timer,
-    yellow: Timer,
-    green: Timer,
-    blue: Timer,
-    indigo: Timer,
-    violet: Timer,
+pub struct GleamStars {
+    pub red: Timer,
+    pub orange: Timer,
+    pub yellow: Timer,
+    pub green: Timer,
+    pub blue: Timer,
+    pub indigo: Timer,
+    pub violet: Timer,
 }
 
 impl Default for GleamStars {
@@ -218,12 +349,33 @@ impl Default for GleamStars {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct SiderealistClassState {
     mend: Timer,
     parallax: Option<(Timer, String, String)>,
     gleam_cooldown: Timer,
-    gleam_stars: Option<GleamStars>,
+    foresight_cooldown: Timer,
+    centrum_cooldown: Timer,
+    pub gleam_stars: Option<GleamStars>,
+    last_vibration_location: HashMap<Vibration, (i64, VibrationState)>,
+    summon_state: SummonState,
+    first_regalia: Option<Regalia>,
+    second_regalia: Option<Regalia>,
+}
+
+impl Hash for SiderealistClassState {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.mend.hash(state);
+        self.parallax.hash(state);
+        self.gleam_cooldown.hash(state);
+        self.centrum_cooldown.hash(state);
+        self.gleam_stars.hash(state);
+        // self.last_vibration_location.hash(state);
+        self.summon_state.hash(state);
+        self.first_regalia.hash(state);
+        self.second_regalia.hash(state);
+        self.foresight_cooldown.hash(state);
+    }
 }
 
 impl SiderealistClassState {
@@ -232,7 +384,13 @@ impl SiderealistClassState {
             mend: Timer::count_down_seconds(30.),
             parallax: None,
             gleam_cooldown: Timer::count_up_seconds_off(30.),
+            foresight_cooldown: Timer::count_up_seconds_off(30.),
+            centrum_cooldown: Timer::count_up_seconds_off(30.),
             gleam_stars: None,
+            last_vibration_location: HashMap::new(),
+            summon_state: SummonState::None,
+            first_regalia: None,
+            second_regalia: None,
         }
     }
 
@@ -242,6 +400,8 @@ impl SiderealistClassState {
             timer.wait(time);
         }
         self.gleam_cooldown.wait(time);
+        self.foresight_cooldown.wait(time);
+        self.centrum_cooldown.wait(time);
         if let Some(gleam_stars) = &mut self.gleam_stars {
             gleam_stars.red.wait(time);
             gleam_stars.orange.wait(time);
@@ -251,14 +411,32 @@ impl SiderealistClassState {
             gleam_stars.indigo.wait(time);
             gleam_stars.violet.wait(time);
         }
-    }
-
-    pub fn use_mend(&mut self) {
-        self.mend.reset();
+        for (_, (_, state)) in self.last_vibration_location.iter_mut() {
+            if let VibrationState::Active(timer) = state {
+                timer.wait(time);
+            }
+        }
+        self.summon_state.wait(time);
     }
 
     pub fn weave_parallax(&mut self, time: f32, spell: String, target: String) {
         self.parallax = Some((Timer::count_down_seconds(time), spell, target));
+    }
+
+    pub fn get_parallax(&self) -> Option<&(Timer, String, String)> {
+        self.parallax.as_ref()
+    }
+
+    pub fn has_parallax(&self) -> bool {
+        self.parallax.is_some()
+    }
+
+    pub fn is_parallaxing(&self, spell: &str) -> bool {
+        if let Some((_, parallax_spell, _)) = &self.parallax {
+            parallax_spell == spell
+        } else {
+            false
+        }
     }
 
     pub fn release_parallax(&mut self) {
@@ -267,6 +445,26 @@ impl SiderealistClassState {
 
     pub fn use_gleam(&mut self) {
         self.gleam_stars = Some(GleamStars::default());
+    }
+
+    pub fn has_gleam(&self) -> bool {
+        self.gleam_stars.is_some()
+    }
+
+    pub fn has_gleam_star(&self, color: GleamColor) -> bool {
+        if let Some(gleam_stars) = &self.gleam_stars {
+            match color {
+                GleamColor::Red => !gleam_stars.red.is_active(),
+                GleamColor::Orange => !gleam_stars.orange.is_active(),
+                GleamColor::Yellow => !gleam_stars.yellow.is_active(),
+                GleamColor::Green => !gleam_stars.green.is_active(),
+                GleamColor::Blue => !gleam_stars.blue.is_active(),
+                GleamColor::Indigo => !gleam_stars.indigo.is_active(),
+                GleamColor::Violet => !gleam_stars.violet.is_active(),
+            }
+        } else {
+            false
+        }
     }
 
     pub fn inflict(&mut self, color: GleamColor) {
@@ -288,5 +486,95 @@ impl SiderealistClassState {
 
     pub fn chromaflare(&mut self) {
         self.gleam_stars = None;
+    }
+
+    pub fn vibration_states(&self) -> Vec<(Vibration, VibrationState)> {
+        self.last_vibration_location
+            .iter()
+            .map(|(vibration, (_, state))| (*vibration, *state))
+            .collect()
+    }
+
+    pub fn has_vibration(&self, vibration: Vibration) -> bool {
+        if let Some((room_id, v_state)) = self.last_vibration_location.get(&vibration) {
+            match v_state {
+                VibrationState::Active(timer) => timer.is_active(),
+                VibrationState::Dormant => true,
+            }
+        } else {
+            false
+        }
+    }
+
+    pub fn embed(&mut self, vibration: Vibration, room_id: i64) {
+        self.last_vibration_location
+            .insert(vibration, (room_id, VibrationState::fresh()));
+    }
+
+    pub fn has_glimmercrest(&self) -> bool {
+        matches!(self.summon_state, SummonState::Glimmercrest(_, _, _))
+    }
+
+    pub fn has_sprite(&self) -> bool {
+        matches!(self.summon_state, SummonState::Sprite(_, _, _))
+    }
+
+    pub fn glimmercrest_attacking(&self, who: &str) -> bool {
+        if let SummonState::Glimmercrest(_, Some(target), last_seen) = &self.summon_state {
+            target == who && last_seen.is_active()
+        } else {
+            false
+        }
+    }
+
+    pub fn sprite_attacking(&self, who: &str) -> bool {
+        if let SummonState::Sprite(_, Some(target), last_seen) = &self.summon_state {
+            target == who && last_seen.is_active()
+        } else {
+            false
+        }
+    }
+
+    pub fn has_regalia(&self, regalia: Regalia) -> bool {
+        self.first_regalia == Some(regalia) || self.second_regalia == Some(regalia)
+    }
+
+    pub fn has_two_regalias(&self) -> bool {
+        self.first_regalia.is_some() && self.second_regalia.is_some()
+    }
+
+    pub fn first_regalia_of(&self, regalias: &Vec<Regalia>) -> Option<Regalia> {
+        for regalia in regalias {
+            if self.first_regalia == Some(*regalia) {
+                return Some(*regalia);
+            } else if self.second_regalia == Some(*regalia) {
+                return Some(*regalia);
+            }
+        }
+        None
+    }
+
+    pub fn foresighted(&mut self) {
+        self.foresight_cooldown.reset();
+    }
+
+    pub fn can_foresight(&self) -> bool {
+        !self.foresight_cooldown.is_active()
+    }
+
+    pub fn centrumed(&mut self) {
+        self.centrum_cooldown.reset();
+    }
+
+    pub fn can_centrum(&self) -> bool {
+        !self.centrum_cooldown.is_active()
+    }
+
+    pub fn mended(&mut self) {
+        self.mend.reset();
+    }
+
+    pub fn can_mend(&self) -> bool {
+        !self.mend.is_active()
     }
 }

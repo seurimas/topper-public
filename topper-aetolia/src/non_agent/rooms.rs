@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use serde::Deserialize;
 
 use crate::{
-    agent::{Timer, Vibration},
+    agent::{Timer, Vibration, VibrationState},
     timeline::*,
 };
 
@@ -46,8 +46,8 @@ impl Direction {
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-pub struct VibrationState {
-    owners: HashMap<String, Option<Timer>>,
+pub struct RoomVibrationState {
+    owners: HashMap<String, VibrationState>,
     unknown_at: Option<Timer>,
 }
 
@@ -57,7 +57,7 @@ pub struct Room {
     pub players: HashSet<String>,
     pub denizens: HashSet<i64>,
     pub exits: HashMap<Direction, i64>,
-    pub vibrations: HashMap<Vibration, VibrationState>,
+    pub vibrations: HashMap<Vibration, RoomVibrationState>,
     tags: HashSet<String>,
 }
 
@@ -97,6 +97,32 @@ impl Room {
     pub fn has_tag(&self, tag: impl ToString) -> bool {
         self.tags.contains(&tag.to_string())
     }
+
+    pub fn has_vibration(&self, vibration: Vibration, owner: &str) -> bool {
+        self.vibrations
+            .get(&vibration)
+            .map(|vibration_state| {
+                vibration_state
+                    .owners
+                    .iter()
+                    .any(|(vibration_owner, _)| vibration_owner == owner)
+            })
+            .unwrap_or(false)
+    }
+
+    pub fn vibration_dormant(&self, vibration: Vibration, owner: &str) -> bool {
+        self.vibrations
+            .get(&vibration)
+            .map(|vibration_state| {
+                vibration_state
+                    .owners
+                    .iter()
+                    .any(|(vibration_owner, v_state)| {
+                        vibration_owner == owner && v_state.is_dormant()
+                    })
+            })
+            .unwrap_or(false)
+    }
 }
 
 pub fn format_room_id(room_id: i64) -> String {
@@ -125,7 +151,7 @@ pub trait AetTimelineRoomExt {
         room_id: i64,
         vibration: Vibration,
         owner: &str,
-        timer: Option<Timer>,
+        timer: VibrationState,
     );
 
     fn begin_vibrations_list(&mut self, room_id: i64);
@@ -197,7 +223,7 @@ impl AetTimelineRoomExt for AetTimelineState {
             let vibration_state =
                 room.vibrations
                     .entry(vibration)
-                    .or_insert_with(|| VibrationState {
+                    .or_insert_with(|| RoomVibrationState {
                         owners: HashMap::new(),
                         unknown_at: None,
                     });
@@ -218,13 +244,13 @@ impl AetTimelineRoomExt for AetTimelineState {
         room_id: i64,
         vibration: Vibration,
         owner: &str,
-        timer: Option<Timer>,
+        timer: VibrationState,
     ) {
         self.for_room(room_id, &|room| {
             let vibration_state =
                 room.vibrations
                     .entry(vibration)
-                    .or_insert_with(|| VibrationState {
+                    .or_insert_with(|| RoomVibrationState {
                         owners: HashMap::new(),
                         unknown_at: None,
                     });

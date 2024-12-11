@@ -182,6 +182,7 @@ pub enum AetObservation {
     DiscernedAfflict(String),
     HiddenAff,
     Rebounds,
+    SafeRebounds,
     Diverts,
     Dodges(String),
     Misses(String),

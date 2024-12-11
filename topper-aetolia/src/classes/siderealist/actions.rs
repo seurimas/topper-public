@@ -5,11 +5,98 @@ use crate::types::*;
 use crate::{targetted_action, untargetted_action};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Embed {
+    pub caster: String,
+    pub vibration: Vibration,
+}
+
+impl Embed {
+    pub fn new(caster: String, vibration: Vibration) -> Self {
+        Self { caster, vibration }
+    }
+}
+
+impl ActiveTransition for Embed {
+    fn act(&self, _timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("embed {}", self.vibration))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Tones {
+    pub caster: String,
+    pub target: String,
+    pub vibration: Vibration,
+}
+
+impl Tones {
+    pub fn from_target(
+        aet_target: AetTarget,
+        model: &BehaviorModel,
+        controller: &BehaviorController,
+        vibration: Vibration,
+    ) -> Self {
+        let caster = model.who_am_i();
+        let target = aet_target.get_name(model, controller);
+        Self {
+            caster,
+            target,
+            vibration,
+        }
+    }
+}
+
+impl ActiveTransition for Tones {
+    fn act(&self, _timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("strike tone {} {}", self.vibration, self.target,))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Parallax {
     pub caster: String,
     pub time: CType,
     pub spell: String,
     pub target: Option<String>,
+    pub ab: Option<String>,
+}
+
+impl Parallax {
+    pub fn new_no_target(caster: String, time: f32, spell: String) -> Self {
+        Self {
+            caster,
+            time: (time * BALANCE_SCALE) as CType,
+            spell,
+            target: None,
+            ab: None,
+        }
+    }
+
+    pub fn new_with_target(caster: String, time: f32, spell: String, target: String) -> Self {
+        Self {
+            caster,
+            time: (time * BALANCE_SCALE) as CType,
+            spell,
+            target: Some(target),
+            ab: None,
+        }
+    }
+
+    pub fn new_with_target_and_ab(
+        caster: String,
+        time: f32,
+        spell: String,
+        target: String,
+        ab: String,
+    ) -> Self {
+        Self {
+            caster,
+            time: (time * BALANCE_SCALE) as CType,
+            spell,
+            target: Some(target),
+            ab: Some(ab),
+        }
+    }
 }
 
 impl ActiveTransition for Parallax {
@@ -28,6 +115,23 @@ pub struct GleamInflict {
     pub caster: String,
     pub target: String,
     pub color: GleamColor,
+}
+
+impl GleamInflict {
+    pub fn from_target(
+        aet_target: AetTarget,
+        model: &BehaviorModel,
+        controller: &BehaviorController,
+        color: GleamColor,
+    ) -> Self {
+        let caster = model.who_am_i();
+        let target = aet_target.get_name(model, controller);
+        Self {
+            caster,
+            target,
+            color,
+        }
+    }
 }
 
 impl ActiveTransition for GleamInflict {
@@ -68,6 +172,12 @@ pub struct Reenactment {
     pub regalia: Regalia,
 }
 
+impl Reenactment {
+    pub fn new(caster: String, regalia: Regalia) -> Self {
+        Self { caster, regalia }
+    }
+}
+
 impl ActiveTransition for Reenactment {
     fn act(&self, _timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("reenact {}", self.regalia.name()))
@@ -78,6 +188,12 @@ impl ActiveTransition for Reenactment {
 pub struct Forfeit {
     pub caster: String,
     pub regalia: Regalia,
+}
+
+impl Forfeit {
+    pub fn new(caster: String, regalia: Regalia) -> Self {
+        Self { caster, regalia }
+    }
 }
 
 impl ActiveTransition for Forfeit {
@@ -93,5 +209,36 @@ targetted_action!(BoltLeftArm, "bolt {} left arm");
 targetted_action!(BoltRightArm, "bolt {} right arm");
 targetted_action!(BoltLeftLeg, "bolt {} left leg");
 targetted_action!(BoltRightLeg, "bolt {} right leg");
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Bolt {
+    pub caster: String,
+    pub target: String,
+    pub limb: LType,
+}
+
+impl Bolt {
+    pub fn from_target(
+        aet_target: AetTarget,
+        model: &BehaviorModel,
+        controller: &BehaviorController,
+        limb: LType,
+    ) -> Self {
+        let caster = model.who_am_i();
+        let target = aet_target.get_name(model, controller);
+        Self {
+            caster,
+            target,
+            limb,
+        }
+    }
+}
+
+impl ActiveTransition for Bolt {
+    fn act(&self, _timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("bolt {} {}", self.target, self.limb.to_string()))
+    }
+}
+
 untargetted_action!(EjaKodosaMend, "speak mend me");
 targetted_action!(EjaKodosaKill, "speak kill {}");

@@ -37,11 +37,20 @@ pub fn apply_observation(
         }
         AetObservation::CombatAction(combat_action) => {
             if let (Some(db), Some(class)) = (db, get_skill_class(&combat_action.category)) {
-                db.set_class(&combat_action.caster, class);
-                for_agent(timeline, &combat_action.caster, &|me| {
-                    me.class_state
-                        .initialize_for_normalized_class(class.normal());
-                });
+                if !before.iter().any(|obs| {
+                    if let AetObservation::CombatAction(before) = obs {
+                        if before.skill.eq_ignore_ascii_case("Replicate") {
+                            return true;
+                        }
+                    }
+                    false
+                }) {
+                    db.set_class(&combat_action.caster, class);
+                    for_agent(timeline, &combat_action.caster, &|me| {
+                        me.class_state
+                            .initialize_for_normalized_class(class.normal());
+                    });
+                }
             }
             handle_combat_action(combat_action, timeline, before, after, db)?;
         }
@@ -616,6 +625,10 @@ pub fn apply_weapon_hits(
                     let venom = venom.clone();
                     agent_states.for_agent(me, &move |me: &mut AgentState| {
                         apply_venom(me, &venom, false);
+                    });
+                } else if let Some(AetObservation::SafeRebounds) = observations.get(i - 1) {
+                    agent_states.for_agent(you, &|you: &mut AgentState| {
+                        you.observe_flag(FType::Rebounding, true);
                     });
                 } else {
                     if let Some(AetObservation::PurgeVenom(_, _v2)) = observations.get(i + 1) {

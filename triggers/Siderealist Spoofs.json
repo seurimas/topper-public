@@ -21,6 +21,27 @@
         "observation_name": "Proc"
     },
     {
+        "regex": "^With a graceful gesture, (you) compell the crystals to embed into the ground and awaken as cosmic vibrations.",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Crystalism"
+            },
+            {
+                "Literal": "Embed"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
         "regex": "^(\\w+) is suffering the effects of your (\\w+) vibration.$",
         "args": [
             {
@@ -31,6 +52,27 @@
             },
             {
                 "GroupAsTarget": 2
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^A disruptive harmony emerges, forcing (\\w+) to vibrate in tune with its insidious sound.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Crystalism"
+            },
+            {
+                "Literal": "Dissension Hit"
             },
             {
                 "Literal": ""

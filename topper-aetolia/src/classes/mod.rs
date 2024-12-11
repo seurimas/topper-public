@@ -361,6 +361,9 @@ pub fn get_attack(
             Class::Ascendril => {
                 ascendril::get_attack(timeline, target, strategy, db, first_aid_settings)
             }
+            Class::Siderealist => {
+                siderealist::get_attack(timeline, target, strategy, db, first_aid_settings)
+            }
             _ => infiltrator::get_attack(timeline, target, strategy, db, first_aid_settings),
         }
     } else {

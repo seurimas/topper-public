@@ -107,7 +107,14 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for BattleModule {
                             firstaid.start_temporary_fa_settings(),
                         )))
                     } else {
-                        Ok(TopperResponse::error("No target.".into()))
+                        Ok(TopperResponse::qeb(get_attack(
+                            &timeline,
+                            &me,
+                            &"".to_string(),
+                            &strategy,
+                            Some(db),
+                            firstaid.start_temporary_fa_settings(),
+                        )))
                     }
                 }
                 _ => Ok(TopperResponse::silent()),
