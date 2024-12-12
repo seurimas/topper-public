@@ -75,7 +75,7 @@ pub enum Class {
     Luminary,
     Templar,
     Zealot,
-    Archivists,
+    Archivist,
     Sciomancer,
     Infiltrator,
     Shapeshifter,
@@ -117,7 +117,7 @@ impl Class {
             "Templar" => Some(Class::Templar),
             "Zealot" => Some(Class::Zealot),
             // Spinesreach
-            "Archivist" => Some(Class::Archivists),
+            "Archivist" => Some(Class::Archivist),
             "Sciomancer" => Some(Class::Sciomancer),
             "Infiltrator" => Some(Class::Infiltrator),
             // Unaffiliated
@@ -162,7 +162,7 @@ impl Class {
             Class::Luminary => "Luminary",
             Class::Ascendril => "Ascendril",
             // Spinesreach
-            Class::Archivists => "Archivists",
+            Class::Archivist => "Archivist",
             Class::Sciomancer => "Sciomancer",
             Class::Infiltrator => "Infiltrator",
             // Neutral
@@ -217,7 +217,7 @@ impl Class {
             Class::Ravager => Class::Zealot,
             Class::Runecarver => Class::Sciomancer,
             Class::Bloodborn => Class::Ascendril,
-            Class::Voidseer => Class::Archivists,
+            Class::Voidseer => Class::Archivist,
             Class::Executor => Class::Sentinel,
             _ => self.clone(),
         }
@@ -225,7 +225,7 @@ impl Class {
 
     pub fn get_safety_alerts(&self, agent: &AgentState) -> Vec<SafetyAlert> {
         match self {
-            Class::Archivists => get_archivist_alerts(agent),
+            Class::Archivist => get_archivist_alerts(agent),
             _ => Vec::new(),
         }
     }
@@ -248,7 +248,7 @@ pub fn get_skill_class(category: &String) -> Option<Class> {
         "Battlefury" | "Righteousness" | "Bladefire" => Some(Class::Templar),
         "Zeal" | "Purification" | "Psionics" => Some(Class::Zealot),
         // Spinesreach
-        "Geometrics" | "Numerology" | "Bioessence" => Some(Class::Archivists),
+        "Geometrics" | "Numerology" | "Bioessence" => Some(Class::Archivist),
         "Sciomancy" | "Sorcery" | "Gravitation" => Some(Class::Sciomancer),
         "Assassination" | "Subterfuge" | "Hypnosis" => Some(Class::Infiltrator),
         // Unaffiliated
@@ -331,6 +331,7 @@ lazy_static! {
 
 pub fn handle_sent(command: &String, agent_states: &mut AetTimelineState) {
     infiltrator::handle_sent(command, agent_states);
+    siderealist::handle_sent(command, agent_states);
     if let Some(captures) = DIAGNOSING.captures(command) {
         let me = agent_states.me.clone();
         let time = agent_states.time;
@@ -536,6 +537,73 @@ pub fn handle_combat_action(
                         apply_or_infer_balance(me, (BType::Focus, duration), &observations);
                     },
                 );
+                Ok(())
+            }
+            "Kill Order" => {
+                if combat_action.annotation.contains("glimmercrest") {
+                    for_agent(agent_states, &combat_action.caster, &|me| {
+                        let room_id = me.room_id;
+                        me.assume_siderealist(&|siderealist| {
+                            siderealist.order_glimmercrest_attack(combat_action.target.clone());
+                        });
+                    });
+                } else if combat_action.annotation.contains("sprite") {
+                    for_agent(agent_states, &combat_action.caster, &|me| {
+                        let room_id = me.room_id;
+                        me.assume_siderealist(&|siderealist| {
+                            siderealist.order_sprite_attack(combat_action.target.clone());
+                        });
+                    });
+                }
+                Ok(())
+            }
+            "Passive Order" => {
+                if combat_action.annotation.contains("glimmercrest") {
+                    for_agent(agent_states, &combat_action.caster, &|me| {
+                        let room_id = me.room_id;
+                        me.assume_siderealist(&|siderealist| {
+                            siderealist.order_glimmercrest_passive();
+                        });
+                    });
+                } else if combat_action.annotation.contains("sprite") {
+                    for_agent(agent_states, &combat_action.caster, &|me| {
+                        let room_id = me.room_id;
+                        me.assume_siderealist(&|siderealist| {
+                            siderealist.order_sprite_passive();
+                        });
+                    });
+                }
+                Ok(())
+            }
+            "Companion Death" => {
+                if combat_action.annotation.contains("glimmercrest")
+                    || combat_action.annotation.contains("sprite")
+                {
+                    for_agent(agent_states, &combat_action.caster, &|me| {
+                        let room_id = me.room_id;
+                        me.assume_siderealist(&|siderealist| {
+                            siderealist.kill_companion();
+                        });
+                    });
+                }
+                Ok(())
+            }
+            "Companion Unseen" => {
+                if combat_action.annotation.contains("glimmercrest") {
+                    for_agent(agent_states, &combat_action.caster, &|me| {
+                        let room_id = me.room_id;
+                        me.assume_siderealist(&|siderealist| {
+                            siderealist.cannot_see_glimmercrest();
+                        });
+                    });
+                } else if combat_action.annotation.contains("sprite") {
+                    for_agent(agent_states, &combat_action.caster, &|me| {
+                        let room_id = me.room_id;
+                        me.assume_siderealist(&|siderealist| {
+                            siderealist.cannot_see_sprite();
+                        });
+                    });
+                }
                 Ok(())
             }
             _ => Ok(()),

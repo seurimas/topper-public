@@ -7,7 +7,7 @@ use crate::curatives::{
     ELIXIR_DEFENCES, PILL_CURE_ORDERS, PILL_DEFENCES, SALVE_CURE_ORDERS, SMOKE_CURE_ORDERS,
 };
 use crate::db::AetDatabaseModule;
-use crate::non_agent::AetNonAgent;
+use crate::non_agent::{AetNonAgent, AetTimelineRoomExt};
 use crate::timeline::*;
 use crate::types::*;
 use log::warn;
@@ -336,6 +336,32 @@ pub fn apply_observation(
                     AetNonAgent::Players(enemies),
                 );
             }
+            "Vibes" => {
+                let me = timeline.borrow_me();
+                let my_room = me.room_id;
+                timeline.begin_vibrations_list(my_room);
+                for line in after
+                    .iter()
+                    .filter(|obs| matches!(obs, AetObservation::ListItem(..)))
+                {
+                    if let AetObservation::ListItem(vibration, status, owner, time) = line {
+                        if let Some(vibration) = Vibration::from_name(vibration.to_string()) {
+                            let timer = if status.contains("dormant") {
+                                VibrationState::dormant_seconds(time.parse().unwrap_or(0))
+                            } else {
+                                VibrationState::active_seconds(time.parse().unwrap_or(0))
+                            };
+                            for_agent(timeline, owner, &|you| {
+                                you.assume_siderealist(&|me| {
+                                    me.set_vibration(vibration, my_room, timer);
+                                });
+                            });
+                            let owner = owner.clone();
+                            timeline.observe_vibration_in_room(my_room, vibration, &owner, timer);
+                        }
+                    }
+                }
+            }
             _ => {}
         },
         AetObservation::Stripped(defense) => {
@@ -513,8 +539,8 @@ pub fn apply_observation(
                         me.toggle_flag(FType::Shock, true);
                     }
                 }
-                me.set_stat(SType::Health, *current);
-                me.set_max_stat(SType::Health, *max);
+                me.set_stat(SType::Health, (percent * 100.) as CType);
+                me.set_max_stat(SType::Health, 100);
             });
         }
         _ => {}
@@ -1172,6 +1198,14 @@ pub fn apply_or_infer_cure(
                         }
                     } else if let Some(defence) = ELIXIR_DEFENCES.get(elixir_name) {
                         who.set_flag(*defence, true);
+                    } else if elixir_name.eq_ignore_ascii_case("health") {
+                        if !first_person {
+                            who.restore_stat(SType::Health, 22);
+                        }
+                    } else if elixir_name.eq_ignore_ascii_case("mana") {
+                        if !first_person {
+                            who.restore_stat(SType::Mana, 22);
+                        }
                     }
                 }
             }
@@ -1280,7 +1314,7 @@ pub fn for_agent(agent_states: &mut AetTimelineState, target: &String, act: &Fn(
 pub fn for_agent_uncertain(
     agent_states: &mut AetTimelineState,
     target: &String,
-    act: fn(&mut AgentState) -> Option<Vec<AgentState>>,
+    act: &Fn(&mut AgentState) -> Option<Vec<AgentState>>,
 ) {
     agent_states.for_agent_uncertain(target, act)
 }

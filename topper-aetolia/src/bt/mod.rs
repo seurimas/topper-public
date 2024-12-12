@@ -73,6 +73,7 @@ pub struct BehaviorController {
     pub allies: HashMap<String, i32>,
     pub class_controller: ClassController,
     pub first_aid_settings: Vec<FirstAidSetting>,
+    pub stripping_shield: bool,
 }
 
 #[derive(Default, Debug)]

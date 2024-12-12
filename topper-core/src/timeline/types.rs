@@ -128,7 +128,7 @@ impl<A: BaseAgentState + Clone, N: Clone> TimelineState<A, N> {
         }
     }
 
-    pub fn for_agent_uncertain(&mut self, who: &String, act: fn(&mut A) -> Option<Vec<A>>) {
+    pub fn for_agent_uncertain(&mut self, who: &String, act: &Fn(&mut A) -> Option<Vec<A>>) {
         let mut branches = Vec::new();
         let mut unbranched = Vec::new();
         for (i, mut you) in self.get_mut_agent(who).iter_mut().enumerate() {

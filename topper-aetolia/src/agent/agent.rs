@@ -482,6 +482,20 @@ impl AgentState {
         self.stats[stat as usize]
     }
 
+    pub fn restore_stat(&mut self, stat: SType, value: CType) {
+        self.stats[stat as usize] += value;
+        if self.stats[stat as usize] > self.max_stats[stat as usize] {
+            self.stats[stat as usize] = self.max_stats[stat as usize];
+        }
+    }
+
+    pub fn damage_stat(&mut self, stat: SType, value: CType) {
+        self.stats[stat as usize] -= value;
+        if self.stats[stat as usize] < 0 {
+            self.stats[stat as usize] = 0;
+        }
+    }
+
     pub fn get_max_stat(&self, stat: SType) -> CType {
         self.max_stats[stat as usize]
     }

@@ -607,5 +607,47 @@
       }
     ],
     "observation_name": "CombatAction"
+  },
+  {
+    "regex": "^(You) order (.*) to kill (\\w+).$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Survival"
+      },
+      {
+        "Literal": "Kill Order"
+      },
+      {
+        "GroupAsTarget": 2
+      },
+      {
+        "GroupAsTarget": 3
+      }
+    ],
+    "observation_name": "CombatAction"
+  },
+  {
+    "regex": "^(You) order (.*) to assume a passive stance.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Survival"
+      },
+      {
+        "Literal": "Passive Order"
+      },
+      {
+        "GroupAsTarget": 2
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "CombatAction"
   }
 ]

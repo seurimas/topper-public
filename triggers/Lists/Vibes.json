@@ -1,0 +1,38 @@
+[
+    {
+        "regex": "^The following vibrations reside here:$",
+        "args": [
+            {
+                "Literal": "Vibes"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "ListStart"
+    },
+    {
+        "regex": "^(\\w+)\\s+(\\(dormant\\)|-)\\s+(\\w+)\\s+(\\d+)$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "GroupAsTarget": 2
+            },
+            {
+                "GroupAsTarget": 3
+            },
+            {
+                "GroupAsTarget": 4
+            }
+        ],
+        "observation_name": "ListItem"
+    }
+]

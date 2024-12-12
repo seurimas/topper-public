@@ -10,6 +10,24 @@ lazy_static! {
     static ref EMBED: Regex = Regex::new(r"embed (\w+)").unwrap();
 }
 
+const RAY_DAMAGE: CType = 20;
+const STILLNESS_DAMAGE: CType = 13;
+
+fn get_damage(before: &Vec<AetObservation>, base: CType) -> CType {
+    let mut damage = base;
+    if before.iter().any(|obs| {
+        if let AetObservation::CombatAction(action) = obs {
+            action.skill.eq_ignore_ascii_case("Parallax Release")
+        } else {
+            false
+        }
+    }) {
+        damage *= 6;
+        damage /= 10;
+    }
+    damage
+}
+
 pub fn handle_sent(command: &String, agent_states: &mut AetTimelineState) {
     if let Some(captures) = EMBED.captures(command) {
         let me = agent_states.me.clone();
@@ -29,11 +47,15 @@ pub fn handle_sent(command: &String, agent_states: &mut AetTimelineState) {
 pub fn handle_combat_action(
     combat_action: &CombatAction,
     agent_states: &mut AetTimelineState,
-    _before: &Vec<AetObservation>,
+    before: &Vec<AetObservation>,
     after: &Vec<AetObservation>,
 ) -> Result<(), String> {
     match combat_action.skill.as_ref() {
         "Embed" => {
+            println!(
+                "Hint: {:?}",
+                agent_states.get_player_hint(&combat_action.caster, &"embedding".to_string())
+            );
             if let Some(embedding) = agent_states
                 .get_player_hint(&combat_action.caster, &"embedding".to_string())
                 .and_then(Vibration::from_name)
@@ -46,13 +68,19 @@ pub fn handle_combat_action(
                     let vibrations = who
                         .check_if_siderealist(&|me| me.vibration_states())
                         .unwrap_or(vec![]);
+                    println!("Found {} vibrations to embed.", vibrations.len());
                     for vibration in vibrations {
                         agent_states.observe_vibration_in_room(
                             room_id,
                             vibration.0,
                             &combat_action.caster,
-                            vibration.1,
+                            vibration.1.activate(),
                         );
+                        for_agent(agent_states, &combat_action.caster, &move |me| {
+                            me.assume_siderealist(&|me| {
+                                me.set_vibration(vibration.0, room_id, vibration.1.activate());
+                            });
+                        });
                     }
                     return Ok(());
                 }
@@ -148,6 +176,33 @@ pub fn handle_combat_action(
         "Tones Plague" => {
             if let Some(aff) = FType::from_name(&combat_action.annotation) {
                 attack_afflictions(agent_states, &combat_action.target, vec![aff], after);
+            } else {
+                let perspect = agent_states.get_perspective(combat_action);
+                let observations = after.clone();
+                for_agent_uncertain(
+                    agent_states,
+                    &combat_action.target,
+                    &move |me: &mut AgentState| {
+                        apply_or_infer_random_afflictions(
+                            me,
+                            &observations,
+                            perspect,
+                            Some((
+                                1,
+                                vec![
+                                    FType::Confusion,
+                                    FType::Weariness,
+                                    FType::Superstition,
+                                    FType::Vomiting,
+                                    FType::Recklessness,
+                                    FType::Epilepsy,
+                                    FType::Paresis,
+                                    FType::Anorexia,
+                                ],
+                            )),
+                        )
+                    },
+                );
             }
         }
         "lullaby" => {
@@ -235,8 +290,20 @@ pub fn handle_combat_action(
             }
         }
         "Ray" => {
+            let perspective = agent_states.get_perspective(combat_action);
+            let damage = get_damage(before, RAY_DAMAGE);
             for_agent(agent_states, &combat_action.target, &move |me| {
                 me.siderealist_board.ray();
+                if perspective != Perspective::Target {
+                    me.damage_stat(SType::Health, damage);
+                }
+            });
+        }
+        "Enigma" => {
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                me.assume_siderealist(&|me| {
+                    me.enigmaed();
+                });
             });
         }
         "Glimmercrest Hit" => {
@@ -246,6 +313,13 @@ pub fn handle_combat_action(
                 vec![FType::Echoes],
                 after,
             );
+        }
+        "Embody" => {
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                me.assume_siderealist(&|me| {
+                    me.embodied();
+                });
+            });
         }
         "Sprite Hit" => {
             attack_afflictions(
@@ -257,6 +331,17 @@ pub fn handle_combat_action(
         }
         "Dustring" => {
             if combat_action.annotation.eq_ignore_ascii_case("failure") {
+                if agent_states.get_perspective(combat_action) != Perspective::Target {
+                    for_agent(agent_states, &combat_action.target, &move |me| {
+                        if me.get_stat(SType::Health) < 60 {
+                            println!(
+                                "Dustring failed, but we thought the health was: {}",
+                                me.get_stat(SType::Health)
+                            );
+                            me.set_stat(SType::Health, 65);
+                        }
+                    });
+                }
                 return Ok(());
             }
             for_agent(agent_states, &combat_action.target, &move |me| {
@@ -390,8 +475,10 @@ pub fn handle_combat_action(
         }
         "Stillness" => {
             if combat_action.annotation.eq_ignore_ascii_case("hit") {
+                let damage = get_damage(before, STILLNESS_DAMAGE);
                 for_agent(agent_states, &combat_action.target, &move |me| {
                     me.observe_flag(FType::Echoes, true);
+                    me.damage_stat(SType::Health, damage);
                 });
             } else if combat_action.annotation.eq_ignore_ascii_case("failure") {
                 for_agent(agent_states, &combat_action.target, &move |me| {

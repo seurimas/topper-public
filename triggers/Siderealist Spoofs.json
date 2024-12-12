@@ -21,7 +21,28 @@
         "observation_name": "Proc"
     },
     {
-        "regex": "^With a graceful gesture, (you) compell the crystals to embed into the ground and awaken as cosmic vibrations.",
+        "regex": "^With a graceful gesture, (you) compell the crystals to embed into the ground and awaken as cosmic vibrations.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Crystalism"
+            },
+            {
+                "Literal": "Embed"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You) already have that vibration embedded here.$",
         "args": [
             {
                 "GroupAsTarget": 1
@@ -187,5 +208,68 @@
             }
         ],
         "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You) can find no such target as '(glimmercrest|sprite)'.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Survival"
+            },
+            {
+                "Literal": "Companion Unseen"
+            },
+            {
+                "GroupAsTarget": 2
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "CombatAction"
+    },
+    {
+        "regex": "^(.*), your loyal companion, has been slain by \\w+.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Survival"
+            },
+            {
+                "Literal": "Companion Death"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "CombatAction"
+    },
+    {
+        "regex": "^Unable to maintain cohesion, (.*) into nebulaic fumes.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Survival"
+            },
+            {
+                "Literal": "Companion Death"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "CombatAction"
     }
 ]

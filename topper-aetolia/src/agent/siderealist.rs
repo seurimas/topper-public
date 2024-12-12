@@ -126,7 +126,7 @@ impl Regalia {
             "Drobia" => Some(Self::Drobia),
             "Gulbedim" => Some(Self::Gulbedim),
             "Averroes" => Some(Self::Averroes),
-            "Eja Kodosa" => Some(Self::EjaKodosa),
+            "Eja Kodosa" | "EjaKodosa" => Some(Self::EjaKodosa),
             _ => None,
         }
     }
@@ -146,7 +146,7 @@ impl Regalia {
             Self::Drobia => "Drobia",
             Self::Gulbedim => "Gulbedim",
             Self::Averroes => "Averroes",
-            Self::EjaKodosa => "Eja Kodosa",
+            Self::EjaKodosa => "EjaKodosa", // WHY
         }
     }
 
@@ -165,7 +165,7 @@ impl Regalia {
             Self::Drobia => "gear",
             Self::Gulbedim => "mantle",
             Self::Averroes => "staff",
-            Self::EjaKodosa => "tome",
+            Self::EjaKodosa => "book",
         }
     }
 }
@@ -200,7 +200,7 @@ pub enum Vibration {
 
 impl Vibration {
     pub fn from_name(name: String) -> Option<Vibration> {
-        match name.as_ref() {
+        match name.to_lowercase().as_ref() {
             "dissipate" => Some(Self::Dissipate),
             "palpitation" => Some(Self::Palpitation),
             "alarm" => Some(Self::Alarm),
@@ -219,7 +219,7 @@ impl Vibration {
             "energize" => Some(Self::Energize),
             "stridulation" => Some(Self::Stridulation),
             "cavitation" => Some(Self::Cavitation),
-            "crystalforest" => Some(Self::Crystalforest),
+            "crystalforest" | "forest" => Some(Self::Crystalforest),
             "dissension" => Some(Self::Dissension),
             "plague" => Some(Self::Plague),
             "lullaby" => Some(Self::Lullaby),
@@ -232,7 +232,7 @@ impl Vibration {
 
 #[derive(Debug, Clone, Deserialize, Copy, PartialEq, Eq, Hash)]
 pub enum VibrationState {
-    Dormant,
+    Dormant(Timer),
     Active(Timer),
 }
 
@@ -241,9 +241,31 @@ impl VibrationState {
         Self::Active(Timer::count_down_seconds(1200.))
     }
 
+    pub fn active_seconds(seconds: i32) -> Self {
+        Self::Active(Timer::count_down_seconds(seconds as f32))
+    }
+
+    pub fn dormant_seconds(seconds: i32) -> Self {
+        Self::Dormant(Timer::count_down_seconds(seconds as f32))
+    }
+
+    pub fn activate(&self) -> Self {
+        match self {
+            Self::Dormant(time) => Self::Active(time.clone()),
+            Self::Active(_) => self.clone(),
+        }
+    }
+
+    pub fn wait(&mut self, time: CType) {
+        match self {
+            Self::Dormant(timer) => {}
+            Self::Active(timer) => timer.wait(time),
+        }
+    }
+
     pub fn is_dormant(&self) -> bool {
         match self {
-            Self::Dormant => true,
+            Self::Dormant(_) => true,
             _ => false,
         }
     }
@@ -260,8 +282,8 @@ impl VibrationState {
 pub enum SummonState {
     #[default]
     None,
-    Glimmercrest(i64, Option<String>, Timer),
-    Sprite(i64, Option<String>, Timer),
+    Glimmercrest(bool, Option<String>, Timer),
+    Sprite(bool, Option<String>, Timer),
 }
 
 impl SummonState {
@@ -412,9 +434,7 @@ impl SiderealistClassState {
             gleam_stars.violet.wait(time);
         }
         for (_, (_, state)) in self.last_vibration_location.iter_mut() {
-            if let VibrationState::Active(timer) = state {
-                timer.wait(time);
-            }
+            state.wait(time);
         }
         self.summon_state.wait(time);
     }
@@ -499,7 +519,7 @@ impl SiderealistClassState {
         if let Some((room_id, v_state)) = self.last_vibration_location.get(&vibration) {
             match v_state {
                 VibrationState::Active(timer) => timer.is_active(),
-                VibrationState::Dormant => true,
+                VibrationState::Dormant(_) => true,
             }
         } else {
             false
@@ -511,12 +531,54 @@ impl SiderealistClassState {
             .insert(vibration, (room_id, VibrationState::fresh()));
     }
 
+    pub fn set_vibration(&mut self, vibration: Vibration, room_id: i64, state: VibrationState) {
+        self.last_vibration_location
+            .insert(vibration, (room_id, state));
+    }
+
     pub fn has_glimmercrest(&self) -> bool {
         matches!(self.summon_state, SummonState::Glimmercrest(_, _, _))
     }
 
     pub fn has_sprite(&self) -> bool {
         matches!(self.summon_state, SummonState::Sprite(_, _, _))
+    }
+
+    pub fn enigmaed(&mut self) {
+        self.summon_state = SummonState::Glimmercrest(true, None, Timer::count_down_seconds(30.));
+    }
+
+    pub fn embodied(&mut self) {
+        self.summon_state = SummonState::Sprite(true, None, Timer::count_down_seconds(30.));
+    }
+
+    pub fn order_glimmercrest_attack(&mut self, target: String) {
+        self.summon_state =
+            SummonState::Glimmercrest(true, Some(target), Timer::count_down_seconds(30.));
+    }
+
+    pub fn order_sprite_attack(&mut self, target: String) {
+        self.summon_state = SummonState::Sprite(true, Some(target), Timer::count_down_seconds(30.));
+    }
+
+    pub fn order_glimmercrest_passive(&mut self) {
+        self.summon_state = SummonState::Glimmercrest(true, None, Timer::count_down_seconds(30.));
+    }
+
+    pub fn order_sprite_passive(&mut self) {
+        self.summon_state = SummonState::Sprite(true, None, Timer::count_down_seconds(30.));
+    }
+
+    pub fn cannot_see_glimmercrest(&mut self) {
+        if let SummonState::Glimmercrest(in_room, _, timer) = &mut self.summon_state {
+            *in_room = false;
+        }
+    }
+
+    pub fn cannot_see_sprite(&mut self) {
+        if let SummonState::Sprite(in_room, _, timer) = &mut self.summon_state {
+            *in_room = false;
+        }
     }
 
     pub fn glimmercrest_attacking(&self, who: &str) -> bool {
@@ -533,6 +595,10 @@ impl SiderealistClassState {
         } else {
             false
         }
+    }
+
+    pub fn kill_companion(&mut self) {
+        self.summon_state = SummonState::None;
     }
 
     pub fn has_regalia(&self, regalia: Regalia) -> bool {

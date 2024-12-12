@@ -102,7 +102,7 @@ impl UnpoweredFunction for SiderealistBehavior {
                     if !me.arms_free() {
                         return UnpoweredFunctionState::Failed;
                     }
-                    if target_agent.is(FType::Shielded) {
+                    if target_agent.is(FType::Shielded) && controller.stripping_shield {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
@@ -115,7 +115,7 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::Erode(target) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free() {
+                    if !me.arms_free() || controller.stripping_shield {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
@@ -185,7 +185,9 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::Dustring(target) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free() {
+                    if !me.arms_free()
+                        || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
+                    {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
@@ -198,7 +200,9 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::Asterism(target) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free() {
+                    if !me.arms_free()
+                        || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
+                    {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
@@ -211,7 +215,9 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::Moonlet(target) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free() {
+                    if !me.arms_free()
+                        || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
+                    {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
@@ -241,6 +247,7 @@ impl UnpoweredFunction for SiderealistBehavior {
                         || !me
                             .check_if_siderealist(&|me| me.has_gleam_star(*color))
                             .unwrap_or(false)
+                        || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
                     {
                         return UnpoweredFunctionState::Failed;
                     }
@@ -300,7 +307,10 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::Stillness(target) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free() || !target_agent.is(FType::Echoes) {
+                    if !me.arms_free()
+                        || !target_agent.is(FType::Echoes)
+                        || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
+                    {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
@@ -375,6 +385,7 @@ impl UnpoweredFunction for SiderealistBehavior {
                         || !me
                             .check_if_siderealist(&|me| me.has_gleam())
                             .unwrap_or(false)
+                        || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
                     {
                         return UnpoweredFunctionState::Failed;
                     }
@@ -394,6 +405,7 @@ impl UnpoweredFunction for SiderealistBehavior {
                         || !target_agent.siderealist_board.has_asterism()
                         || !target_agent.siderealist_board.has_moonlet()
                         || !target_agent.siderealist_board.has_dustring()
+                        || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
                     {
                         return UnpoweredFunctionState::Failed;
                     }
@@ -437,6 +449,7 @@ impl UnpoweredFunction for SiderealistBehavior {
                     if !me
                         .check_if_siderealist(&|me| me.has_regalia(Regalia::Ontesme))
                         .unwrap_or(false)
+                        || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
                     {
                         return UnpoweredFunctionState::Failed;
                     }
@@ -453,6 +466,7 @@ impl UnpoweredFunction for SiderealistBehavior {
                     if !me
                         .check_if_siderealist(&|me| me.has_regalia(Regalia::Averroes))
                         .unwrap_or(false)
+                        || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
                     {
                         return UnpoweredFunctionState::Failed;
                     }
@@ -484,6 +498,7 @@ impl UnpoweredFunction for SiderealistBehavior {
                     if !me
                         .check_if_siderealist(&|me| me.has_regalia(Regalia::EjaKodosa))
                         .unwrap_or(false)
+                        || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
                     {
                         return UnpoweredFunctionState::Failed;
                     }
