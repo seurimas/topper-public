@@ -98,6 +98,11 @@ pub fn handle_combat_action(
                 });
             }
         }
+        "palpitation" => {
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                me.damage_stat(SType::Health, 5);
+            });
+        }
         "Tones Tremors" => {
             attack_afflictions(
                 agent_states,
@@ -108,7 +113,7 @@ pub fn handle_combat_action(
         }
         "creeps" => {
             if let Some(aff) = FType::from_name(&combat_action.annotation) {
-                attack_afflictions(agent_states, &combat_action.target, vec![aff], after);
+                attack_afflictions(agent_states, &combat_action.caster, vec![aff], after);
             }
         }
         "Tones Creeps" => {
@@ -130,7 +135,7 @@ pub fn handle_combat_action(
         "disorientation" => {
             attack_afflictions(
                 agent_states,
-                &combat_action.target,
+                &combat_action.caster,
                 vec![FType::Dizziness],
                 after,
             );
@@ -152,10 +157,15 @@ pub fn handle_combat_action(
                 }
             });
         }
+        "dissension" => {
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                me.damage_stat(SType::Health, 4);
+            });
+        }
         "Dissension Hit" => {
             attack_afflictions(
                 agent_states,
-                &combat_action.target,
+                &combat_action.caster,
                 vec![FType::Dissonance],
                 after,
             );
@@ -170,7 +180,7 @@ pub fn handle_combat_action(
         }
         "plague" => {
             if let Some(aff) = FType::from_name(&combat_action.annotation) {
-                attack_afflictions(agent_states, &combat_action.target, vec![aff], after);
+                attack_afflictions(agent_states, &combat_action.caster, vec![aff], after);
             }
         }
         "Tones Plague" => {
@@ -205,8 +215,27 @@ pub fn handle_combat_action(
                 );
             }
         }
+        "Tones Crystalforest" => {
+            if combat_action.target.eq_ignore_ascii_case("") {
+                return Ok(());
+            }
+            if let Some(defense) = FType::from_name(&combat_action.annotation) {
+                for_agent(agent_states, &combat_action.target, &move |me| {
+                    me.toggle_flag(defense, false);
+                });
+            } else {
+                for_agent(agent_states, &combat_action.target, &move |me| {
+                    me.toggle_flag(FType::Shielded, false);
+                });
+            }
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                me.assume_siderealist(&|me| {
+                    me.shatter_crystalforest();
+                });
+            });
+        }
         "lullaby" => {
-            for_agent(agent_states, &combat_action.target, &move |me| {
+            for_agent(agent_states, &combat_action.caster, &move |me| {
                 if me.is(FType::Insomnia) {
                     me.toggle_flag(FType::Insomnia, false);
                 } else if !me.is(FType::Asleep) {
@@ -236,6 +265,11 @@ pub fn handle_combat_action(
                 first_person,
                 &hints,
             );
+            if attack_hit(after) {
+                for_agent(agent_states, &combat_action.target, &move |me| {
+                    me.damage_stat(SType::Health, 7);
+                });
+            }
         }
         "Ontesme Illgrasp" => {
             for_agent(agent_states, &combat_action.target, &move |me| {
@@ -403,15 +437,32 @@ pub fn handle_combat_action(
                 );
             }
         }
+        "Chromaflare" => {
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                me.assume_siderealist(&|me| {
+                    me.chromaflare();
+                });
+            });
+        }
+        "Chromaflare Hit" => {
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                me.damage_stat(SType::Health, 5);
+            });
+        }
         "Parallax" => {
-            if let Some(AetObservation::Proc(weave)) = after.get(0) {
+            println!("Parallax: {:?}", after);
+            if let Some(AetObservation::Proc(weave)) = after.get(1) {
                 if !weave.skill.eq_ignore_ascii_case("parallax weave") {
                     return Ok(());
                 }
                 let time = weave.target.parse::<f32>().unwrap_or(0.0);
                 for_agent(agent_states, &combat_action.caster, &move |me| {
                     me.assume_siderealist(&|me| {
-                        me.weave_parallax(time, weave.target.clone(), combat_action.target.clone());
+                        me.weave_parallax(
+                            time,
+                            weave.annotation.clone(),
+                            combat_action.target.clone(),
+                        );
                     });
                 });
             }
@@ -476,10 +527,43 @@ pub fn handle_combat_action(
         "Stillness" => {
             if combat_action.annotation.eq_ignore_ascii_case("hit") {
                 let damage = get_damage(before, STILLNESS_DAMAGE);
-                for_agent(agent_states, &combat_action.target, &move |me| {
+                for_agent(agent_states, &combat_action.caster, &move |me| {
                     me.observe_flag(FType::Echoes, true);
                     me.damage_stat(SType::Health, damage);
                 });
+                attack_afflictions(
+                    agent_states,
+                    &combat_action.caster,
+                    vec![
+                        FType::Stupidity,
+                        FType::Confusion,
+                        FType::Dementia,
+                        FType::Hallucinations,
+                    ],
+                    after,
+                );
+                for_agent(agent_states, &combat_action.caster, &move |me| {
+                    if me.affs_count(&vec![
+                        FType::Stupidity,
+                        FType::Confusion,
+                        FType::Dementia,
+                        FType::Hallucinations,
+                    ]) >= 4
+                    {
+                        me.siderealist_board.moonlet_hit();
+                    }
+                });
+                attack_afflictions(
+                    agent_states,
+                    &combat_action.caster,
+                    vec![
+                        FType::Stupidity,
+                        FType::Confusion,
+                        FType::Dementia,
+                        FType::Hallucinations,
+                    ],
+                    after,
+                );
             } else if combat_action.annotation.eq_ignore_ascii_case("failure") {
                 for_agent(agent_states, &combat_action.target, &move |me| {
                     me.observe_flag(FType::Echoes, false);
@@ -490,6 +574,9 @@ pub fn handle_combat_action(
         }
         "Syzygy" => {
             if combat_action.annotation.eq_ignore_ascii_case("failure") {
+                for_agent(agent_states, &combat_action.target, &move |me| {
+                    me.siderealist_board.expire_oldest_anomaly();
+                });
                 return Ok(());
             }
             for_agent(agent_states, &combat_action.target, &move |me| {

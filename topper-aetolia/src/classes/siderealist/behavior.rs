@@ -36,12 +36,14 @@ pub enum SiderealistBehavior {
     Stillness(AetTarget),
     Parallax(AetTarget, i32, String),
     ParallaxWithAb(AetTarget, i32, String, String),
+    Alteration(AetTarget, FType, FType),
     Redshift(AetTarget),
     Chromaflare(AetTarget),
     Syzygy(AetTarget),
     Reenact(Regalia, Vec<Regalia>),
     Illgrasp(AetTarget),
     Bolt(AetTarget, LimbDescriptor),
+    VayuaAttack(AetTarget),
     EjaKodosaMend,
     EjaKodosaKill(AetTarget),
 }
@@ -58,7 +60,10 @@ impl UnpoweredFunction for SiderealistBehavior {
         let me = model.state.borrow_me();
         match self {
             SiderealistBehavior::Embed(vibration) => {
-                if !me.arms_free() || vibration_in_room(&model.state, me.room_id, *vibration) {
+                if vibration_in_room(&model.state, me.room_id, *vibration) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                if !centrum_check(model, controller) {
                     return UnpoweredFunctionState::Failed;
                 }
                 controller
@@ -67,7 +72,7 @@ impl UnpoweredFunction for SiderealistBehavior {
                 UnpoweredFunctionState::Complete
             }
             SiderealistBehavior::Embeds(vibrations) => {
-                if !me.arms_free() {
+                if !centrum_check(model, controller) {
                     return UnpoweredFunctionState::Failed;
                 }
                 for vibration in vibrations {
@@ -86,7 +91,21 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::Tones(target, vibration) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free() || vibration_in_room(&model.state, me.room_id, *vibration) {
+                    if !vibration_in_room(&model.state, me.room_id, *vibration) {
+                        println!("No {} in room!", *vibration);
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if !me.balanced(BType::Secondary) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if *vibration == Vibration::Crystalforest
+                        && me
+                            .check_if_siderealist(&|me| me.can_crystalforest())
+                            .unwrap_or(false)
+                    {
+                        controller.stripping_shield = true;
+                    }
+                    if !centrum_check(model, controller) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(Tones::from_target(
@@ -99,7 +118,7 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::Ray(target) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free() {
+                    if !centrum_check(model, controller) {
                         return UnpoweredFunctionState::Failed;
                     }
                     if target_agent.is(FType::Shielded) && controller.stripping_shield {
@@ -115,7 +134,10 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::Erode(target) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free() || controller.stripping_shield {
+                    if controller.stripping_shield {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if !centrum_check(model, controller) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
@@ -127,7 +149,7 @@ impl UnpoweredFunction for SiderealistBehavior {
                 }
             }
             SiderealistBehavior::Rotate => {
-                if !me.arms_free() {
+                if !centrum_check(model, controller) {
                     return UnpoweredFunctionState::Failed;
                 }
                 controller
@@ -136,7 +158,7 @@ impl UnpoweredFunction for SiderealistBehavior {
                 UnpoweredFunctionState::Complete
             }
             SiderealistBehavior::Enigma => {
-                if !me.arms_free() {
+                if !centrum_check(model, controller) {
                     return UnpoweredFunctionState::Failed;
                 }
                 controller
@@ -160,7 +182,7 @@ impl UnpoweredFunction for SiderealistBehavior {
                 }
             }
             SiderealistBehavior::Embody => {
-                if !me.arms_free() {
+                if !centrum_check(model, controller) {
                     return UnpoweredFunctionState::Failed;
                 }
                 controller
@@ -185,9 +207,10 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::Dustring(target) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free()
-                        || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
-                    {
+                    if (target_agent.is(FType::Shielded) && !controller.stripping_shield) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if !centrum_check(model, controller) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
@@ -200,9 +223,10 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::Asterism(target) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free()
-                        || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
-                    {
+                    if (target_agent.is(FType::Shielded) && !controller.stripping_shield) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if !centrum_check(model, controller) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
@@ -215,9 +239,10 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::Moonlet(target) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free()
-                        || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
-                    {
+                    if (target_agent.is(FType::Shielded) && !controller.stripping_shield) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if !centrum_check(model, controller) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
@@ -229,11 +254,13 @@ impl UnpoweredFunction for SiderealistBehavior {
                 }
             }
             SiderealistBehavior::Gleam => {
-                if !me.arms_free()
-                    || me
-                        .check_if_siderealist(&|me| me.has_gleam())
-                        .unwrap_or(false)
+                if me
+                    .check_if_siderealist(&|me| me.has_gleam() || !me.can_gleam())
+                    .unwrap_or(false)
                 {
+                    return UnpoweredFunctionState::Failed;
+                }
+                if !centrum_check(model, controller) {
                     return UnpoweredFunctionState::Failed;
                 }
                 controller
@@ -243,12 +270,17 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::GleamInflict(target, color) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free()
-                        || !me
-                            .check_if_siderealist(&|me| me.has_gleam_star(*color))
-                            .unwrap_or(false)
+                    if !me
+                        .check_if_siderealist(&|me| me.has_gleam_star(*color))
+                        .unwrap_or(false)
                         || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
                     {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if target_agent.is(FType::Shielded) && !controller.stripping_shield {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if !centrum_check(model, controller) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
@@ -307,10 +339,12 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::Stillness(target) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free()
-                        || !target_agent.is(FType::Echoes)
+                    if !target_agent.is(FType::Echoes)
                         || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
                     {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if !centrum_check(model, controller) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
@@ -323,18 +357,20 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::Parallax(target, time, spell) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free()
-                        || me
-                            .check_if_siderealist(&|me| me.has_parallax())
-                            .unwrap_or(false)
+                    if me
+                        .check_if_siderealist(&|me| me.has_parallax())
+                        .unwrap_or(false)
                     {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if !centrum_check(model, controller) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
                         .plan
                         .add_to_qeb(Box::new(Parallax::new_with_target(
                             model.who_am_i(),
-                            *time as f32,
+                            *time,
                             spell.clone(),
                             target.get_name(model, controller),
                         )));
@@ -345,18 +381,20 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::ParallaxWithAb(target, time, spell, ab) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free()
-                        || me
-                            .check_if_siderealist(&|me| me.has_parallax())
-                            .unwrap_or(false)
+                    if me
+                        .check_if_siderealist(&|me| me.has_parallax())
+                        .unwrap_or(false)
                     {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if !centrum_check(model, controller) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
                         .plan
                         .add_to_qeb(Box::new(Parallax::new_with_target_and_ab(
                             model.who_am_i(),
-                            *time as f32,
+                            *time,
                             spell.clone(),
                             target.get_name(model, controller),
                             ab.clone(),
@@ -366,9 +404,25 @@ impl UnpoweredFunction for SiderealistBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
+            SiderealistBehavior::Alteration(target, source, result) => {
+                if let Some(target_agent) = target.get_target(model, controller) {
+                    if !me.balanced(BType::Secondary) || !target_agent.is(*source) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if !centrum_check(model, controller) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    controller.plan.add_to_qeb(Box::new(Alteration::from_target(
+                        *target, model, controller, *source, *result,
+                    )));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
             SiderealistBehavior::Redshift(target) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free() {
+                    if !centrum_check(model, controller) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
@@ -381,12 +435,14 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::Chromaflare(target) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free()
-                        || !me
-                            .check_if_siderealist(&|me| me.has_gleam())
-                            .unwrap_or(false)
+                    if !me
+                        .check_if_siderealist(&|me| me.has_gleam())
+                        .unwrap_or(false)
                         || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
                     {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if !centrum_check(model, controller) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
@@ -401,12 +457,14 @@ impl UnpoweredFunction for SiderealistBehavior {
             }
             SiderealistBehavior::Syzygy(target) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
-                    if !me.arms_free()
-                        || !target_agent.siderealist_board.has_asterism()
+                    if !target_agent.siderealist_board.has_asterism()
                         || !target_agent.siderealist_board.has_moonlet()
                         || !target_agent.siderealist_board.has_dustring()
                         || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
                     {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if !centrum_check(model, controller) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller
@@ -470,6 +528,9 @@ impl UnpoweredFunction for SiderealistBehavior {
                     {
                         return UnpoweredFunctionState::Failed;
                     }
+                    if !regalia_uncrippled(&me, model, controller, "staff") {
+                        return UnpoweredFunctionState::Failed;
+                    }
                     let limb = limb
                         .get_limb(model, controller, target)
                         .unwrap_or(LType::HeadDamage);
@@ -480,6 +541,36 @@ impl UnpoweredFunction for SiderealistBehavior {
                 } else {
                     return UnpoweredFunctionState::Failed;
                 }
+            }
+            SiderealistBehavior::VayuaAttack(target) => {
+                if let Some(target_agent) = target.get_target(model, controller) {
+                    if !me
+                        .check_if_siderealist(&|me| me.has_regalia(Regalia::Vayua))
+                        .unwrap_or(false)
+                        || (target_agent.is(FType::Shielded) && !controller.stripping_shield)
+                    {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if !regalia_uncrippled(&me, model, controller, "sword") {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if let Some(venom) = controller.aff_priorities.as_ref().and_then(|affs| {
+                        get_venoms_from_plan(&affs, 1, target_agent)
+                            .first()
+                            .cloned()
+                    }) {
+                        controller
+                            .plan
+                            .add_to_qeb(Box::new(VayuaAttack::from_target(
+                                *target,
+                                model,
+                                controller,
+                                venom.to_string(),
+                            )));
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                return UnpoweredFunctionState::Failed;
             }
             SiderealistBehavior::EjaKodosaMend => {
                 if !me
@@ -520,4 +611,38 @@ impl UnpoweredFunction for SiderealistBehavior {
             _ => (),
         }
     }
+}
+
+fn centrum_check(model: &BehaviorModel, controller: &mut BehaviorController) -> bool {
+    let me = model.state.borrow_me();
+    if me.arms_free() {
+        return true; // Arms are free
+    } else if me.arm_free() && me.is(FType::Centrum) {
+        return true; // Centrum is active
+    } else if me.arm_free()
+        && me
+            .check_if_siderealist(&|me| me.can_centrum())
+            .unwrap_or(false)
+    {
+        controller
+            .plan
+            .add_to_front_of_qeb(Box::new(Centrum::new(model.who_am_i())));
+        return true; // Centrum is not active, but can be activated
+    } else {
+        return false; // Centrum is not active and cannot be activated
+    }
+}
+
+fn regalia_uncrippled(
+    me: &AgentState,
+    model: &BehaviorModel,
+    controller: &mut BehaviorController,
+    wielded: &str,
+) -> bool {
+    if me.wield_state.is_wielding_left(wielded) && !me.arm_free_left() {
+        return false;
+    } else if me.wield_state.is_wielding_right(wielded) && !me.arm_free_right() {
+        return false;
+    }
+    true
 }

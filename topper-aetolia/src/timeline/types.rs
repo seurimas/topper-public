@@ -208,6 +208,8 @@ pub enum AetObservation {
     // Specific case, non-action
     Relapse(String),
     TickAff(String, String),
+    #[skip_args]
+    AffTicks(String, u8),
     // Pipes
     FillPipe(String),
     PipeEmpty,

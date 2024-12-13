@@ -78,6 +78,7 @@ fn handle_char_vitals(
     }
     handle_bard_values(gmcp, timeline);
     handle_predator_values(gmcp, timeline);
+    handle_siderealist_values(gmcp, timeline);
 
     if let (Some(hp), Some(mp), Some(max_hp), Some(max_mp)) = (
         gmcp.get("hp")
@@ -179,6 +180,31 @@ fn handle_predator_values(
                 if let ClassState::Predator(class_state) = &mut me.class_state {
                     class_state.apex = apex;
                 }
+            },
+        );
+    }
+}
+
+fn handle_siderealist_values(
+    gmcp: &serde_json::Value,
+    timeline: &mut TimelineState<AgentState, crate::non_agent::AetNonAgent>,
+) {
+    let first_regalia = gmcp
+        .get("first_regalia")
+        .and_then(|regalia| regalia.as_str())
+        .and_then(Regalia::from_item_name);
+    let second_regalia = gmcp
+        .get("second_regalia")
+        .and_then(|regalia| regalia.as_str())
+        .and_then(Regalia::from_item_name);
+    if first_regalia.is_some() || second_regalia.is_some() {
+        for_agent(
+            timeline,
+            &timeline.me.clone(),
+            &move |me: &mut AgentState| {
+                me.assume_siderealist(&move |class_state| {
+                    class_state.observe_regalia(first_regalia, second_regalia)
+                });
             },
         );
     }

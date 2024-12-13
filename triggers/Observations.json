@@ -414,6 +414,18 @@
     "observation_name": "LimbDone"
   },
   {
+    "regex": "^Your (\\w+) affliction now has (\\d+) stacks.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "GroupAsTarget": 2
+      }
+    ],
+    "observation_name": "AffTicks"
+  },
+  {
     "regex": "^Your (\\w+ ?\\w*) is greatly healed, but still damaged.$",
     "args": [
       {
@@ -439,6 +451,24 @@
       },
       {
         "Literal": "allergies"
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "TickAff"
+  },
+  {
+    "regex": "^Anguish twists (\\w+)'s visage as the magical energies wash over",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "illgrasp"
       },
       {
         "Literal": ""

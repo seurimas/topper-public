@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use serde::Deserialize;
+use topper_core::timeline::CType;
 
 use crate::{
     agent::{Timer, Vibration, VibrationState},
@@ -86,6 +87,16 @@ impl Room {
         })
     }
 
+    pub fn wait(&mut self, time: CType) {
+        self.vibrations.retain(|_, vibration_state| {
+            vibration_state.owners.retain(|_, state| {
+                state.wait(time);
+                state.is_dormant() || state.is_active()
+            });
+            !vibration_state.owners.is_empty()
+        });
+    }
+
     pub fn add_tag(&mut self, tag: impl ToString) {
         self.tags.insert(tag.to_string());
     }
@@ -105,7 +116,7 @@ impl Room {
                 vibration_state
                     .owners
                     .iter()
-                    .any(|(vibration_owner, _)| vibration_owner == owner)
+                    .any(|(vibration_owner, state)| vibration_owner == owner && state.is_active())
             })
             .unwrap_or(false)
     }

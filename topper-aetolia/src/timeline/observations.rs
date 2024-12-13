@@ -49,6 +49,15 @@ pub fn aet_observation_creator(
             &arguments.get(3).unwrap(),
             &arguments.get(4).unwrap(),
         ),
+        "AffTicks" => AetObservation::AffTicks(
+            arguments.get(0).unwrap().to_string(),
+            arguments
+                .get(1)
+                .unwrap()
+                .to_string()
+                .parse()
+                .unwrap_or_default(),
+        ),
         "SimpleCure" => {
             AetObservation::SimpleCureAction(match arguments.get(1).unwrap().as_ref() {
                 "Smoke" => {

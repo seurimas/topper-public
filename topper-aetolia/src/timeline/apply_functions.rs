@@ -503,7 +503,24 @@ pub fn apply_observation(
             });
         }
         AetObservation::TickAff(who, what) => {
-            timeline.tick_counter_up_for_agent(who, what)?;
+            if what.eq_ignore_ascii_case("illgrasp") {
+                for_agent(timeline, who, &move |me: &mut AgentState| {
+                    me.tick_flag_down(FType::Illgrasp);
+                });
+            } else {
+                timeline.tick_counter_up_for_agent(who, what)?;
+            }
+        }
+        AetObservation::AffTicks(aff, what) => {
+            if let Some(aff) = FType::from_name(aff) {
+                for_agent(
+                    timeline,
+                    &timeline.me.clone(),
+                    &move |me: &mut AgentState| {
+                        me.set_count(aff, *what);
+                    },
+                );
+            }
         }
         AetObservation::Relapse(who) => {
             if before.len() == 0 {
@@ -539,7 +556,15 @@ pub fn apply_observation(
                         me.toggle_flag(FType::Shock, true);
                     }
                 }
-                me.set_stat(SType::Health, (percent * 100.) as CType);
+                let percent_value = (percent * 100.) as CType;
+                if (percent_value - me.get_stat(SType::Health)).abs() > 10 {
+                    println!(
+                        "Assess: {} -> {}",
+                        me.get_stat(SType::Health),
+                        percent_value
+                    );
+                }
+                me.set_stat(SType::Health, percent_value);
                 me.set_max_stat(SType::Health, 100);
             });
         }
@@ -1198,14 +1223,6 @@ pub fn apply_or_infer_cure(
                         }
                     } else if let Some(defence) = ELIXIR_DEFENCES.get(elixir_name) {
                         who.set_flag(*defence, true);
-                    } else if elixir_name.eq_ignore_ascii_case("health") {
-                        if !first_person {
-                            who.restore_stat(SType::Health, 22);
-                        }
-                    } else if elixir_name.eq_ignore_ascii_case("mana") {
-                        if !first_person {
-                            who.restore_stat(SType::Mana, 22);
-                        }
                     }
                 }
             }
@@ -1217,6 +1234,10 @@ pub fn apply_or_infer_cure(
             SimpleCure::Pill(pill_name) => {
                 who.observe_flag(FType::Anorexia, false);
                 if pill_name == "anabiotic" {
+                    if !first_person {
+                        who.restore_stat(SType::Health, 9);
+                        who.restore_stat(SType::Mana, 9);
+                    }
                 } else if let Some(order) = PILL_CURE_ORDERS.get(pill_name) {
                     if first_person {
                         for pill_aff in order.iter() {
@@ -1300,6 +1321,14 @@ pub fn apply_or_infer_cure(
                     }
                 } else if let Some(order) = ELIXIR_DEFENCES.get(elixir_name) {
                     who.set_flag(*order, true);
+                } else if elixir_name.eq_ignore_ascii_case("health") {
+                    if !first_person {
+                        who.restore_stat(SType::Health, 22);
+                    }
+                } else if elixir_name.eq_ignore_ascii_case("mana") {
+                    if !first_person {
+                        who.restore_stat(SType::Mana, 22);
+                    }
                 }
             }
         }

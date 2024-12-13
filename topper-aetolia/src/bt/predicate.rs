@@ -429,7 +429,7 @@ impl UnpoweredFunction for AetPredicate {
             }
             AetPredicate::Buffered(target, aff) => {
                 if let Some(target) = target.get_target(model, controller) {
-                    if get_cure_depth(target, *aff).cures > 1 {
+                    if target.is(*aff) && get_cure_depth(target, *aff).cures > 1 {
                         return UnpoweredFunctionState::Complete;
                     }
                 }

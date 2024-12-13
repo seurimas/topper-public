@@ -90,6 +90,21 @@ impl SiderealistBoard {
         self.asterism.expire();
         self.moonlet.expire();
     }
+
+    pub fn expire_oldest_anomaly(&mut self) {
+        let soonest = self
+            .dustring
+            .get_time_left_seconds()
+            .min(self.asterism.get_time_left_seconds())
+            .min(self.moonlet.get_time_left_seconds());
+        if soonest == self.dustring.get_time_left_seconds() {
+            self.dustring.expire();
+        } else if soonest == self.asterism.get_time_left_seconds() {
+            self.asterism.expire();
+        } else {
+            self.moonlet.expire();
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
@@ -131,6 +146,26 @@ impl Regalia {
         }
     }
 
+    pub fn try_from_type(regalia_type: &str) -> Option<Self> {
+        match regalia_type {
+            "glasses" => Some(Self::Artos),
+            "bow" => Some(Self::Cthalut),
+            "candle" => Some(Self::Treyes),
+            "coin" => Some(Self::IzuAri),
+            "sword" => Some(Self::Vayua),
+            "robe" => Some(Self::Loskiou),
+            "shoes" => Some(Self::Peripleko),
+            "cloak" => Some(Self::Umbrael),
+            "mask" => Some(Self::Ontesme),
+            "hammer" => Some(Self::Ulgar),
+            "gear" => Some(Self::Drobia),
+            "mantle" => Some(Self::Gulbedim),
+            "staff" => Some(Self::Averroes),
+            "book" => Some(Self::EjaKodosa),
+            _ => None,
+        }
+    }
+
     pub fn name(&self) -> &str {
         match self {
             Self::Artos => "Artos",
@@ -167,6 +202,10 @@ impl Regalia {
             Self::Averroes => "staff",
             Self::EjaKodosa => "book",
         }
+    }
+
+    pub fn from_item_name(name: &str) -> Option<Self> {
+        Self::try_from_type(name.trim_matches(char::is_numeric))
     }
 }
 
@@ -272,7 +311,7 @@ impl VibrationState {
 
     pub fn is_active(&self) -> bool {
         match self {
-            Self::Active(_) => true,
+            Self::Active(timer) => timer.is_active(),
             _ => false,
         }
     }
@@ -378,6 +417,7 @@ pub struct SiderealistClassState {
     gleam_cooldown: Timer,
     foresight_cooldown: Timer,
     centrum_cooldown: Timer,
+    crystalforest_cooldown: Timer,
     pub gleam_stars: Option<GleamStars>,
     last_vibration_location: HashMap<Vibration, (i64, VibrationState)>,
     summon_state: SummonState,
@@ -391,6 +431,7 @@ impl Hash for SiderealistClassState {
         self.parallax.hash(state);
         self.gleam_cooldown.hash(state);
         self.centrum_cooldown.hash(state);
+        self.crystalforest_cooldown.hash(state);
         self.gleam_stars.hash(state);
         // self.last_vibration_location.hash(state);
         self.summon_state.hash(state);
@@ -408,6 +449,7 @@ impl SiderealistClassState {
             gleam_cooldown: Timer::count_up_seconds_off(30.),
             foresight_cooldown: Timer::count_up_seconds_off(30.),
             centrum_cooldown: Timer::count_up_seconds_off(30.),
+            crystalforest_cooldown: Timer::count_up_seconds_off(20.),
             gleam_stars: None,
             last_vibration_location: HashMap::new(),
             summon_state: SummonState::None,
@@ -424,6 +466,7 @@ impl SiderealistClassState {
         self.gleam_cooldown.wait(time);
         self.foresight_cooldown.wait(time);
         self.centrum_cooldown.wait(time);
+        self.crystalforest_cooldown.wait(time);
         if let Some(gleam_stars) = &mut self.gleam_stars {
             gleam_stars.red.wait(time);
             gleam_stars.orange.wait(time);
@@ -471,6 +514,10 @@ impl SiderealistClassState {
         self.gleam_stars.is_some()
     }
 
+    pub fn can_gleam(&self) -> bool {
+        !self.gleam_cooldown.is_active()
+    }
+
     pub fn has_gleam_star(&self, color: GleamColor) -> bool {
         if let Some(gleam_stars) = &self.gleam_stars {
             match color {
@@ -506,6 +553,7 @@ impl SiderealistClassState {
 
     pub fn chromaflare(&mut self) {
         self.gleam_stars = None;
+        self.gleam_cooldown.reset();
     }
 
     pub fn vibration_states(&self) -> Vec<(Vibration, VibrationState)> {
@@ -597,8 +645,16 @@ impl SiderealistClassState {
         }
     }
 
+    pub fn summon_state(&self) -> &SummonState {
+        &self.summon_state
+    }
+
     pub fn kill_companion(&mut self) {
         self.summon_state = SummonState::None;
+    }
+
+    pub fn get_regalia(&self) -> Vec<Option<Regalia>> {
+        vec![self.first_regalia, self.second_regalia]
     }
 
     pub fn has_regalia(&self, regalia: Regalia) -> bool {
@@ -618,6 +674,11 @@ impl SiderealistClassState {
             }
         }
         None
+    }
+
+    pub fn observe_regalia(&mut self, first: Option<Regalia>, second: Option<Regalia>) {
+        self.first_regalia = first;
+        self.second_regalia = second;
     }
 
     pub fn foresighted(&mut self) {
@@ -642,5 +703,13 @@ impl SiderealistClassState {
 
     pub fn can_mend(&self) -> bool {
         !self.mend.is_active()
+    }
+
+    pub fn shatter_crystalforest(&mut self) {
+        self.crystalforest_cooldown.reset();
+    }
+
+    pub fn can_crystalforest(&self) -> bool {
+        !self.crystalforest_cooldown.is_active()
     }
 }

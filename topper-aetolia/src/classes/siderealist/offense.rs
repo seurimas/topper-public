@@ -112,6 +112,52 @@ pub fn get_class_state(
     } else {
         "<white>-".to_string()
     };
+    let summons = me
+        .check_if_siderealist(&|me| match me.summon_state() {
+            SummonState::Glimmercrest(in_room, target, last_hit) => {
+                if *in_room {
+                    format!(
+                        "<green>GLIMMER -> {} ({})",
+                        target.clone().unwrap_or("XXX".to_string()),
+                        last_hit.get_time_left_seconds()
+                    )
+                } else {
+                    format!(
+                        "<red>GLIMMER -> {} ({})",
+                        target.clone().unwrap_or("XXX".to_string()),
+                        last_hit.get_time_left_seconds()
+                    )
+                }
+            }
+            SummonState::Sprite(in_room, target, last_hit) => {
+                if *in_room {
+                    format!(
+                        "<green>SPRITE -> {} ({})",
+                        target.clone().unwrap_or("XXX".to_string()),
+                        last_hit.get_time_left_seconds()
+                    )
+                } else {
+                    format!(
+                        "<red>SPRITE -> {} ({})",
+                        target.clone().unwrap_or("XXX".to_string()),
+                        last_hit.get_time_left_seconds()
+                    )
+                }
+            }
+            SummonState::None => "<white>-------".to_string(),
+        })
+        .unwrap_or("<white>-------".to_string());
+    let regalia = me
+        .check_if_siderealist(&|me| {
+            me.get_regalia()
+                .iter()
+                .flatten()
+                .map(Regalia::name)
+                .map(|name| format!("<green>{}", name))
+                .collect::<Vec<String>>()
+                .join("<white> - ")
+        })
+        .unwrap_or("<white>-------".to_string());
     let parallax = me
         .check_if_siderealist(&|me| {
             if let Some((time, spell, p_target)) = me.get_parallax() {
@@ -135,9 +181,16 @@ pub fn get_class_state(
             }
         })
         .unwrap_or("<white>-------".to_string());
+    let health = if you.get_stat(SType::Health) > 100 {
+        format!("<green>{}", you.get_stat(SType::Health))
+    } else if you.get_stat(SType::Health) > 50 {
+        format!("<yellow>{}", you.get_stat(SType::Health))
+    } else {
+        format!("<red>{}", you.get_stat(SType::Health))
+    };
 
     format!(
-        "{}{}{}\n\n{}\n{}",
-        moonlet, asterism, dustring, gleam, parallax,
+        "{}{}{}\n{}\n\n{}\n{}\n{}\n{}",
+        moonlet, asterism, dustring, health, summons, gleam, parallax, regalia
     )
 }

@@ -39,6 +39,10 @@ pub trait BaseAgentState {
     fn branch(&mut self, time: i32);
 }
 
+pub trait NonAgentState {
+    fn wait(&mut self, time: i32);
+}
+
 pub type AgentStates<A> = HashMap<String, Vec<A>>;
 
 #[derive(Clone)]
@@ -56,7 +60,7 @@ impl<A, N> Debug for TimelineState<A, N> {
     }
 }
 
-impl<A: BaseAgentState + Clone, N: Clone> TimelineState<A, N> {
+impl<A: BaseAgentState + Clone, N: NonAgentState + Clone> TimelineState<A, N> {
     pub fn new() -> Self {
         TimelineState {
             agent_states: HashMap::new(),
@@ -188,6 +192,9 @@ impl<A: BaseAgentState + Clone, N: Clone> TimelineState<A, N> {
                 agent_state.wait(duration);
             }
         }
+        for non_agent_state in self.non_agent_states.values_mut() {
+            non_agent_state.wait(duration);
+        }
     }
 
     pub fn update_time(&mut self, when: CType) -> Result<(), String> {
@@ -252,7 +259,7 @@ pub trait TestableTimeline<O, P> {
     fn test_push_time_slice(&mut self, slice: TimeSlice<O, P>) -> Result<(), String>;
 }
 
-impl<O, P, A: BaseAgentState + Clone, N: Clone> Timeline<O, P, A, N> {
+impl<O, P, A: BaseAgentState + Clone, N: NonAgentState + Clone> Timeline<O, P, A, N> {
     pub fn new() -> Self {
         Timeline {
             slices: Vec::new(),

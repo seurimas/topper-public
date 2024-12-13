@@ -880,6 +880,19 @@ impl FlagSet {
             println!("Tried to tick up non-counter.");
         }
     }
+
+    pub fn tick_counter_down(&mut self, flag: FType) {
+        if flag.is_mirror() {
+            self.tick_counter_down(flag.normalize());
+        } else if flag.is_counter() {
+            let old_value = self.get_counter(flag);
+            if old_value > 0 {
+                *self.get_counter_mut(flag) -= 1;
+            }
+        } else {
+            println!("Tried to tick down non-counter.");
+        }
+    }
 }
 
 impl fmt::Debug for FlagSet {

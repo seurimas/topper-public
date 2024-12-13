@@ -107,7 +107,7 @@ pub fn handle_simple_cure_action(
                     }
                 }
                 SimpleCure::Elixir(elixir_name) => match elixir_name.as_ref() {
-                    "Health" | "Mana" | "Infusion" => {
+                    "health" | "mana" | "infusion" => {
                         apply_or_infer_balance(me, (BType::Elixir, 4.75), &observations);
                     }
                     _ => apply_or_infer_balance(me, (BType::Elixir, 1.4), &observations),

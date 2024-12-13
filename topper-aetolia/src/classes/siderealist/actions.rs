@@ -62,20 +62,20 @@ pub struct Parallax {
 }
 
 impl Parallax {
-    pub fn new_no_target(caster: String, time: f32, spell: String) -> Self {
+    pub fn new_no_target(caster: String, time: CType, spell: String) -> Self {
         Self {
             caster,
-            time: (time * BALANCE_SCALE) as CType,
+            time,
             spell,
             target: None,
             ab: None,
         }
     }
 
-    pub fn new_with_target(caster: String, time: f32, spell: String, target: String) -> Self {
+    pub fn new_with_target(caster: String, time: CType, spell: String, target: String) -> Self {
         Self {
             caster,
-            time: (time * BALANCE_SCALE) as CType,
+            time,
             spell,
             target: Some(target),
             ab: None,
@@ -84,14 +84,14 @@ impl Parallax {
 
     pub fn new_with_target_and_ab(
         caster: String,
-        time: f32,
+        time: CType,
         spell: String,
         target: String,
         ab: String,
     ) -> Self {
         Self {
             caster,
-            time: (time * BALANCE_SCALE) as CType,
+            time,
             spell,
             target: Some(target),
             ab: Some(ab),
@@ -106,6 +106,42 @@ impl ActiveTransition for Parallax {
             self.time,
             self.spell,
             self.target.as_ref().unwrap_or(&"".to_string())
+        ))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Alteration {
+    pub caster: String,
+    pub target: String,
+    pub source: FType,
+    pub result: FType,
+}
+
+impl Alteration {
+    pub fn from_target(
+        aet_target: AetTarget,
+        model: &BehaviorModel,
+        controller: &BehaviorController,
+        source: FType,
+        result: FType,
+    ) -> Self {
+        let caster = model.who_am_i();
+        let target = aet_target.get_name(model, controller);
+        Self {
+            caster,
+            target,
+            source,
+            result,
+        }
+    }
+}
+
+impl ActiveTransition for Alteration {
+    fn act(&self, _timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!(
+            "astra alteration {} {} to {}",
+            self.target, self.source, self.result
         ))
     }
 }
@@ -237,6 +273,36 @@ impl Bolt {
 impl ActiveTransition for Bolt {
     fn act(&self, _timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("bolt {} {}", self.target, self.limb.to_string()))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct VayuaAttack {
+    pub caster: String,
+    pub target: String,
+    pub venom: String,
+}
+
+impl VayuaAttack {
+    pub fn from_target(
+        aet_target: AetTarget,
+        model: &BehaviorModel,
+        controller: &BehaviorController,
+        venom: String,
+    ) -> Self {
+        let caster = model.who_am_i();
+        let target = aet_target.get_name(model, controller);
+        Self {
+            caster,
+            target,
+            venom,
+        }
+    }
+}
+
+impl ActiveTransition for VayuaAttack {
+    fn act(&self, _timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("jab {} {}", self.target, self.venom))
     }
 }
 

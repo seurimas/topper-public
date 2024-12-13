@@ -1,7 +1,7 @@
 pub use crate::topper::telnet::TelnetModule;
 pub use crate::topper::timeline::TimelineModule;
 use topper_core::timeline::db::DatabaseModule;
-use topper_core::timeline::{BaseAgentState, CType, Timeline};
+use topper_core::timeline::{BaseAgentState, CType, NonAgentState, Timeline};
 pub mod telnet;
 pub mod timeline;
 use log::info;
@@ -179,7 +179,7 @@ impl<BS> TopperResponse<BS> {
     }
 }
 
-pub trait Topper<O, P, A: BaseAgentState + Clone, N: Clone, DB: DatabaseModule> {
+pub trait Topper<O, P, A: BaseAgentState + Clone, N: NonAgentState + Clone, DB: DatabaseModule> {
     fn get_timeline_module(&self) -> &TimelineModule<O, P, A, N>;
     fn get_core_module(&self) -> &TopperCore;
     fn get_mut_timeline_module(&mut self) -> &mut TimelineModule<O, P, A, N>;

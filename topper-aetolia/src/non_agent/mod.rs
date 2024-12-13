@@ -3,6 +3,7 @@ pub mod rooms;
 pub use denizen::*;
 pub use rooms::*;
 use serde::Deserialize;
+use topper_core::timeline::NonAgentState;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub enum AetNonAgent {
@@ -36,6 +37,16 @@ impl AetNonAgent {
         match self {
             AetNonAgent::Room(room) => Some(room),
             _ => None,
+        }
+    }
+}
+
+impl NonAgentState for AetNonAgent {
+    fn wait(&mut self, time: i32) {
+        match self {
+            AetNonAgent::Room(room) => room.wait(time),
+            // AetNonAgent::Denizen(denizen) => denizen.wait(time),
+            _ => {}
         }
     }
 }

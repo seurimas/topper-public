@@ -105,6 +105,27 @@
         "observation_name": "Proc"
     },
     {
+        "regex": "^(\\w+) does not reside beneath the auspice of three anomalies.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Astranomia"
+            },
+            {
+                "Literal": "Syzygy"
+            },
+            {
+                "Literal": "failure"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "CombatAction"
+    },
+    {
         "regex": "^(You) weave a.? (\\w+) spell and set it adrift upon stellar tides, ensuring its return in (\\d+) seconds.$",
         "args": [
             {
@@ -231,6 +252,69 @@
         "observation_name": "CombatAction"
     },
     {
+        "regex": "^(You) have already summoned forth a glimmercrest.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Astranomia"
+            },
+            {
+                "Literal": "Enigma"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "CombatAction"
+    },
+    {
+        "regex": "^(You) have already summoned forth a sprite.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Astranomia"
+            },
+            {
+                "Literal": "Embody"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "CombatAction"
+    },
+    {
+        "regex": "^(You) are already condensing stray mana into miniature stars.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Astranomia"
+            },
+            {
+                "Literal": "Gleam"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "CombatAction"
+    },
+    {
         "regex": "^(.*), your loyal companion, has been slain by \\w+.$",
         "args": [
             {
@@ -271,5 +355,26 @@
             }
         ],
         "observation_name": "CombatAction"
+    },
+    {
+        "regex": "^The (\\w+)-hued miniature star's collapse (:?captures (\\w+) within a fiery cataclysm|steals the air from (\\w+)'s lungs|torments (\\w+) with electrical mayhem|floods (\\w+)'s lungs with lethal gases|wracks (\\w+)'s flesh with hoarfrost|unleashes raw arcana upon (\\w+)|causes (\\w+) to wince).$",
+        "args": [
+            {
+                "GroupAsTarget": 2
+            },
+            {
+                "Literal": "Astranomia"
+            },
+            {
+                "Literal": "Chromaflare Hit"
+            },
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
     }
 ]

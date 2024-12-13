@@ -120,8 +120,8 @@ impl BaseAgentState for AgentState {
     }
     fn get_base_state() -> Self {
         let mut val = AgentState::default();
-        val.initialize_stat(SType::Health, 4000);
-        val.initialize_stat(SType::Mana, 4000);
+        val.initialize_stat(SType::Health, 100);
+        val.initialize_stat(SType::Mana, 100);
         val.set_flag(FType::Player, true);
         val.set_flag(FType::Blindness, true);
         val.set_flag(FType::Deafness, true);
@@ -402,6 +402,10 @@ impl AgentState {
 
     pub fn tick_flag_up(&mut self, flag: FType) {
         self.flags.tick_counter_up(flag);
+    }
+
+    pub fn tick_flag_down(&mut self, flag: FType) {
+        self.flags.tick_counter_down(flag);
     }
 
     pub fn set_balance(&mut self, balance: BType, value: f32) {

@@ -42,7 +42,7 @@
     "observation_name": "SimpleCure"
   },
   {
-    "regex": "^(\\w+) drinks an elixir of the (\\w+) from",
+    "regex": "^(\\w+) drinks an elixir of (the |)(\\w+) from",
     "args": [
       {
         "GroupAsTarget": 1
@@ -51,7 +51,7 @@
         "Literal": "Elixir"
       },
       {
-        "GroupAsTarget": 2
+        "GroupAsTarget": 3
       }
     ],
     "observation_name": "SimpleCure"
