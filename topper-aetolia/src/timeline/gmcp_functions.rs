@@ -80,6 +80,22 @@ fn handle_char_vitals(
     handle_predator_values(gmcp, timeline);
     handle_siderealist_values(gmcp, timeline);
 
+    if let Some(secondary) = gmcp
+        .get("ability_bal")
+        .and_then(|bal| bal.as_str())
+        .map(|bal| bal.eq("1"))
+    {
+        for_agent(
+            timeline,
+            &timeline.me.clone(),
+            &move |me: &mut AgentState| {
+                if secondary != me.balanced(BType::Secondary) {
+                    me.set_balance(BType::Secondary, if secondary { 1. } else { 0. });
+                }
+            },
+        );
+    }
+
     if let (Some(hp), Some(mp), Some(max_hp), Some(max_mp)) = (
         gmcp.get("hp")
             .and_then(|hp| hp.as_str())

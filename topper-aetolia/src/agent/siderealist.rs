@@ -556,10 +556,10 @@ impl SiderealistClassState {
         self.gleam_cooldown.reset();
     }
 
-    pub fn vibration_states(&self) -> Vec<(Vibration, VibrationState)> {
+    pub fn vibration_states(&self) -> Vec<(Vibration, i64, VibrationState)> {
         self.last_vibration_location
             .iter()
-            .map(|(vibration, (_, state))| (*vibration, *state))
+            .map(|(vibration, (room_id, state))| (*vibration, *room_id, *state))
             .collect()
     }
 

@@ -165,6 +165,8 @@ pub trait AetTimelineRoomExt {
         timer: VibrationState,
     );
 
+    fn observe_vibration_not_in_room(&mut self, room_id: i64, vibration: Vibration, owner: &str);
+
     fn begin_vibrations_list(&mut self, room_id: i64);
 }
 
@@ -247,6 +249,17 @@ impl AetTimelineRoomExt for AetTimelineState {
             } else {
                 vibration_state.unknown_at = Some(Timer::count_down_seconds(15.));
             }
+        });
+    }
+
+    fn observe_vibration_not_in_room(&mut self, room_id: i64, vibration: Vibration, owner: &str) {
+        self.for_room(room_id, &|room| {
+            let vibration_state = room
+                .vibrations
+                .entry(vibration)
+                .and_modify(|vibration_state| {
+                    vibration_state.owners.remove(owner);
+                });
         });
     }
 

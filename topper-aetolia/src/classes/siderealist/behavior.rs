@@ -92,7 +92,12 @@ impl UnpoweredFunction for SiderealistBehavior {
             SiderealistBehavior::Tones(target, vibration) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
                     if !vibration_in_room(&model.state, me.room_id, *vibration) {
-                        println!("No {} in room!", *vibration);
+                        controller
+                            .plan
+                            .add_to_front_of_qeb(Box::new(PlainAction::new(format!(
+                                "echo No {} in the room.",
+                                vibration.to_string()
+                            ))));
                         return UnpoweredFunctionState::Failed;
                     }
                     if !me.balanced(BType::Secondary) {

@@ -70,15 +70,20 @@ pub fn handle_combat_action(
                         .unwrap_or(vec![]);
                     println!("Found {} vibrations to embed.", vibrations.len());
                     for vibration in vibrations {
+                        agent_states.observe_vibration_not_in_room(
+                            vibration.1,
+                            vibration.0,
+                            &combat_action.caster,
+                        );
                         agent_states.observe_vibration_in_room(
                             room_id,
                             vibration.0,
                             &combat_action.caster,
-                            vibration.1.activate(),
+                            vibration.2.activate(),
                         );
                         for_agent(agent_states, &combat_action.caster, &move |me| {
                             me.assume_siderealist(&|me| {
-                                me.set_vibration(vibration.0, room_id, vibration.1.activate());
+                                me.set_vibration(vibration.0, room_id, vibration.2.activate());
                             });
                         });
                     }
@@ -531,39 +536,41 @@ pub fn handle_combat_action(
                     me.observe_flag(FType::Echoes, true);
                     me.damage_stat(SType::Health, damage);
                 });
-                attack_afflictions(
-                    agent_states,
-                    &combat_action.caster,
-                    vec![
-                        FType::Stupidity,
-                        FType::Confusion,
-                        FType::Dementia,
-                        FType::Hallucinations,
-                    ],
-                    after,
-                );
-                for_agent(agent_states, &combat_action.caster, &move |me| {
-                    if me.affs_count(&vec![
-                        FType::Stupidity,
-                        FType::Confusion,
-                        FType::Dementia,
-                        FType::Hallucinations,
-                    ]) >= 4
-                    {
-                        me.siderealist_board.moonlet_hit();
-                    }
-                });
-                attack_afflictions(
-                    agent_states,
-                    &combat_action.caster,
-                    vec![
-                        FType::Stupidity,
-                        FType::Confusion,
-                        FType::Dementia,
-                        FType::Hallucinations,
-                    ],
-                    after,
-                );
+                if agent_states.get_perspective(&combat_action) != Perspective::Attacker {
+                    attack_afflictions(
+                        agent_states,
+                        &combat_action.caster,
+                        vec![
+                            FType::Stupidity,
+                            FType::Confusion,
+                            FType::Dementia,
+                            FType::Hallucinations,
+                        ],
+                        after,
+                    );
+                    for_agent(agent_states, &combat_action.caster, &move |me| {
+                        if me.affs_count(&vec![
+                            FType::Stupidity,
+                            FType::Confusion,
+                            FType::Dementia,
+                            FType::Hallucinations,
+                        ]) >= 4
+                        {
+                            me.siderealist_board.moonlet_hit();
+                        }
+                    });
+                    attack_afflictions(
+                        agent_states,
+                        &combat_action.caster,
+                        vec![
+                            FType::Stupidity,
+                            FType::Confusion,
+                            FType::Dementia,
+                            FType::Hallucinations,
+                        ],
+                        after,
+                    );
+                }
             } else if combat_action.annotation.eq_ignore_ascii_case("failure") {
                 for_agent(agent_states, &combat_action.target, &move |me| {
                     me.observe_flag(FType::Echoes, false);
