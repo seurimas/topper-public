@@ -1317,7 +1317,7 @@ impl ClassState {
             Self::Siderealist(_) => Some(Class::Siderealist),
             Self::Shifter(_) => Some(Class::Shapeshifter),
             Self::Monk(_) => Some(Class::Monk),
-            Self::Other(class) => Some(*class),
+            Self::Other(class) => Some(class.normal()),
             Self::Unknown => None,
         }
     }

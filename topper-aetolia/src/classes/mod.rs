@@ -528,12 +528,21 @@ pub fn handle_combat_action(
                         if me.is(FType::Laxity) {
                             duration += 2.0;
                         }
-                        apply_or_infer_cures(
-                            me,
-                            MENTAL_AFFLICTIONS.to_vec(),
-                            &observations,
-                            first_person,
-                        );
+                        if me.is(FType::Muddled) {
+                            apply_or_infer_cures(
+                                me,
+                                vec![FType::Muddled],
+                                &observations,
+                                first_person,
+                            );
+                        } else {
+                            apply_or_infer_cures(
+                                me,
+                                MENTAL_AFFLICTIONS.to_vec(),
+                                &observations,
+                                first_person,
+                            );
+                        }
                         apply_or_infer_balance(me, (BType::Focus, duration), &observations);
                     },
                 );

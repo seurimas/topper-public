@@ -102,10 +102,11 @@ impl Parallax {
 impl ActiveTransition for Parallax {
     fn act(&self, _timeline: &AetTimeline) -> ActivateResult {
         Ok(format!(
-            "astra parallax {} {} {}",
+            "astra parallax {} {} {} {}",
             self.time,
             self.spell,
-            self.target.as_ref().unwrap_or(&"".to_string())
+            self.target.as_ref().unwrap_or(&"".to_string()),
+            self.ab.as_ref().unwrap_or(&"".to_string())
         ))
     }
 }

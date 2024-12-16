@@ -1,6 +1,6 @@
 [
     {
-        "regex": "^(\\w+) is suffering the effects of your (\\w+) ((.*)) vibration.$",
+        "regex": "^(\\w+) is suffering the effects of your (\\w+) \\((.*)\\) vibration.$",
         "args": [
             {
                 "GroupAsTarget": 1
@@ -13,6 +13,27 @@
             },
             {
                 "GroupAsTarget": 3
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You) are already exercising your cosmic foresight.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Astranomia"
+            },
+            {
+                "Literal": "Foresight"
+            },
+            {
+                "Literal": ""
             },
             {
                 "Literal": ""
@@ -123,7 +144,7 @@
                 "Literal": ""
             }
         ],
-        "observation_name": "CombatAction"
+        "observation_name": "Proc"
     },
     {
         "regex": "^(You) weave a.? (\\w+) spell and set it adrift upon stellar tides, ensuring its return in (\\d+) seconds.$",
@@ -145,6 +166,27 @@
             }
         ],
         "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You) invoke the soothing embrace of a starswept night and swathe yourself in its dusky glory, driving out ailments.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Astranomia"
+            },
+            {
+                "Literal": "Eventide"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "CombatAction"
     },
     {
         "regex": "Buckling beneath the enervating lash, (\\w+) issues a bloodcurdling scream.$",

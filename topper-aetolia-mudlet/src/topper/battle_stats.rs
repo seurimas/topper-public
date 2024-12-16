@@ -151,6 +151,17 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for BattleStatsModule {
             TopperMessage::Request(request) => match request {
                 TopperRequest::BattleStats(when) => {
                     timeline.update_time(*when);
+                    if let Some(class) = target
+                        .as_ref()
+                        .and_then(|target| db.get_class(target))
+                        .map(|c| c.normal())
+                    {
+                        for_agent(&mut timeline.state, target.as_ref().unwrap(), &|you| {
+                            if you.get_normalized_class().is_none() {
+                                you.class_state.initialize_for_normalized_class(class);
+                            }
+                        });
+                    }
                     Ok(TopperResponse::battle_stats(get_battle_stats(
                         timeline,
                         target,

@@ -41,6 +41,9 @@ pub fn handle_sent(command: &String, agent_states: &mut AetTimelineState) {
                 .to_string()
                 .to_ascii_lowercase(),
         );
+    } else if command.contains("fvibes") {
+        let me = agent_states.me.clone();
+        agent_states.add_player_hint(&me, &"embedding", "focus".to_string());
     }
 }
 
@@ -537,7 +540,7 @@ pub fn handle_combat_action(
                     me.damage_stat(SType::Health, damage);
                 });
                 if agent_states.get_perspective(&combat_action) != Perspective::Attacker {
-                    attack_afflictions(
+                    attack_first_affliction(
                         agent_states,
                         &combat_action.caster,
                         vec![
@@ -559,7 +562,7 @@ pub fn handle_combat_action(
                             me.siderealist_board.moonlet_hit();
                         }
                     });
-                    attack_afflictions(
+                    attack_first_affliction(
                         agent_states,
                         &combat_action.caster,
                         vec![
@@ -581,7 +584,7 @@ pub fn handle_combat_action(
         }
         "Syzygy" => {
             if combat_action.annotation.eq_ignore_ascii_case("failure") {
-                for_agent(agent_states, &combat_action.target, &move |me| {
+                for_agent(agent_states, &combat_action.caster, &move |me| {
                     me.siderealist_board.expire_oldest_anomaly();
                 });
                 return Ok(());
