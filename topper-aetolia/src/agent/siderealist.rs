@@ -7,6 +7,7 @@ use serde::*;
 pub struct SiderealistBoard {
     dustring: Timer,
     asterism: Timer,
+    asterism_affs: Vec<FType>,
     moonlet: Timer,
     magic_weakness: Option<(Timer, i32)>,
     irradiated_limb: Option<LType>,
@@ -23,6 +24,7 @@ impl SiderealistBoard {
         Self {
             dustring: Timer::count_up_seconds_off(150.),
             asterism: Timer::count_up_seconds_off(150.),
+            asterism_affs: Vec::new(),
             moonlet: Timer::count_up_seconds_off(150.),
             magic_weakness: None,
             irradiated_limb: None,
@@ -65,8 +67,12 @@ impl SiderealistBoard {
         self.dustring.reset();
     }
 
-    pub fn asterism_hit(&mut self) {
+    pub fn asterism_hit(&mut self, affs: Vec<FType>) {
         self.asterism.reset();
+    }
+
+    pub fn get_asterism_affs(&self) -> &Vec<FType> {
+        &self.asterism_affs
     }
 
     pub fn moonlet_hit(&mut self) {

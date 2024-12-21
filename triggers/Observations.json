@@ -198,6 +198,24 @@
     "observation_name": "BalanceBack"
   },
   {
+    "regex": "^You may draw upon complex cosmic forces again.$",
+    "args": [
+      {
+        "Literal": "Cosmic"
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "BalanceBack"
+  },
+  {
     "regex": "^You have recovered equilibrium.$",
     "args": [
       {

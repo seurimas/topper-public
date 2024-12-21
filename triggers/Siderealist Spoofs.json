@@ -378,6 +378,66 @@
         "observation_name": "CombatAction"
     },
     {
+        "regex": "^The miniature cosmos around (\\w+) thrums and radiates stellar light.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Astranomia"
+            },
+            {
+                "Literal": "Asterism Hit"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(\\w+|\\w+ \\w+)'?s? (\\w+) defence corrodes to twinkling dust.$",
+        "args": [
+            {
+                "GroupAsTarget": 2
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "DiscernedAfflict"
+    },
+    {
+        "regex": "^Unable to maintain its form, (.*) slowly fades back into cosmic energy.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Survival"
+            },
+            {
+                "Literal": "Companion Death"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "CombatAction"
+    },
+    {
         "regex": "^Unable to maintain cohesion, (.*) into nebulaic fumes.$",
         "args": [
             {

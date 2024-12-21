@@ -118,6 +118,9 @@ pub fn handle_combat_action(
                 vec![FType::Fallen],
                 after,
             );
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                apply_or_infer_balance(me, (BType::Secondary, 3.0), after);
+            });
         }
         "creeps" => {
             if let Some(aff) = FType::from_name(&combat_action.annotation) {
@@ -131,6 +134,9 @@ pub fn handle_combat_action(
                 vec![FType::Loneliness, FType::Masochism],
                 after,
             );
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                apply_or_infer_balance(me, (BType::Secondary, 3.5), after);
+            });
         }
         "Tones Oscillate" => {
             attack_first_affliction(
@@ -139,6 +145,9 @@ pub fn handle_combat_action(
                 vec![FType::Muddled],
                 after,
             );
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                apply_or_infer_balance(me, (BType::Secondary, 3.5), after);
+            });
         }
         "disorientation" => {
             attack_afflictions(
@@ -155,6 +164,9 @@ pub fn handle_combat_action(
                 vec![FType::Epilepsy, FType::Berserking],
                 after,
             );
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                apply_or_infer_balance(me, (BType::Secondary, 3.5), after);
+            });
         }
         "Tones Stridulation" => {
             for_agent(agent_states, &combat_action.target, &move |me| {
@@ -164,6 +176,19 @@ pub fn handle_combat_action(
                     me.toggle_flag(FType::Sensitivity, true);
                 }
             });
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                apply_or_infer_balance(me, (BType::Secondary, 3.5), after);
+            });
+        }
+        "cavitation" => {
+            if let Some(limb) = LType::try_from_name(&combat_action.annotation) {
+                attack_limb_damage(
+                    agent_states,
+                    &combat_action.caster,
+                    (limb, 3.4, true),
+                    after,
+                );
+            }
         }
         "dissension" => {
             for_agent(agent_states, &combat_action.caster, &move |me| {
@@ -185,6 +210,9 @@ pub fn handle_combat_action(
                 vec![FType::Dissonance],
                 after,
             );
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                apply_or_infer_balance(me, (BType::Secondary, 3.5), after);
+            });
         }
         "plague" => {
             if let Some(aff) = FType::from_name(&combat_action.annotation) {
@@ -194,6 +222,9 @@ pub fn handle_combat_action(
         "Tones Plague" => {
             if let Some(aff) = FType::from_name(&combat_action.annotation) {
                 attack_afflictions(agent_states, &combat_action.target, vec![aff], after);
+                for_agent(agent_states, &combat_action.caster, &move |me| {
+                    apply_or_infer_balance(me, (BType::Secondary, 3.5), after);
+                });
             } else {
                 let perspect = agent_states.get_perspective(combat_action);
                 let observations = after.clone();
@@ -237,6 +268,7 @@ pub fn handle_combat_action(
                 });
             }
             for_agent(agent_states, &combat_action.caster, &move |me| {
+                apply_or_infer_balance(me, (BType::Secondary, 3.5), after);
                 me.assume_siderealist(&|me| {
                     me.shatter_crystalforest();
                 });
@@ -260,6 +292,9 @@ pub fn handle_combat_action(
                 vec![FType::Asleep, FType::Hypersomnia],
                 after,
             );
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                apply_or_infer_balance(me, (BType::Secondary, 3.5), after);
+            });
         }
         "Vayua Attack" => {
             let first_person = combat_action.caster.eq(&agent_states.me);
@@ -319,7 +354,8 @@ pub fn handle_combat_action(
         }
         "Erode" => {
             if let Some(defence) = after
-                .get(0)
+                .iter()
+                .find(|obs| matches!(obs, AetObservation::DiscernedAfflict(_)))
                 .and_then(|obs| match obs {
                     AetObservation::DiscernedAfflict(aff) => Some(aff),
                     _ => None,
@@ -328,6 +364,11 @@ pub fn handle_combat_action(
             {
                 for_agent(agent_states, &combat_action.target, &move |me| {
                     me.toggle_flag(defence, false);
+                });
+            } else {
+                for_agent(agent_states, &combat_action.target, &move |me| {
+                    println!("Could not find affliction to erode: {:?}", after);
+                    me.toggle_flag(FType::Shielded, false);
                 });
             }
         }
@@ -395,8 +436,31 @@ pub fn handle_combat_action(
                 return Ok(());
             }
             for_agent(agent_states, &combat_action.target, &move |me| {
-                me.siderealist_board.asterism_hit();
+                me.siderealist_board
+                    .asterism_hit(me.affs_in(RANDOM_CURES.as_ref()));
             });
+        }
+        "Asterism Hit" => {
+            for_agent_uncertain(
+                agent_states,
+                &combat_action.caster,
+                &move |me: &mut AgentState| {
+                    apply_or_infer_random_afflictions(
+                        me,
+                        after,
+                        Perspective::Bystander,
+                        Some((
+                            1,
+                            me.siderealist_board
+                                .get_asterism_affs()
+                                .iter()
+                                .filter(|aff| !me.is(**aff))
+                                .map(|aff| *aff)
+                                .collect(),
+                        )),
+                    )
+                },
+            );
         }
         "Moonlet" => {
             if combat_action.annotation.eq_ignore_ascii_case("start") {
@@ -540,17 +604,6 @@ pub fn handle_combat_action(
                     me.damage_stat(SType::Health, damage);
                 });
                 if agent_states.get_perspective(&combat_action) != Perspective::Attacker {
-                    attack_first_affliction(
-                        agent_states,
-                        &combat_action.caster,
-                        vec![
-                            FType::Stupidity,
-                            FType::Confusion,
-                            FType::Dementia,
-                            FType::Hallucinations,
-                        ],
-                        after,
-                    );
                     for_agent(agent_states, &combat_action.caster, &move |me| {
                         if me.affs_count(&vec![
                             FType::Stupidity,
@@ -562,6 +615,17 @@ pub fn handle_combat_action(
                             me.siderealist_board.moonlet_hit();
                         }
                     });
+                    attack_first_affliction(
+                        agent_states,
+                        &combat_action.caster,
+                        vec![
+                            FType::Stupidity,
+                            FType::Confusion,
+                            FType::Dementia,
+                            FType::Hallucinations,
+                        ],
+                        after,
+                    );
                     attack_first_affliction(
                         agent_states,
                         &combat_action.caster,

@@ -206,7 +206,7 @@ impl BType {
         match bal_name.as_str() {
             "Balance" => BType::Balance,
             "Equilibrium" => BType::Equil,
-            "Shadow" => BType::Secondary,
+            "Cosmic" | "Shadow" => BType::Secondary,
             "Left Hand Balance" => BType::LeftHandBalance,
             "Right Hand Balance" => BType::RightHandBalance,
             _ => BType::UNKNOWN,

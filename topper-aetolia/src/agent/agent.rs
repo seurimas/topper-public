@@ -977,6 +977,16 @@ impl AgentState {
         count
     }
 
+    pub fn affs_in(&self, affs: &Vec<FType>) -> Vec<FType> {
+        let mut found = vec![];
+        for aff in affs.iter() {
+            if self.is(*aff) {
+                found.push(*aff);
+            }
+        }
+        found
+    }
+
     pub fn set_channel(&mut self, channel_type: ChannelType, time: f32) {
         self.channel_state = ChannelState::Channeling {
             channel_type,
