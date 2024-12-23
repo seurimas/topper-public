@@ -330,23 +330,23 @@ impl FirstAidSetting {
                     prio = 26;
                 }
                 if ft.is_affliction() {
-                    format!("firstaid priority {} {}", ft, prio)
+                    format!("firstaid priority {} {}", ft.to_name(), prio)
                 } else {
-                    format!("firstaid priority defense {} {}", ft, prio)
+                    format!("firstaid priority defense {} {}", ft.to_name(), prio)
                 }
             }
             FirstAidSetting::ResetPriorities => "firstaid priority reset".to_string(),
             FirstAidSetting::Predict(ft) => {
-                format!("firstaid predict {}", ft)
+                format!("firstaid predict {}", ft.to_name())
             }
             FirstAidSetting::UnPredict(ft) => {
-                format!("firstaid unpredict {}", ft)
+                format!("firstaid unpredict {}", ft.to_name())
             }
             FirstAidSetting::Elevate(ft) => {
-                format!("firstaid elevate {}", ft)
+                format!("firstaid elevate {}", ft.to_name())
             }
             FirstAidSetting::UnElevate(ft) => {
-                format!("firstaid unelevate {}", ft)
+                format!("firstaid unelevate {}", ft.to_name())
             }
             FirstAidSetting::HealthPercent(p) => {
                 format!("firstaid health {}", p)

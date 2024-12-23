@@ -707,7 +707,7 @@ impl FType {
                 word.push_str(&letter.to_lowercase().to_string());
             } else if letter.is_uppercase() {
                 words.push(word.clone());
-                word = String::from("");
+                word = letter.to_lowercase().to_string();
             } else {
                 word.push_str(&letter.to_string());
             }
