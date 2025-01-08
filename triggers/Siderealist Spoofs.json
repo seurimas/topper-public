@@ -189,6 +189,27 @@
         "observation_name": "CombatAction"
     },
     {
+        "regex": "^(You) gently guide your unseen magics, refracting their power towards (\\w+).$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Crystalism"
+            },
+            {
+                "Literal": "Refraction"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "GroupAsTarget": 2
+            }
+        ],
+        "observation_name": "CombatAction"
+    },
+    {
         "regex": "Buckling beneath the enervating lash, (\\w+) issues a bloodcurdling scream.$",
         "args": [
             {

@@ -585,15 +585,17 @@ pub fn handle_combat_action(
                 Ok(())
             }
             "Companion Death" => {
-                if combat_action.annotation.contains("glimmercrest")
-                    || combat_action.annotation.contains("sprite")
+                if combat_action.caster.contains("glimmercrest")
+                    || combat_action.caster.contains("sprite")
                 {
-                    for_agent(agent_states, &combat_action.caster, &|me| {
-                        let room_id = me.room_id;
-                        me.assume_siderealist(&|siderealist| {
-                            siderealist.kill_companion();
+                    if agent_states.borrow_me().get_normalized_class() == Some(Class::Siderealist) {
+                        let me = agent_states.me.clone();
+                        for_agent(agent_states, &me, &|me| {
+                            me.assume_siderealist(&|siderealist| {
+                                siderealist.kill_companion();
+                            });
                         });
-                    });
+                    }
                 }
                 Ok(())
             }

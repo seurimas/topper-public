@@ -11,6 +11,7 @@ use super::{actions::*, vibration_dormant_in_room, vibration_in_room};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum SiderealistPredicate {
+    IsRefracting,
     VibrationInRoom(Vibration),
     VibrationDormant(Vibration),
     VibrationSomewhere(Vibration),
@@ -36,6 +37,13 @@ impl TargetPredicate for SiderealistPredicate {
     ) -> bool {
         if let Some(target) = aet_target.get_target(model, controller) {
             match self {
+                SiderealistPredicate::IsRefracting => model
+                    .state
+                    .borrow_me()
+                    .check_if_siderealist(&|me| {
+                        me.is_refracting_target(&aet_target.get_name(model, controller))
+                    })
+                    .unwrap_or(false),
                 SiderealistPredicate::VibrationInRoom(vibration) => {
                     let me = model.state.borrow_me();
                     vibration_in_room(&model.state, me.room_id, *vibration)

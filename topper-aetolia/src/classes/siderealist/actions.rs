@@ -4,6 +4,8 @@ use crate::timeline::*;
 use crate::types::*;
 use crate::{targetted_action, untargetted_action};
 
+targetted_action!(Refract, "refract {}");
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Embed {
     pub caster: String,

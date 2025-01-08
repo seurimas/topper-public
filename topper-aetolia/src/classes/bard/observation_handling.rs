@@ -24,6 +24,7 @@ const HEARTCAGE_DITHER: usize = 5;
 const IRONCOLLAR_DITHER: usize = 2;
 const IMPETUS_DITHER: usize = 3;
 const SWINDLE_DITHER: usize = 4;
+const MASTERSTROKE_DITHER: usize = 8;
 
 pub const NULLSTONE: &str = "a stone of annulment";
 pub const HOROLOGE: &str = "a faded hourglass";
@@ -51,6 +52,29 @@ pub fn handle_weaving_action(
     let first_person = combat_action.caster.eq(&agent_states.me);
     let hints = agent_states.get_player_hint(&combat_action.caster, &"CALLED_VENOMS".to_string());
     match combat_action.skill.as_ref() {
+        "Masterstroke" => {
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &move |me: &mut AgentState| {
+                    me.assume_bard(&|bard: &mut BardClassState| {
+                        bard.dithering = MASTERSTROKE_DITHER;
+                    });
+                    use_destiny_eq(me, &observations);
+                },
+            );
+            for_agent(
+                agent_states,
+                &combat_action.target,
+                &|me: &mut AgentState| {
+                    me.bard_board.runeband_state = RunebandState::initial();
+                    me.bard_board.globes_state = GlobesState::initial();
+                },
+            );
+            if let Some(my_room) = agent_states.get_my_room_mut() {
+                my_room.add_tag("boundary");
+            }
+        }
         "Runeband" => {
             for_agent(
                 agent_states,

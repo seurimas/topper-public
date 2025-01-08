@@ -14,6 +14,7 @@ use super::*;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum SiderealistBehavior {
+    Refract(AetTarget),
     Embed(Vibration),
     Embeds(Vec<Vibration>),
     Tones(AetTarget, Vibration),
@@ -59,6 +60,20 @@ impl UnpoweredFunction for SiderealistBehavior {
     ) -> UnpoweredFunctionState {
         let me = model.state.borrow_me();
         match self {
+            SiderealistBehavior::Refract(target) => {
+                if me
+                    .check_if_siderealist(&|me| {
+                        me.is_refracting_target(&target.get_name(model, controller))
+                    })
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
+                controller
+                    .plan
+                    .add_to_qeb(Box::new(Refract::from_target(target, model, controller)));
+                UnpoweredFunctionState::Complete
+            }
             SiderealistBehavior::Embed(vibration) => {
                 if vibration_in_room(&model.state, me.room_id, *vibration) {
                     return UnpoweredFunctionState::Failed;

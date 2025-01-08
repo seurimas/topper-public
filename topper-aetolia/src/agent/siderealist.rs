@@ -416,9 +416,10 @@ impl Default for GleamStars {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SiderealistClassState {
     mend: Timer,
+    refracting: Option<String>,
     parallax: Option<(Timer, String, String)>,
     gleam_cooldown: Timer,
     foresight_cooldown: Timer,
@@ -447,10 +448,17 @@ impl Hash for SiderealistClassState {
     }
 }
 
+impl Default for SiderealistClassState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SiderealistClassState {
     pub fn new() -> Self {
         Self {
             mend: Timer::count_down_seconds(30.),
+            refracting: None,
             parallax: None,
             gleam_cooldown: Timer::count_up_seconds_off(30.),
             foresight_cooldown: Timer::count_up_seconds_off(30.),
@@ -486,6 +494,26 @@ impl SiderealistClassState {
             state.wait(time);
         }
         self.summon_state.wait(time);
+    }
+
+    pub fn refract(&mut self, target: String) {
+        self.refracting = Some(target);
+    }
+
+    pub fn lose_refraction(&mut self) {
+        self.refracting = None;
+    }
+
+    pub fn is_refracting(&self) -> bool {
+        self.refracting.is_some()
+    }
+
+    pub fn is_refracting_target(&self, target: &str) -> bool {
+        if let Some(refracting) = &self.refracting {
+            refracting == target
+        } else {
+            false
+        }
     }
 
     pub fn weave_parallax(&mut self, time: f32, spell: String, target: String) {

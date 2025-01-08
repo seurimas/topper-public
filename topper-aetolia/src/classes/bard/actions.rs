@@ -118,6 +118,7 @@ pub enum WeavingAttack {
     Ironcollar,
     Headstitch,
     Heartcage,
+    Masterstroke,
 }
 
 pub struct WeavingAttackAction {
@@ -225,6 +226,13 @@ impl WeavingAttackAction {
             attack: WeavingAttack::Patchwork,
         }
     }
+    pub fn masterstroke(caster: String, target: String) -> Self {
+        WeavingAttackAction {
+            caster,
+            target,
+            attack: WeavingAttack::Masterstroke,
+        }
+    }
 
     pub fn get_skill(&self) -> &str {
         match self.attack {
@@ -241,6 +249,7 @@ impl WeavingAttackAction {
             WeavingAttack::Ironcollar => "Ironcollar",
             WeavingAttack::Headstitch => "Headstitch",
             WeavingAttack::Heartcage => "Heartcage",
+            WeavingAttack::Masterstroke => "Masterstroke",
         }
     }
 }
@@ -272,6 +281,7 @@ impl ActiveTransition for WeavingAttackAction {
             WeavingAttack::Ironcollar => format!("weave ironcollar {}", self.target),
             WeavingAttack::Headstitch => format!("weave headstitch {}", self.target),
             WeavingAttack::Heartcage => format!("weave heartcage {}", self.target),
+            WeavingAttack::Masterstroke => format!("weave masterstroke {}", self.target),
         })
     }
 }

@@ -22,6 +22,7 @@ pub const JAB_DAMAGE: f32 = 5.5;
 pub const SPINSLASH_DAMAGE: f32 = 4.0;
 pub const GOUGE_DAMAGE: f32 = 6.5;
 pub const FLASHKICK_DAMAGE: f32 = 5.0;
+pub const GYANIS_BONUS: f32 = 2.0;
 
 pub fn use_up_intoxicated(
     agent_states: &mut AetTimelineState,
@@ -151,10 +152,11 @@ pub fn handle_combat_action(
         // Knifeplay combo attacks.
         "Jab" => {
             let limb = LType::from_name(&combat_action.annotation);
+            let damage = apply_gyanis(combat_action, agent_states, JAB_DAMAGE);
             attack_limb_damage(
                 agent_states,
                 &combat_action.target,
-                (limb, JAB_DAMAGE, true),
+                (limb, damage, true),
                 after,
             );
             sitara_strike(agent_states, &combat_action.target, after, 1);
@@ -169,10 +171,11 @@ pub fn handle_combat_action(
         }
         "Lowhook" => {
             let limb = LType::from_name(&combat_action.annotation);
+            let damage = apply_gyanis(combat_action, agent_states, LOWHOOK_DAMAGE);
             attack_limb_damage(
                 agent_states,
                 &combat_action.target,
-                (limb, LOWHOOK_DAMAGE, true),
+                (limb, damage, true),
                 after,
             );
             sitara_strike(agent_states, &combat_action.target, after, 1);
@@ -187,6 +190,7 @@ pub fn handle_combat_action(
         }
         "Spinslash" => {
             let limb = LType::from_name(&combat_action.annotation);
+            let damage = apply_gyanis(combat_action, agent_states, SPINSLASH_DAMAGE);
             attack_limb_damage(
                 agent_states,
                 &combat_action.target,
@@ -204,10 +208,11 @@ pub fn handle_combat_action(
             );
         }
         "Lateral" => {
+            let damage = apply_gyanis(combat_action, agent_states, LATERAL_DAMAGE);
             attack_limb_damage(
                 agent_states,
                 &combat_action.target,
-                (LType::TorsoDamage, LATERAL_DAMAGE, true),
+                (LType::TorsoDamage, damage, true),
                 after,
             );
             sitara_strike(agent_states, &combat_action.target, after, 1);
@@ -263,10 +268,11 @@ pub fn handle_combat_action(
             });
         }
         "Flashkick" => {
+            let damage = apply_gyanis(combat_action, agent_states, FLASHKICK_DAMAGE);
             attack_limb_damage(
                 agent_states,
                 &combat_action.target,
-                (LType::HeadDamage, FLASHKICK_DAMAGE, true),
+                (LType::HeadDamage, damage, true),
                 after,
             );
             let mut parried = attack_parried(after);
@@ -357,10 +363,11 @@ pub fn handle_combat_action(
                 vec![FType::Disfigurement],
                 after,
             );
+            let damage = apply_gyanis(combat_action, agent_states, GOUGE_DAMAGE);
             attack_limb_damage(
                 agent_states,
                 &combat_action.target,
-                (LType::TorsoDamage, GOUGE_DAMAGE, true),
+                (LType::TorsoDamage, damage, true),
                 after,
             );
             let mut parried = attack_parried(after);
@@ -606,6 +613,22 @@ pub fn handle_combat_action(
         _ => {}
     }
     Ok(())
+}
+
+fn apply_gyanis(
+    combat_action: &CombatAction,
+    agent_states: &mut AetTimelineState,
+    base: f32,
+) -> f32 {
+    if agent_states
+        .borrow_agent(&combat_action.caster)
+        .check_if_predator(&|predator| predator.stance == KnifeStance::Gyanis)
+        .unwrap_or(false)
+    {
+        base + GYANIS_BONUS
+    } else {
+        base
+    }
 }
 
 fn toggle_mawcrush_freely(db: Option<&impl AetDatabaseModule>, value: bool) {

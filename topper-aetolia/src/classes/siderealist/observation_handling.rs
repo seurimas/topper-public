@@ -54,6 +54,13 @@ pub fn handle_combat_action(
     after: &Vec<AetObservation>,
 ) -> Result<(), String> {
     match combat_action.skill.as_ref() {
+        "Refraction" => {
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                me.assume_siderealist(&|me| {
+                    me.refract(combat_action.target.clone());
+                });
+            });
+        }
         "Embed" => {
             println!(
                 "Hint: {:?}",
