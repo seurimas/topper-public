@@ -555,7 +555,12 @@ pub fn handle_weaving_action(
 }
 
 fn use_destiny_eq(me: &mut AgentState, observations: &Vec<AetObservation>) {
-    if !me.is(FType::SongDestiny) {
+    if observations.iter().any(|obs| match obs {
+        AetObservation::Stripped(stripped) => stripped.eq("song_destiny"),
+        _ => false,
+    }) {
+        // Destiny stripped observed!
+    } else if !me.is(FType::SongDestiny) {
         apply_or_infer_balance(me, (BType::Equil, 2.0), observations);
     } else {
         me.set_flag(FType::SongDestiny, false);

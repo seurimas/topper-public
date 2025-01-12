@@ -95,7 +95,7 @@ impl Timer {
                 expire_at,
                 progress,
                 ..
-            } => *progress = *expire_at,
+            } => *progress = *expire_at + 1,
         }
     }
 
@@ -113,7 +113,7 @@ impl Timer {
                 progress,
                 ..
             } => {
-                if *progress < *expire_at {
+                if *progress <= *expire_at {
                     *progress += duration;
                 }
             }
@@ -127,7 +127,7 @@ impl Timer {
                 expire_at,
                 progress,
                 ..
-            } => *progress < *expire_at,
+            } => *progress <= *expire_at,
         }
     }
 
@@ -676,6 +676,22 @@ lazy_static! {
 impl FType {
     pub fn is_affliction(&self) -> bool {
         self >= &FType::Sadness
+    }
+
+    pub fn is_general_defence(&self) -> bool {
+        match self {
+            FType::Blindness
+            | FType::Deafness
+            | FType::Insomnia
+            | FType::Fangbarrier
+            | FType::Levitation
+            | FType::Instawake
+            | FType::Speed
+            | FType::Arcane
+            | FType::Density
+            | FType::Vigor => true,
+            _ => false,
+        }
     }
 
     pub fn from_name(aff_name: &String) -> Option<FType> {

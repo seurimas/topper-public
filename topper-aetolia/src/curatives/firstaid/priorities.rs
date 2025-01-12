@@ -8,6 +8,7 @@ use regex::{Regex, RegexSet};
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
+use std::convert::TryFrom;
 use std::hash::Hash;
 use std::iter::FromIterator;
 use std::ops::{Deref, DerefMut};
@@ -590,6 +591,26 @@ impl FirstAidPriorities {
         }
         for (aff, priority) in DEFAULT_PRIORITIES.iter() {
             self.0.insert(*aff, *priority);
+        }
+        result
+    }
+
+    pub fn reset_defence(&mut self) -> Option<(FType, u32)> {
+        let mut result = None;
+        for (aff, priority) in &self.0 {
+            if aff.is_general_defence() {
+                if *priority != DEFAULT_PRIORITIES.get(&aff).cloned().unwrap_or(*priority) {
+                    result = Some((*aff, *priority));
+                }
+            }
+        }
+        for aff_idx in 0..(FType::Sadness as u16) {
+            let Ok(aff) = FType::try_from(aff_idx) else {
+                continue;
+            };
+            if aff.is_general_defence() {
+                self.0.insert(aff, 0);
+            }
         }
         result
     }

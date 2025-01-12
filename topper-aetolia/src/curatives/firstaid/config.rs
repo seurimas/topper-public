@@ -56,6 +56,7 @@ lazy_static! {
 lazy_static! {
     static ref SET_SIMPLE_PRIORITY: Regex = Regex::new(r"You have set the '(\w+)' (?:affliction|defence) to the (\d+) priority.").unwrap();
     static ref SET_RESET_PRIORITIES: Regex = Regex::new(r"All your curing affliction priorities have been reset to defaults.").unwrap();
+    static ref SET_RESET_DEFENCE_PRIORITIES: Regex = Regex::new(r"All your defence priorities have been reset to defaults.").unwrap();
     static ref SET_HEAL_HEALTH: Regex =
         Regex::new(r"You will now heal your health when it drops below (\d+)%.").unwrap();
     static ref SET_HEAL_MANA: Regex =
@@ -157,6 +158,7 @@ pub struct FirstAidConfig {
 pub enum FirstAidSetting {
     SimplePriority(FType, u32),
     ResetPriorities,
+    ResetDefencePriorities,
     Predict(FType),
     UnPredict(FType),
     Elevate(FType),
@@ -199,6 +201,13 @@ impl FirstAidConfig {
                     FirstAidSetting::SimplePriority(aff, priority)
                 } else {
                     FirstAidSetting::ResetPriorities
+                }
+            }
+            FirstAidSetting::ResetDefencePriorities => {
+                if let Some((aff, priority)) = self.simple_priorities.reset_defence() {
+                    FirstAidSetting::SimplePriority(aff, priority)
+                } else {
+                    FirstAidSetting::ResetDefencePriorities
                 }
             }
             FirstAidSetting::Predict(ft) => {
@@ -336,6 +345,9 @@ impl FirstAidSetting {
                 }
             }
             FirstAidSetting::ResetPriorities => "firstaid priority reset".to_string(),
+            FirstAidSetting::ResetDefencePriorities => {
+                "firstaid priority defense reset".to_string()
+            }
             FirstAidSetting::Predict(ft) => {
                 format!("firstaid predict {}", ft.to_name())
             }
@@ -491,6 +503,7 @@ impl FirstAidSetting {
     pub fn setting_changed_in_line(line: &str) -> bool {
         SET_SIMPLE_PRIORITY.is_match(line)
             || SET_RESET_PRIORITIES.is_match(line)
+            || SET_RESET_DEFENCE_PRIORITIES.is_match(line)
             || SET_HEAL_HEALTH.is_match(line)
             || SET_HEAL_MANA.is_match(line)
             || SET_FORCE_HEALTH.is_match(line)
@@ -522,6 +535,9 @@ impl FirstAidSetting {
         }
         if SET_RESET_PRIORITIES.is_match(line) {
             return vec![FirstAidSetting::ResetPriorities];
+        }
+        if SET_RESET_DEFENCE_PRIORITIES.is_match(line) {
+            return vec![FirstAidSetting::ResetDefencePriorities];
         }
         if let Some(caps) = SET_HEAL_HEALTH.captures(line) {
             return vec![FirstAidSetting::HealthPercent(caps[1].parse().unwrap())];

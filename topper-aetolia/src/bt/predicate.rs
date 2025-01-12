@@ -83,6 +83,7 @@ pub enum AetPredicate {
     CanBreak(AetTarget, LimbDescriptor, f32),
     CanMangled(AetTarget, LimbDescriptor, f32),
     LimbOver(AetTarget, LimbDescriptor, f32, bool),
+    CanMend(AetTarget, LimbDescriptor),
     AtLeastNLimbsOver(AetTarget, Vec<LimbDescriptor>, usize, f32, bool),
     // Priorities
     PriorityAffIs(AetTarget, FType),
@@ -214,7 +215,9 @@ pub fn get_priority_aff(
     stack: Option<Vec<VenomPlan>>,
 ) -> Option<FType> {
     if let (Some(target), Some(stack)) = (target.get_target(model, controller), stack) {
-        get_affs_from_plan(&stack, 1, target).get(0).cloned()
+        get_affs_from_plan(&stack, 1, target, &vec![])
+            .get(0)
+            .cloned()
     } else {
         None
     }
@@ -340,6 +343,18 @@ impl UnpoweredFunction for AetPredicate {
                             limb_state.assume_restore();
                         }
                         if limb_state.damage > *damage {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::CanMend(target, limb_descriptor) => {
+                if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
+                    if let Some(target) = target.get_target(model, controller) {
+                        if target.get_limb_state(limb).crippled
+                            && !target.get_limb_state(limb).broken
+                        {
                             return UnpoweredFunctionState::Complete;
                         }
                     }

@@ -176,6 +176,7 @@ pub enum AetObservation {
     Devenoms(String),
     ParryStart(String, String),
     Parry(String, String),
+    Envenom(String),
     Damaged(String, String),
     Mangled(String, String),
     Absorbed(String, String),

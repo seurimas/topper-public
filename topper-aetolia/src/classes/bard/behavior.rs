@@ -1,9 +1,9 @@
-use serde::*;
 use behavior_bark::unpowered::*;
+use serde::*;
 
 use crate::{
     bt::*,
-    classes::{get_venoms_from_plan, group::*},
+    classes::{get_venoms_from_plan, group::*, AFFLICT_VENOMS},
     curatives::get_cure_depth,
     items::{UnwieldAction, WieldAction},
     non_agent::AetTimelineRoomExt,
@@ -22,6 +22,7 @@ pub const FAST_WEAPON_HINT: &str = "FAST_WEAPON";
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum BardVenomAttack {
     Tempo,
+    TempoOne,
     Needle,
     Harry,
     Bravado,
@@ -33,6 +34,7 @@ pub enum BardBehavior {
     WeaveAttack(WeavingAttack),
     PerformanceAttack(PerformanceAttack),
     VenomAttack(BardVenomAttack),
+    TempoVenom(bool),
     Anelace,
     ColdRead,
     PatchAggroedAlly,
@@ -221,7 +223,8 @@ impl UnpoweredFunction for BardBehavior {
                         BardVenomAttack::Tempo => 3,
                         _ => 1,
                     };
-                    let venoms = get_venoms_from_plan(&venom_plan.to_vec(), venom_count, &you);
+                    let venoms =
+                        get_venoms_from_plan(&venom_plan.to_vec(), venom_count, &you, &vec![]);
                     controller
                         .plan
                         .add_to_qeb(Box::new(PerformanceAttackAction::new(
@@ -231,6 +234,9 @@ impl UnpoweredFunction for BardBehavior {
                                 BardVenomAttack::Tempo => PerformanceAttack::TempoThree(
                                     venoms.get(2).unwrap_or(&"kalmia").to_string(),
                                     venoms.get(1).unwrap_or(&"digitalis").to_string(),
+                                    venoms.get(0).unwrap_or(&"curare").to_string(),
+                                ),
+                                BardVenomAttack::TempoOne => PerformanceAttack::TempoOne(
                                     venoms.get(0).unwrap_or(&"curare").to_string(),
                                 ),
                                 BardVenomAttack::Needle => PerformanceAttack::Needle(
@@ -244,6 +250,59 @@ impl UnpoweredFunction for BardBehavior {
                                 ),
                             },
                         )));
+                }
+            }
+            BardBehavior::TempoVenom(keep_it_going) => {
+                if !controller.has_qeb() {
+                    return UnpoweredFunctionState::Failed;
+                }
+                if let (Some(target), Some(venom_plan)) =
+                    (controller.target.clone(), controller.aff_priorities.clone())
+                {
+                    let me = model.state.borrow_me();
+                    let you = model.state.borrow_agent(&target);
+                    let venom = if *keep_it_going {
+                        if let Some(next_venom) = me
+                            .check_if_bard(&|me| me.next_next_tempo_aff())
+                            .unwrap_or_default()
+                        {
+                            if !you.is(next_venom) && next_venom != FType::Besilence {
+                                AFFLICT_VENOMS
+                                    .get(&next_venom)
+                                    .unwrap_or(&"selarnia")
+                                    .to_string()
+                            } else {
+                                get_venoms_from_plan(&venom_plan.to_vec(), 1, &you, &vec![])
+                                    .get(0)
+                                    .unwrap_or(&"selarnia")
+                                    .to_string()
+                            }
+                        } else {
+                            get_venoms_from_plan(&venom_plan.to_vec(), 1, &you, &vec![])
+                                .get(0)
+                                .unwrap_or(&"selarnia")
+                                .to_string()
+                        }
+                    } else {
+                        get_venoms_from_plan(&venom_plan.to_vec(), 1, &you, &vec![])
+                            .get(0)
+                            .unwrap_or(&"selarnia")
+                            .to_string()
+                    };
+                    if me.check_if_bard(&|me| me.is_on_tempo()).unwrap_or(false)
+                        && !me
+                            .check_if_bard(&|me| me.falchion_venomed(&venom))
+                            .unwrap_or(false)
+                    {
+                        controller
+                            .plan
+                            .add_to_plain(Box::new(EnvenomFalchionAction::new(
+                                model.who_am_i(),
+                                venom,
+                            )));
+                        return UnpoweredFunctionState::Complete;
+                    }
+                    return UnpoweredFunctionState::Failed;
                 }
             }
             BardBehavior::PerformanceAttack(performance_attack) => {

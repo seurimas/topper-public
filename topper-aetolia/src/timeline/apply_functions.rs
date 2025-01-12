@@ -425,6 +425,20 @@ pub fn apply_observation(
                 me.set_parrying(limb);
             });
         }
+        AetObservation::Envenom(venom) => {
+            let venom = venom.clone();
+            for_agent(
+                timeline,
+                &timeline.me.clone(),
+                &move |me: &mut AgentState| {
+                    if me.get_normalized_class() == Some(Class::Bard) {
+                        me.assume_bard(&|bard| {
+                            bard.falchion_venom = Some(venom.clone());
+                        });
+                    }
+                },
+            );
+        }
         AetObservation::HiddenAff => {
             for_agent(
                 timeline,

@@ -740,3 +740,24 @@ impl ActiveTransition for HorologeAction {
         }
     }
 }
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+pub struct EnvenomFalchionAction {
+    pub caster: String,
+    pub venom: String,
+}
+
+impl EnvenomFalchionAction {
+    pub fn new(caster: String, venom: String) -> Self {
+        EnvenomFalchionAction { caster, venom }
+    }
+}
+
+impl ActiveTransition for EnvenomFalchionAction {
+    fn simulate(&self, timeline: &AetTimeline) -> Vec<ProbableEvent> {
+        vec![]
+    }
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("envenom falchion with {}", self.venom))
+    }
+}

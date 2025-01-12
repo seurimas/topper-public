@@ -575,9 +575,19 @@ impl UnpoweredFunction for SiderealistBehavior {
                         return UnpoweredFunctionState::Failed;
                     }
                     if let Some(venom) = controller.aff_priorities.as_ref().and_then(|affs| {
-                        get_venoms_from_plan(&affs, 1, target_agent)
-                            .first()
-                            .cloned()
+                        get_venoms_from_plan(
+                            &affs,
+                            1,
+                            target_agent,
+                            &vec![
+                                FType::LeftLegCrippled,
+                                FType::RightLegCrippled,
+                                FType::LeftArmCrippled,
+                                FType::RightArmCrippled,
+                            ],
+                        )
+                        .first()
+                        .cloned()
                     }) {
                         controller
                             .plan
@@ -596,6 +606,7 @@ impl UnpoweredFunction for SiderealistBehavior {
                 if !me
                     .check_if_siderealist(&|me| me.has_regalia(Regalia::EjaKodosa) && me.can_mend())
                     .unwrap_or(false)
+                    || me.stuck_fallen()
                 {
                     return UnpoweredFunctionState::Failed;
                 }

@@ -311,6 +311,7 @@ impl HorologeState {
 pub struct BardClassState {
     pub dithering: usize,
     pub tempo: Option<(usize, CType)>,
+    pub falchion_venom: Option<String>,
     pub voice_song: Option<Song>,
     pub instrument_song: Option<Song>,
     pub voice_timeout: CType,
@@ -358,7 +359,12 @@ impl BardClassState {
         self.half_beat.wait(duration);
     }
 
+    pub fn falchion_venomed(&self, venom: &String) -> bool {
+        self.falchion_venom.as_ref() == Some(venom)
+    }
+
     pub fn on_tempo(&mut self, count: usize) {
+        self.falchion_venom = None;
         if count > 3 {
             self.tempo = None;
         } else {
@@ -372,6 +378,23 @@ impl BardClassState {
 
     pub fn is_on_tempo(&self) -> bool {
         self.tempo.is_some()
+    }
+
+    pub fn next_tempo_aff(&self) -> Option<FType> {
+        self.tempo.and_then(|(hit, _)| match hit {
+            1 => Some(FType::Paresis),
+            2 => Some(FType::Shyness),
+            3 => Some(FType::Besilence),
+            _ => None,
+        })
+    }
+
+    pub fn next_next_tempo_aff(&self) -> Option<FType> {
+        self.tempo.and_then(|(hit, _)| match hit {
+            2 => Some(FType::Paresis),
+            3 => Some(FType::Besilence),
+            _ => None,
+        })
     }
 
     pub fn can_drop_tempo(&self, you: &AgentState) -> bool {
