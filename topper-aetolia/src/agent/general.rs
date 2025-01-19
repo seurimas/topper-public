@@ -190,6 +190,7 @@ pub enum BType {
     SelfLoathing,
     // Manabarbs,
     Pacifism,
+    Boar,
 
     // Writhe
     WritheDartpinned,

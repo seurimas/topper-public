@@ -102,6 +102,11 @@ impl BaseAgentState for AgentState {
         if self.is(FType::WritheWeb) && self.balanced(BType::WritheWeb) {
             self.set_flag(FType::WritheWeb, false);
         }
+        // TODO: Add a myself/other player flag?
+        if !self.balanced(BType::Boar) && self.get_max_stat(SType::Health) == 100 {
+            self.restore_stat(SType::Health, 6);
+            self.set_balance(BType::Boar, 10.);
+        }
         if self.is(FType::SelfLoathing) {
             let observed = self.get_count(FType::SelfLoathing);
             if (observed <= 2 && self.get_balance(BType::SelfLoathing) < 3.)

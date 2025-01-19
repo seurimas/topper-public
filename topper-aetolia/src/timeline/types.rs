@@ -464,6 +464,10 @@ impl AetTimelineTrait for AetTimeline {
                 agent.set_flag(FType::Fangbarrier, true);
                 agent.set_flag(FType::Instawake, true);
                 agent.set_flag(FType::Insulation, true);
+                agent.set_stat(SType::Health, 100);
+                agent.set_stat(SType::Mana, 100);
+                agent.set_max_stat(SType::Health, 100);
+                agent.set_max_stat(SType::Mana, 100);
                 agent.limb_damage = LimbSet::default();
             }
         }

@@ -18,7 +18,7 @@ lazy_static! {
         FType::Hypochondria,
         FType::Lethargy,
         FType::SelfLoathing,
-        FType::Masochism,
+        FType::Justice,
         FType::Paranoia,
         FType::Recklessness,
         FType::Stupidity,

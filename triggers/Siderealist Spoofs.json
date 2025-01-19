@@ -42,7 +42,7 @@
         "observation_name": "Proc"
     },
     {
-        "regex": "^With a graceful gesture, (you) compell the crystals to embed into the ground and awaken as cosmic vibrations.$",
+        "regex": "^With a graceful gesture, (you) compel the crystals to embed into the ground and awaken as cosmic vibrations.$",
         "args": [
             {
                 "GroupAsTarget": 1
