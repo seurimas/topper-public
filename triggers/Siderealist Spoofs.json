@@ -42,6 +42,27 @@
         "observation_name": "Proc"
     },
     {
+        "regex": "^(\\w+) does not have (.*).$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Astranomia"
+            },
+            {
+                "Literal": "Alteration fail"
+            },
+            {
+                "GroupAsTarget": 2
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
         "regex": "^With a graceful gesture, (you) compel the crystals to embed into the ground and awaken as cosmic vibrations.$",
         "args": [
             {

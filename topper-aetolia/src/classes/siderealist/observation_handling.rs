@@ -653,6 +653,20 @@ pub fn handle_combat_action(
                 // Nothing to do.
             }
         }
+        "Alteration" => {
+            if let Some(aff) = FType::from_name(&combat_action.annotation[4..].to_string()) {
+                for_agent(agent_states, &combat_action.target, &move |me| {
+                    me.toggle_flag(aff, false);
+                });
+            }
+        }
+        "Alteration fail" => {
+            if let Some(aff) = FType::from_name(&combat_action.annotation) {
+                for_agent(agent_states, &combat_action.caster, &move |me| {
+                    me.observe_flag(aff, false);
+                });
+            }
+        }
         "Syzygy" => {
             if combat_action.annotation.eq_ignore_ascii_case("failure") {
                 for_agent(agent_states, &combat_action.caster, &move |me| {

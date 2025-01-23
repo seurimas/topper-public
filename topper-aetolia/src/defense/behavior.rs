@@ -8,6 +8,7 @@ use crate::{
     bt::*,
     classes::{Action, Class, FitnessAction, ParryAction},
     db::AetDatabaseModule,
+    observables::PlainAction,
     types::*,
 };
 
@@ -107,6 +108,9 @@ impl UnpoweredFunction for DefenseBehavior {
                     controller
                         .plan
                         .add_to_qeb(Box::new(FitnessAction::new(model.who_am_i())));
+                    controller
+                        .plan
+                        .add_to_qeb(Box::new(PlainAction::new("smoke yarrow".to_string())));
                 } else {
                     for aggressor in me.aggro.get_aggro_attackers() {
                         let aggressor = model.state.borrow_agent(&aggressor);
@@ -116,6 +120,17 @@ impl UnpoweredFunction for DefenseBehavior {
                                     controller
                                         .plan
                                         .add_to_qeb(Box::new(FitnessAction::new(model.who_am_i())));
+                                    return UnpoweredFunctionState::Complete;
+                                }
+                            }
+                            Some(Class::Indorani) => {
+                                if me.is(FType::Asthma) && me.is(FType::Aeon) {
+                                    controller
+                                        .plan
+                                        .add_to_qeb(Box::new(FitnessAction::new(model.who_am_i())));
+                                    controller.plan.add_to_qeb(Box::new(PlainAction::new(
+                                        "smoke willow".to_string(),
+                                    )));
                                     return UnpoweredFunctionState::Complete;
                                 }
                             }

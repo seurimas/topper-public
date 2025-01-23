@@ -337,7 +337,7 @@ const THURIBLE_DESPAWN_TIMEOUT: CType = (240.0 * BALANCE_SCALE) as CType;
 const THURIBLE_MISSING_TIMEOUT: CType = (6.0 * BALANCE_SCALE) as CType;
 
 impl BardClassState {
-    pub fn wait(&mut self, duration: i32) {
+    pub fn wait(&mut self, duration: i32, cooldown_effect: CooldownEffect) {
         let mut tempo_timeout = false;
         if let Some((count, timer)) = &mut self.tempo {
             *timer += duration;

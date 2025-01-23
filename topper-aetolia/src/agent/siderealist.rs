@@ -472,15 +472,17 @@ impl SiderealistClassState {
         }
     }
 
-    pub fn wait(&mut self, time: CType) {
-        self.mend.wait(time);
+    pub fn wait(&mut self, time: CType, cooldown_effect: CooldownEffect) {
+        if !cooldown_effect {
+            self.mend.wait(time);
+            self.gleam_cooldown.wait(time);
+            self.foresight_cooldown.wait(time);
+            self.centrum_cooldown.wait(time);
+        }
+        self.crystalforest_cooldown.wait(time);
         if let Some((timer, _, _)) = &mut self.parallax {
             timer.wait(time);
         }
-        self.gleam_cooldown.wait(time);
-        self.foresight_cooldown.wait(time);
-        self.centrum_cooldown.wait(time);
-        self.crystalforest_cooldown.wait(time);
         if let Some(gleam_stars) = &mut self.gleam_stars {
             gleam_stars.red.wait(time);
             gleam_stars.orange.wait(time);

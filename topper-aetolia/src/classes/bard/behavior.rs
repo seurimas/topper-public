@@ -26,6 +26,7 @@ pub enum BardVenomAttack {
     Needle,
     Harry,
     Bravado,
+    Cadence,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
@@ -246,6 +247,9 @@ impl UnpoweredFunction for BardBehavior {
                                     venoms.get(0).unwrap_or(&"curare").to_string(),
                                 ),
                                 BardVenomAttack::Bravado => PerformanceAttack::Bravado(
+                                    venoms.get(0).unwrap_or(&"curare").to_string(),
+                                ),
+                                BardVenomAttack::Cadence => PerformanceAttack::Cadence(
                                     venoms.get(0).unwrap_or(&"curare").to_string(),
                                 ),
                             },

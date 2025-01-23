@@ -571,6 +571,9 @@ pub enum FType {
     Thunderbrand,
     FrozenFeet,
 
+    // Shapeshifter
+    RippedThroat,
+
     // Special
     Asleep,
     Unconscious,
@@ -1301,24 +1304,30 @@ pub enum ClassState {
 }
 
 impl ClassState {
-    pub fn wait(&mut self, duration: CType) {
+    pub fn wait(&mut self, duration: CType, cooldown_effect: CooldownEffect) {
         match self {
             ClassState::Zealot(ZealotClassState { zenith, pyromania }) => {
-                zenith.wait(duration);
+                if !cooldown_effect {
+                    zenith.wait(duration);
+                }
                 pyromania.wait(duration);
             }
-            ClassState::Bard(bard_class_state) => bard_class_state.wait(duration),
-            ClassState::Predator(predator_class_state) => predator_class_state.wait(duration),
+            ClassState::Bard(bard_class_state) => bard_class_state.wait(duration, cooldown_effect),
+            ClassState::Predator(predator_class_state) => {
+                predator_class_state.wait(duration, cooldown_effect)
+            }
             // ClassState::Sentinel(sentinel_class_state) => sentinel_class_state.wait(duration),
             ClassState::Infiltrator(infiltrator_class_state) => {
                 // infiltrator_class_state.wait(duration)
             }
             ClassState::Siderealist(siderealist_class_state) => {
-                siderealist_class_state.wait(duration)
+                siderealist_class_state.wait(duration, cooldown_effect)
             }
             // ClassState::Shifter(howling_state) => howling_state.wait(duration),
             // ClassState::Monk(monk_class_state) => monk_class_state.wait(duration),
-            ClassState::Ascendril(ascendril_class_state) => ascendril_class_state.wait(duration),
+            ClassState::Ascendril(ascendril_class_state) => {
+                ascendril_class_state.wait(duration, cooldown_effect)
+            }
             _ => {}
         }
     }
@@ -1384,6 +1393,7 @@ pub enum ChannelType {
     Shatter,
     Death,
     Moonlet,
+    Tumbling,
 }
 
 impl ChannelType {
@@ -1395,6 +1405,7 @@ impl ChannelType {
             (ChannelType::Moonlet, FType::LeftArmCrippled) => true,
             (ChannelType::Moonlet, FType::RightArmCrippled) => true,
             (ChannelType::Moonlet, FType::Paresis) => true,
+            (ChannelType::Tumbling, FType::WritheImpaled) => true,
             _ => false,
         }
     }

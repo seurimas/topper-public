@@ -369,6 +369,24 @@
     "observation_name": "OtherAfflicted"
   },
   {
+    "regex": "^Dread manifests on (\\w+)'s face as (.*) takes hold.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "GroupAsTarget": 2
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "OtherAfflicted"
+  },
+  {
     "regex": "^(\\w+) twists and turns (.*) body, dodging the attack.$",
     "args": [
       {

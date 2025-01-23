@@ -3,7 +3,7 @@ use crate::classes::Class;
 use crate::curatives::statics::RESTORE_CURE_ORDERS;
 use num_enum::TryFromPrimitive;
 use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use std::fmt;
 use topper_core::timeline::BaseAgentState;
 
@@ -37,12 +37,16 @@ pub struct AgentState {
     pub elevation: Elevation,
 }
 
+// True = Aeon = Pause cooldowns.
+pub type CooldownEffect = bool;
+
 impl BaseAgentState for AgentState {
     fn wait(&mut self, duration: i32) {
+        let cooldown_effect = self.is(FType::Aeon);
         self.aggro.wait(duration);
         self.relapses.wait(duration);
         self.resin_state.wait(duration);
-        self.class_state.wait(duration);
+        self.class_state.wait(duration, cooldown_effect);
         self.dodge_state.wait(duration);
         self.pipe_state.wait(duration);
         self.ascendril_board.wait(duration);
@@ -83,7 +87,21 @@ impl BaseAgentState for AgentState {
         }
         let rebound_pending = !self.balanced(BType::Rebounding) && !self.is(FType::Rebounding);
         for i in 0..self.balances.len() {
-            self.balances[i].wait(duration);
+            match (i.try_into(), cooldown_effect) {
+                (
+                    Ok(BType::Fitness)
+                    | Ok(BType::Fitness)
+                    | Ok(BType::ClassCure1)
+                    | Ok(BType::ClassCure2)
+                    | Ok(BType::Regenerate),
+                    true,
+                ) => {
+                    // Aeon pauses cooldowns.
+                }
+                _ => {
+                    self.balances[i].wait(duration);
+                }
+            }
         }
         if rebound_pending && self.balanced(BType::Rebounding) {
             self.set_flag(FType::AssumedRebounding, true);

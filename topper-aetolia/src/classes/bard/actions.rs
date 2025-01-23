@@ -303,7 +303,8 @@ pub enum PerformanceAttack {
     Quip,
     Sock,
     Hiltblow,
-    Cadence,
+    CadenceNaked,
+    Cadence(String),
 }
 
 impl PerformanceAttack {
@@ -315,7 +316,8 @@ impl PerformanceAttack {
             | Self::TempoThree(_, _, _)
             | Self::Harry(_)
             | Self::Bravado(_)
-            | Self::Cadence
+            | Self::CadenceNaked
+            | Self::Cadence(_)
             | Self::Pierce
             | Self::Hiltblow => true,
             _ => false,
@@ -344,7 +346,8 @@ impl PerformanceAttack {
             | Self::TempoThree(_, _, _)
             | Self::Harry(_)
             | Self::Bravado(_)
-            | Self::Cadence
+            | Self::Cadence(_)
+            | Self::CadenceNaked
             | Self::Pierce
             | Self::Hiltblow
             | Self::Crackshot
@@ -361,7 +364,8 @@ impl PerformanceAttack {
             | Self::TempoTwo(_, _)
             | Self::TempoThree(_, _, _)
             | Self::Harry(_)
-            | Self::Cadence
+            | Self::CadenceNaked
+            | Self::Cadence(_)
             | Self::Pierce
             | Self::Hiltblow
             | Self::Crackshot
@@ -386,7 +390,8 @@ impl PerformanceAttack {
             | Self::TempoThree(_, _, _)
             | Self::Harry(_)
             | Self::Bravado(_)
-            | Self::Cadence
+            | Self::Cadence(_)
+            | Self::CadenceNaked
             | Self::Hiltblow => true,
             _ => false,
         }
@@ -462,11 +467,18 @@ impl PerformanceAttackAction {
             attack: PerformanceAttack::TempoThree(venom_one, venom_two, venom_three),
         }
     }
-    pub fn cadence(caster: String, target: String) -> Self {
+    pub fn cadence_naked(caster: String, target: String) -> Self {
         PerformanceAttackAction {
             caster,
             target,
-            attack: PerformanceAttack::Cadence,
+            attack: PerformanceAttack::CadenceNaked,
+        }
+    }
+    pub fn cadence(caster: String, target: String, venom: String) -> Self {
+        PerformanceAttackAction {
+            caster,
+            target,
+            attack: PerformanceAttack::Cadence(venom),
         }
     }
     pub fn crackshot(caster: String, target: String) -> Self {
@@ -554,7 +566,8 @@ impl ActiveTransition for PerformanceAttackAction {
             PerformanceAttack::Quip => format!("quip {}", self.target),
             PerformanceAttack::Sock => format!("sock {}", self.target),
             PerformanceAttack::Hiltblow => format!("hiltblow {}", self.target),
-            PerformanceAttack::Cadence => format!("cadence {}", self.target),
+            PerformanceAttack::CadenceNaked => format!("cadence {}", self.target),
+            PerformanceAttack::Cadence(venom) => format!("cadence {} {}", self.target, venom),
         };
         if should_call_venoms(timeline) {
             let called = match &self.attack {
@@ -577,6 +590,7 @@ impl ActiveTransition for PerformanceAttackAction {
                 PerformanceAttack::Needle(venom) => call_venom(&self.target, venom, None),
                 PerformanceAttack::Harry(venom) => call_venom(&self.target, venom, None),
                 PerformanceAttack::Bravado(venom) => call_venom(&self.target, venom, None),
+                PerformanceAttack::Cadence(venom) => call_venom(&self.target, venom, None),
                 _ => "".to_string(),
             };
             Ok(format!("{};;{}", called, action))

@@ -80,7 +80,7 @@ pub fn handle_combat_action(
                 if perspective != Perspective::Bystander {
                     for_agent_uncertain_closure(
                         agent_states,
-                        &combat_action.target,
+                        &combat_action.caster,
                         Box::new(move |you| {
                             apply_or_infer_random_afflictions(
                                 you,

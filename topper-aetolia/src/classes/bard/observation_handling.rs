@@ -732,7 +732,7 @@ pub fn handle_performance_action(
                 },
             );
         }
-        "Tempo" | "Harry" | "Bravado" | "Rhythm" => {
+        "Tempo" | "Harry" | "Bravado" | "Rhythm" | "Cadence" => {
             if !combat_action.skill.eq("Rhythm") {
                 for_agent(
                     agent_states,

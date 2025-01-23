@@ -319,7 +319,7 @@ impl UnpoweredFunction for SiderealistBehavior {
                 }
                 controller
                     .plan
-                    .add_to_qeb(Box::new(Eventide::new(model.who_am_i())));
+                    .add_to_plain(Box::new(Eventide::new(model.who_am_i())));
                 UnpoweredFunctionState::Complete
             }
             SiderealistBehavior::Equinox => {
