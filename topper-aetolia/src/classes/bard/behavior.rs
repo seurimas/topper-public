@@ -335,6 +335,8 @@ impl UnpoweredFunction for BardBehavior {
                     } else if performance_attack.needs_weapon() {
                         if !assure_weapon_wielded(&me, model, controller, true) {
                             return UnpoweredFunctionState::Failed;
+                        } else if me.check_if_bard(&|me| me.is_on_tempo()).unwrap_or_default() {
+                            return UnpoweredFunctionState::Failed;
                         }
                     } else if performance_attack.needs_free_hand() {
                         if !assure_unwielded(&me, model, controller, true) {

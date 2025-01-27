@@ -732,8 +732,9 @@ pub fn handle_performance_action(
                 },
             );
         }
-        "Tempo" | "Harry" | "Bravado" | "Rhythm" | "Cadence" => {
-            if !combat_action.skill.eq("Rhythm") {
+        "Tempo" | "Harry" | "Bravado" | "Rhythm One" | "Rhythm Two" | "Rhythm Three"
+        | "Cadence" => {
+            if !combat_action.skill.starts_with("Rhythm") {
                 for_agent(
                     agent_states,
                     &combat_action.caster,
@@ -750,32 +751,32 @@ pub fn handle_performance_action(
                 first_person,
                 &hints,
             );
-            if combat_action.skill.eq("Tempo") || combat_action.skill.eq("Rhythm") {
-                let annotation = combat_action.annotation.clone();
+            if combat_action.skill.eq("Tempo") || combat_action.skill.starts_with("Rhythm") {
+                let skill = combat_action.skill.clone();
                 for_agent(
                     agent_states,
                     &combat_action.target,
                     &move |me: &mut AgentState| {
-                        if annotation.eq("one") {
+                        if skill.eq("Rhythm One") {
                             me.observe_flag(FType::Paresis, true);
-                        } else if annotation.eq("two") {
+                        } else if skill.eq("Rhythm Two") {
                             me.observe_flag(FType::Shyness, true);
-                        } else if annotation.eq("three") {
+                        } else if skill.eq("Rhythm Three") {
                             me.observe_flag(FType::Besilence, true);
                         }
                     },
                 );
-                let annotation = combat_action.annotation.clone();
+                let skill = combat_action.skill.clone();
                 for_agent(
                     agent_states,
                     &combat_action.caster,
                     &|me: &mut AgentState| {
                         me.assume_bard(&|bard: &mut BardClassState| {
-                            bard.on_tempo(if annotation.eq("one") {
+                            bard.on_tempo(if skill.eq("Rhythm One") {
                                 2
-                            } else if annotation.eq("two") {
+                            } else if skill.eq("Rhthym Two") {
                                 3
-                            } else if annotation.eq("three") {
+                            } else if skill.eq("Rhthym Three") {
                                 4
                             } else {
                                 1

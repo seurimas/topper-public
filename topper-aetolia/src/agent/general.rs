@@ -886,7 +886,7 @@ impl FlagSet {
             } else {
                 Timer::default()
             };
-        } else {
+        } else if flag != FType::Fleshbane {
             self.simple[flag as usize] = value > 0;
         }
     }
