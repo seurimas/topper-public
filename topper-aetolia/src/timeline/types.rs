@@ -229,6 +229,19 @@ pub enum AetObservation {
     Illusion,
     #[skip_args]
     Assess(String, i32, i32),
+    #[skip_args]
+    StatsOne {
+        strength: i32,
+        dexterity: i32,
+        wisdom: i32,
+    },
+    #[skip_args]
+    StatsTwo {
+        intelligence: i32,
+        constitution: i32,
+    },
+    PersuasionDraw(String, String, String),
+    PersuasionDiscard(String, String),
 }
 
 pub trait AetTimelineStateTrait {

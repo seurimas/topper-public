@@ -668,5 +668,74 @@
       }
     ],
     "observation_name": "Assess"
+  },
+  {
+    "regex": "^\\| Strength\\s+: (\\d+).*Dexterity\\s+: (\\d+).*Wisdom\\s+: (\\d+).*\\|$",
+    "args": [
+      {
+        "Group": 1
+      },
+      {
+        "Group": 2
+      },
+      {
+        "Group": 3
+      }
+    ],
+    "observation_name": "StatsOne"
+  },
+  {
+    "regex": "^\\| Intelligence\\s+: (\\d+).*Constitution\\s+: (\\d+).*|$",
+    "args": [
+      {
+        "Group": 1
+      },
+      {
+        "Group": 2
+      }
+    ],
+    "observation_name": "StatsTwo"
+  },
+  {
+    "regex": "^(You) lose track of your appeal to (\\w+).$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Group": 2
+      }
+    ],
+    "observation_name": "PersuasionDiscard"
+  },
+  {
+    "regex": "^(You) draw upon your repertoire, devising an argument that appeals to (\\w+).$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Group": 2
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "PersuasionDraw"
+  },
+  {
+    "regex": "^(You) draw upon your repertoire, devising a arguments that appeals to (\\w+) and (\\w+).$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Group": 2
+      },
+      {
+        "Group": 3
+      }
+    ],
+    "observation_name": "PersuasionDraw"
   }
 ]

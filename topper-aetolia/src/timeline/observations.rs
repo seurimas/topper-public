@@ -145,6 +145,15 @@ pub fn aet_observation_creator(
                 .parse()
                 .unwrap_or_default(),
         ),
+        "StatsOne" => AetObservation::StatsOne {
+            strength: arguments.get(0).unwrap().parse().unwrap_or_default(),
+            dexterity: arguments.get(1).unwrap().parse().unwrap_or_default(),
+            wisdom: arguments.get(2).unwrap().parse().unwrap_or_default(),
+        },
+        "StatsTwo" => AetObservation::StatsTwo {
+            intelligence: arguments.get(0).unwrap().parse().unwrap_or_default(),
+            constitution: arguments.get(1).unwrap().parse().unwrap_or_default(),
+        },
         _ => AetObservation::enum_from_args(observation_name, arguments),
     }
 }

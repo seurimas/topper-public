@@ -7,7 +7,7 @@ use crate::curatives::{
     ELIXIR_DEFENCES, PILL_CURE_ORDERS, PILL_DEFENCES, SALVE_CURE_ORDERS, SMOKE_CURE_ORDERS,
 };
 use crate::db::AetDatabaseModule;
-use crate::non_agent::{AetNonAgent, AetTimelineRoomExt};
+use crate::non_agent::{AetNonAgent, AetTimelineRoomExt, Appeals};
 use crate::timeline::*;
 use crate::types::*;
 use log::warn;
@@ -580,6 +580,41 @@ pub fn apply_observation(
                 }
                 me.set_stat(SType::Health, percent_value);
                 me.set_max_stat(SType::Health, 100);
+            });
+        }
+        AetObservation::StatsOne {
+            strength,
+            dexterity,
+            wisdom,
+        } => {
+            for_agent(timeline, &timeline.me.clone(), &move |me| {
+                me.persuasion_state.str = Some(*strength);
+                me.persuasion_state.wis = Some(*wisdom);
+            });
+        }
+        AetObservation::StatsTwo {
+            intelligence,
+            constitution,
+        } => {
+            for_agent(timeline, &timeline.me.clone(), &move |me| {
+                me.persuasion_state.int = Some(*intelligence);
+            });
+        }
+        AetObservation::PersuasionDraw(who, card_one, card_two) => {
+            for_agent(timeline, who, &move |me| {
+                if let Some(card_one) = Appeals::from_name(card_one) {
+                    me.persuasion_state.drawn(card_one);
+                }
+                if let Some(card_two) = Appeals::from_name(card_two) {
+                    me.persuasion_state.drawn(card_two);
+                }
+            });
+        }
+        AetObservation::PersuasionDiscard(who, card) => {
+            for_agent(timeline, who, &move |me| {
+                if let Some(card) = Appeals::from_name(card) {
+                    me.persuasion_state.discard(card);
+                }
             });
         }
         _ => {}

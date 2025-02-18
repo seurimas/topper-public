@@ -24,6 +24,7 @@ pub mod lords;
 pub mod luminary;
 pub mod mirrors;
 pub mod monk;
+pub mod persuasion;
 pub mod praenomen;
 pub mod predator;
 pub mod sciomancer;
@@ -478,6 +479,9 @@ pub fn handle_combat_action(
         }
         "Purification" | "Zeal" | "Psionics" => {
             zealot::handle_combat_action(combat_action, agent_states, before, after)
+        }
+        "Persuasion" => {
+            persuasion::handle_combat_action(combat_action, agent_states, before, after)
         }
         "Weaponry" => match combat_action.skill.as_ref() {
             "Shatter" => {

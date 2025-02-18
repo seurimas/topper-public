@@ -1,5 +1,7 @@
 use serde::Deserialize;
 
+use super::{AppealType, Appeals};
+
 #[derive(Debug, Deserialize, PartialEq, Clone, Copy)]
 pub enum Personality {
     Unknown,
@@ -53,4 +55,16 @@ pub enum PersuasionStatus {
     #[default]
     Unscrutinised,
     NonSentient,
+}
+
+impl PersuasionStatus {
+    pub fn value_influence_by_resolve(&self) -> i64 {
+        match self {
+            PersuasionStatus::Convinced => 0,
+            PersuasionStatus::Persuading { resolve, .. } => *resolve * 5 / 105,
+            PersuasionStatus::Scrutinised { resolve, .. } => *resolve * 5 / 105,
+            PersuasionStatus::Unscrutinised => 0,
+            PersuasionStatus::NonSentient => 0,
+        }
+    }
 }

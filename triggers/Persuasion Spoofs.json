@@ -1,0 +1,86 @@
+[
+    {
+        "regex": "^(You) commit to maintaining your appeal to (\\w+) throughout this persuasion attempt.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Persuasion"
+            },
+            {
+                "Literal": "Cyclic"
+            },
+            {
+                "GroupAsTarget": 2
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You) do not currently have any cyclic appeals active.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Persuasion"
+            },
+            {
+                "Literal": "Cyclic"
+            },
+            {
+                "Literal": "none"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You) cease maintaining your cyclic appeal to \\w+.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Persuasion"
+            },
+            {
+                "Literal": "Cyclic"
+            },
+            {
+                "Literal": "none"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^That appeal is already set as (you)r cyclic appeal.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Persuasion"
+            },
+            {
+                "Literal": "Cyclic"
+            },
+            {
+                "Literal": "already"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    }
+]

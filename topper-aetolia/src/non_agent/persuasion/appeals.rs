@@ -5,7 +5,7 @@ use crate::agent::PersuasionState;
 
 use super::Personality;
 
-#[derive(Debug, Deserialize, PartialEq, Clone, Copy)]
+#[derive(Debug, Deserialize, PartialEq, Clone, Copy, Eq, Hash)]
 pub enum AppealType {
     Ethos,
     Logos,
@@ -34,6 +34,23 @@ pub enum Appeals {
 }
 
 impl Appeals {
+    pub fn from_name(name: &str) -> Option<Appeals> {
+        match name.to_ascii_lowercase().as_str() {
+            "authority" => Some(Appeals::Authority),
+            "morality" => Some(Appeals::Morality),
+            "reputation" => Some(Appeals::Reputation),
+            "tradition" => Some(Appeals::Tradition),
+            "evidence" => Some(Appeals::Evidence),
+            "reason" => Some(Appeals::Reason),
+            "analogy" => Some(Appeals::Analogy),
+            "causality" => Some(Appeals::Causality),
+            "intimidation" => Some(Appeals::Intimidation),
+            "reassurance" => Some(Appeals::Reassurance),
+            "inspiration" => Some(Appeals::Inspiration),
+            "provocation" => Some(Appeals::Provocation),
+            _ => None,
+        }
+    }
     pub fn appeal_type(&self) -> AppealType {
         if self.is_ethos() {
             AppealType::Ethos
