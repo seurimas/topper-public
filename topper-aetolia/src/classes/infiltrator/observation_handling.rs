@@ -259,6 +259,22 @@ pub fn handle_combat_action(
                 &after.clone(),
             );
         }
+        "Marking" => {
+            let observations = after.clone();
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &move |me: &mut AgentState| {
+                    apply_or_infer_balance(me, (BType::Balance, 4.), &observations);
+                },
+            );
+            attack_afflictions(
+                agent_states,
+                &combat_action.target,
+                vec![FType::Marked],
+                &after.clone(),
+            );
+        }
         "Flay" => {
             let targetless = infer_flay_target(&combat_action.target, agent_states).is_none();
             let observations = after.clone();

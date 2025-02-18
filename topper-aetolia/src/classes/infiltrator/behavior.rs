@@ -91,6 +91,7 @@ pub enum InfiltratorBehavior {
     ShrugVenom,
     Bind(AetTarget),
     Bite(AetTarget, BiteType),
+    Mark(AetTarget),
     Garrote(AetTarget),
     Sleight(AetTarget, SleightType),
 }
@@ -331,6 +332,13 @@ impl UnpoweredFunction for InfiltratorBehavior {
                 } else {
                     UnpoweredFunctionState::Failed
                 }
+            }
+            InfiltratorBehavior::Mark(target) => {
+                controller.plan.add_to_qeb(Box::new(MarkAction::new(
+                    model.who_am_i(),
+                    target.get_name(model, controller),
+                )));
+                UnpoweredFunctionState::Complete
             }
             InfiltratorBehavior::Garrote(target) => {
                 if let (me, Some(you)) = (

@@ -270,6 +270,8 @@ impl ActiveTransition for BiteAction {
     }
 }
 
+targetted_action!(MarkAction, "mark {}");
+
 pub struct GarroteAction {
     pub caster: String,
     pub target: String,

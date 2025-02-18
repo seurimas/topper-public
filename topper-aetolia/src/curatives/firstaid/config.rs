@@ -103,6 +103,7 @@ lazy_static! {
         Regex::new(r"You are no longer predicting that you have been afflicted with the (\w+) affliction.").unwrap();
     static ref SET_NOT_AFFLICTED: Regex =
         Regex::new(r"You're not afflicted with (\w+).").unwrap();
+    static ref PRESS_RESTORATION: Regex = Regex::new(r"You press a restoration poultice against your (head|torso|left arm|right arm|left leg|right leg), rubbing it into your flesh.").unwrap();
 }
 
 #[derive(Debug, Display, Default, PartialEq, Eq, Hash, Serialize, Deserialize, Clone, Copy)]
@@ -524,6 +525,7 @@ impl FirstAidSetting {
             || SET_UNELEVATED.is_match(line)
             || SET_UNPREDICTED.is_match(line)
             || SET_NOT_AFFLICTED.is_match(line)
+            || PRESS_RESTORATION.is_match(line)
     }
 
     fn get_setting_changed_from_line(line: &str) -> Vec<Self> {
@@ -651,6 +653,17 @@ impl FirstAidSetting {
                     FType::from_name(&caps[1].to_string()).unwrap_or(FType::Dead),
                 ),
             ];
+        }
+        if let Some(caps) = PRESS_RESTORATION.captures(line) {
+            return vec![FirstAidSetting::UnPredict(match &caps[1] {
+                "head" => FType::PreRestoreHead,
+                "torso" => FType::PreRestoreTorso,
+                "left arm" => FType::PreRestoreLeftArm,
+                "right arm" => FType::PreRestoreRightArm,
+                "left leg" => FType::PreRestoreLeftLeg,
+                "right leg" => FType::PreRestoreRightLeg,
+                _ => FType::Dead,
+            })];
         }
         vec![]
     }

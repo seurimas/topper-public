@@ -30,6 +30,12 @@ pub fn apply_gmcp<DB: AetDatabaseModule>(
     Ok(())
 }
 
+fn get_stat(gmcp: &serde_json::Value, stat: &str) -> Option<i32> {
+    gmcp.get(stat)
+        .and_then(|stat| stat.as_str())
+        .and_then(|stat| stat.parse::<i32>().ok())
+}
+
 fn handle_char_vitals(
     gmcp: &serde_json::Value,
     timeline: &mut TimelineState<crate::types::AgentState, crate::non_agent::AetNonAgent>,
@@ -96,19 +102,13 @@ fn handle_char_vitals(
         );
     }
 
-    if let (Some(hp), Some(mp), Some(max_hp), Some(max_mp)) = (
-        gmcp.get("hp")
-            .and_then(|hp| hp.as_str())
-            .and_then(|hp| hp.parse::<i32>().ok()),
-        gmcp.get("mp")
-            .and_then(|mp| mp.as_str())
-            .and_then(|mp| mp.parse::<i32>().ok()),
-        gmcp.get("maxhp")
-            .and_then(|max_hp| max_hp.as_str())
-            .and_then(|max_hp| max_hp.parse::<i32>().ok()),
-        gmcp.get("maxmp")
-            .and_then(|max_mp| max_mp.as_str())
-            .and_then(|max_mp| max_mp.parse::<i32>().ok()),
+    if let (Some(hp), Some(mp), Some(acu), Some(max_hp), Some(max_mp), Some(max_acu)) = (
+        get_stat(gmcp, "hp"),
+        get_stat(gmcp, "mp"),
+        get_stat(gmcp, "acu"),
+        get_stat(gmcp, "maxhp"),
+        get_stat(gmcp, "maxmp"),
+        get_stat(gmcp, "maxacu"),
     ) {
         for_agent(
             timeline,
@@ -117,8 +117,10 @@ fn handle_char_vitals(
                 if !me.is(FType::Recklessness) {
                     me.set_stat(SType::Health, hp);
                     me.set_stat(SType::Mana, mp);
+                    me.persuasion_state.acumen = acu;
                     me.set_max_stat(SType::Health, max_hp);
                     me.set_max_stat(SType::Mana, max_mp);
+                    me.persuasion_state.max_acumen = max_acu;
                 } else if max_mp != mp || max_hp != hp {
                     me.observe_flag(FType::Recklessness, false);
                 }

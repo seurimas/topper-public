@@ -646,7 +646,7 @@ pub fn handle_combat_action(
                     );
                 }
             } else if combat_action.annotation.eq_ignore_ascii_case("failure") {
-                for_agent(agent_states, &combat_action.target, &move |me| {
+                for_agent(agent_states, &combat_action.caster, &move |me| {
                     me.observe_flag(FType::Echoes, false);
                 });
             } else {

@@ -35,6 +35,7 @@ pub struct AgentState {
     pub siderealist_board: SiderealistBoard,
     pub room_id: i64,
     pub elevation: Elevation,
+    pub persuasion_state: PersuasionState,
 }
 
 // True = Aeon = Pause cooldowns.
@@ -119,6 +120,9 @@ impl BaseAgentState for AgentState {
         }
         if self.is(FType::WritheWeb) && self.balanced(BType::WritheWeb) {
             self.set_flag(FType::WritheWeb, false);
+        }
+        if self.is(FType::Marked) && self.balanced(BType::Marked) {
+            self.set_flag(FType::Marked, false);
         }
         // TODO: Add a myself/other player flag?
         if !self.balanced(BType::Boar) && self.get_max_stat(SType::Health) == 100 {
@@ -207,6 +211,18 @@ impl AgentState {
             FType::RightLegAmputated => self.limb_damage.amputated(LType::RightLegDamage),
             FType::LeftArmAmputated => self.limb_damage.amputated(LType::LeftArmDamage),
             FType::RightArmAmputated => self.limb_damage.amputated(LType::RightArmDamage),
+            FType::Conflicted
+            | FType::Confounded
+            | FType::Engrossed
+            | FType::Entrenched
+            | FType::Fatigued
+            | FType::Pressured
+            | FType::LimitedAppeals
+            | FType::Slandered
+            | FType::Revelation
+            | FType::Gravitas
+            | FType::Influence
+            | FType::Conviction => self.persuasion_state.is(flag),
             _ => {
                 if flag.is_mirror() {
                     self.flags.is_flag_set(flag.normalize())
@@ -276,6 +292,9 @@ impl AgentState {
     pub fn set_flag(&mut self, flag: FType, value: bool) {
         if !value {
             self.hidden_state.unhide(flag);
+        }
+        if flag == FType::Asleep && value {
+            self.clear_channel();
         }
         match flag {
             FType::Acid => {
@@ -355,6 +374,18 @@ impl AgentState {
             | FType::LeftArmAmputated
             | FType::RightLegAmputated
             | FType::RightArmAmputated => {}
+            FType::Conflicted
+            | FType::Confounded
+            | FType::Engrossed
+            | FType::Entrenched
+            | FType::Fatigued
+            | FType::Pressured
+            | FType::LimitedAppeals
+            | FType::Slandered
+            | FType::Revelation
+            | FType::Gravitas
+            | FType::Influence
+            | FType::Conviction => self.persuasion_state.set(flag, value),
             _ => self.flags.set_flag(flag, value),
         }
         if flag == FType::Rebounding {
@@ -377,6 +408,9 @@ impl AgentState {
         }
         if value && flag == FType::WritheWeb {
             self.set_balance(BType::WritheWeb, 3.0);
+        }
+        if value && flag == FType::Marked {
+            self.set_balance(BType::Marked, 30.0);
         }
         match flag {
             FType::Zenith => {
@@ -1008,6 +1042,10 @@ impl AgentState {
             }
         }
         found
+    }
+
+    pub fn clear_channel(&mut self) {
+        self.channel_state = ChannelState::Inactive;
     }
 
     pub fn set_channel(&mut self, channel_type: ChannelType, time: f32) {

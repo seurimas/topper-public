@@ -617,6 +617,12 @@ pub fn handle_combat_action(
                 }
                 Ok(())
             }
+            "Tumbling" => {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.set_channel(ChannelType::Tumbling, 4.);
+                });
+                Ok(())
+            }
             _ => Ok(()),
         },
         "Tattoos" => match combat_action.skill.as_ref() {
@@ -843,6 +849,13 @@ pub fn handle_combat_action(
                 for_agent(agent_states, &combat_action.caster, &|you| {
                     you.toggle_flag(FType::Fallen, true);
                     you.observe_flag(FType::Stupidity, true);
+                });
+                Ok(())
+            }
+            "hallucinations" => {
+                for_agent(agent_states, &combat_action.caster, &|you| {
+                    you.toggle_flag(FType::Fallen, true);
+                    you.observe_flag(FType::Hallucinations, true);
                 });
                 Ok(())
             }

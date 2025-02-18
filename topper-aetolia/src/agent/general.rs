@@ -183,6 +183,7 @@ pub enum BType {
     // Timers
     // Disabled,
     Hypnosis,
+    Marked,
     Fangbarrier,
     Rebounding,
     Void,
@@ -549,6 +550,7 @@ pub enum FType {
     NumbedSkin,
     MentalFatigue,
     Thorns,
+    Marked,
 
     // Zealot Uncurable
     InfernalSeal,
@@ -655,6 +657,32 @@ pub enum FType {
     // Mirrored affs
     Remorse,
     Contrition,
+
+    // Firstaid flags
+    FirstaidPredictAnyLimb,
+    FirstaidPredictArms,
+    FirstaidPredictLegs,
+    FirstaidFocusMuddled,
+    PreRestoreHead,
+    PreRestoreTorso,
+    PreRestoreLeftArm,
+    PreRestoreRightArm,
+    PreRestoreLeftLeg,
+    PreRestoreRightLeg,
+
+    // Persuasion
+    Conflicted,
+    Confounded,
+    Engrossed,
+    Entrenched,
+    Fatigued,
+    Pressured,
+    LimitedAppeals,
+    Slandered,
+    Revelation,
+    Gravitas,
+    Influence,
+    Conviction,
 }
 
 lazy_static! {
@@ -750,6 +778,22 @@ impl FType {
         self > &FType::TIMED && self < &FType::FULL
     }
 
+    pub fn is_controller(&self) -> bool {
+        match self {
+            FType::FirstaidPredictAnyLimb
+            | FType::FirstaidPredictArms
+            | FType::FirstaidPredictLegs
+            | FType::FirstaidFocusMuddled
+            | FType::PreRestoreHead
+            | FType::PreRestoreTorso
+            | FType::PreRestoreLeftArm
+            | FType::PreRestoreRightArm
+            | FType::PreRestoreLeftLeg
+            | FType::PreRestoreRightLeg => true,
+            _ => false,
+        }
+    }
+
     pub fn default_time(&self) -> f32 {
         match self {
             FType::Blackout => 3.0,
@@ -829,6 +873,9 @@ impl FlagSet {
             self.get_counter(flag) > 0
         } else if flag.is_timed() {
             self.get_timer(flag).is_active()
+        } else if flag.is_controller() {
+            // Ignore controller flags.
+            false
         } else {
             self.simple[flag as usize]
         }
@@ -845,6 +892,9 @@ impl FlagSet {
             } else {
                 0
             }
+        } else if flag.is_controller() {
+            // Ignore controller flags.
+            0
         } else {
             if self.simple[flag as usize] {
                 1
@@ -870,6 +920,8 @@ impl FlagSet {
             } else {
                 Timer::default()
             };
+        } else if flag.is_controller() {
+            // Ignore controller flags.
         } else {
             self.simple[flag as usize] = value;
         }
@@ -886,6 +938,8 @@ impl FlagSet {
             } else {
                 Timer::default()
             };
+        } else if flag.is_controller() {
+            // Ignore controller flags.
         } else if flag != FType::Fleshbane {
             self.simple[flag as usize] = value > 0;
         }

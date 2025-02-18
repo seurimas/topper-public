@@ -4,7 +4,7 @@ use serde::Deserialize;
 
 use crate::timeline::AetTimelineState;
 
-use super::{AetNonAgent, AetTimelineRoomExt};
+use super::{AetNonAgent, AetTimelineRoomExt, PersuasionStatus};
 
 #[derive(Debug, Deserialize, PartialEq, Clone, Copy)]
 pub enum EvalStatus {
@@ -24,6 +24,7 @@ pub struct Denizen {
     pub full_name: String,
     pub status: EvalStatus,
     pub aggroed: bool,
+    pub persuasion_status: PersuasionStatus,
     pub tags: HashSet<String>,
 }
 
@@ -51,7 +52,7 @@ pub trait AetTimelineDenizenExt {
 
     fn observe_denizen_out_of_room(&mut self, denizen_id: i64, room_id: i64);
 
-    fn observe_denizen_in_room(&mut self, denizen_id: i64, room_id: i64);
+    fn observe_denizen_in_room(&mut self, denizen_id: i64, room_id: i64, convinced: Option<bool>);
 
     fn check_denizen<R>(&self, denizen_id: i64, predicate: &Fn(&Denizen) -> R) -> Option<R>;
 
@@ -94,6 +95,7 @@ impl AetTimelineDenizenExt for AetTimelineState {
                     room_id,
                     status: status.unwrap_or(EvalStatus::Uninjured),
                     aggroed: false,
+                    persuasion_status: PersuasionStatus::Unscrutinised,
                     tags: HashSet::new(),
                 }),
             );
@@ -127,7 +129,7 @@ impl AetTimelineDenizenExt for AetTimelineState {
         }
     }
 
-    fn observe_denizen_in_room(&mut self, denizen_id: i64, room_id: i64) {
+    fn observe_denizen_in_room(&mut self, denizen_id: i64, room_id: i64, convinced: Option<bool>) {
         let previous_room_id = self.check_denizen(denizen_id, &|denizen| denizen.room_id);
         if let Some(previous_room_id) = previous_room_id {
             self.for_room(previous_room_id, &|mut room| {
@@ -136,6 +138,11 @@ impl AetTimelineDenizenExt for AetTimelineState {
         }
         self.for_denizen(denizen_id, &|mut denizen| {
             denizen.room_id = room_id;
+            if let Some(convinced) = convinced {
+                if convinced {
+                    denizen.persuasion_status = PersuasionStatus::Convinced;
+                }
+            }
         });
         self.for_room(room_id, &|mut room| {
             room.denizens.insert(denizen_id);

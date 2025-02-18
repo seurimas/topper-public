@@ -1,6 +1,8 @@
 pub mod denizen;
+pub mod persuasion;
 pub mod rooms;
 pub use denizen::*;
+pub use persuasion::*;
 pub use rooms::*;
 use serde::Deserialize;
 use topper_core::timeline::NonAgentState;

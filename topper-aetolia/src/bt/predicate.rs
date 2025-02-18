@@ -78,7 +78,9 @@ pub enum AetPredicate {
     AffCountUnder(AetTarget, usize, Vec<FType>),
     RandomCuresOver(AetTarget, usize),
     AffStacksOver(AetTarget, usize, FType),
+    IsProne(AetTarget),
     // Limbs
+    IsRestoringAny(AetTarget),
     IsRestoring(AetTarget, LimbDescriptor),
     CanBreak(AetTarget, LimbDescriptor, f32),
     CanMangled(AetTarget, LimbDescriptor, f32),
@@ -300,6 +302,22 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::AffStacksOver(target, min_stacks, aff) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.get_count(*aff) >= *min_stacks as u8 {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::IsProne(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.is_prone() {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::IsRestoringAny(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.get_restoring().is_some() {
                         return UnpoweredFunctionState::Complete;
                     }
                 }

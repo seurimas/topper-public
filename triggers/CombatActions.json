@@ -525,6 +525,48 @@
     "observation_name": "Proc"
   },
   {
+    "regex": "^(\\w+) leaps up in what is apparently an attempt at a graceful swan dive. .* smacks headfirst into the solid ground.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Aff"
+      },
+      {
+        "Literal": "hallucinations"
+      },
+      {
+        "Literal": "dive"
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
+    "regex": "^(\\w+) begins to tumble towards the (\\w+).$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Survival"
+      },
+      {
+        "Literal": "Tumbling"
+      },
+      {
+        "GroupAsTarget": 2
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
     "regex": "^(\\w+)'s head droops as (.*) struggles? to remain awake.$",
     "args": [
       {
