@@ -154,6 +154,12 @@ pub fn aet_observation_creator(
             intelligence: arguments.get(0).unwrap().parse().unwrap_or_default(),
             constitution: arguments.get(1).unwrap().parse().unwrap_or_default(),
         },
+        "Scrutinise" => AetObservation::Scrutinise {
+            who: arguments.get(0).unwrap().to_string(),
+            personality: arguments.get(1).unwrap().parse().unwrap_or_default(),
+            resolve: arguments.get(2).unwrap().parse().unwrap_or_default(),
+            max_resolve: arguments.get(3).unwrap().parse().unwrap_or_default(),
+        },
         _ => AetObservation::enum_from_args(observation_name, arguments),
     }
 }

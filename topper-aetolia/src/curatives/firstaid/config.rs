@@ -43,8 +43,10 @@ lazy_static! {
     static ref USE_ANABIOTIC: Regex =
         Regex::new(r"Using Anabiotic:\s+ON \(H:(\d+)%\) \(M:(\d+)%\)").unwrap();
     static ref STOP_MANA_BELOW: Regex = Regex::new(r"Stop Mana Below:\s+ON \((\d+)%\)").unwrap();
-    static ref USE_TREE: Regex = Regex::new(r"Tree Curing:\s+(ON|OFF)").unwrap();
-    static ref USE_FOCUS: Regex = Regex::new(r"Focus Curing:\s+(ON|OFF)").unwrap();
+    static ref USE_TREE: Regex =
+        Regex::new(r"Tree Curing:\s+(ON|OFF)(| \(Aff: (\d+)\))\s*$").unwrap();
+    static ref USE_FOCUS: Regex =
+        Regex::new(r"Focus Curing:\s+(ON|OFF)(| \(Aff: (\d+)\))\s*$").unwrap();
     static ref CLOTTING: Regex =
         Regex::new(r"Clotting:\s+(ON|SAFE) \(At: (\d+)\) \(M:(\d+)%\)").unwrap();
     static ref CLOTTING_OFF: Regex = Regex::new(r"Clotting:\s+OFF").unwrap();
@@ -72,8 +74,16 @@ lazy_static! {
         Regex::new(r"First Aid will no longer use mana-consuming commands when your mana falls below (\d+)%.").unwrap();
     static ref SET_USE_TREE: Regex =
         Regex::new(r"First Aid will (now utilize|no longer utilize) the tree of life tattoo in its curing.").unwrap();
+    static ref SET_USE_TREE_EAGERLY: Regex =
+        Regex::new(r"You will try to use the tree tattoo before using a primary curing method, such as consuming a pill, if possible.").unwrap();
+    static ref SET_USE_TREE_THRESHOLD: Regex =
+        Regex::new(r"You will only use the tree tattoo if you have at least (\d+) random-curable affliction\(s\).").unwrap();
     static ref SET_USE_FOCUS: Regex =
         Regex::new(r"First Aid will (now utilize|no longer utilize) the focusing ability in its curing.").unwrap();
+    static ref SET_USE_FOCUS_EAGERLY: Regex =
+        Regex::new(r"You will try to use focus before using a primary curing method, such as consuming a pill, if possible.").unwrap();
+    static ref SET_USE_FOCUS_THRESHOLD: Regex =
+        Regex::new(r"You will only use focus if you have at least (\d+) curable mental affliction\(s\).").unwrap();
     static ref SET_USE_INSOMNIA: Regex =
         Regex::new(r"First Aid will (now attempt to use|no longer attempt to use) the Insomnia skill (instead of a kawhe pill|and will eat a kawhe pill).").unwrap();
     static ref SET_USE_CLOTTING: Regex =
@@ -143,7 +153,9 @@ pub struct FirstAidConfig {
     // Not managed: Precache
     // Not managed: auto stand/wake
     use_tree: bool,
+    tree_count: i32,
     use_focus: bool,
+    focus_count: i32,
     use_insomnia: bool,
 
     use_clotting: ClottingType,
@@ -174,7 +186,9 @@ pub enum FirstAidSetting {
     StopManaBelowPercent(i32),
     UseAnabiotic(bool),
     UseTree(bool),
+    TreeCount(i32),
     UseFocus(bool),
+    FocusCount(i32),
     UseInsomnia(bool),
     UseClotting(ClottingType),
     ClotAbovePercentMana(i32),
@@ -293,10 +307,20 @@ impl FirstAidConfig {
                 self.use_tree = b;
                 FirstAidSetting::UseTree(previous)
             }
+            FirstAidSetting::TreeCount(count) => {
+                let previous = self.tree_count;
+                self.tree_count = count;
+                FirstAidSetting::TreeCount(previous)
+            }
             FirstAidSetting::UseFocus(b) => {
                 let previous = self.use_focus;
                 self.use_focus = b;
                 FirstAidSetting::UseFocus(previous)
+            }
+            FirstAidSetting::FocusCount(count) => {
+                let previous = self.focus_count;
+                self.focus_count = count;
+                FirstAidSetting::FocusCount(previous)
             }
             FirstAidSetting::UseInsomnia(b) => {
                 let previous = self.use_insomnia;
@@ -391,8 +415,14 @@ impl FirstAidSetting {
             FirstAidSetting::UseTree(b) => {
                 format!("firstaid use tree {}", if *b { "on" } else { "off" })
             }
+            FirstAidSetting::TreeCount(c) => {
+                format!("firstaid tree count {}", c)
+            }
             FirstAidSetting::UseFocus(b) => {
                 format!("firstaid use focus {}", if *b { "on" } else { "off" })
+            }
+            FirstAidSetting::FocusCount(c) => {
+                format!("firstaid focus count {}", c)
             }
             FirstAidSetting::UseInsomnia(b) => {
                 format!("firstaid use insomnia {}", if *b { "on" } else { "off" })
@@ -466,9 +496,21 @@ impl FirstAidSetting {
             )];
         }
         if let Some(caps) = USE_TREE.captures(line) {
+            if let Some(count) = caps.get(3).and_then(|cap| cap.as_str().parse().ok()) {
+                return vec![
+                    FirstAidSetting::UseTree(&caps[1] == "ON"),
+                    FirstAidSetting::TreeCount(count),
+                ];
+            }
             return vec![FirstAidSetting::UseTree(&caps[1] == "ON")];
         }
         if let Some(caps) = USE_FOCUS.captures(line) {
+            if let Some(count) = caps.get(3).and_then(|cap| cap.as_str().parse().ok()) {
+                return vec![
+                    FirstAidSetting::UseFocus(&caps[1] == "ON"),
+                    FirstAidSetting::FocusCount(count),
+                ];
+            }
             return vec![FirstAidSetting::UseFocus(&caps[1] == "ON")];
         }
         if let Some(caps) = CLOTTING.captures(line) {
@@ -513,7 +555,11 @@ impl FirstAidSetting {
             || SET_USE_ANABIOTIC.is_match(line)
             || SET_STOP_MANA_BELOW.is_match(line)
             || SET_USE_TREE.is_match(line)
+            || SET_USE_TREE_EAGERLY.is_match(line)
+            || SET_USE_TREE_THRESHOLD.is_match(line)
             || SET_USE_FOCUS.is_match(line)
+            || SET_USE_FOCUS_EAGERLY.is_match(line)
+            || SET_USE_FOCUS_THRESHOLD.is_match(line)
             || SET_USE_INSOMNIA.is_match(line)
             || SET_USE_CLOTTING.is_match(line)
             || SET_CLOTTING_MANA.is_match(line)
@@ -589,8 +635,20 @@ impl FirstAidSetting {
         if SET_USE_TREE.is_match(line) {
             return vec![FirstAidSetting::UseTree(line.contains("now utilize"))];
         }
+        if SET_USE_TREE_EAGERLY.is_match(line) {
+            return vec![FirstAidSetting::TreeCount(0)];
+        }
+        if let Some(caps) = SET_USE_TREE_THRESHOLD.captures(line) {
+            return vec![FirstAidSetting::TreeCount(caps[1].parse().unwrap())];
+        }
         if SET_USE_FOCUS.is_match(line) {
             return vec![FirstAidSetting::UseFocus(line.contains("now utilize"))];
+        }
+        if SET_USE_FOCUS_EAGERLY.is_match(line) {
+            return vec![FirstAidSetting::FocusCount(0)];
+        }
+        if let Some(caps) = SET_USE_FOCUS_THRESHOLD.captures(line) {
+            return vec![FirstAidSetting::FocusCount(caps[1].parse().unwrap())];
         }
         if SET_USE_INSOMNIA.is_match(line) {
             return vec![FirstAidSetting::UseInsomnia(
@@ -792,16 +850,52 @@ mod firstaid_tests {
 
     #[test]
     fn test_tree() {
-        let line = "Tree Curing:        ON";
+        let line = "Tree Curing:        ON (Aff: 0)";
         let settings = FirstAidSetting::get_setting_from_line(line);
-        assert_eq!(settings, vec![FirstAidSetting::UseTree(true)]);
+        assert_eq!(
+            settings,
+            vec![
+                FirstAidSetting::UseTree(true),
+                FirstAidSetting::TreeCount(0)
+            ]
+        );
+        let line = "Tree Curing:        OFF";
+        let settings = FirstAidSetting::get_setting_from_line(line);
+        assert_eq!(settings, vec![FirstAidSetting::UseTree(false)]);
+        let line = "Tree Curing:        ON (Aff: 1)";
+        let settings = FirstAidSetting::get_setting_from_line(line);
+        assert_eq!(
+            settings,
+            vec![
+                FirstAidSetting::UseTree(true),
+                FirstAidSetting::TreeCount(1)
+            ]
+        );
     }
 
     #[test]
     fn test_focus() {
-        let line = "Focus Curing:       ON";
+        let line = "Focus Curing:       ON (Aff: 0)";
         let settings = FirstAidSetting::get_setting_from_line(line);
-        assert_eq!(settings, vec![FirstAidSetting::UseFocus(true)]);
+        assert_eq!(
+            settings,
+            vec![
+                FirstAidSetting::UseFocus(true),
+                FirstAidSetting::FocusCount(0)
+            ]
+        );
+        let line = "Focus Curing:       OFF";
+        let settings = FirstAidSetting::get_setting_from_line(line);
+        assert_eq!(settings, vec![FirstAidSetting::UseFocus(false)]);
+        let line = "Focus Curing:       ON (Aff: 1)";
+        let settings = FirstAidSetting::get_setting_from_line(line);
+        assert_eq!(
+            settings,
+            vec![
+                FirstAidSetting::UseFocus(true),
+                FirstAidSetting::FocusCount(1)
+            ]
+        );
     }
 
     #[test]
@@ -818,6 +912,23 @@ mod firstaid_tests {
         let line = "First Aid will no longer utilize the focusing ability in its curing.";
         let settings = FirstAidSetting::get_from_line(line);
         assert_eq!(settings, vec![FirstAidSetting::UseFocus(false)]);
+    }
+
+    #[test]
+    fn test_toggle_tree_focus_threshold() {
+        let line = "You will try to use focus before using a primary curing method, such as consuming a pill, if possible.";
+        let settings = FirstAidSetting::get_from_line(line);
+        assert_eq!(settings, vec![FirstAidSetting::FocusCount(0)]);
+        let line = "You will only use focus if you have at least 1 curable mental affliction(s).";
+        let settings = FirstAidSetting::get_from_line(line);
+        assert_eq!(settings, vec![FirstAidSetting::FocusCount(1)]);
+        let line = "You will try to use the tree tattoo before using a primary curing method, such as consuming a pill, if possible.";
+        let settings = FirstAidSetting::get_from_line(line);
+        assert_eq!(settings, vec![FirstAidSetting::TreeCount(0)]);
+        let line =
+            "You will only use the tree tattoo if you have at least 1 random-curable affliction(s).";
+        let settings = FirstAidSetting::get_from_line(line);
+        assert_eq!(settings, vec![FirstAidSetting::TreeCount(1)]);
     }
 
     #[test]

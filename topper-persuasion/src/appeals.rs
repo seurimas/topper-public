@@ -1,5 +1,6 @@
+use std::str::FromStr;
+
 use serde::Deserialize;
-use topper_core::timeline::CType;
 
 use crate::agent::PersuasionState;
 
@@ -33,6 +34,18 @@ pub enum Appeals {
     Provocation,  // Big, but risky
 }
 
+impl FromStr for Appeals {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Some(appeal) = Appeals::from_name(s) {
+            Ok(appeal)
+        } else {
+            Err(format!("Unknown appeal: {}", s))
+        }
+    }
+}
+
 impl Appeals {
     pub fn from_name(name: &str) -> Option<Appeals> {
         match name.to_ascii_lowercase().as_str() {
@@ -51,6 +64,24 @@ impl Appeals {
             _ => None,
         }
     }
+
+    pub fn to_name(&self) -> &'static str {
+        match self {
+            Appeals::Authority => "authority",
+            Appeals::Morality => "morality",
+            Appeals::Reputation => "reputation",
+            Appeals::Tradition => "tradition",
+            Appeals::Evidence => "evidence",
+            Appeals::Reason => "reason",
+            Appeals::Analogy => "analogy",
+            Appeals::Causality => "causality",
+            Appeals::Intimidation => "intimidation",
+            Appeals::Reassurance => "reassurance",
+            Appeals::Inspiration => "inspiration",
+            Appeals::Provocation => "provocation",
+        }
+    }
+
     pub fn appeal_type(&self) -> AppealType {
         if self.is_ethos() {
             AppealType::Ethos
@@ -89,20 +120,37 @@ impl Appeals {
 }
 
 impl Appeals {
-    pub fn base_speed(&self) -> CType {
+    pub fn base_speed(&self) -> f32 {
         match self {
-            Appeals::Authority => 258,
-            Appeals::Morality => 280,
-            Appeals::Reputation => 258,
-            Appeals::Tradition => 387,
-            Appeals::Evidence => 280,
-            Appeals::Reason => 172,
-            Appeals::Analogy => 280,
-            Appeals::Causality => 300,
-            Appeals::Intimidation => 258,
-            Appeals::Reassurance => 237,
-            Appeals::Inspiration => 258,
-            Appeals::Provocation => 300,
+            Appeals::Authority => 2.58,
+            Appeals::Morality => 2.80,
+            Appeals::Reputation => 2.58,
+            Appeals::Tradition => 3.87,
+            Appeals::Evidence => 2.80,
+            Appeals::Reason => 1.72,
+            Appeals::Analogy => 2.80,
+            Appeals::Causality => 3.00,
+            Appeals::Intimidation => 2.58,
+            Appeals::Reassurance => 2.37,
+            Appeals::Inspiration => 2.58,
+            Appeals::Provocation => 3.00,
+        }
+    }
+
+    pub fn base_cost(&self) -> i32 {
+        match self {
+            Appeals::Authority => 196,
+            Appeals::Morality => 83,
+            Appeals::Reputation => 167,
+            Appeals::Tradition => 392,
+            Appeals::Evidence => 196,
+            Appeals::Reason => 10,
+            Appeals::Analogy => 10,
+            Appeals::Causality => 10,
+            Appeals::Intimidation => 10,
+            Appeals::Reassurance => 10,
+            Appeals::Inspiration => 10,
+            Appeals::Provocation => 10,
         }
     }
 
@@ -118,9 +166,9 @@ impl Appeals {
         } else {
             player_stats.str.map(|str| str * 10 + 250).unwrap_or(400)
         };
-        let personality = if personality.is_weak_to(self) {
+        let personality = if personality.is_weak_to(*self) {
             base_damage + 100
-        } else if personality.is_strong_to(self) {
+        } else if personality.is_strong_to(*self) {
             base_damage - 100
         } else {
             base_damage

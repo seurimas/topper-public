@@ -7,6 +7,7 @@ use crate::curatives::{
 };
 use crate::db::AetDatabaseModule;
 use crate::non_agent::AetNonAgent;
+use crate::non_agent::Personality;
 use crate::types::*;
 use log::warn;
 use regex::Regex;
@@ -240,8 +241,19 @@ pub enum AetObservation {
         intelligence: i32,
         constitution: i32,
     },
-    PersuasionDraw(String, String, String),
+    PersuasionDraw(String, String, String, String),
+    PersuasionResult(String, String),
     PersuasionDiscard(String, String),
+    ResolveAffect(String, String),
+    AcumenLost(String),
+    #[skip_args]
+    Scrutinise {
+        who: String,
+        personality: Personality,
+        resolve: i32,
+        max_resolve: i32,
+    },
+    Persuaded(String),
 }
 
 pub trait AetTimelineStateTrait {

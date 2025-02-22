@@ -3,7 +3,10 @@ use topper_core::timeline::*;
 use crate::{
     classes::Class,
     db::*,
-    non_agent::{AetTimelineDenizenExt, AetTimelineRoomExt, Direction, Room},
+    non_agent::{
+        AetTimelineDenizenExt, AetTimelineRoomExt, Direction, PersuasionStatus, Room,
+        CONVINCED_TAG, MOB_TAG,
+    },
     types::*,
 };
 
@@ -321,7 +324,8 @@ fn handle_item_added(
                     None
                 };
                 if let Some(room_id) = in_room {
-                    timeline.add_denizen(id, "".to_string(), room_id, name.to_string(), None);
+                    timeline.add_denizen(id, room_id, name.to_string(), None);
+                    handle_item_attribs(id, timeline, item);
                 }
                 timeline.for_all_agents(&|agent| {
                     if agent.class_state.get_normalized_class() == Some(Class::Bard) {
@@ -379,6 +383,7 @@ fn handle_item_list(
         None
     };
     if let Some(room_id) = in_room {
+        // Clear the room before adding the new items.
         for denizen in timeline.find_denizens_in_room(room_id) {
             timeline.observe_denizen_out_of_room(denizen, room_id);
         }
@@ -392,9 +397,32 @@ fn handle_item_list(
                 item.get("name").and_then(|name| name.as_str()),
             ) {
                 if let Some(room_id) = in_room {
-                    timeline.add_denizen(id, "".to_string(), room_id, name.to_string(), None);
+                    timeline.add_denizen(id, room_id, name.to_string(), None);
+                    handle_item_attribs(id, timeline, item);
                 }
+            } else {
+                println!("Item added without name or id");
             }
         }
+    } else {
+        println!("No items found in list");
+    }
+}
+
+fn handle_item_attribs(
+    id: i64,
+    timeline: &mut TimelineState<crate::types::AgentState, crate::non_agent::AetNonAgent>,
+    item: &serde_json::Value,
+) {
+    if let Some(attribs) = item.get("attrib").and_then(|id| id.as_str()) {
+        timeline.for_denizen(id, &move |denizen| {
+            if attribs.contains('m') {
+                denizen.tags.insert(MOB_TAG.to_string());
+            }
+            if attribs.contains('C') {
+                denizen.tags.insert(CONVINCED_TAG.to_string());
+                denizen.persuasion_status = PersuasionStatus::Convinced;
+            }
+        });
     }
 }

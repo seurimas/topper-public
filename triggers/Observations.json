@@ -685,7 +685,7 @@
     "observation_name": "StatsOne"
   },
   {
-    "regex": "^\\| Intelligence\\s+: (\\d+).*Constitution\\s+: (\\d+).*|$",
+    "regex": "^\\| Intelligence\\s+: (\\d+).*Constitution\\s+: (\\d+).*\\|$",
     "args": [
       {
         "Group": 1
@@ -719,12 +719,15 @@
       },
       {
         "Literal": ""
+      },
+      {
+        "Literal": ""
       }
     ],
     "observation_name": "PersuasionDraw"
   },
   {
-    "regex": "^(You) draw upon your repertoire, devising a arguments that appeals to (\\w+) and (\\w+).$",
+    "regex": "^(You) draw upon your repertoire, devising arguments that appeal to (\\w+) and (\\w+).$",
     "args": [
       {
         "GroupAsTarget": 1
@@ -734,8 +737,149 @@
       },
       {
         "Group": 3
+      },
+      {
+        "Literal": ""
       }
     ],
     "observation_name": "PersuasionDraw"
+  },
+  {
+    "regex": "^(You) draw upon your repertoire, devising arguments that appeal to (\\w+), (\\w+), and (\\w+).$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Group": 2
+      },
+      {
+        "Group": 3
+      },
+      {
+        "Group": 4
+      }
+    ],
+    "observation_name": "PersuasionDraw"
+  },
+  {
+    "regex": "^You determine that (.*) has an? (\\w+) personality \\(\\+\\w+ -\\w+\\) and (\\d+) / \\d+ resolve remaining.$",
+    "args": [
+      {
+        "Group": 1
+      },
+      {
+        "Group": 2
+      },
+      {
+        "Group": 3
+      },
+      {
+        "Group": 4
+      }
+    ],
+    "observation_name": "Scrutinise"
+  },
+  {
+    "regex": "^.* is too busy for that kind of persuasion.$",
+    "args": [
+      {
+        "Literal": "Unique"
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": "10000"
+      },
+      {
+        "Literal": "10000"
+      }
+    ],
+    "observation_name": "Scrutinise"
+  },
+  {
+    "regex": "^(You can hardly persuade a mindless creature.|.* is not interested in your persuasion.|.* is too loyal to someone else to be persuaded.|.* has no gold to give.|There are too many of them to persuade.)$",
+    "args": [
+      {
+        "Literal": "NonSentient"
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Scrutinise"
+  },
+  {
+    "regex": "^(She|He|It|They|The \\w+) (is|are) currently persuaded for .*.$",
+    "args": [
+      {
+        "Group": 3
+      }
+    ],
+    "observation_name": "Persuaded"
+  },
+  {
+    "regex": "^(You) have successfully persuaded .*.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Success"
+      }
+    ],
+    "observation_name": "PersuasionResult"
+  },
+  {
+    "regex": "^(You) have failed to persuade .*$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Failure"
+      }
+    ],
+    "observation_name": "PersuasionResult"
+  },
+  {
+    "regex": "^(You) are not currently persuading anyone.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Failure"
+      }
+    ],
+    "observation_name": "PersuasionResult"
+  },
+  {
+    "regex": "^Resolve affect: (\\d+), (ethos|logos|pathos)$",
+    "args": [
+      {
+        "Group": 1
+      },
+      {
+        "Group": 2
+      }
+    ],
+    "observation_name": "ResolveAffect"
+  },
+  {
+    "regex": "^Acumen Lost: (\\d+)$",
+    "args": [
+      {
+        "Group": 1
+      }
+    ],
+    "observation_name": "AcumenLost"
   }
 ]

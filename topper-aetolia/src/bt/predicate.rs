@@ -69,6 +69,7 @@ impl AetTarget {
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum AetPredicate {
+    Persuading(AetTarget),
     // Affs
     AllAffs(AetTarget, Vec<FType>),
     SomeAffs(AetTarget, Vec<FType>),
@@ -235,6 +236,14 @@ impl UnpoweredFunction for AetPredicate {
         controller: &mut Self::Controller,
     ) -> UnpoweredFunctionState {
         match self {
+            AetPredicate::Persuading(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.persuasion_state.get_target().is_some() {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
             AetPredicate::AllAffs(target, affs) => {
                 if all_affs(target, model, controller, affs) {
                     UnpoweredFunctionState::Complete

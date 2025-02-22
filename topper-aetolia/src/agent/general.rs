@@ -7,6 +7,7 @@ use std::ascii::AsciiExt;
 use std::convert::{TryFrom, TryInto};
 use std::fmt;
 use topper_core::timeline::BaseAgentState;
+use topper_persuasion::PersuasionAff;
 
 #[derive(Deserialize, Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Timer {
@@ -683,6 +684,7 @@ pub enum FType {
     Gravitas,
     Influence,
     Conviction,
+    Tradition,
 }
 
 lazy_static! {
@@ -706,6 +708,25 @@ lazy_static! {
 }
 
 impl FType {
+    pub fn to_persuasion_aff(&self) -> Option<PersuasionAff> {
+        match self {
+            FType::Conflicted => Some(PersuasionAff::Conflicted),
+            FType::Confounded => Some(PersuasionAff::Confounded),
+            FType::Engrossed => Some(PersuasionAff::Engrossed),
+            FType::Entrenched => Some(PersuasionAff::Entrenched),
+            FType::Fatigued => Some(PersuasionAff::Fatigued),
+            FType::Pressured => Some(PersuasionAff::Pressured),
+            FType::LimitedAppeals => Some(PersuasionAff::LimitedAppeals),
+            FType::Slandered => Some(PersuasionAff::Slandered),
+            FType::Revelation => Some(PersuasionAff::Revelation),
+            FType::Gravitas => Some(PersuasionAff::Gravitas),
+            FType::Influence => Some(PersuasionAff::Influence),
+            FType::Conviction => Some(PersuasionAff::Conviction),
+            FType::Tradition => Some(PersuasionAff::Tradition),
+            _ => None,
+        }
+    }
+
     pub fn is_affliction(&self) -> bool {
         self >= &FType::Sadness
     }

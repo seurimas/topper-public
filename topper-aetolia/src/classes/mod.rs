@@ -24,7 +24,6 @@ pub mod lords;
 pub mod luminary;
 pub mod mirrors;
 pub mod monk;
-pub mod persuasion;
 pub mod praenomen;
 pub mod predator;
 pub mod sciomancer;
@@ -333,6 +332,7 @@ lazy_static! {
 pub fn handle_sent(command: &String, agent_states: &mut AetTimelineState) {
     infiltrator::handle_sent(command, agent_states);
     siderealist::handle_sent(command, agent_states);
+    crate::non_agent::combat_action::handle_sent(command, agent_states);
     if let Some(captures) = DIAGNOSING.captures(command) {
         let me = agent_states.me.clone();
         let time = agent_states.time;
@@ -480,9 +480,13 @@ pub fn handle_combat_action(
         "Purification" | "Zeal" | "Psionics" => {
             zealot::handle_combat_action(combat_action, agent_states, before, after)
         }
-        "Persuasion" => {
-            persuasion::handle_combat_action(combat_action, agent_states, before, after)
-        }
+        "Persuasion" => crate::non_agent::combat_action::handle_combat_action(
+            combat_action,
+            agent_states,
+            before,
+            after,
+            db,
+        ),
         "Weaponry" => match combat_action.skill.as_ref() {
             "Shatter" => {
                 if combat_action.annotation.eq("start") {

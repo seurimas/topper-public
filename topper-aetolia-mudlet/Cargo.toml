@@ -11,6 +11,7 @@ topper-core = { path = "../topper-core" }
 topper-core-mudlet = { path = "../topper-core-mudlet" }
 topper-aetolia = { path = "../topper-aetolia" }
 topper-derive = { path = "../topper-derive" }
+topper-persuasion = { path = "../topper-persuasion" }
 num_enum = "0.4.2"
 serde = { version = "1.0", features = ["derive"]}
 serde_json = "1.0"

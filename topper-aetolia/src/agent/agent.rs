@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::convert::{TryFrom, TryInto};
 use std::fmt;
 use topper_core::timeline::BaseAgentState;
+use topper_persuasion::PersuasionState;
 
 pub const SHOCK_TIME: f32 = 20.0;
 pub const BURNOUT_TIME: f32 = 20.0;
@@ -222,7 +223,8 @@ impl AgentState {
             | FType::Revelation
             | FType::Gravitas
             | FType::Influence
-            | FType::Conviction => self.persuasion_state.is(flag),
+            | FType::Conviction
+            | FType::Tradition => self.persuasion_state.is(flag.to_persuasion_aff().unwrap()),
             _ => {
                 if flag.is_mirror() {
                     self.flags.is_flag_set(flag.normalize())
@@ -385,7 +387,10 @@ impl AgentState {
             | FType::Revelation
             | FType::Gravitas
             | FType::Influence
-            | FType::Conviction => self.persuasion_state.set(flag, value),
+            | FType::Conviction
+            | FType::Tradition => self
+                .persuasion_state
+                .set(flag.to_persuasion_aff().unwrap(), value),
             _ => self.flags.set_flag(flag, value),
         }
         if flag == FType::Rebounding {

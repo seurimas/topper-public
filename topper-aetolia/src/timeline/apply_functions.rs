@@ -7,7 +7,10 @@ use crate::curatives::{
     ELIXIR_DEFENCES, PILL_CURE_ORDERS, PILL_DEFENCES, SALVE_CURE_ORDERS, SMOKE_CURE_ORDERS,
 };
 use crate::db::AetDatabaseModule;
-use crate::non_agent::{AetNonAgent, AetTimelineRoomExt, Appeals};
+use crate::non_agent::{
+    get_persuasion_target, AetNonAgent, AetTimelineDenizenExt, AetTimelineRoomExt, Appeals,
+    PersuasionStatus,
+};
 use crate::timeline::*;
 use crate::types::*;
 use log::warn;
@@ -600,13 +603,33 @@ pub fn apply_observation(
                 me.persuasion_state.int = Some(*intelligence);
             });
         }
-        AetObservation::PersuasionDraw(who, card_one, card_two) => {
+        AetObservation::PersuasionResult(who, result) => {
+            if let Some(target) = get_persuasion_target(timeline) {
+                timeline.for_denizen(target, &|denizen| {
+                    if result.eq("Failure") {
+                        println!("Failed at {}", denizen.persuasion_status.resolve());
+                        denizen.persuasion_status = PersuasionStatus::Unscrutinised;
+                    } else {
+                        denizen.persuasion_status = PersuasionStatus::Convinced;
+                    }
+                });
+                timeline.for_agent(who, &|me| {
+                    me.persuasion_state.finish_persuasion();
+                });
+            } else {
+                println!("No target found for persuasion!");
+            }
+        }
+        AetObservation::PersuasionDraw(who, card_one, card_two, card_three) => {
             for_agent(timeline, who, &move |me| {
                 if let Some(card_one) = Appeals::from_name(card_one) {
                     me.persuasion_state.drawn(card_one);
                 }
                 if let Some(card_two) = Appeals::from_name(card_two) {
                     me.persuasion_state.drawn(card_two);
+                }
+                if let Some(card_three) = Appeals::from_name(card_three) {
+                    me.persuasion_state.drawn(card_three);
                 }
             });
         }
@@ -616,6 +639,49 @@ pub fn apply_observation(
                     me.persuasion_state.discard(card);
                 }
             });
+        }
+        AetObservation::ResolveAffect(amount, appeal_type) => {
+            let Ok(amount) = amount.parse::<i32>() else {
+                return Err(format!("Could not parse amount: {}", amount));
+            };
+            if let Some(target) = get_persuasion_target(timeline) {
+                timeline.for_denizen(target, &|denizen| {
+                    denizen.persuasion_status.resolve_affect(amount);
+                });
+            } else {
+                println!("No target found for resolve affect!");
+            }
+        }
+        AetObservation::Scrutinise {
+            who,
+            personality,
+            resolve,
+            max_resolve,
+        } => {
+            let convinced = if let Some(AetObservation::Persuaded(already)) = after.get(1) {
+                true
+            } else {
+                false
+            };
+            if let Some(target) = get_persuasion_target(timeline) {
+                timeline.for_denizen(target, &|denizen| {
+                    if convinced {
+                        denizen.persuasion_status = PersuasionStatus::Convinced;
+                    } else if who == "NonSentient" {
+                        denizen.persuasion_status = PersuasionStatus::NonSentient;
+                    } else {
+                        denizen.persuasion_status = PersuasionStatus::Scrutinised {
+                            resolve: *resolve,
+                            max_resolve: *max_resolve,
+                            personality: *personality,
+                            weakened: vec![],
+                            unique: who == "Unique",
+                        };
+                    }
+                });
+            } else {
+                println!("No target found for scrutinise!");
+            }
         }
         _ => {}
     }
