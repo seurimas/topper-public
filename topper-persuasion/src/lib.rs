@@ -6,5 +6,7 @@ mod denizen;
 pub use denizen::*;
 mod appeals;
 pub use appeals::*;
-pub mod persuasion_events;
 pub mod simple_strategy;
+pub mod simulation;
+
+pub mod combinatorics;

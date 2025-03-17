@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::RwLock};
 
 use behavior_bark::unpowered::*;
 
@@ -148,19 +148,60 @@ pub fn get_hypno_stack<'s>(
     strategy: &String,
     db: Option<&impl AetDatabaseModule>,
 ) -> Vec<Hypnosis> {
-    db.and_then(|db| {
-        let stack = get_hypno_stack_name(timeline, target, strategy);
-        if stack == "normal" {
-            None // Default to HARD_HYPNO
-        } else if stack == "class" {
-            if let Some(class) = db.get_class(target) {
-                db.get_hypno_plan(&class.to_string())
-            } else {
-                db.get_hypno_plan(&format!("hypno_{}", stack))
-            }
-        } else {
-            db.get_hypno_plan(&format!("hypno_{}", stack))
+    let stack_name = get_hypno_stack_name(timeline, target, strategy);
+    get_hypno_stack_from_file(&stack_name)
+        .or_else(|| {
+            db.and_then(|db| {
+                if stack_name == "normal" {
+                    None // Default to HARD_HYPNO
+                } else if stack_name == "class" {
+                    if let Some(class) = db.get_class(target) {
+                        db.get_hypno_plan(&class.to_string())
+                    } else {
+                        db.get_hypno_plan(&format!("hypno_{}", stack_name))
+                    }
+                } else {
+                    db.get_hypno_plan(&format!("hypno_{}", stack_name))
+                }
+            })
+        })
+        .unwrap_or(HARD_HYPNO.to_vec())
+}
+
+pub static mut LOAD_HYPNO_STACK_FUNC: Option<fn(&String, &String) -> String> = None;
+
+lazy_static! {
+    pub static ref LOADED_HYPNO_STACKS: RwLock<HashMap<String, Option<Vec<Hypnosis>>>> =
+        { RwLock::new(HashMap::new()) };
+}
+
+pub fn clear_hypnostacks() {
+    let mut stacks = LOADED_HYPNO_STACKS.write().unwrap();
+    stacks.clear();
+}
+
+pub fn get_hypno_stack_from_file(stack_name: &String) -> Option<Vec<Hypnosis>> {
+    {
+        let stacks = LOADED_HYPNO_STACKS.read().unwrap();
+        if let Some(stack) = stacks.get(stack_name) {
+            return stack.clone();
         }
-    })
-    .unwrap_or(HARD_HYPNO.to_vec())
+    }
+    {
+        let mut trees = LOADED_HYPNO_STACKS.write().unwrap();
+        let stack_json =
+            unsafe { LOAD_HYPNO_STACK_FUNC.unwrap()(&"hypnosis".to_string(), stack_name) };
+        println!("Loading {} stack ({})", stack_name, stack_json.len());
+        match serde_json::from_str::<Vec<Hypnosis>>(&stack_json) {
+            Ok(stack_def) => {
+                trees.insert(stack_name.clone(), Some(stack_def.clone()));
+                Some(stack_def)
+            }
+            Err(err) => {
+                println!("Failed to load {}: {:?}", stack_name, err);
+                trees.insert(stack_name.clone(), None);
+                None
+            }
+        }
+    }
 }

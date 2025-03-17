@@ -4,13 +4,13 @@ use serde::*;
 
 use super::*;
 
-pub const GLOBE_AFFS: [FType; 3] = [FType::Dizziness, FType::Confusion, FType::Perplexed];
+pub const GLOBE_AFFS: [FType; 3] = [FType::Dizziness, FType::Confusion, FType::Perplexity];
 pub const RUNEBAND_AFFS: [FType; 7] = [
     FType::Stupidity,
     FType::Paranoia,
     FType::RingingEars,
     FType::Loneliness,
-    FType::Exhausted,
+    FType::Exhaustion,
     FType::Laxity,
     FType::Clumsiness,
 ];
@@ -690,7 +690,7 @@ impl Emotion {
     pub fn get_aff(&self) -> FType {
         match self {
             Emotion::Sadness => FType::Shyness,
-            Emotion::Happiness => FType::Perplexed,
+            Emotion::Happiness => FType::Perplexity,
             Emotion::Surprise => FType::Dizziness,
             Emotion::Anger => FType::Hatred,
             Emotion::Stress => FType::Masochism,

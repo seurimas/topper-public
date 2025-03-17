@@ -168,7 +168,7 @@ pub fn handle_combat_action(
             attack_first_affliction(
                 agent_states,
                 &combat_action.target,
-                vec![FType::Epilepsy, FType::Berserking],
+                vec![FType::Epilepsy, FType::Mania],
                 after,
             );
             for_agent(agent_states, &combat_action.caster, &move |me| {

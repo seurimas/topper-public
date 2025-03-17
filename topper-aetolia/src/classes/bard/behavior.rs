@@ -842,7 +842,7 @@ impl UnpoweredFunction for BardWrapper {
         }
         if let Some(target) = AetTarget::Target.get_target(model, controller) {
             if (get_cure_depth(target, FType::Paresis).cures
-                + get_cure_depth(target, FType::Perplexed).cures)
+                + get_cure_depth(target, FType::Perplexity).cures)
                 > 1
             {
                 if me

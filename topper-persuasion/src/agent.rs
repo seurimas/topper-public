@@ -9,7 +9,7 @@ pub enum RhetoricState {
     OneLeft(AppealType),
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PersuasionState {
     pub max_acumen: i32,
     pub acumen: i32,
@@ -28,6 +28,32 @@ pub struct PersuasionState {
     rhetoric_bonus: Option<AppealType>,
     conflicted_type: Option<AppealType>,
     entrenched_type: Option<AppealType>,
+    prudence_cooldown: i32,
+}
+
+impl Default for PersuasionState {
+    fn default() -> Self {
+        PersuasionState {
+            max_acumen: 5000,
+            acumen: 5000,
+            int: None,
+            wis: None,
+            str: None,
+            last_appeal: None,
+            target: None,
+            appeals_in_hand: vec![],
+            discarded_appeals: vec![],
+            appeals_in_deck: vec![],
+            cyclic: None,
+            flags: [false; 13],
+            influence_stacks: 0,
+            rhetoric_state: RhetoricState::NoRhetoric,
+            rhetoric_bonus: None,
+            conflicted_type: None,
+            entrenched_type: None,
+            prudence_cooldown: 0,
+        }
+    }
 }
 
 impl PersuasionState {
@@ -283,6 +309,10 @@ impl PersuasionState {
     pub fn discard(&mut self, appeal: Appeals) {
         self.discarded_appeals.push(appeal);
         self.appeals_in_hand.retain(|&x| x != appeal);
+    }
+
+    pub fn sip_prudence(&mut self) {
+        self.prudence_cooldown = 650;
     }
 }
 

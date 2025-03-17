@@ -7,9 +7,9 @@ use crate::types::*;
 
 lazy_static! {
     pub static ref CIRCLE_AFFS: Vec<FType> = vec![
-        FType::Merciful,
+        FType::Mercy,
         FType::Masochism,
-        FType::Berserking,
+        FType::Mania,
         FType::Recklessness,
     ];
     pub static ref SQUARE_AFFS: Vec<FType> = vec![
@@ -20,7 +20,7 @@ lazy_static! {
     ];
     pub static ref TRIANGLE_AFFS: Vec<FType> = vec![
         FType::Laxity,
-        FType::LoversEffect,
+        FType::Infatuation,
         FType::Peace,
         FType::Magnanimity,
     ];

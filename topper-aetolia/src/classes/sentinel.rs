@@ -175,7 +175,7 @@ lazy_static! {
             val.insert(*aff, SecondStrike::Stab(venom));
         }
         val.insert(FType::Impatience, SecondStrike::Gouge);
-        val.insert(FType::Heartflutter, SecondStrike::Heartbreaker);
+        val.insert(FType::Arrhythmia, SecondStrike::Heartbreaker);
         val.insert(FType::CrippledThroat, SecondStrike::Slit);
         val
     };
@@ -602,7 +602,7 @@ pub fn handle_combat_action(
             attack_afflictions(
                 agent_states,
                 &combat_action.target,
-                vec![FType::Heartflutter],
+                vec![FType::Arrhythmia],
                 after,
             );
         }
@@ -705,7 +705,7 @@ pub fn handle_combat_action(
                 attack_afflictions(
                     agent_states,
                     &combat_action.target,
-                    vec![FType::Berserking],
+                    vec![FType::Mania],
                     after,
                 );
             }
@@ -754,7 +754,7 @@ lazy_static! {
         FType::Anorexia,
         FType::Stupidity,
         FType::Confusion,
-        FType::Heartflutter,
+        FType::Arrhythmia,
         FType::LeftLegCrippled,
         FType::RightLegCrippled,
         FType::Vomiting,
@@ -781,7 +781,7 @@ fn get_stack<'s>(
         FType::Impatience
         | FType::Epilepsy
         | FType::Laxity
-        | FType::Heartflutter
+        | FType::Arrhythmia
         | FType::Impairment => !you.can_parry(),
         _ => true,
     });
@@ -804,7 +804,7 @@ fn want_spinecut(you: &AgentState) -> bool {
         FType::LeftLegCrippled,
         FType::RightLegCrippled,
         FType::Confusion,
-        FType::Heartflutter,
+        FType::Arrhythmia,
     ]) >= 4
 }
 

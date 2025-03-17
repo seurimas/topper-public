@@ -608,7 +608,7 @@ pub fn handle_performance_action(
             attack_afflictions(
                 agent_states,
                 &combat_action.target,
-                vec![FType::Dizziness, FType::Perplexed, FType::Stun],
+                vec![FType::Dizziness, FType::Perplexity, FType::Stun],
                 after,
             );
             for_agent(
@@ -648,7 +648,7 @@ pub fn handle_performance_action(
                 attack_afflictions(
                     agent_states,
                     &combat_action.caster,
-                    vec![FType::LoversEffect],
+                    vec![FType::Infatuation],
                     after,
                 );
             }
@@ -658,7 +658,7 @@ pub fn handle_performance_action(
                 attack_afflictions(
                     agent_states,
                     &combat_action.caster,
-                    vec![FType::Berserking],
+                    vec![FType::Mania],
                     after,
                 );
             } else {
@@ -998,7 +998,7 @@ pub fn handle_songcalling_action(
             attack_afflictions(
                 agent_states,
                 &combat_action.target,
-                vec![FType::Generosity],
+                vec![FType::Magnanimity],
                 after,
             );
         }

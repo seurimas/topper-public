@@ -73,7 +73,7 @@ pub fn handle_combat_action(
                 attack_afflictions(
                     agent_states,
                     &combat_action.target,
-                    vec![FType::BloodCurse],
+                    vec![FType::Psychosis],
                     after,
                 );
             }
@@ -85,7 +85,7 @@ pub fn handle_combat_action(
                 attack_afflictions(
                     agent_states,
                     &combat_action.target,
-                    vec![FType::BloodPoison],
+                    vec![FType::Sepsis],
                     after,
                 );
             }

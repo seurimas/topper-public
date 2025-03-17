@@ -9,7 +9,7 @@ lazy_static! {
         FType::Vertigo,
         FType::Sensitivity,
         FType::SelfPity,
-        FType::Berserking,
+        FType::Mania,
         FType::Migraine,
     ];
     pub static ref CHASTEN_AFFS: Vec<FType> = vec![

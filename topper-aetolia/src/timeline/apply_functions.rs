@@ -705,7 +705,7 @@ pub fn apply_or_infer_suggestion(
 
 pub fn apply_venom(who: &mut AgentState, venom: &String, relapse: bool) -> Result<(), String> {
     let mut guessed_aff = None;
-    if who.is(FType::ThinBlood) && !relapse {
+    if who.is(FType::Dyscrasia) && !relapse {
         who.push_toxin(venom.clone());
     }
     if venom == "prefarar" && who.is(FType::Deafness) {
@@ -749,13 +749,13 @@ pub fn apply_venom(who: &mut AgentState, venom: &String, relapse: bool) -> Resul
         who.set_flag(FType::Crippled, true);
     } else if (venom == "azu" || venom == "cripple") && who.is(FType::Crippled) {
         // Revenant
-        who.set_flag(FType::PhysicalDisruption, true);
-    } else if (venom == "dirne" || venom == "disrupt") && !who.is(FType::PhysicalDisruption) {
+        who.set_flag(FType::Extravasation, true);
+    } else if (venom == "dirne" || venom == "disrupt") && !who.is(FType::Extravasation) {
         // Revenant
-        who.set_flag(FType::PhysicalDisruption, true);
-    } else if (venom == "dirne" || venom == "disrupt") && who.is(FType::PhysicalDisruption) {
+        who.set_flag(FType::Extravasation, true);
+    } else if (venom == "dirne" || venom == "disrupt") && who.is(FType::Extravasation) {
         // Revenant
-        who.set_flag(FType::MentalDisruption, true);
+        who.set_flag(FType::Delirium, true);
     } else {
         return Err(format!("Could not determine effect of {}", venom));
     }
@@ -983,7 +983,7 @@ pub fn apply_or_infer_relapse(
     who: &mut AgentState,
     after: &Vec<AetObservation>,
 ) -> Option<Vec<AgentState>> {
-    who.observe_flag(FType::ThinBlood, true);
+    who.observe_flag(FType::Dyscrasia, true);
     let mut relapse_count = 1;
     let mut name = "";
     for observation in after.iter() {
@@ -1185,7 +1185,7 @@ pub fn apply_or_infer_cures(
                 AetObservation::Cured(aff_name) => {
                     if let Some(aff) = FType::from_name(&aff_name) {
                         who.toggle_flag(aff, false);
-                        if aff == FType::ThinBlood {
+                        if aff == FType::Dyscrasia {
                             who.clear_relapses();
                         } else if aff == FType::Void {
                             who.set_flag(FType::Weakvoid, true);
@@ -1361,7 +1361,7 @@ pub fn apply_or_infer_cure(
                     } else {
                         let cured = top_aff(who, order.to_vec());
                         remove_in_order(order.to_vec(), who);
-                        if cured == Some(FType::ThinBlood) {
+                        if cured == Some(FType::Dyscrasia) {
                             who.clear_relapses();
                         }
                     }

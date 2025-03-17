@@ -1,10 +1,10 @@
 use std::str::FromStr;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use super::{AppealType, Appeals};
 
-#[derive(Debug, Deserialize, PartialEq, Clone, Copy, Default)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Copy, Default)]
 pub enum Personality {
     #[default]
     Unknown,
@@ -66,6 +66,7 @@ pub enum PersuasionStatus {
         max_resolve: i32,
         personality: Personality,
         weakened: Vec<AppealType>,
+        retort_cooldown: i32,
     },
     Scrutinised {
         resolve: i32,
@@ -94,6 +95,7 @@ impl PersuasionStatus {
                     max_resolve: *max_resolve,
                     personality: *personality,
                     weakened: weakened.clone(),
+                    retort_cooldown: 0,
                 };
             }
             _ => {
@@ -102,6 +104,7 @@ impl PersuasionStatus {
                     max_resolve: 10000,
                     personality: Personality::Unknown,
                     weakened: vec![],
+                    retort_cooldown: 0,
                 };
             }
         }
@@ -164,6 +167,37 @@ impl PersuasionStatus {
             PersuasionStatus::Scrutinised { personality, .. } => *personality,
             PersuasionStatus::Unscrutinised => Personality::Unknown,
             PersuasionStatus::NonSentient => Personality::Unknown,
+        }
+    }
+
+    pub fn retorted(&mut self) {
+        match self {
+            PersuasionStatus::Persuading {
+                retort_cooldown, ..
+            } => {
+                *retort_cooldown = 400;
+            }
+            _ => {}
+        }
+    }
+
+    pub fn evidence(&mut self, appeal: AppealType) {
+        match self {
+            PersuasionStatus::Persuading { weakened, .. } => {
+                weakened.push(appeal);
+            }
+            _ => {}
+        }
+    }
+
+    pub fn wait(&mut self, time: i32) {
+        match self {
+            PersuasionStatus::Persuading {
+                retort_cooldown, ..
+            } => {
+                *retort_cooldown -= time;
+            }
+            _ => {}
         }
     }
 }

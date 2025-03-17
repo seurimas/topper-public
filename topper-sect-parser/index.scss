@@ -1,10 +1,12 @@
 body.outer {
     margin: 0;
 }
+
 iframe {
     box-sizing: border-box;
     width: calc(100% - 480px);
 }
+
 body:not(.outer) {
     background-color: black;
     margin: 0;
@@ -12,10 +14,10 @@ body:not(.outer) {
     position: relative;
 
     span {
-      font-weight: normal !important;
-      white-space: pre-wrap;
-      font-family: Anadale Mono, monospace;
-      font-size: 14px;
+        font-weight: normal !important;
+        white-space: pre-wrap;
+        font-family: Anadale Mono, monospace;
+        font-size: 14px;
     }
 
     .line {
@@ -39,8 +41,8 @@ body:not(.outer) {
     from {
         background-color: white;
     }
-    to {
-    }
+
+    to {}
 }
 
 .battle_stats {
@@ -59,11 +61,12 @@ body:not(.outer) {
         display: flex;
         flex-direction: row;
     }
-    
+
     &--me {
         top: 0;
         bottom: 50%;
     }
+
     &--you {
         top: 50%;
         bottom: 0;
@@ -82,33 +85,36 @@ body:not(.outer) {
         height: 16px;
         line-height: 16px;
         text-align: center;
+
         &--cured {
             background-color: green;
         }
+
         &--afflicted {
             background-color: red;
             color: white;
             opacity: 1;
             animation: flash 0.5s ease-in-out 0s 1 normal;
         }
+
         &--Sadness,
         &--SelfPity,
-        &--Baldness,
-        &--CommitmentFear,
-        &--BodyOdor,
         &--Hubris {
             opacity: 0.7;
         }
+
         &--Paralysis,
         &--Stormtouched {
             margin-top: 16px;
         }
+
         &--Paresis,
         &--Paralysis,
         &--Asthma,
         &--Impatience {
             font-weight: bold;
         }
+
         &--Insomnia {
             display: none;
         }

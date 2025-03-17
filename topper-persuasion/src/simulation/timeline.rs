@@ -1,6 +1,14 @@
-use crate::{AppealType, Appeals, Personality};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+use crate::{AppealType, Appeals, Personality, PersuasionAff, PersuasionState, PersuasionStatus};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TimestampedEvent {
+    pub time: String,
+    pub event: PersuasionEvent,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum CompellingType {
     Compelling,
     DecisivelyCompelling,
@@ -9,21 +17,23 @@ pub enum CompellingType {
     IncontrovertiblyCompelling,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum PersuasionEvent {
     Stats(i32, i32, i32), // Strength, Wisdom, Intelligence
     Scrutinised(String, Personality, i32, i32),
-    ResolveAffect,
+    ResolveAffect(i32, AppealType),
     Compelling(CompellingType),
     Cyclic(Appeals),
     Evidence(AppealType), // Your evidence weakens a dishevelled hedge mage's resistance to ethos appeals!
-    AcumenLost,
-    AcumenGain,
+    AcumenLost(i32),
+    AcumenGain(i32),
     StartPersuasion(String),
     SipPrudence,
     Retort(Retorts),
     Appeal(Appeals),
     Draw(Vec<Appeals>),
+    Gained(PersuasionAff),
+    Lost(PersuasionAff),
     CasualityReveals(Appeals), // Your logical foresight reveals your next argument will appeal to inspiration.
     RhetoricStart, // You focus your mind on the art of rhetoric, preparing to chain your arguments together.
     RhetoricLost,  // You lose your focus on the art of rhetoric, breaking your chain of arguments.
@@ -31,7 +41,7 @@ pub enum PersuasionEvent {
     FailedPersuasion, // You have failed to persuade a gruff, menacing drifter.
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Retorts {
     SimpleCounterpoint, // A dishevelled hedge mage raises a simple counterpoint, challenging the foundation of your argument.
     SimpleDismiss, // With a wave of his hand, a gruff, menacing drifter dismisses your points as irrelevant and unworthy of consideration.
@@ -59,6 +69,78 @@ pub enum Retorts {
     Confounded, // A Nazetu halberdier launches into a bewildering tangent that leaves you struggling to follow the thread of the debate.
 
     // Appeal-based
+    HitProvocation, // A moss-veiled noblewoman's scathing retort strikes right to the heart of your argument!
     MissedProvocation, // A weatherworn vagrant's hasty retort falls flat and unconvincing.
     Intimidated, // A gruff, menacing drifter presents a hastily constructed argument, his usual rhetorical flair notably diminished in the face of your recent intimidation.
+}
+
+impl PersuasionEvent {
+    pub fn apply(&self, my_state: &mut PersuasionState, their_status: &mut PersuasionStatus) {
+        match self {
+            PersuasionEvent::Stats(strength, wisdom, intelligence) => {
+                my_state.str = Some(*strength);
+                my_state.wis = Some(*wisdom);
+                my_state.int = Some(*intelligence);
+            }
+            PersuasionEvent::Scrutinised(name, personality, resolve, max_resolve) => {
+                *their_status = PersuasionStatus::Scrutinised {
+                    resolve: *resolve,
+                    max_resolve: *max_resolve,
+                    personality: *personality,
+                    weakened: vec![],
+                    unique: false,
+                };
+            }
+            PersuasionEvent::ResolveAffect(amount, appeal) => {
+                their_status.resolve_affect(*amount);
+            }
+            PersuasionEvent::AcumenGain(amount) => {
+                my_state.acumen += amount;
+            }
+            PersuasionEvent::AcumenLost(amount) => {
+                my_state.acumen -= amount;
+            }
+            PersuasionEvent::StartPersuasion(name) => {
+                my_state.start_persuasion(0);
+                their_status.start_persuasion();
+            }
+            PersuasionEvent::Appeal(appeal) => {
+                my_state.appeal(appeal.clone());
+            }
+            PersuasionEvent::Retort(retort) => match retort {
+                Retorts::HitProvocation | Retorts::MissedProvocation => {}
+                _ => {
+                    their_status.retorted();
+                }
+            },
+            PersuasionEvent::Cyclic(appeals) => {
+                my_state.cyclic = Some(appeals.clone());
+            }
+            PersuasionEvent::Draw(appeals) => {
+                for appeal in appeals {
+                    my_state.drawn(appeal.clone());
+                }
+            }
+            PersuasionEvent::Gained(aff) => {
+                my_state.set(aff.clone(), true);
+            }
+            PersuasionEvent::Lost(aff) => {
+                my_state.set(aff.clone(), false);
+            }
+            PersuasionEvent::RhetoricStart => {
+                my_state.rhetoric_start();
+            }
+            PersuasionEvent::SipPrudence => {
+                my_state.sip_prudence();
+            }
+            PersuasionEvent::Evidence(appeal) => {
+                their_status.evidence(appeal.clone());
+            }
+            PersuasionEvent::Compelling(_)
+            | PersuasionEvent::CasualityReveals(_)
+            | PersuasionEvent::RhetoricLost
+            | PersuasionEvent::SuccessfulPersuasion
+            | PersuasionEvent::FailedPersuasion => {}
+        }
+    }
 }

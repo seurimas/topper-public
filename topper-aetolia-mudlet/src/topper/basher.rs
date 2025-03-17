@@ -99,12 +99,24 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for BasherModule {
                             self.primary_persuasion = "charity".to_string();
                             self.charity_fallback = true;
                         }
+                        "charity safe" => {
+                            self.primary_persuasion = "charity".to_string();
+                            self.charity_fallback = false;
+                        }
                         "pickpocket" => {
                             self.primary_persuasion = "pickpocket".to_string();
                             self.charity_fallback = true;
                         }
                         "pickpocket only" => {
                             self.primary_persuasion = "pickpocket".to_string();
+                            self.charity_fallback = false;
+                        }
+                        "worship tanixalthas" => {
+                            self.primary_persuasion = "worship tanixalthas".to_string();
+                            self.charity_fallback = true;
+                        }
+                        "worship tanixalthas only" => {
+                            self.primary_persuasion = "worship tanixalthas".to_string();
                             self.charity_fallback = false;
                         }
                         "debug" => match auto_persuade(

@@ -799,7 +799,7 @@
     "observation_name": "Scrutinise"
   },
   {
-    "regex": "^(You can hardly persuade a mindless creature.|.* is not interested in your persuasion.|.* is too loyal to someone else to be persuaded.|.* has no gold to give.|There are too many of them to persuade.)$",
+    "regex": "^(You can hardly persuade a mindless creature.|.*not interested in your persuasion.|.* is too loyal to someone else to be persuaded.|.* has no gold to give.|There are too many of them to persuade.)$",
     "args": [
       {
         "Literal": "NonSentient"

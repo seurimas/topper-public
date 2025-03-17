@@ -426,7 +426,7 @@ pub fn handle_combat_action(
             attack_afflictions(
                 agent_states,
                 &combat_action.target,
-                vec![FType::LoversEffect],
+                vec![FType::Infatuation],
                 after,
             );
         }

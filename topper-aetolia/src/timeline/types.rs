@@ -318,7 +318,7 @@ impl AetTimelineStateTrait for AetTimelineState {
             if let Ok((_damage_type, _damage_amount)) = get_damage_barrier(&flag_name) {
                 // Do nothing...
             } else if let Some(aff_flag) = FType::from_name(&flag_name) {
-                if aff_flag == FType::ThinBlood && !val {
+                if aff_flag == FType::Dyscrasia && !val {
                     me.clear_relapses();
                 }
                 if aff_flag == FType::Insomnia && val && me.is(FType::Hypersomnia) {

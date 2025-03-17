@@ -697,7 +697,7 @@ impl AgentState {
         if right && self.get_limb_state(LType::RightArmDamage).crippled {
             return false;
         }
-        if self.is(FType::Paralysis) || self.is(FType::Perplexed) {
+        if self.is(FType::Paralysis) || self.is(FType::Perplexity) {
             return false;
         }
         true
@@ -749,7 +749,7 @@ impl AgentState {
         !self.is(FType::Paresis)
             && !self.is(FType::Paralysis)
             && !(self.is(FType::LeftArmCrippled) && self.is(FType::RightArmCrippled))
-            && !self.is(FType::Perplexed)
+            && !self.is(FType::Perplexity)
             && self.balanced(BType::Balance)
             && self.balanced(BType::Equil)
     }

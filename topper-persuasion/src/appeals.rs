@@ -1,19 +1,19 @@
 use std::str::FromStr;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::agent::PersuasionState;
 
 use super::Personality;
 
-#[derive(Debug, Deserialize, PartialEq, Clone, Copy, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Copy, Eq, Hash)]
 pub enum AppealType {
     Ethos,
     Logos,
     Pathos,
 }
 
-#[derive(Debug, Deserialize, PartialEq, Clone, Copy, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Copy, Eq, Hash)]
 pub enum Appeals {
     // Ethos
     Authority,  // Defense buff

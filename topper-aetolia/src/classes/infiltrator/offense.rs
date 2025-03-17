@@ -264,15 +264,15 @@ lazy_static! {
     static ref THIN_STACK: Vec<VenomPlan> = vec![
         VenomPlan::OnTree(FType::Paresis),
         VenomPlan::IfDo(
-            FType::ThinBlood,
+            FType::Dyscrasia,
             Box::new(VenomPlan::OneOf(FType::Vomiting, FType::Allergies))
         ),
         VenomPlan::IfNotDo(
-            FType::ThinBlood,
+            FType::Dyscrasia,
             Box::new(VenomPlan::Stick(FType::Allergies)),
         ),
         VenomPlan::IfNotDo(
-            FType::ThinBlood,
+            FType::Dyscrasia,
             Box::new(VenomPlan::Stick(FType::Vomiting)),
         ),
         VenomPlan::Stick(FType::Asthma),
@@ -513,7 +513,7 @@ fn should_bedazzle(
         false
     } else if strategy.eq_ignore_ascii_case("bedazzle")
         && target.affs_count(&vec![FType::Vomiting, FType::Laxity, FType::Weariness]) < 2
-        && !target.is(FType::ThinBlood)
+        && !target.is(FType::Dyscrasia)
         && !target.lock_duration().is_some()
     {
         true
@@ -525,7 +525,7 @@ fn should_bedazzle(
             FType::Weariness,
             FType::Dizziness,
         ]) < 3
-        && !target.is(FType::ThinBlood)
+        && !target.is(FType::Dyscrasia)
         && !target.lock_duration().is_some()
     {
         true
@@ -566,7 +566,7 @@ fn go_for_thin_blood(_timeline: &AetTimeline, you: &AgentState, _strategy: &Stri
     (buffer_count >= 2
         || (buffer_count >= 1 && you.get_balance(BType::Pill) > 1.0)
         || you.lock_duration().map(|dur| dur > 5.0).unwrap_or(false))
-        && !you.is(FType::ThinBlood)
+        && !you.is(FType::Dyscrasia)
         && (!you.is(FType::Fangbarrier)
             || !you.can_tree(true)
             || you.get_balance(BType::Tree) > 3.0)
@@ -613,7 +613,7 @@ pub fn choose_venoms(
         if you.lock_duration().map_or(false, |dur| dur > 10.0) && !you.is(FType::Voyria) {
             buffer.insert(buffer.len(), "voyria");
         }
-        if you.is(FType::ThinBlood) && buffer.len() > 0 {
+        if you.is(FType::Dyscrasia) && buffer.len() > 0 {
             add_buffers(&mut venoms, &buffer);
         } else if !you.can_tree(false) {
             let mut hypno_buffers = vec![];

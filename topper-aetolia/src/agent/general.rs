@@ -340,8 +340,8 @@ pub enum FType {
     Hatred,
     Addiction,
     Hypersomnia,
-    BloodCurse,
-    Blighted,
+    Psychosis,
+    Blight,
 
     // Euphoriant
     SelfPity,
@@ -352,19 +352,19 @@ pub enum FType {
     Epilepsy,
     Impatience,
     Dissonance,
-    Infested,
+    Infestation,
     // Insomnia,
 
     // Eucrasia
-    Worrywart,
     Misery,
-    Hollow,
+    Hopelessness,
     Echoes,
+    Hollow,
     Narcolepsy,
-    Perplexed,
+    Loneliness,
+    Perplexity,
 
     // Decongestant
-    Baldness,
     Clumsiness,
     Hypochondria,
     Weariness,
@@ -372,29 +372,26 @@ pub enum FType {
     Sensitivity,
     RingingEars,
     Impairment,
-    BloodPoison,
+    Sepsis,
 
     // Depressant
-    CommitmentFear,
-    Merciful,
+    Mercy,
     Recklessness,
-    Egocentric,
+    Egocentrism,
     Masochism,
     Agoraphobia,
-    Loneliness,
-    Berserking,
+    Mania,
     Vertigo,
     Claustrophobia,
     Nyctophobia,
 
     // Coagulation
-    BodyOdor,
     Lethargy,
-    MentalDisruption,
-    PhysicalDisruption,
+    Delirium,
+    Extravasation,
     Vomiting,
-    Exhausted,
-    ThinBlood,
+    Exhaustion,
+    Dyscrasia,
     Rend,
     Haemophilia,
 
@@ -404,8 +401,8 @@ pub enum FType {
     Peace,
     Agony,
     Accursed,
-    LimpVeins,
-    LoversEffect,
+    Hypotension,
+    Infatuation,
     Laxity,
     Superstition,
     Generosity,
@@ -420,7 +417,7 @@ pub enum FType {
     Crippled,
     Blisters,
     Slickness,
-    Heartflutter,
+    Arrhythmia,
     Slough,
 
     // Anabiotic
@@ -859,7 +856,7 @@ pub struct FlagSet {
 impl FlagSet {
     pub fn wait(&mut self, duration: CType) {
         let confused = self.is_flag_set(FType::Confusion);
-        let thin_blooded = self.is_flag_set(FType::ThinBlood);
+        let thin_blooded = self.is_flag_set(FType::Dyscrasia);
         for (i, timer) in self.timed.iter_mut().enumerate() {
             let flag = FType::try_from(i as u16 + FType::TIMED as u16 + 1).unwrap();
             if flag == FType::Disrupted && confused {

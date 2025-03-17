@@ -4,7 +4,7 @@ use std::{
     path::PathBuf,
 };
 
-use topper_aetolia::classes::LOAD_STACK_FUNC;
+use topper_aetolia::classes::{infiltrator::LOAD_HYPNO_STACK_FUNC, LOAD_STACK_FUNC};
 
 static mut STACKS_DIRECTORY: &str = "";
 
@@ -28,5 +28,6 @@ pub fn initialize_load_stack_func(stacks_dir: String) {
     unsafe {
         STACKS_DIRECTORY = Box::leak(stacks_dir.into_boxed_str());
         LOAD_STACK_FUNC = Some(load_stack);
+        LOAD_HYPNO_STACK_FUNC = Some(load_stack);
     }
 }

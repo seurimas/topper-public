@@ -18,7 +18,7 @@ lazy_static! {
         FType::Recklessness,
         FType::Impatience,
         FType::Epilepsy,
-        FType::Berserking,
+        FType::Mania,
         FType::Weariness,
         FType::Anorexia,
     ];

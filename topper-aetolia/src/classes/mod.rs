@@ -741,7 +741,7 @@ pub fn handle_combat_action(
                                     FType::Paresis,
                                     FType::Vertigo,
                                     FType::Agoraphobia,
-                                    FType::Generosity,
+                                    FType::Claustrophobia,
                                 ],
                             )),
                         )
@@ -904,7 +904,7 @@ pub fn handle_combat_action(
                         you.set_balance(BType::SelfLoathing, 24.)
                     }
                     if you.bard_board.emotion_state.primary == Some(Emotion::Fear) {
-                        you.set_flag(FType::Worrywart, true);
+                        you.set_flag(FType::Hopelessness, true);
                     }
                     if flings {
                         you.toggle_flag(FType::Fallen, true);
@@ -1112,7 +1112,7 @@ lazy_static! {
         val.insert(FType::Deadening, "vardrax");
         val.insert(FType::Squelched, "selarnia");
         val.insert(FType::Slickness, "gecko");
-        val.insert(FType::ThinBlood, "scytherus");
+        val.insert(FType::Dyscrasia, "scytherus");
         val.insert(FType::Peace, "ouabain");
         val.insert(FType::Stupidity, "aconite");
         val.insert(FType::Asleep, "delphinium");
@@ -1153,7 +1153,7 @@ lazy_static! {
         val.insert("vardrax".into(), FType::Deadening);
         val.insert("selarnia".into(), FType::Squelched);
         val.insert("gecko".into(), FType::Slickness);
-        val.insert("scytherus".into(), FType::ThinBlood);
+        val.insert("scytherus".into(), FType::Dyscrasia);
         val.insert("ouabain".into(), FType::Peace);
         val.insert("aconite".into(), FType::Stupidity);
         val
