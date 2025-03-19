@@ -763,7 +763,7 @@ lazy_static! {
         FType::RightArmCrippled,
         FType::Dizziness,
         FType::Epilepsy,
-        FType::Sensitivity,
+        FType::RingingEars,
         FType::Recklessness,
     ];
 }

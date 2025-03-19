@@ -21,7 +21,7 @@ lazy_static! {
     pub static ref BEDAZZLE_AFFS: Vec<FType> = vec![
         FType::Vomiting,
         FType::Stuttering,
-        FType::BlurryVision,
+        FType::WateryEyes,
         FType::Dizziness,
         FType::Weariness,
         FType::Laxity,

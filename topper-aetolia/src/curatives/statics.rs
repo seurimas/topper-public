@@ -74,7 +74,7 @@ lazy_static! {
         FType::Backstrain,
         FType::SoreWrist,
         FType::SoreAnkle,
-        FType::BurntEyes,
+        FType::WateryEyes,
         FType::BlurryVision,
         FType::Migraine,
         FType::Deadening,
@@ -169,6 +169,7 @@ lazy_static! {
         FType::CrippledThroat,
         FType::Idiocy,
         FType::Plodding,
+        FType::WateryEyes,
         FType::BlurryVision,
         FType::Mirroring,
         FType::Crippled,
@@ -212,7 +213,6 @@ lazy_static! {
         FType::Impatience,
         FType::Dissonance,
         FType::Infestation,
-        FType::Insomnia,
     ];
 }
 
@@ -334,8 +334,7 @@ lazy_static! {
         val.insert("thanatonin".into(), FType::Deathsight);
         val.insert("stimulant".into(), FType::Instawake);
         val.insert("kawhe".into(), FType::Insomnia);
-        val.insert("ototoxin".into(), FType::Deafness);
-        val.insert("amaurosis".into(), FType::Blindness);
+        val.insert("pluck".into(), FType::Courage);
         val.insert("acuity".into(), FType::Thirdeye);
         val.insert("waterbreathing".into(), FType::Waterbreathing);
         val
@@ -380,8 +379,8 @@ lazy_static! {
     pub static ref EPIDERMAL_HEAD_ORDER: Vec<FType> = vec![
         FType::Indifference,
         FType::Stuttering,
+        FType::WateryEyes,
         FType::BlurryVision,
-        FType::BurntEyes,
         FType::Blindness,
         FType::Gloom,
         FType::Deafness,
@@ -399,11 +398,19 @@ lazy_static! {
 }
 
 lazy_static! {
+    pub static ref EPIDERMAL_ARMS_ORDER: Vec<FType> = vec![FType::FeebleArms];
+}
+
+lazy_static! {
+    pub static ref EPIDERMAL_LEGS_ORDER: Vec<FType> = vec![FType::FeebleLegs];
+}
+
+lazy_static! {
     pub static ref EPIDERMAL_SKIN_ORDER: Vec<FType> = vec![
         FType::Indifference,
         FType::Stuttering,
+        FType::WateryEyes,
         FType::BlurryVision,
-        FType::BurntEyes,
         FType::Gloom,
         FType::Anorexia,
         FType::Manablight,
@@ -658,6 +665,14 @@ lazy_static! {
         val.insert(
             ("epidermal".into(), "torso".into()),
             EPIDERMAL_TORSO_ORDER.to_vec(),
+        );
+        val.insert(
+            ("epidermal".into(), "legs".into()),
+            EPIDERMAL_LEGS_ORDER.to_vec(),
+        );
+        val.insert(
+            ("epidermal".into(), "arms".into()),
+            EPIDERMAL_ARMS_ORDER.to_vec(),
         );
         val.insert(
             ("epidermal".into(), "head".into()),

@@ -151,8 +151,7 @@ impl BaseAgentState for AgentState {
         val.initialize_stat(SType::Health, 100);
         val.initialize_stat(SType::Mana, 100);
         val.set_flag(FType::Player, true);
-        val.set_flag(FType::Blindness, true);
-        val.set_flag(FType::Deafness, true);
+        val.set_flag(FType::Courage, true);
         val.set_flag(FType::Arcane, true);
         val.set_flag(FType::Levitation, true);
         val.set_flag(FType::Speed, true);
@@ -185,6 +184,8 @@ impl AgentState {
 
     pub fn is(&self, flag: FType) -> bool {
         match flag {
+            FType::RingingEars => self.is(FType::RingingEars) || self.is(FType::Sensitivity),
+            FType::WateryEyes => self.is(FType::WateryEyes) || self.is(FType::BlurryVision),
             FType::Acid => self.predator_board.acid.is_active(),
             FType::Fleshbane => self.predator_board.fleshbane.is_active(),
             FType::Bloodscourge => self.predator_board.bloodscourge.is_active(),
@@ -691,10 +692,9 @@ impl AgentState {
     }
 
     pub fn can_wield(&self, left: bool, right: bool) -> bool {
-        if left && self.get_limb_state(LType::LeftArmDamage).crippled {
-            return false;
-        }
-        if right && self.get_limb_state(LType::RightArmDamage).crippled {
+        if self.get_limb_state(LType::LeftArmDamage).crippled
+            || self.get_limb_state(LType::RightArmDamage).crippled
+        {
             return false;
         }
         if self.is(FType::Paralysis) || self.is(FType::Perplexity) {
@@ -771,7 +771,6 @@ impl AgentState {
     pub fn can_parry(&self) -> bool {
         self.affs_count(&vec![
             // Fallen counts for prone, but not parrying.
-            FType::Indifference,
             FType::Asleep,
             FType::Stun,
             FType::Paralysis,
@@ -797,7 +796,6 @@ impl AgentState {
         self.affs_count(&vec![
             // Fallen counts for prone, but not parrying.
             FType::Fallen,
-            FType::Indifference,
             FType::Asleep,
             FType::Stun,
             FType::Paralysis,
@@ -816,13 +814,13 @@ impl AgentState {
             FType::WritheGrappled,
             FType::WritheStasis,
         ]) > 0
+            || (self.is(FType::FeebleArms) && self.is(FType::FeebleLegs))
     }
 
     pub fn observe_not_prone(&mut self) {
         if self.is_prone() {
             println!("Not actually prone!");
             self.observe_flag(FType::Fallen, false);
-            self.observe_flag(FType::Indifference, false);
             self.observe_flag(FType::Asleep, false);
             self.observe_flag(FType::Stun, false);
             // No writhes!

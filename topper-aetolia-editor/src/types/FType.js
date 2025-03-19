@@ -138,7 +138,6 @@ Besilence
 Indifference
 Stuttering
 BlurryVision
-BurntEyes
 Gloom
 Anorexia
 Gorged

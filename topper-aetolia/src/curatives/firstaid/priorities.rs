@@ -323,7 +323,6 @@ lazy_static! {
         (FType::WeakGrip, 19),
         (FType::Stuttering, 20),
         (FType::CrippledThroat, 20),
-        (FType::BurntEyes, 20),
         (FType::Lightwound, 20),
         (FType::Manablight, 20),
         (FType::Void, 21),

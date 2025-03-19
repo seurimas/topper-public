@@ -177,10 +177,10 @@ pub fn handle_combat_action(
         }
         "Tones Stridulation" => {
             for_agent(agent_states, &combat_action.target, &move |me| {
-                if me.is(FType::Deafness) {
-                    me.toggle_flag(FType::Deafness, false);
+                if me.is(FType::Courage) {
+                    me.toggle_flag(FType::Courage, false);
                 } else {
-                    me.toggle_flag(FType::Sensitivity, true);
+                    me.toggle_flag(FType::RingingEars, true);
                 }
             });
             for_agent(agent_states, &combat_action.caster, &move |me| {

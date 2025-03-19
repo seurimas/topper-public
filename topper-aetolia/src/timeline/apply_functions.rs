@@ -708,27 +708,7 @@ pub fn apply_venom(who: &mut AgentState, venom: &String, relapse: bool) -> Resul
     if who.is(FType::Dyscrasia) && !relapse {
         who.push_toxin(venom.clone());
     }
-    if venom == "prefarar" && who.is(FType::Deafness) {
-        who.set_flag(FType::Deafness, false);
-    } else if venom == "oculus" && who.is(FType::Blindness) {
-        who.set_flag(FType::Deafness, false);
-    } else if venom == "epseth" {
-        if who.is(FType::LeftLegCrippled) {
-            who.set_flag(FType::RightLegCrippled, true);
-            guessed_aff = Some(FType::RightLegCrippled);
-        } else {
-            who.set_flag(FType::LeftLegCrippled, true);
-            guessed_aff = Some(FType::LeftLegCrippled);
-        }
-    } else if venom == "epteth" {
-        if who.is(FType::LeftArmCrippled) {
-            who.set_flag(FType::RightArmCrippled, true);
-            guessed_aff = Some(FType::RightArmCrippled);
-        } else {
-            who.set_flag(FType::LeftArmCrippled, true);
-            guessed_aff = Some(FType::LeftArmCrippled);
-        }
-    } else if let Some(affliction) = VENOM_AFFLICTS.get(venom) {
+    if let Some(affliction) = VENOM_AFFLICTS.get(venom) {
         who.set_flag(*affliction, true);
         guessed_aff = Some(*affliction);
     } else if venom == "asp" || venom == "loki" {
@@ -736,6 +716,8 @@ pub fn apply_venom(who: &mut AgentState, venom: &String, relapse: bool) -> Resul
     } else if venom == "camus" {
         who.set_stat(SType::Health, who.get_stat(SType::Health) - 1000);
     } else if venom == "delphinium" && who.is(FType::Insomnia) {
+        who.set_flag(FType::Insomnia, false);
+    } else if venom == "araceae" && who.is(FType::Density) {
         who.set_flag(FType::Insomnia, false);
     } else if venom == "delphinium" && !who.is(FType::Asleep) {
         who.set_flag(FType::Asleep, true);

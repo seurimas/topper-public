@@ -7,7 +7,7 @@ lazy_static! {
         FType::Stupidity,
         FType::Impatience,
         FType::Vertigo,
-        FType::Sensitivity,
+        FType::RingingEars,
         FType::SelfPity,
         FType::Mania,
         FType::Migraine,

@@ -274,8 +274,7 @@ pub enum FType {
     Deathsight,
     Insomnia,
     Instawake,
-    Deafness,
-    Blindness,
+    Courage,
     Thirdeye,
     Daydreams,
     Fangbarrier,
@@ -369,8 +368,8 @@ pub enum FType {
     Hypochondria,
     Weariness,
     Asthma,
-    Sensitivity,
     RingingEars,
+    Sensitivity,
     Impairment,
     Sepsis,
 
@@ -455,11 +454,11 @@ pub enum FType {
     // Epidermal Head
     Indifference,
     Stuttering,
+    WateryEyes,
     BlurryVision,
-    BurntEyes,
-    // Blindness,
+    Blindness,
     Gloom,
-    // Deafness,
+    Deafness,
 
     // Epidermal Toros
     Anorexia,
@@ -481,6 +480,12 @@ pub enum FType {
     CrackedRibs,
     TorsoBruisedModerate,
     TorsoBruised,
+
+    // Mending Arms
+    FeebleArms,
+
+    // Mending Legs
+    FeebleLegs,
 
     // Mending Left Arm
     LeftArmBruisedCritical,
@@ -730,8 +735,7 @@ impl FType {
 
     pub fn is_general_defence(&self) -> bool {
         match self {
-            FType::Blindness
-            | FType::Deafness
+            FType::Courage
             | FType::Insomnia
             | FType::Fangbarrier
             | FType::Levitation

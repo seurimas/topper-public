@@ -352,7 +352,7 @@ pub fn handle_combat_action(
                 agent_states,
                 &combat_action.target,
                 &move |me: &mut AgentState| {
-                    me.set_flag(FType::Density, false);
+                    me.set_flag(FType::Courage, false);
                 },
             );
         }

@@ -84,6 +84,7 @@ mod firstaid_tests {
         priorities.insert(FType::Gorged, 6);
         priorities.insert(FType::EffusedBlood, 6);
         priorities.insert(FType::BlurryVision, 6);
+        priorities.insert(FType::WateryEyes, 6);
         priorities.insert(FType::SmashedThroat, 6);
         priorities.insert(FType::RightArmCrippled, 6);
         priorities.insert(FType::LeftArmCrippled, 6);

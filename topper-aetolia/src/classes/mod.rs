@@ -1096,7 +1096,7 @@ lazy_static! {
         val.insert(FType::Paresis, "curare");
         val.insert(FType::LeftArmCrippled, "epteth");
         val.insert(FType::RightArmCrippled, "epteth");
-        val.insert(FType::Sensitivity, "prefarar");
+        val.insert(FType::RingingEars, "prefarar");
         val.insert(FType::Disfigurement, "monkshood");
         val.insert(FType::Vomiting, "euphorbia");
         val.insert(FType::Deafness, "colocasia");
@@ -1134,13 +1134,15 @@ lazy_static! {
     pub static ref VENOM_AFFLICTS: HashMap<String, FType> = {
         let mut val = HashMap::new();
         val.insert("xentio".into(), FType::Clumsiness);
+        val.insert("epseth".into(), FType::FeebleLegs);
+        val.insert("epteth".into(), FType::FeebleArms);
         val.insert("oleander".into(), FType::Blindness);
         val.insert("eurypteria".into(), FType::Recklessness);
         val.insert("kalmia".into(), FType::Asthma);
         val.insert("digitalis".into(), FType::Shyness);
         val.insert("darkshade".into(), FType::Allergies);
         val.insert("curare".into(), FType::Paresis);
-        val.insert("prefarar".into(), FType::Sensitivity);
+        val.insert("prefarar".into(), FType::RingingEars);
         val.insert("monkshood".into(), FType::Disfigurement);
         val.insert("euphorbia".into(), FType::Vomiting);
         val.insert("colocasia".into(), FType::Deafness);
@@ -1172,6 +1174,8 @@ pub fn remove_through(you: &mut AgentState, end: FType, order: &Vec<FType>) {
 pub fn is_susceptible(target: &AgentState, affliction: &FType, afflicted: &Vec<FType>) -> bool {
     !target.is(*affliction)
         && !(*affliction == FType::Paresis && target.is(FType::Paralysis))
+        && !(*affliction == FType::RingingEars && target.is(FType::Sensitivity))
+        && !(*affliction == FType::WateryEyes && target.is(FType::BlurryVision))
         && !afflicted.contains(affliction)
 }
 
