@@ -184,8 +184,8 @@ impl AgentState {
 
     pub fn is(&self, flag: FType) -> bool {
         match flag {
-            FType::RingingEars => self.is(FType::RingingEars) || self.is(FType::Sensitivity),
-            FType::WateryEyes => self.is(FType::WateryEyes) || self.is(FType::BlurryVision),
+            FType::RingingEars => self.flags.is_flag_set(flag) || self.is(FType::Sensitivity),
+            FType::WateryEyes => self.flags.is_flag_set(flag) || self.is(FType::BlurryVision),
             FType::Acid => self.predator_board.acid.is_active(),
             FType::Fleshbane => self.predator_board.fleshbane.is_active(),
             FType::Bloodscourge => self.predator_board.bloodscourge.is_active(),
