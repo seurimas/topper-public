@@ -277,6 +277,10 @@ impl PersuasionState {
             self.advance_rhetoric(appeal);
             return; // Don't discard.
         } else if self.cyclic == Some(appeal) {
+            if self.appeals_in_deck.is_empty() {
+                println!("Shuffling appeals before cyclic.");
+                self.appeals_in_deck = self.discarded_appeals.clone();
+            }
             self.appeals_in_deck.push(appeal);
         } else {
             self.discarded_appeals.push(appeal);

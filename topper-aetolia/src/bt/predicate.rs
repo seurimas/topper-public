@@ -117,6 +117,7 @@ pub enum AetPredicate {
     HasFocus(AetTarget, f32),
     HasFitness(AetTarget, f32),
     HasClassCure(AetTarget, f32),
+    CanDodge(AetTarget),
     // Elevation
     IsGrounded(AetTarget),
     IsFlying(AetTarget),
@@ -619,6 +620,14 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::HasClassCure(target, buffer) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.get_balance(BType::ClassCure1) < QUEUE_TIME + *buffer {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::CanDodge(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.dodge_state.can_dodge() {
                         return UnpoweredFunctionState::Complete;
                     }
                 }

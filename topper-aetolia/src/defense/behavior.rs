@@ -89,9 +89,12 @@ impl UnpoweredFunction for DefenseBehavior {
                 Err(err) => println!("Could not parry: {:?}", err),
             },
             DefenseBehavior::Repipe => {
-                let refill_actions = get_needed_refills(&model.state.borrow_me());
+                let me = &model.state.borrow_me();
+                let refill_actions = get_needed_refills(me);
                 for action in refill_actions {
-                    controller.plan.add_to_qeb(Box::new(action));
+                    if me.can_fill_pipe() {
+                        controller.plan.add_to_qeb(Box::new(action));
+                    }
                 }
                 if model.state.borrow_me().pipe_state.has_unknown_unfilled() {
                     controller

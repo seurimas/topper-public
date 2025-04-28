@@ -194,7 +194,7 @@ pub fn simple_strategy(
             Appeals::Provocation,
             Box::new(|me: &PersuasionState, denizen: &PersuasionStatus| {
                 if (me.has_pathos_bonus() || me.is(PersuasionAff::Revelation) || me.analogizing())
-                    && me.acumen > 2000
+                    && me.acumen > 4000
                 {
                     return EvaluatorResult::Add(2);
                 }
@@ -269,11 +269,11 @@ pub fn simple_strategy(
             .is_some()
     {
         return Ok("cyclic reassurance".to_string());
-    } else if my_state.could_follow_any_rhetoric()
-        && !my_state.in_rhetoric()
-        && my_state.acumen > 3000
-    {
-        return Ok("rhetoric".to_string());
+        // } else if my_state.could_follow_any_rhetoric()
+        //     && !my_state.in_rhetoric()
+        //     && my_state.acumen > 3000
+        // {
+        //     return Ok("rhetoric".to_string());
     }
     let mut values = HashMap::new();
     let mut best_dps = 0;
