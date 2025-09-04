@@ -18,7 +18,7 @@
         "observation_name": "ListStart"
     },
     {
-        "regex": "^(\\w+)\\s+(\\(dormant\\)|-)\\s+(\\w+)\\s+(\\d+)$",
+        "regex": "^(\\w+)\\s+(\\(Inert\\)|-)\\s+(\\w+)\\s+(\\d+)$",
         "args": [
             {
                 "GroupAsTarget": 1

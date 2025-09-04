@@ -362,7 +362,7 @@ pub fn apply_observation(
                 {
                     if let AetObservation::ListItem(vibration, status, owner, time) = line {
                         if let Some(vibration) = Vibration::from_name(vibration.to_string()) {
-                            let timer = if status.contains("dormant") {
+                            let timer = if status.contains("Inert") {
                                 VibrationState::dormant_seconds(time.parse().unwrap_or(0))
                             } else {
                                 VibrationState::active_seconds(time.parse().unwrap_or(0))
