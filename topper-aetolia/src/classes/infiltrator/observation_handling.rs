@@ -21,7 +21,7 @@ lazy_static! {
     pub static ref BEDAZZLE_AFFS: Vec<FType> = vec![
         FType::Vomiting,
         FType::Stuttering,
-        FType::BlurryVision,
+        FType::WateryEyes,
         FType::Dizziness,
         FType::Weariness,
         FType::Laxity,
@@ -256,6 +256,22 @@ pub fn handle_combat_action(
                 agent_states,
                 &combat_action.target,
                 vec![FType::WritheBind],
+                &after.clone(),
+            );
+        }
+        "Marking" => {
+            let observations = after.clone();
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &move |me: &mut AgentState| {
+                    apply_or_infer_balance(me, (BType::Balance, 4.), &observations);
+                },
+            );
+            attack_afflictions(
+                agent_states,
+                &combat_action.target,
+                vec![FType::Marked],
                 &after.clone(),
             );
         }

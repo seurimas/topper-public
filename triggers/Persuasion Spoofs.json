@@ -1,0 +1,170 @@
+[
+    {
+        "regex": "^(.*) has been persuaded already on another matter.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Persuasion"
+            },
+            {
+                "Literal": "Persuade"
+            },
+            {
+                "Literal": "convinced"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(.*) has an aversion to this type of persuasion, having recently seen it used.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Persuasion"
+            },
+            {
+                "Literal": "Persuade"
+            },
+            {
+                "Literal": "aversion"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You) commit to maintaining your appeal to (\\w+) throughout this persuasion attempt.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Persuasion"
+            },
+            {
+                "Literal": "Cyclic"
+            },
+            {
+                "GroupAsTarget": 2
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You) do not currently have any cyclic appeals active.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Persuasion"
+            },
+            {
+                "Literal": "Cyclic"
+            },
+            {
+                "Literal": "none"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You) cease maintaining your cyclic appeal to \\w+.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Persuasion"
+            },
+            {
+                "Literal": "Cyclic"
+            },
+            {
+                "Literal": "none"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^That appeal is already set as (you)r cyclic appeal.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Persuasion"
+            },
+            {
+                "Literal": "Cyclic"
+            },
+            {
+                "Literal": "already"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You) focus your mind on the art of rhetoric, preparing to chain your arguments together.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Persuasion"
+            },
+            {
+                "Literal": "Rhetoric"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You) cease focusing on advanced rhetoric.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Persuasion"
+            },
+            {
+                "Literal": "Rhetoric"
+            },
+            {
+                "Literal": "off"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    }
+]

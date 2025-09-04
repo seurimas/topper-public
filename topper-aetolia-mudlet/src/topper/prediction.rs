@@ -152,7 +152,7 @@ pub fn prioritize_cures(
         }
     }
     let me = timeline.state.borrow_me();
-    if me.bard_board.iron_collar_state == IronCollarState::Locking && !me.is(FType::Perplexed) {
+    if me.bard_board.iron_collar_state == IronCollarState::Locking && !me.is(FType::Perplexity) {
         if !prediction_module.removing {
             prediction_module.removing = true;
             return TopperResponse::passive(

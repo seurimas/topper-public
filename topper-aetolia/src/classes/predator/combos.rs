@@ -183,29 +183,15 @@ impl ComboAttack {
 
     pub fn parried_by(&self, stance: KnifeStance, parry: LType) -> bool {
         match (self, stance, parry) {
-            (ComboAttack::JabLeft, KnifeStance::Gyanis, parry) => parry == LType::LeftArmDamage,
-            (ComboAttack::JabRight, KnifeStance::Gyanis, parry) => parry == LType::RightArmDamage,
-            (ComboAttack::LowhookLeft, KnifeStance::Gyanis, parry) => parry == LType::LeftLegDamage,
-            (ComboAttack::LowhookRight, KnifeStance::Gyanis, parry) => {
-                parry == LType::RightLegDamage
-            }
+            (ComboAttack::JabLeft, _, parry) => parry == LType::LeftArmDamage,
+            (ComboAttack::JabRight, _, parry) => parry == LType::RightArmDamage,
+            (ComboAttack::LowhookLeft, _, parry) => parry == LType::LeftLegDamage,
+            (ComboAttack::LowhookRight, _, parry) => parry == LType::RightLegDamage,
             (ComboAttack::Jab, _, parry) => {
                 parry == LType::LeftArmDamage || parry == LType::RightArmDamage
             }
             (ComboAttack::Lowhook, _, parry) => {
                 parry == LType::LeftArmDamage || parry == LType::RightArmDamage
-            }
-            (ComboAttack::JabLeft, _, parry) => {
-                parry == LType::LeftArmDamage || parry == LType::RightArmDamage
-            }
-            (ComboAttack::JabRight, _, parry) => {
-                parry == LType::LeftArmDamage || parry == LType::RightArmDamage
-            }
-            (ComboAttack::LowhookLeft, _, parry) => {
-                parry == LType::LeftLegDamage || parry == LType::RightLegDamage
-            }
-            (ComboAttack::LowhookRight, _, parry) => {
-                parry == LType::LeftLegDamage || parry == LType::RightLegDamage
             }
             (ComboAttack::Spinslash, _, _) => false,
             (other_attack, _, parry) => {
@@ -214,8 +200,8 @@ impl ComboAttack {
         }
     }
 
-    pub fn get_limb_damage(&self) -> CType {
-        match self {
+    pub fn get_limb_damage(&self, stance: KnifeStance) -> CType {
+        let base = match self {
             ComboAttack::Lateral => 600,
             ComboAttack::Flashkick => 500,
             ComboAttack::Veinrip => 200,
@@ -224,6 +210,11 @@ impl ComboAttack {
             ComboAttack::Lowhook | ComboAttack::LowhookLeft | ComboAttack::LowhookRight => 550,
             ComboAttack::Spinslash => 400,
             _ => 0,
+        };
+        if stance == KnifeStance::Gyanis {
+            base + 200
+        } else {
+            base
         }
     }
 
@@ -954,18 +945,21 @@ impl ComboGrader {
             ComboGrader::Breaks(limbs, min_breaks, value) => {
                 let mut limbs_state = target.get_limbs_state();
                 let mut breaks = 0;
+                let mut stance = combo.0;
                 for combo_attack in combo.get_attacks().iter() {
                     if let Some(limb) = combo_attack.get_single_limb_target() {
                         if limbs.is_empty() || limbs.contains(&limb) {
                             if !limbs_state[limb].broken {
-                                limbs_state[limb]
-                                    .apply_damage(combo_attack.get_limb_damage() as f32 / 100.);
+                                limbs_state[limb].apply_damage(
+                                    combo_attack.get_limb_damage(stance) as f32 / 100.,
+                                );
                                 if limbs_state[limb].broken {
                                     breaks += 1;
                                 }
                             }
                         }
                     }
+                    stance = combo_attack.get_next_stance(stance);
                 }
                 if breaks >= *min_breaks {
                     *value

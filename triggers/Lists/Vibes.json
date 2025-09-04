@@ -34,5 +34,23 @@
             }
         ],
         "observation_name": "ListItem"
+    },
+    {
+        "regex": "^(\\w+) \\((\\w+)\\)\\s+(\\(dormant\\)|-)\\s+(\\w+)\\s+(\\d+)$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "GroupAsTarget": 3
+            },
+            {
+                "GroupAsTarget": 4
+            },
+            {
+                "GroupAsTarget": 5
+            }
+        ],
+        "observation_name": "ListItem"
     }
 ]

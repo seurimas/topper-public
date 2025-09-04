@@ -4,6 +4,8 @@ use crate::timeline::*;
 use crate::types::*;
 use crate::{targetted_action, untargetted_action};
 
+targetted_action!(Refract, "refract {}");
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Embed {
     pub caster: String,
@@ -141,8 +143,10 @@ impl Alteration {
 impl ActiveTransition for Alteration {
     fn act(&self, _timeline: &AetTimeline) -> ActivateResult {
         Ok(format!(
-            "astra alteration {} {} to {}",
-            self.target, self.source, self.result
+            "astra alteration {} {} into {}",
+            self.target,
+            self.source,
+            self.result.to_name()
         ))
     }
 }

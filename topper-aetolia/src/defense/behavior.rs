@@ -8,6 +8,7 @@ use crate::{
     bt::*,
     classes::{Action, Class, FitnessAction, ParryAction},
     db::AetDatabaseModule,
+    observables::PlainAction,
     types::*,
 };
 
@@ -88,9 +89,12 @@ impl UnpoweredFunction for DefenseBehavior {
                 Err(err) => println!("Could not parry: {:?}", err),
             },
             DefenseBehavior::Repipe => {
-                let refill_actions = get_needed_refills(&model.state.borrow_me());
+                let me = &model.state.borrow_me();
+                let refill_actions = get_needed_refills(me);
                 for action in refill_actions {
-                    controller.plan.add_to_qeb(Box::new(action));
+                    if me.can_fill_pipe() {
+                        controller.plan.add_to_qeb(Box::new(action));
+                    }
                 }
                 if model.state.borrow_me().pipe_state.has_unknown_unfilled() {
                     controller
@@ -107,6 +111,9 @@ impl UnpoweredFunction for DefenseBehavior {
                     controller
                         .plan
                         .add_to_qeb(Box::new(FitnessAction::new(model.who_am_i())));
+                    controller
+                        .plan
+                        .add_to_qeb(Box::new(PlainAction::new("smoke yarrow".to_string())));
                 } else {
                     for aggressor in me.aggro.get_aggro_attackers() {
                         let aggressor = model.state.borrow_agent(&aggressor);
@@ -116,6 +123,17 @@ impl UnpoweredFunction for DefenseBehavior {
                                     controller
                                         .plan
                                         .add_to_qeb(Box::new(FitnessAction::new(model.who_am_i())));
+                                    return UnpoweredFunctionState::Complete;
+                                }
+                            }
+                            Some(Class::Indorani) => {
+                                if me.is(FType::Asthma) && me.is(FType::Aeon) {
+                                    controller
+                                        .plan
+                                        .add_to_qeb(Box::new(FitnessAction::new(model.who_am_i())));
+                                    controller.plan.add_to_qeb(Box::new(PlainAction::new(
+                                        "smoke willow".to_string(),
+                                    )));
                                     return UnpoweredFunctionState::Complete;
                                 }
                             }

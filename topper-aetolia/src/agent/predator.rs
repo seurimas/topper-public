@@ -66,7 +66,7 @@ pub enum PredatorCompanionState {
 }
 
 impl PredatorCompanionState {
-    pub fn wait(&mut self, time: CType) {
+    pub fn wait(&mut self, time: CType, cooldown_effect: CooldownEffect) {
         match self {
             PredatorCompanionState::Orel { swooping, venoms } => {
                 if let Some((_who, swooping_timer)) = swooping {
@@ -88,7 +88,9 @@ impl PredatorCompanionState {
                 }
             }
             PredatorCompanionState::Spider { web_cooldown, .. } => {
-                web_cooldown.wait(time);
+                if !cooldown_effect {
+                    web_cooldown.wait(time);
+                }
             }
         }
     }
@@ -104,9 +106,13 @@ pub struct PredatorClassState {
 }
 
 impl PredatorClassState {
-    pub fn wait(&mut self, time: CType) {
-        self.feint_time -= time;
-        self.companion.iter_mut().for_each(|c| c.wait(time));
+    pub fn wait(&mut self, time: CType, cooldown_effect: CooldownEffect) {
+        if !cooldown_effect {
+            self.feint_time -= time;
+        }
+        self.companion
+            .iter_mut()
+            .for_each(|c| c.wait(time, cooldown_effect));
     }
 
     pub fn feint(&mut self) {

@@ -111,9 +111,19 @@ impl BehaviorController {
         self.plan_hints.get(&hint_name.to_string())
     }
 
-    pub fn get_venoms_from_plan(&self, count: usize, you: &AgentState) -> Vec<&'static str> {
+    pub fn get_venoms_from_plan(
+        &self,
+        count: usize,
+        you: &AgentState,
+        prohibited: &Vec<FType>,
+    ) -> Vec<&'static str> {
         if let Some(venom_plan) = &self.aff_priorities {
-            get_venoms_from_plan(&self.aff_priorities.as_ref().unwrap(), count, &you)
+            get_venoms_from_plan(
+                &self.aff_priorities.as_ref().unwrap(),
+                count,
+                &you,
+                prohibited,
+            )
         } else {
             vec![""]
         }

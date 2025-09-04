@@ -8,7 +8,7 @@ lazy_static! {
         FType::Asthma,
         FType::Vomiting,
         FType::Lethargy,
-        FType::Sensitivity,
+        FType::RingingEars,
         FType::Superstition,
         FType::Hypersomnia,
     ];
@@ -18,7 +18,7 @@ lazy_static! {
         FType::Recklessness,
         FType::Impatience,
         FType::Epilepsy,
-        FType::Berserking,
+        FType::Mania,
         FType::Weariness,
         FType::Anorexia,
     ];

@@ -54,11 +54,14 @@ pub fn get_worst_damage(timeline: &AetTimeline, me: &String) -> Option<LType> {
     top_non_restoring.map(|top| top.1)
 }
 
-pub fn get_worst_bruise(timeline: &AetTimeline, me: &String) -> Option<LType> {
+pub fn get_most_dangerous_bruise(timeline: &AetTimeline, me: &String) -> Option<LType> {
     let me = timeline.state.borrow_agent(me);
     let mut top_bruised = None;
     for limb in LIMBS.to_vec() {
         let limb_state = me.get_limb_state(limb);
+        if limb_state.is_restoring {
+            continue;
+        }
         if let Some((top_bruise_level, _top_limb)) = top_bruised {
             if limb_state.bruise_level > top_bruise_level {
                 top_bruised = Some((limb_state.bruise_level, limb));
@@ -137,7 +140,7 @@ pub fn get_preferred_parry<DB: AetDatabaseModule + ?Sized>(
                 }
             }
             Class::Teradrim => {
-                if let Some(bruised) = get_worst_bruise(timeline, me) {
+                if let Some(bruised) = get_most_dangerous_bruise(timeline, me) {
                     Ok(bruised)
                 } else if let Some(parry) = get_restore_parry(timeline, me) {
                     Ok(parry)

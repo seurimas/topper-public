@@ -72,11 +72,13 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for WebModule {
                                 explainer_page.filter_out_from_body("an insignia of the Blades");
                                 explainer_page.filter_out_command("auction");
                                 explainer_page.filter_out_command("tell");
+                                explainer_page.filter_out_command("otells");
                                 explainer_page.filter_out_command("gtells");
                                 explainer_page.filter_out_command("gtstells");
                                 explainer_page.filter_out_command("clantells");
                                 explainer_page.filter_out_command("clan");
                                 explainer_page.filter_out_command("gw");
+                                explainer_page.filter_out_command("owho");
                                 explainer_page.filter_out_command("cw");
                                 explainer_page.filter_out_command("who");
                                 explainer_page.filter_out_command("rm");

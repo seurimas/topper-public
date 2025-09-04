@@ -42,7 +42,28 @@
         "observation_name": "Proc"
     },
     {
-        "regex": "^With a graceful gesture, (you) compell the crystals to embed into the ground and awaken as cosmic vibrations.$",
+        "regex": "^(\\w+) does not have (.*).$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Astranomia"
+            },
+            {
+                "Literal": "Alteration fail"
+            },
+            {
+                "GroupAsTarget": 2
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^With a graceful gesture, (you) compel the crystals to embed into the ground and awaken as cosmic vibrations.$",
         "args": [
             {
                 "GroupAsTarget": 1
@@ -184,6 +205,27 @@
             },
             {
                 "Literal": ""
+            }
+        ],
+        "observation_name": "CombatAction"
+    },
+    {
+        "regex": "^(You) gently guide your unseen magics, refracting their power towards (\\w+).$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Crystalism"
+            },
+            {
+                "Literal": "Refraction"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "GroupAsTarget": 2
             }
         ],
         "observation_name": "CombatAction"

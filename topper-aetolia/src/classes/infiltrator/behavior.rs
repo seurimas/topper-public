@@ -1,7 +1,7 @@
 use std::f32::consts::E;
 
-use serde::*;
 use behavior_bark::unpowered::*;
+use serde::*;
 
 use crate::{
     bt::*,
@@ -91,6 +91,7 @@ pub enum InfiltratorBehavior {
     ShrugVenom,
     Bind(AetTarget),
     Bite(AetTarget, BiteType),
+    Mark(AetTarget),
     Garrote(AetTarget),
     Sleight(AetTarget, SleightType),
 }
@@ -155,7 +156,7 @@ impl UnpoweredFunction for InfiltratorBehavior {
                         return UnpoweredFunctionState::Failed;
                     }
                     if bite_type == &BiteType::Stack {
-                        let venoms = get_venoms_from_plan(&aff_stack.to_vec(), 1, &you);
+                        let venoms = get_venoms_from_plan(&aff_stack.to_vec(), 1, &you, &vec![]);
                         if venoms.len() < 1 {
                             return UnpoweredFunctionState::Failed;
                         }
@@ -187,7 +188,17 @@ impl UnpoweredFunction for InfiltratorBehavior {
                     } else if you.is(FType::Rebounding) || you.is(FType::Shielded) {
                         return UnpoweredFunctionState::Failed;
                     }
-                    let venoms = get_venoms_from_plan(&venom_plan.to_vec(), 1, &you);
+                    let venoms = get_venoms_from_plan(
+                        &venom_plan.to_vec(),
+                        1,
+                        &you,
+                        &vec![
+                            FType::LeftLegCrippled,
+                            FType::RightLegCrippled,
+                            FType::LeftArmCrippled,
+                            FType::RightArmCrippled,
+                        ],
+                    );
                     if venoms.len() < 1 {
                         return UnpoweredFunctionState::Failed;
                     }
@@ -215,7 +226,17 @@ impl UnpoweredFunction for InfiltratorBehavior {
                     } else if you.is(FType::Rebounding) || you.is(FType::Shielded) {
                         return UnpoweredFunctionState::Failed;
                     }
-                    let mut venoms = get_venoms_from_plan(&venom_plan.to_vec(), 2, &you);
+                    let mut venoms = get_venoms_from_plan(
+                        &venom_plan.to_vec(),
+                        2,
+                        &you,
+                        &vec![
+                            FType::LeftLegCrippled,
+                            FType::RightLegCrippled,
+                            FType::LeftArmCrippled,
+                            FType::RightArmCrippled,
+                        ],
+                    );
                     if !add_delphs(you, &mut venoms, 2) {
                         return UnpoweredFunctionState::Failed;
                     }
@@ -246,7 +267,17 @@ impl UnpoweredFunction for InfiltratorBehavior {
                     } else if you.is(FType::Rebounding) || you.is(FType::Shielded) {
                         return UnpoweredFunctionState::Failed;
                     }
-                    let venoms = get_venoms_from_plan(&venom_plan.to_vec(), 2, &you);
+                    let venoms = get_venoms_from_plan(
+                        &venom_plan.to_vec(),
+                        2,
+                        &you,
+                        &vec![
+                            FType::LeftLegCrippled,
+                            FType::RightLegCrippled,
+                            FType::LeftArmCrippled,
+                            FType::RightArmCrippled,
+                        ],
+                    );
                     if venoms.len() < 2 {
                         return UnpoweredFunctionState::Failed;
                     }
@@ -277,7 +308,17 @@ impl UnpoweredFunction for InfiltratorBehavior {
                         }
                         return UnpoweredFunctionState::Failed;
                     }
-                    let venoms = get_venoms_from_plan(&venom_plan.to_vec(), 1, &you);
+                    let venoms = get_venoms_from_plan(
+                        &venom_plan.to_vec(),
+                        1,
+                        &you,
+                        &vec![
+                            FType::LeftLegCrippled,
+                            FType::RightLegCrippled,
+                            FType::LeftArmCrippled,
+                            FType::RightArmCrippled,
+                        ],
+                    );
                     if venoms.len() < 1 {
                         return UnpoweredFunctionState::Failed;
                     }
@@ -291,6 +332,13 @@ impl UnpoweredFunction for InfiltratorBehavior {
                 } else {
                     UnpoweredFunctionState::Failed
                 }
+            }
+            InfiltratorBehavior::Mark(target) => {
+                controller.plan.add_to_qeb(Box::new(MarkAction::new(
+                    model.who_am_i(),
+                    target.get_name(model, controller),
+                )));
+                UnpoweredFunctionState::Complete
             }
             InfiltratorBehavior::Garrote(target) => {
                 if let (me, Some(you)) = (
@@ -381,7 +429,17 @@ impl UnpoweredFunction for InfiltratorBehavior {
                     {
                         return UnpoweredFunctionState::Failed;
                     }
-                    let venoms = get_venoms_from_plan(&venom_plan.to_vec(), 1, &you);
+                    let venoms = get_venoms_from_plan(
+                        &venom_plan.to_vec(),
+                        1,
+                        &you,
+                        &vec![
+                            FType::LeftLegCrippled,
+                            FType::RightLegCrippled,
+                            FType::LeftArmCrippled,
+                            FType::RightArmCrippled,
+                        ],
+                    );
                     if venoms.len() < 1 {
                         return UnpoweredFunctionState::Failed;
                     }

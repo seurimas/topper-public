@@ -403,7 +403,7 @@ pub fn handle_combat_action(
             attack_afflictions(
                 agent_states,
                 &combat_action.target,
-                vec![FType::Stuttering, FType::BlurryVision],
+                vec![FType::Stuttering, FType::WateryEyes],
                 after,
             );
         }
@@ -999,7 +999,7 @@ fn main_stack(
             if you.get_restore_time_left() - me.get_qeb_balance() > 2.0
                 && !you.is(FType::Indifference)
                 && !you.is(FType::Stuttering)
-                && !you.is(FType::BlurryVision)
+                && !you.is(FType::WateryEyes)
                 && (!you.can_focus(false) || you.is_prone())
                 && me.get_stat(SType::SP) > 200
                 && !me.is(FType::Zenith)
@@ -1513,7 +1513,7 @@ fn main_stack(
             if me.get_balance(BType::Secondary) < 3.0 {
                 0.0
             } else if let Some(class) = db_class(db) {
-                if is_affected_by(class, FType::Clumsiness) && !you.is(FType::BlurryVision) {
+                if is_affected_by(class, FType::Clumsiness) && !you.is(FType::WateryEyes) {
                     25.0
                 } else {
                     0.0
@@ -1592,7 +1592,7 @@ fn main_stack(
             {
                 0.0
             } else if you.limb_damage.restore_timer.is_some()
-                && !you.is(FType::BlurryVision)
+                && !you.is(FType::WateryEyes)
                 && !you.is(FType::Stuttering)
             {
                 35.0

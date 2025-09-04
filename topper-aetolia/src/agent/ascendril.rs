@@ -5,6 +5,8 @@ use topper_core::timeline::CType;
 
 use crate::types::Timer;
 
+use super::CooldownEffect;
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
 pub enum PhenomenaState {
     Blazewhirl,
@@ -129,7 +131,7 @@ pub struct AscendrilClassState {
 }
 
 impl AscendrilClassState {
-    pub fn wait(&mut self, time: CType) {
+    pub fn wait(&mut self, time: CType, cooldown_effect: CooldownEffect) {
         if self.afterburn_raising.is_active() {
             self.afterburn_raising.wait(time);
             if !self.afterburn_raising.is_active() {
@@ -137,7 +139,9 @@ impl AscendrilClassState {
             }
         }
         self.afterburn_up.wait(time);
-        self.enrich_timer.wait(time);
+        if !cooldown_effect {
+            self.enrich_timer.wait(time);
+        }
         if let Some((timer, _)) = &mut self.fulcrum_glimpse {
             timer.wait(time);
         }

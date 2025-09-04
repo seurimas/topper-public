@@ -1,5 +1,5 @@
-use serde::*;
 use behavior_bark::unpowered::*;
+use serde::*;
 
 use crate::{
     bt::*,
@@ -233,7 +233,7 @@ impl UnpoweredFunction for PredatorBehavior {
                     if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
                     }
-                    let venom = controller.get_venoms_from_plan(1, you);
+                    let venom = controller.get_venoms_from_plan(1, you, &vec![]);
                     controller.plan.add_to_qeb(Box::new(BloodscourgeAction::new(
                         controller.target.clone().unwrap_or("".to_string()),
                         if venom.is_empty() { "" } else { venom[0] },
@@ -252,7 +252,7 @@ impl UnpoweredFunction for PredatorBehavior {
                     if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
                     }
-                    let venom = controller.get_venoms_from_plan(1, you);
+                    let venom = controller.get_venoms_from_plan(1, you, &vec![]);
                     controller.plan.add_to_qeb(Box::new(FleshbaneAction::new(
                         controller.target.clone().unwrap_or("".to_string()),
                         if venom.is_empty() { "" } else { venom[0] },
@@ -271,7 +271,16 @@ impl UnpoweredFunction for PredatorBehavior {
                     {
                         return UnpoweredFunctionState::Failed;
                     }
-                    let venoms = controller.get_venoms_from_plan(2, you);
+                    let venoms = controller.get_venoms_from_plan(
+                        2,
+                        you,
+                        &vec![
+                            FType::LeftLegCrippled,
+                            FType::RightLegCrippled,
+                            FType::LeftArmCrippled,
+                            FType::RightArmCrippled,
+                        ],
+                    );
                     if let (Some(venom_0), Some(venom_1)) = (venoms.get(0), venoms.get(1)) {
                         controller.plan.add_to_qeb(Box::new(SwoopAction::new(
                             controller.target.clone().unwrap_or("".to_string()),
@@ -447,7 +456,16 @@ impl UnpoweredFunction for PredatorBehavior {
                     } else if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
                     }
-                    let venom = controller.get_venoms_from_plan(1, you);
+                    let venom = controller.get_venoms_from_plan(
+                        1,
+                        you,
+                        &vec![
+                            FType::LeftLegCrippled,
+                            FType::RightLegCrippled,
+                            FType::LeftArmCrippled,
+                            FType::RightArmCrippled,
+                        ],
+                    );
                     controller.plan.add_to_qeb(Box::new(DartshotAction::new(
                         controller.target.clone().unwrap_or("".to_string()),
                         if venom.is_empty() { "" } else { venom[0] },
@@ -468,7 +486,16 @@ impl UnpoweredFunction for PredatorBehavior {
                     if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
                     }
-                    let venoms = controller.get_venoms_from_plan(2, you);
+                    let venoms = controller.get_venoms_from_plan(
+                        2,
+                        you,
+                        &vec![
+                            FType::LeftLegCrippled,
+                            FType::RightLegCrippled,
+                            FType::LeftArmCrippled,
+                            FType::RightArmCrippled,
+                        ],
+                    );
                     if let (Some(venom_0), Some(venom_1)) = (venoms.get(0), venoms.get(1)) {
                         controller.plan.add_to_qeb(Box::new(TwinshotAction::new(
                             controller.target.clone().unwrap_or("".to_string()),
@@ -528,7 +555,16 @@ impl UnpoweredFunction for PredatorBehavior {
                     } else if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
                     }
-                    let venom = controller.get_venoms_from_plan(1, you);
+                    let venom = controller.get_venoms_from_plan(
+                        1,
+                        you,
+                        &vec![
+                            FType::LeftLegCrippled,
+                            FType::RightLegCrippled,
+                            FType::LeftArmCrippled,
+                            FType::RightArmCrippled,
+                        ],
+                    );
                     controller.plan.add_to_qeb(Box::new(TwinshotAction::new(
                         controller.target.clone().unwrap_or("".to_string()),
                         "cirisosis",
@@ -694,7 +730,7 @@ fn use_combo(
     }
 
     if let (Some(you), Some(combo)) = (target.get_target(model, controller), &best_combo) {
-        let venom = controller.get_venoms_from_plan(1, you);
+        let venom = controller.get_venoms_from_plan(1, you, &vec![]);
         controller
             .plan
             .add_to_qeb(Box::new(SeriesAttack::new_random_params(

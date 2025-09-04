@@ -616,10 +616,10 @@ mod infiltrator_timeline_tests {
         timeline.push_time_slice(dstab_slice, None as Option<&DummyDatabaseModule>);
         let seur_state = timeline.state.borrow_agent(&"Seurimas".to_string());
         assert_eq!(seur_state.balanced(BType::Balance), false);
-        assert_eq!(seur_state.is(FType::ThinBlood), false);
+        assert_eq!(seur_state.is(FType::Dyscrasia), false);
         let bene_state = timeline.state.borrow_agent(&"Benedicto".to_string());
         assert_eq!(bene_state.balanced(BType::Balance), true);
-        assert_eq!(bene_state.is(FType::ThinBlood), true);
+        assert_eq!(bene_state.is(FType::Dyscrasia), true);
     }
 
     #[test]
@@ -645,10 +645,10 @@ mod infiltrator_timeline_tests {
         timeline.push_time_slice(dstab_slice, None as Option<&DummyDatabaseModule>);
         let seur_state = timeline.state.borrow_agent(&"Seurimas".to_string());
         assert_eq!(seur_state.balanced(BType::Balance), false);
-        assert_eq!(seur_state.is(FType::ThinBlood), false);
+        assert_eq!(seur_state.is(FType::Dyscrasia), false);
         let bene_state = timeline.state.borrow_agent(&"Benedicto".to_string());
         assert_eq!(bene_state.balanced(BType::Balance), true);
-        assert_eq!(bene_state.is(FType::ThinBlood), false);
+        assert_eq!(bene_state.is(FType::Dyscrasia), false);
     }
 
     #[test]
@@ -674,10 +674,10 @@ mod infiltrator_timeline_tests {
         timeline.push_time_slice(dstab_slice, None as Option<&DummyDatabaseModule>);
         let seur_state = timeline.state.borrow_agent(&"Seurimas".to_string());
         assert_eq!(seur_state.balanced(BType::Balance), false);
-        assert_eq!(seur_state.is(FType::ThinBlood), false);
+        assert_eq!(seur_state.is(FType::Dyscrasia), false);
         let bene_state = timeline.state.borrow_agent(&"Benedicto".to_string());
         assert_eq!(bene_state.balanced(BType::Balance), true);
-        assert_eq!(bene_state.is(FType::ThinBlood), false);
+        assert_eq!(bene_state.is(FType::Dyscrasia), false);
     }
 
     #[test]
@@ -703,11 +703,11 @@ mod infiltrator_timeline_tests {
         timeline.push_time_slice(dstab_slice, None as Option<&DummyDatabaseModule>);
         let seur_state = timeline.state.borrow_agent(&"Seurimas".to_string());
         assert_eq!(seur_state.balanced(BType::Balance), false);
-        assert_eq!(seur_state.is(FType::ThinBlood), false);
+        assert_eq!(seur_state.is(FType::Dyscrasia), false);
         assert_eq!(seur_state.get_parrying(), None);
         let bene_state = timeline.state.borrow_agent(&"Benedicto".to_string());
         assert_eq!(bene_state.balanced(BType::Balance), true);
-        assert_eq!(bene_state.is(FType::ThinBlood), false);
+        assert_eq!(bene_state.is(FType::Dyscrasia), false);
         assert_eq!(bene_state.get_parrying(), Some(LType::HeadDamage));
     }
 

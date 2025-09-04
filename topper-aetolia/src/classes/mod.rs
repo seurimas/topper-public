@@ -332,6 +332,7 @@ lazy_static! {
 pub fn handle_sent(command: &String, agent_states: &mut AetTimelineState) {
     infiltrator::handle_sent(command, agent_states);
     siderealist::handle_sent(command, agent_states);
+    crate::non_agent::combat_action::handle_sent(command, agent_states);
     if let Some(captures) = DIAGNOSING.captures(command) {
         let me = agent_states.me.clone();
         let time = agent_states.time;
@@ -479,6 +480,13 @@ pub fn handle_combat_action(
         "Purification" | "Zeal" | "Psionics" => {
             zealot::handle_combat_action(combat_action, agent_states, before, after)
         }
+        "Persuasion" => crate::non_agent::combat_action::handle_combat_action(
+            combat_action,
+            agent_states,
+            before,
+            after,
+            db,
+        ),
         "Weaponry" => match combat_action.skill.as_ref() {
             "Shatter" => {
                 if combat_action.annotation.eq("start") {
@@ -585,15 +593,17 @@ pub fn handle_combat_action(
                 Ok(())
             }
             "Companion Death" => {
-                if combat_action.annotation.contains("glimmercrest")
-                    || combat_action.annotation.contains("sprite")
+                if combat_action.caster.contains("glimmercrest")
+                    || combat_action.caster.contains("sprite")
                 {
-                    for_agent(agent_states, &agent_states.me.clone(), &|me| {
-                        let room_id = me.room_id;
-                        me.assume_siderealist(&|siderealist| {
-                            siderealist.kill_companion();
+                    if agent_states.borrow_me().get_normalized_class() == Some(Class::Siderealist) {
+                        let me = agent_states.me.clone();
+                        for_agent(agent_states, &me, &|me| {
+                            me.assume_siderealist(&|siderealist| {
+                                siderealist.kill_companion();
+                            });
                         });
-                    });
+                    }
                 }
                 Ok(())
             }
@@ -613,6 +623,12 @@ pub fn handle_combat_action(
                         });
                     });
                 }
+                Ok(())
+            }
+            "Tumbling" => {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.set_channel(ChannelType::Tumbling, 4.);
+                });
                 Ok(())
             }
             _ => Ok(()),
@@ -725,7 +741,7 @@ pub fn handle_combat_action(
                                     FType::Paresis,
                                     FType::Vertigo,
                                     FType::Agoraphobia,
-                                    FType::Generosity,
+                                    FType::Claustrophobia,
                                 ],
                             )),
                         )
@@ -844,6 +860,13 @@ pub fn handle_combat_action(
                 });
                 Ok(())
             }
+            "hallucinations" => {
+                for_agent(agent_states, &combat_action.caster, &|you| {
+                    you.toggle_flag(FType::Fallen, true);
+                    you.observe_flag(FType::Hallucinations, true);
+                });
+                Ok(())
+            }
             "narcolepsy" => {
                 for_agent(agent_states, &combat_action.caster, &|you| {
                     you.observe_flag(FType::Narcolepsy, true);
@@ -881,7 +904,7 @@ pub fn handle_combat_action(
                         you.set_balance(BType::SelfLoathing, 24.)
                     }
                     if you.bard_board.emotion_state.primary == Some(Emotion::Fear) {
-                        you.set_flag(FType::Worrywart, true);
+                        you.set_flag(FType::Hopelessness, true);
                     }
                     if flings {
                         you.toggle_flag(FType::Fallen, true);
@@ -1073,7 +1096,7 @@ lazy_static! {
         val.insert(FType::Paresis, "curare");
         val.insert(FType::LeftArmCrippled, "epteth");
         val.insert(FType::RightArmCrippled, "epteth");
-        val.insert(FType::Sensitivity, "prefarar");
+        val.insert(FType::RingingEars, "prefarar");
         val.insert(FType::Disfigurement, "monkshood");
         val.insert(FType::Vomiting, "euphorbia");
         val.insert(FType::Deafness, "colocasia");
@@ -1089,7 +1112,7 @@ lazy_static! {
         val.insert(FType::Deadening, "vardrax");
         val.insert(FType::Squelched, "selarnia");
         val.insert(FType::Slickness, "gecko");
-        val.insert(FType::ThinBlood, "scytherus");
+        val.insert(FType::Dyscrasia, "scytherus");
         val.insert(FType::Peace, "ouabain");
         val.insert(FType::Stupidity, "aconite");
         val.insert(FType::Asleep, "delphinium");
@@ -1111,13 +1134,15 @@ lazy_static! {
     pub static ref VENOM_AFFLICTS: HashMap<String, FType> = {
         let mut val = HashMap::new();
         val.insert("xentio".into(), FType::Clumsiness);
+        val.insert("epseth".into(), FType::FeebleLegs);
+        val.insert("epteth".into(), FType::FeebleArms);
         val.insert("oleander".into(), FType::Blindness);
         val.insert("eurypteria".into(), FType::Recklessness);
         val.insert("kalmia".into(), FType::Asthma);
         val.insert("digitalis".into(), FType::Shyness);
         val.insert("darkshade".into(), FType::Allergies);
         val.insert("curare".into(), FType::Paresis);
-        val.insert("prefarar".into(), FType::Sensitivity);
+        val.insert("prefarar".into(), FType::RingingEars);
         val.insert("monkshood".into(), FType::Disfigurement);
         val.insert("euphorbia".into(), FType::Vomiting);
         val.insert("colocasia".into(), FType::Deafness);
@@ -1130,7 +1155,7 @@ lazy_static! {
         val.insert("vardrax".into(), FType::Deadening);
         val.insert("selarnia".into(), FType::Squelched);
         val.insert("gecko".into(), FType::Slickness);
-        val.insert("scytherus".into(), FType::ThinBlood);
+        val.insert("scytherus".into(), FType::Dyscrasia);
         val.insert("ouabain".into(), FType::Peace);
         val.insert("aconite".into(), FType::Stupidity);
         val
@@ -1149,6 +1174,8 @@ pub fn remove_through(you: &mut AgentState, end: FType, order: &Vec<FType>) {
 pub fn is_susceptible(target: &AgentState, affliction: &FType, afflicted: &Vec<FType>) -> bool {
     !target.is(*affliction)
         && !(*affliction == FType::Paresis && target.is(FType::Paralysis))
+        && !(*affliction == FType::RingingEars && target.is(FType::Sensitivity))
+        && !(*affliction == FType::WateryEyes && target.is(FType::BlurryVision))
         && !afflicted.contains(affliction)
 }
 
@@ -1240,10 +1267,11 @@ macro_rules! affliction_plan_stacker {
             target: &AgentState,
             venoms: &mut Vec<$returned>,
             afflicted: &mut Vec<FType>,
+            prohibited: &Vec<FType>,
         ) {
             match item {
                 VenomPlan::Stick(aff) => {
-                    if is_susceptible(target, aff, afflicted) {
+                    if is_susceptible(target, aff, afflicted) && !prohibited.contains(aff) {
                         if let Some(venom) = $stack.get(aff) {
                             venoms.insert(0, *venom);
                             afflicted.push(*aff);
@@ -1253,6 +1281,7 @@ macro_rules! affliction_plan_stacker {
                 VenomPlan::OnTree(aff) => {
                     if (target.balanced(BType::Tree) || target.get_balance(BType::Tree) < 1.5)
                         && is_susceptible(target, aff, afflicted)
+                        && !prohibited.contains(aff)
                     {
                         if let Some(venom) = $stack.get(aff) {
                             venoms.insert(0, *venom);
@@ -1263,6 +1292,7 @@ macro_rules! affliction_plan_stacker {
                 VenomPlan::OffTree(aff) => {
                     if !(target.balanced(BType::Tree) || target.get_balance(BType::Tree) < 1.5)
                         && is_susceptible(target, aff, afflicted)
+                        && !prohibited.contains(aff)
                     {
                         if let Some(venom) = $stack.get(aff) {
                             venoms.insert(0, *venom);
@@ -1273,6 +1303,7 @@ macro_rules! affliction_plan_stacker {
                 VenomPlan::OnFocus(aff) => {
                     if (target.balanced(BType::Focus) || target.get_balance(BType::Focus) < 1.5)
                         && is_susceptible(target, aff, afflicted)
+                        && !prohibited.contains(aff)
                     {
                         if let Some(venom) = $stack.get(aff) {
                             venoms.insert(0, *venom);
@@ -1283,6 +1314,7 @@ macro_rules! affliction_plan_stacker {
                 VenomPlan::OffFocus(aff) => {
                     if !(target.balanced(BType::Focus) || target.get_balance(BType::Focus) < 1.5)
                         && is_susceptible(target, aff, afflicted)
+                        && !prohibited.contains(aff)
                     {
                         if let Some(venom) = $stack.get(aff) {
                             venoms.insert(0, *venom);
@@ -1293,6 +1325,7 @@ macro_rules! affliction_plan_stacker {
                 VenomPlan::OnFitness(aff) => {
                     if (target.balanced(BType::Fitness) || target.get_balance(BType::Fitness) < 1.5)
                         && is_susceptible(target, aff, afflicted)
+                        && !prohibited.contains(aff)
                     {
                         if let Some(venom) = $stack.get(aff) {
                             venoms.insert(0, *venom);
@@ -1304,6 +1337,7 @@ macro_rules! affliction_plan_stacker {
                     if !(target.balanced(BType::Fitness)
                         || target.get_balance(BType::Fitness) < 1.5)
                         && is_susceptible(target, aff, afflicted)
+                        && !prohibited.contains(aff)
                     {
                         if let Some(venom) = $stack.get(aff) {
                             venoms.insert(0, *venom);
@@ -1317,10 +1351,13 @@ macro_rules! affliction_plan_stacker {
                     {
                         if !is_susceptible(target, priority, afflicted)
                             && is_susceptible(target, secondary, afflicted)
+                            && !prohibited.contains(secondary)
                         {
                             venoms.insert(0, *secondary_venom);
                             afflicted.push(*secondary);
-                        } else if is_susceptible(target, priority, afflicted) {
+                        } else if is_susceptible(target, priority, afflicted)
+                            && !prohibited.contains(priority)
+                        {
                             venoms.insert(0, *priority_venom);
                             afflicted.push(*priority);
                         }
@@ -1328,28 +1365,28 @@ macro_rules! affliction_plan_stacker {
                 }
                 VenomPlan::IfDo(when, plan) => {
                     if !is_susceptible(target, when, afflicted) {
-                        $add_name(plan, target, venoms, afflicted);
+                        $add_name(plan, target, venoms, afflicted, prohibited);
                     }
                 }
                 VenomPlan::IfNotDo(when, plan) => {
                     if is_susceptible(target, when, afflicted) {
-                        $add_name(plan, target, venoms, afflicted);
+                        $add_name(plan, target, venoms, afflicted, prohibited);
                     }
                 }
                 VenomPlan::IfClassHates(when, plan) => {
                     if let Some(class) = target.get_normalized_class() {
                         if is_affected_by(class, *when) {
-                            $add_name(plan, target, venoms, afflicted);
+                            $add_name(plan, target, venoms, afflicted, prohibited);
                         }
                     }
                 }
                 VenomPlan::IfNotClassHates(when, plan) => {
                     if let Some(class) = target.get_normalized_class() {
                         if !is_affected_by(class, *when) {
-                            $add_name(plan, target, venoms, afflicted);
+                            $add_name(plan, target, venoms, afflicted, prohibited);
                         }
                     } else {
-                        $add_name(plan, target, venoms, afflicted);
+                        $add_name(plan, target, venoms, afflicted, prohibited);
                     }
                 }
             }
@@ -1359,11 +1396,12 @@ macro_rules! affliction_plan_stacker {
             plan: &Vec<VenomPlan>,
             count: usize,
             target: &AgentState,
+            prohibited: &Vec<FType>,
         ) -> Vec<$returned> {
             let mut venoms = Vec::new();
             let mut afflicted = Vec::new();
             for item in plan.iter() {
-                $add_name(item, target, &mut venoms, &mut afflicted);
+                $add_name(item, target, &mut venoms, &mut afflicted, prohibited);
                 if count == venoms.len() {
                     break;
                 }

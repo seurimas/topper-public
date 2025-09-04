@@ -10,12 +10,12 @@ mod timeline_tests {
         timeline
             .state
             .for_agent(&"Seurimas".into(), &move |updated_seur: &mut AgentState| {
-                updated_seur.set_flag(FType::ThinBlood, true);
+                updated_seur.set_flag(FType::Dyscrasia, true);
             });
         timeline.state.for_agent(
             &"Benedicto".into(),
             &move |updated_bene: &mut AgentState| {
-                updated_bene.set_flag(FType::ThinBlood, true);
+                updated_bene.set_flag(FType::Dyscrasia, true);
             },
         );
         let coag_slice = AetTimeSlice {
@@ -32,10 +32,10 @@ mod timeline_tests {
         timeline.push_time_slice(coag_slice, None as Option<&DummyDatabaseModule>);
         let seur_state = timeline.state.borrow_agent(&"Seurimas".to_string());
         assert_eq!(seur_state.balanced(BType::Pill), true);
-        assert_eq!(seur_state.is(FType::ThinBlood), true);
+        assert_eq!(seur_state.is(FType::Dyscrasia), true);
         let bene_state = timeline.state.borrow_agent(&"Benedicto".to_string());
         assert_eq!(bene_state.balanced(BType::Pill), false);
-        assert_eq!(bene_state.is(FType::ThinBlood), false);
+        assert_eq!(bene_state.is(FType::Dyscrasia), false);
     }
 
     #[test]

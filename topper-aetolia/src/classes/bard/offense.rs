@@ -172,7 +172,7 @@ pub fn get_class_state(
     } else {
         "".to_string()
     };
-    let pipelocks = if you.is(FType::Perplexed) {
+    let pipelocks = if you.is(FType::Perplexity) {
         let empties = you.pipe_state.get_empties();
         if empties.len() > 0 {
             format!("<green>{}", empties.join("/"))

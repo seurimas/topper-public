@@ -23,7 +23,7 @@ pub enum Howl {
     Disruptive,
     Serenading,
     Debilitating,
-    Berserking,
+    Mania,
     Angry,
     Wailing,
     Disturbing,

@@ -8,6 +8,7 @@ use regex::{Regex, RegexSet};
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
+use std::convert::TryFrom;
 use std::hash::Hash;
 use std::iter::FromIterator;
 use std::ops::{Deref, DerefMut};
@@ -150,8 +151,8 @@ lazy_static! {
         (FType::LeftArmBruisedCritical, 4),
         (FType::TorsoBruisedCritical, 4),
         (FType::HeadBruisedCritical, 4),
-        (FType::PhysicalDisruption, 4),
-        (FType::MentalDisruption, 4),
+        (FType::Extravasation, 4),
+        (FType::Delirium, 4),
         (FType::Paresis, 4),
         (FType::RotBody, 4),
         (FType::WritheThighlock, 4),
@@ -165,9 +166,9 @@ lazy_static! {
         (FType::Gloom, 5),
         (FType::Voidgaze, 5),
         (FType::Slough, 5),
-        (FType::BloodCurse, 5),
-        (FType::BloodPoison, 5),
-        (FType::ThinBlood, 5),
+        (FType::Psychosis, 5),
+        (FType::Sepsis, 5),
+        (FType::Dyscrasia, 5),
         (FType::Mirroring, 5),
         (FType::WritheGunk, 5),
         (FType::WritheGrappled, 5),
@@ -198,6 +199,7 @@ lazy_static! {
         (FType::RightArmMangled, 7),
         (FType::LeftArmMangled, 7),
         (FType::Sensitivity, 7),
+        (FType::Hopelessness, 7),
         (FType::Recklessness, 7),
         (FType::Nyctophobia, 7),
         (FType::Accursed, 7),
@@ -207,7 +209,7 @@ lazy_static! {
         (FType::Frozen, 8),
         (FType::MauledFace, 8),
         (FType::Frigid, 8),
-        (FType::Heartflutter, 8),
+        (FType::Arrhythmia, 8),
         (FType::Confusion, 8),
         (FType::Epilepsy, 8),
         (FType::Dissonance, 8),
@@ -219,21 +221,21 @@ lazy_static! {
         (FType::Phosphenes, 9),
         (FType::Squelched, 9),
         (FType::Ablaze, 9),
-        //(FType::FirstaidPredictAnyLimb, 9),
+        (FType::FirstaidPredictAnyLimb, 9),
         (FType::Clumsiness, 9),
         (FType::Weariness, 9),
-        (FType::Berserking, 9),
+        (FType::Mania, 9),
         (FType::Laxity, 9),
         (FType::Faintness, 9),
         (FType::Hollow, 9),
-        (FType::Perplexed, 9),
+        (FType::Perplexity, 9),
         (FType::Disrupted, 9),
         // (FType::Dazed, 9),
         (FType::Deadening, 10),
         (FType::LeftLegCrippled, 10),
         (FType::RightLegCrippled, 10),
-        //(FType::FirstaidPredictLegs, 10),
-        (FType::LimpVeins, 10),
+        (FType::FirstaidPredictLegs, 10),
+        (FType::Hypotension, 10),
         (FType::Masochism, 10),
         (FType::Haemophilia, 10),
         (FType::Vomiting, 10),
@@ -243,11 +245,11 @@ lazy_static! {
         // (FType::Dread, 10),
         (FType::RightArmCrippled, 11),
         (FType::LeftArmCrippled, 11),
-        //(FType::FirstaidPredictArms, 11),
+        (FType::FirstaidPredictArms, 11),
         (FType::Dizziness, 11),
         (FType::Crippled, 11),
         (FType::CrippledBody, 11),
-        (FType::Merciful, 11),
+        (FType::Mercy, 11),
         // (FType::Oiled, 11),
         (FType::HeadBroken, 12),
         (FType::CollapsedLung, 12),
@@ -270,11 +272,11 @@ lazy_static! {
         (FType::RightArmDislocated, 14),
         (FType::Hatred, 14),
         (FType::Rend, 14),
-        (FType::Blighted, 14),
-        (FType::Infested, 14),
-        (FType::Egocentric, 14),
+        (FType::Blight, 14),
+        (FType::Infestation, 14),
+        (FType::Egocentrism, 14),
         (FType::Magnanimity, 14),
-        (FType::Exhausted, 14),
+        (FType::Exhaustion, 14),
         (FType::RotHeat, 14),
         (FType::Narcolepsy, 14),
         (FType::SpinalRip, 15),
@@ -287,7 +289,7 @@ lazy_static! {
         (FType::Pacifism, 15),
         (FType::Peace, 15),
         (FType::Generosity, 15),
-        (FType::LoversEffect, 15),
+        (FType::Infatuation, 15),
         (FType::Superstition, 15),
         (FType::Misery, 15),
         (FType::LeftLegBruisedModerate, 16),
@@ -296,6 +298,7 @@ lazy_static! {
         (FType::LeftArmBruisedModerate, 16),
         (FType::TorsoBruisedModerate, 16),
         (FType::HeadBruisedModerate, 16),
+        (FType::Blindness, 16),
         (FType::RotBenign, 16),
         (FType::RotSpirit, 16),
         (FType::LeftArmBruised, 17),
@@ -306,11 +309,8 @@ lazy_static! {
         (FType::TorsoBruised, 17),
         (FType::Sadness, 17),
         (FType::SelfPity, 17),
-        (FType::Baldness, 17),
-        (FType::CommitmentFear, 17),
         (FType::Hubris, 17),
-        (FType::BodyOdor, 17),
-        (FType::Worrywart, 17),
+        (FType::FeebleLegs, 18),
         (FType::Indifference, 18),
         (FType::Gnawing, 18),
         (FType::BlurryVision, 18),
@@ -326,17 +326,18 @@ lazy_static! {
         (FType::WeakGrip, 19),
         (FType::Stuttering, 20),
         (FType::CrippledThroat, 20),
-        (FType::BurntEyes, 20),
+        (FType::Deafness, 20),
+        (FType::FeebleArms, 20),
         (FType::Lightwound, 20),
         (FType::Manablight, 20),
         (FType::Void, 21),
         (FType::Weakvoid, 21),
-        // (FType::PreRestoreLeftLeg, 22),
-        // (FType::PreRestoreRightLeg, 22),
-        // (FType::PreRestoreHead, 23),
-        // (FType::PreRestoreLeftArm, 23),
-        // (FType::PreRestoreRightArm, 23),
-        // (FType::PreRestoreTorso, 24),
+        (FType::PreRestoreLeftLeg, 22),
+        (FType::PreRestoreRightLeg, 22),
+        (FType::PreRestoreHead, 23),
+        (FType::PreRestoreLeftArm, 23),
+        (FType::PreRestoreRightArm, 23),
+        (FType::PreRestoreTorso, 24),
         (FType::EffusedBlood, 25),
         (FType::Dead, 26),
     ]);
@@ -590,6 +591,26 @@ impl FirstAidPriorities {
         }
         for (aff, priority) in DEFAULT_PRIORITIES.iter() {
             self.0.insert(*aff, *priority);
+        }
+        result
+    }
+
+    pub fn reset_defence(&mut self) -> Option<(FType, u32)> {
+        let mut result = None;
+        for (aff, priority) in &self.0 {
+            if aff.is_general_defence() {
+                if *priority != DEFAULT_PRIORITIES.get(&aff).cloned().unwrap_or(*priority) {
+                    result = Some((*aff, *priority));
+                }
+            }
+        }
+        for aff_idx in 0..(FType::Sadness as u16) {
+            let Ok(aff) = FType::try_from(aff_idx) else {
+                continue;
+            };
+            if aff.is_general_defence() {
+                self.0.insert(aff, 0);
+            }
         }
         result
     }

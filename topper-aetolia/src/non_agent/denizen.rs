@@ -4,7 +4,10 @@ use serde::Deserialize;
 
 use crate::timeline::AetTimelineState;
 
-use super::{AetNonAgent, AetTimelineRoomExt};
+use super::{AetNonAgent, AetTimelineRoomExt, PersuasionStatus};
+
+pub const MOB_TAG: &str = "mob";
+pub const CONVINCED_TAG: &str = "convinced";
 
 #[derive(Debug, Deserialize, PartialEq, Clone, Copy)]
 pub enum EvalStatus {
@@ -19,12 +22,18 @@ pub enum EvalStatus {
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct Denizen {
-    pub id: String,
     pub room_id: i64,
     pub full_name: String,
     pub status: EvalStatus,
     pub aggroed: bool,
+    pub persuasion_status: PersuasionStatus,
     pub tags: HashSet<String>,
+}
+
+impl Denizen {
+    pub fn has_tag(&self, tag: &str) -> bool {
+        self.tags.contains(tag)
+    }
 }
 
 pub fn format_denizen_id(room_id: i64) -> String {
@@ -35,7 +44,6 @@ pub trait AetTimelineDenizenExt {
     fn add_denizen(
         &mut self,
         denizen_id: i64,
-        id: String,
         room_id: i64,
         full_name: String,
         status: Option<EvalStatus>,
@@ -45,13 +53,13 @@ pub trait AetTimelineDenizenExt {
 
     fn for_denizen(&mut self, denizen_id: i64, action: &Fn(&mut Denizen));
 
-    fn find_denizens_in_room(&mut self, room_id: i64) -> Vec<i64>;
+    fn find_denizens_in_room(&self, room_id: i64) -> Vec<i64>;
 
     fn kill_denizen(&mut self, denizen_id: i64);
 
     fn observe_denizen_out_of_room(&mut self, denizen_id: i64, room_id: i64);
 
-    fn observe_denizen_in_room(&mut self, denizen_id: i64, room_id: i64);
+    fn observe_denizen_in_room(&mut self, denizen_id: i64, room_id: i64, convinced: Option<bool>);
 
     fn check_denizen<R>(&self, denizen_id: i64, predicate: &Fn(&Denizen) -> R) -> Option<R>;
 
@@ -65,7 +73,6 @@ impl AetTimelineDenizenExt for AetTimelineState {
     fn add_denizen(
         &mut self,
         denizen_id: i64,
-        id: String,
         room_id: i64,
         full_name: String,
         status: Option<EvalStatus>,
@@ -89,11 +96,11 @@ impl AetTimelineDenizenExt for AetTimelineState {
             self.non_agent_states.insert(
                 key,
                 AetNonAgent::Denizen(Denizen {
-                    id,
                     full_name,
                     room_id,
                     status: status.unwrap_or(EvalStatus::Uninjured),
                     aggroed: false,
+                    persuasion_status: PersuasionStatus::Unscrutinised,
                     tags: HashSet::new(),
                 }),
             );
@@ -127,7 +134,7 @@ impl AetTimelineDenizenExt for AetTimelineState {
         }
     }
 
-    fn observe_denizen_in_room(&mut self, denizen_id: i64, room_id: i64) {
+    fn observe_denizen_in_room(&mut self, denizen_id: i64, room_id: i64, convinced: Option<bool>) {
         let previous_room_id = self.check_denizen(denizen_id, &|denizen| denizen.room_id);
         if let Some(previous_room_id) = previous_room_id {
             self.for_room(previous_room_id, &|mut room| {
@@ -136,6 +143,11 @@ impl AetTimelineDenizenExt for AetTimelineState {
         }
         self.for_denizen(denizen_id, &|mut denizen| {
             denizen.room_id = room_id;
+            if let Some(convinced) = convinced {
+                if convinced {
+                    denizen.persuasion_status = PersuasionStatus::Convinced;
+                }
+            }
         });
         self.for_room(room_id, &|mut room| {
             room.denizens.insert(denizen_id);
@@ -157,7 +169,7 @@ impl AetTimelineDenizenExt for AetTimelineState {
         }
     }
 
-    fn find_denizens_in_room(&mut self, room_id: i64) -> Vec<i64> {
+    fn find_denizens_in_room(&self, room_id: i64) -> Vec<i64> {
         if let Some(room) = self.get_room(room_id) {
             room.denizens.iter().copied().collect()
         } else {

@@ -30,4 +30,5 @@ pub use sentinel::*;
 pub use shapeshifter::*;
 pub use siderealist::*;
 pub use topper_core::timeline::{CType, BALANCE_SCALE};
+pub use topper_persuasion::agent::*;
 pub use zealot::*;

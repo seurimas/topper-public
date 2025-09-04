@@ -7,6 +7,7 @@ use crate::curatives::{
 };
 use crate::db::AetDatabaseModule;
 use crate::non_agent::AetNonAgent;
+use crate::non_agent::Personality;
 use crate::types::*;
 use log::warn;
 use regex::Regex;
@@ -176,6 +177,7 @@ pub enum AetObservation {
     Devenoms(String),
     ParryStart(String, String),
     Parry(String, String),
+    Envenom(String),
     Damaged(String, String),
     Mangled(String, String),
     Absorbed(String, String),
@@ -228,6 +230,30 @@ pub enum AetObservation {
     Illusion,
     #[skip_args]
     Assess(String, i32, i32),
+    #[skip_args]
+    StatsOne {
+        strength: i32,
+        dexterity: i32,
+        wisdom: i32,
+    },
+    #[skip_args]
+    StatsTwo {
+        intelligence: i32,
+        constitution: i32,
+    },
+    PersuasionDraw(String, String, String, String),
+    PersuasionResult(String, String),
+    PersuasionDiscard(String, String),
+    ResolveAffect(String, String),
+    AcumenLost(String),
+    #[skip_args]
+    Scrutinise {
+        who: String,
+        personality: Personality,
+        resolve: i32,
+        max_resolve: i32,
+    },
+    Persuaded(String),
 }
 
 pub trait AetTimelineStateTrait {
@@ -292,7 +318,7 @@ impl AetTimelineStateTrait for AetTimelineState {
             if let Ok((_damage_type, _damage_amount)) = get_damage_barrier(&flag_name) {
                 // Do nothing...
             } else if let Some(aff_flag) = FType::from_name(&flag_name) {
-                if aff_flag == FType::ThinBlood && !val {
+                if aff_flag == FType::Dyscrasia && !val {
                     me.clear_relapses();
                 }
                 if aff_flag == FType::Insomnia && val && me.is(FType::Hypersomnia) {
@@ -452,8 +478,7 @@ impl AetTimelineTrait for AetTimeline {
                     agent.set_flag(*aff, false);
                 }
                 agent.branch_state = BranchState::Single;
-                agent.set_flag(FType::Blindness, true);
-                agent.set_flag(FType::Deafness, true);
+                agent.set_flag(FType::Courage, true);
                 agent.set_flag(FType::Levitation, true);
                 agent.set_flag(FType::Speed, true);
                 agent.set_flag(FType::Arcane, true);
@@ -463,6 +488,10 @@ impl AetTimelineTrait for AetTimeline {
                 agent.set_flag(FType::Fangbarrier, true);
                 agent.set_flag(FType::Instawake, true);
                 agent.set_flag(FType::Insulation, true);
+                agent.set_stat(SType::Health, 100);
+                agent.set_stat(SType::Mana, 100);
+                agent.set_max_stat(SType::Health, 100);
+                agent.set_max_stat(SType::Mana, 100);
                 agent.limb_damage = LimbSet::default();
             }
         }

@@ -1,5 +1,14 @@
 [
   {
+    "regex": "^You rub some (\\w+) on .*.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      }
+    ],
+    "observation_name": "Envenom"
+  },
+  {
     "regex": "^(\\w+) (parries|parry) the attack (to|on) (.*) (head|torso|left arm|right arm|left leg|right leg|legs|arms) with a deft maneuver.$",
     "args": [
       {
@@ -343,6 +352,24 @@
   },
   {
     "regex": "^You determine that (\\w+) has been afflicted by (.*).$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "GroupAsTarget": 2
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "OtherAfflicted"
+  },
+  {
+    "regex": "^Dread manifests on (\\w+)'s face as (.*) takes hold.$",
     "args": [
       {
         "GroupAsTarget": 1

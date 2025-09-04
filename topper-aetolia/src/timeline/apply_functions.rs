@@ -7,7 +7,10 @@ use crate::curatives::{
     ELIXIR_DEFENCES, PILL_CURE_ORDERS, PILL_DEFENCES, SALVE_CURE_ORDERS, SMOKE_CURE_ORDERS,
 };
 use crate::db::AetDatabaseModule;
-use crate::non_agent::{AetNonAgent, AetTimelineRoomExt};
+use crate::non_agent::{
+    get_persuasion_target, AetNonAgent, AetTimelineDenizenExt, AetTimelineRoomExt, Appeals,
+    PersuasionStatus,
+};
 use crate::timeline::*;
 use crate::types::*;
 use log::warn;
@@ -425,6 +428,20 @@ pub fn apply_observation(
                 me.set_parrying(limb);
             });
         }
+        AetObservation::Envenom(venom) => {
+            let venom = venom.clone();
+            for_agent(
+                timeline,
+                &timeline.me.clone(),
+                &move |me: &mut AgentState| {
+                    if me.get_normalized_class() == Some(Class::Bard) {
+                        me.assume_bard(&|bard| {
+                            bard.falchion_venom = Some(venom.clone());
+                        });
+                    }
+                },
+            );
+        }
         AetObservation::HiddenAff => {
             for_agent(
                 timeline,
@@ -568,6 +585,104 @@ pub fn apply_observation(
                 me.set_max_stat(SType::Health, 100);
             });
         }
+        AetObservation::StatsOne {
+            strength,
+            dexterity,
+            wisdom,
+        } => {
+            for_agent(timeline, &timeline.me.clone(), &move |me| {
+                me.persuasion_state.str = Some(*strength);
+                me.persuasion_state.wis = Some(*wisdom);
+            });
+        }
+        AetObservation::StatsTwo {
+            intelligence,
+            constitution,
+        } => {
+            for_agent(timeline, &timeline.me.clone(), &move |me| {
+                me.persuasion_state.int = Some(*intelligence);
+            });
+        }
+        AetObservation::PersuasionResult(who, result) => {
+            if let Some(target) = get_persuasion_target(timeline) {
+                timeline.for_denizen(target, &|denizen| {
+                    if result.eq("Failure") {
+                        println!("Failed at {}", denizen.persuasion_status.resolve());
+                        denizen.persuasion_status = PersuasionStatus::Unscrutinised;
+                    } else {
+                        denizen.persuasion_status = PersuasionStatus::Convinced;
+                    }
+                });
+                timeline.for_agent(who, &|me| {
+                    me.persuasion_state.finish_persuasion();
+                });
+            } else {
+                println!("No target found for persuasion!");
+            }
+        }
+        AetObservation::PersuasionDraw(who, card_one, card_two, card_three) => {
+            for_agent(timeline, who, &move |me| {
+                if let Some(card_one) = Appeals::from_name(card_one) {
+                    me.persuasion_state.drawn(card_one);
+                }
+                if let Some(card_two) = Appeals::from_name(card_two) {
+                    me.persuasion_state.drawn(card_two);
+                }
+                if let Some(card_three) = Appeals::from_name(card_three) {
+                    me.persuasion_state.drawn(card_three);
+                }
+            });
+        }
+        AetObservation::PersuasionDiscard(who, card) => {
+            for_agent(timeline, who, &move |me| {
+                if let Some(card) = Appeals::from_name(card) {
+                    me.persuasion_state.discard(card);
+                }
+            });
+        }
+        AetObservation::ResolveAffect(amount, appeal_type) => {
+            let Ok(amount) = amount.parse::<i32>() else {
+                return Err(format!("Could not parse amount: {}", amount));
+            };
+            if let Some(target) = get_persuasion_target(timeline) {
+                timeline.for_denizen(target, &|denizen| {
+                    denizen.persuasion_status.resolve_affect(amount);
+                });
+            } else {
+                println!("No target found for resolve affect!");
+            }
+        }
+        AetObservation::Scrutinise {
+            who,
+            personality,
+            resolve,
+            max_resolve,
+        } => {
+            let convinced = if let Some(AetObservation::Persuaded(already)) = after.get(1) {
+                true
+            } else {
+                false
+            };
+            if let Some(target) = get_persuasion_target(timeline) {
+                timeline.for_denizen(target, &|denizen| {
+                    if convinced {
+                        denizen.persuasion_status = PersuasionStatus::Convinced;
+                    } else if who == "NonSentient" {
+                        denizen.persuasion_status = PersuasionStatus::NonSentient;
+                    } else {
+                        denizen.persuasion_status = PersuasionStatus::Scrutinised {
+                            resolve: *resolve,
+                            max_resolve: *max_resolve,
+                            personality: *personality,
+                            weakened: vec![],
+                            unique: who == "Unique",
+                        };
+                    }
+                });
+            } else {
+                println!("No target found for scrutinise!");
+            }
+        }
         _ => {}
     }
     Ok(())
@@ -590,30 +705,10 @@ pub fn apply_or_infer_suggestion(
 
 pub fn apply_venom(who: &mut AgentState, venom: &String, relapse: bool) -> Result<(), String> {
     let mut guessed_aff = None;
-    if who.is(FType::ThinBlood) && !relapse {
+    if who.is(FType::Dyscrasia) && !relapse {
         who.push_toxin(venom.clone());
     }
-    if venom == "prefarar" && who.is(FType::Deafness) {
-        who.set_flag(FType::Deafness, false);
-    } else if venom == "oculus" && who.is(FType::Blindness) {
-        who.set_flag(FType::Deafness, false);
-    } else if venom == "epseth" {
-        if who.is(FType::LeftLegCrippled) {
-            who.set_flag(FType::RightLegCrippled, true);
-            guessed_aff = Some(FType::RightLegCrippled);
-        } else {
-            who.set_flag(FType::LeftLegCrippled, true);
-            guessed_aff = Some(FType::LeftLegCrippled);
-        }
-    } else if venom == "epteth" {
-        if who.is(FType::LeftArmCrippled) {
-            who.set_flag(FType::RightArmCrippled, true);
-            guessed_aff = Some(FType::RightArmCrippled);
-        } else {
-            who.set_flag(FType::LeftArmCrippled, true);
-            guessed_aff = Some(FType::LeftArmCrippled);
-        }
-    } else if let Some(affliction) = VENOM_AFFLICTS.get(venom) {
+    if let Some(affliction) = VENOM_AFFLICTS.get(venom) {
         who.set_flag(*affliction, true);
         guessed_aff = Some(*affliction);
     } else if venom == "asp" || venom == "loki" {
@@ -621,6 +716,8 @@ pub fn apply_venom(who: &mut AgentState, venom: &String, relapse: bool) -> Resul
     } else if venom == "camus" {
         who.set_stat(SType::Health, who.get_stat(SType::Health) - 1000);
     } else if venom == "delphinium" && who.is(FType::Insomnia) {
+        who.set_flag(FType::Insomnia, false);
+    } else if venom == "araceae" && who.is(FType::Density) {
         who.set_flag(FType::Insomnia, false);
     } else if venom == "delphinium" && !who.is(FType::Asleep) {
         who.set_flag(FType::Asleep, true);
@@ -634,13 +731,13 @@ pub fn apply_venom(who: &mut AgentState, venom: &String, relapse: bool) -> Resul
         who.set_flag(FType::Crippled, true);
     } else if (venom == "azu" || venom == "cripple") && who.is(FType::Crippled) {
         // Revenant
-        who.set_flag(FType::PhysicalDisruption, true);
-    } else if (venom == "dirne" || venom == "disrupt") && !who.is(FType::PhysicalDisruption) {
+        who.set_flag(FType::Extravasation, true);
+    } else if (venom == "dirne" || venom == "disrupt") && !who.is(FType::Extravasation) {
         // Revenant
-        who.set_flag(FType::PhysicalDisruption, true);
-    } else if (venom == "dirne" || venom == "disrupt") && who.is(FType::PhysicalDisruption) {
+        who.set_flag(FType::Extravasation, true);
+    } else if (venom == "dirne" || venom == "disrupt") && who.is(FType::Extravasation) {
         // Revenant
-        who.set_flag(FType::MentalDisruption, true);
+        who.set_flag(FType::Delirium, true);
     } else {
         return Err(format!("Could not determine effect of {}", venom));
     }
@@ -868,7 +965,7 @@ pub fn apply_or_infer_relapse(
     who: &mut AgentState,
     after: &Vec<AetObservation>,
 ) -> Option<Vec<AgentState>> {
-    who.observe_flag(FType::ThinBlood, true);
+    who.observe_flag(FType::Dyscrasia, true);
     let mut relapse_count = 1;
     let mut name = "";
     for observation in after.iter() {
@@ -1070,7 +1167,7 @@ pub fn apply_or_infer_cures(
                 AetObservation::Cured(aff_name) => {
                     if let Some(aff) = FType::from_name(&aff_name) {
                         who.toggle_flag(aff, false);
-                        if aff == FType::ThinBlood {
+                        if aff == FType::Dyscrasia {
                             who.clear_relapses();
                         } else if aff == FType::Void {
                             who.set_flag(FType::Weakvoid, true);
@@ -1246,7 +1343,7 @@ pub fn apply_or_infer_cure(
                     } else {
                         let cured = top_aff(who, order.to_vec());
                         remove_in_order(order.to_vec(), who);
-                        if cured == Some(FType::ThinBlood) {
+                        if cured == Some(FType::Dyscrasia) {
                             who.clear_relapses();
                         }
                     }

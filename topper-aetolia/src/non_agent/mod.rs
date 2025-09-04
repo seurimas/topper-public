@@ -1,9 +1,14 @@
+pub mod combat_action;
 pub mod denizen;
+pub mod persuasion;
 pub mod rooms;
+pub use combat_action::*;
 pub use denizen::*;
+pub use persuasion::*;
 pub use rooms::*;
 use serde::Deserialize;
 use topper_core::timeline::NonAgentState;
+pub use topper_persuasion::*;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub enum AetNonAgent {

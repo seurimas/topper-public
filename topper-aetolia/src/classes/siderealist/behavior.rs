@@ -14,6 +14,7 @@ use super::*;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum SiderealistBehavior {
+    Refract(AetTarget),
     Embed(Vibration),
     Embeds(Vec<Vibration>),
     Tones(AetTarget, Vibration),
@@ -59,6 +60,20 @@ impl UnpoweredFunction for SiderealistBehavior {
     ) -> UnpoweredFunctionState {
         let me = model.state.borrow_me();
         match self {
+            SiderealistBehavior::Refract(target) => {
+                if me
+                    .check_if_siderealist(&|me| {
+                        me.is_refracting_target(&target.get_name(model, controller))
+                    })
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
+                controller
+                    .plan
+                    .add_to_qeb(Box::new(Refract::from_target(target, model, controller)));
+                UnpoweredFunctionState::Complete
+            }
             SiderealistBehavior::Embed(vibration) => {
                 if vibration_in_room(&model.state, me.room_id, *vibration) {
                     return UnpoweredFunctionState::Failed;
@@ -304,7 +319,7 @@ impl UnpoweredFunction for SiderealistBehavior {
                 }
                 controller
                     .plan
-                    .add_to_qeb(Box::new(Eventide::new(model.who_am_i())));
+                    .add_to_plain(Box::new(Eventide::new(model.who_am_i())));
                 UnpoweredFunctionState::Complete
             }
             SiderealistBehavior::Equinox => {
@@ -560,9 +575,19 @@ impl UnpoweredFunction for SiderealistBehavior {
                         return UnpoweredFunctionState::Failed;
                     }
                     if let Some(venom) = controller.aff_priorities.as_ref().and_then(|affs| {
-                        get_venoms_from_plan(&affs, 1, target_agent)
-                            .first()
-                            .cloned()
+                        get_venoms_from_plan(
+                            &affs,
+                            1,
+                            target_agent,
+                            &vec![
+                                FType::LeftLegCrippled,
+                                FType::RightLegCrippled,
+                                FType::LeftArmCrippled,
+                                FType::RightArmCrippled,
+                            ],
+                        )
+                        .first()
+                        .cloned()
                     }) {
                         controller
                             .plan
@@ -581,6 +606,7 @@ impl UnpoweredFunction for SiderealistBehavior {
                 if !me
                     .check_if_siderealist(&|me| me.has_regalia(Regalia::EjaKodosa) && me.can_mend())
                     .unwrap_or(false)
+                    || me.stuck_fallen()
                 {
                     return UnpoweredFunctionState::Failed;
                 }

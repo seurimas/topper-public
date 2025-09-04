@@ -69,6 +69,7 @@ impl AetTarget {
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum AetPredicate {
+    Persuading(AetTarget),
     // Affs
     AllAffs(AetTarget, Vec<FType>),
     SomeAffs(AetTarget, Vec<FType>),
@@ -78,11 +79,14 @@ pub enum AetPredicate {
     AffCountUnder(AetTarget, usize, Vec<FType>),
     RandomCuresOver(AetTarget, usize),
     AffStacksOver(AetTarget, usize, FType),
+    IsProne(AetTarget),
     // Limbs
+    IsRestoringAny(AetTarget),
     IsRestoring(AetTarget, LimbDescriptor),
     CanBreak(AetTarget, LimbDescriptor, f32),
     CanMangled(AetTarget, LimbDescriptor, f32),
     LimbOver(AetTarget, LimbDescriptor, f32, bool),
+    CanMend(AetTarget, LimbDescriptor),
     AtLeastNLimbsOver(AetTarget, Vec<LimbDescriptor>, usize, f32, bool),
     // Priorities
     PriorityAffIs(AetTarget, FType),
@@ -113,6 +117,7 @@ pub enum AetPredicate {
     HasFocus(AetTarget, f32),
     HasFitness(AetTarget, f32),
     HasClassCure(AetTarget, f32),
+    CanDodge(AetTarget),
     // Elevation
     IsGrounded(AetTarget),
     IsFlying(AetTarget),
@@ -214,7 +219,9 @@ pub fn get_priority_aff(
     stack: Option<Vec<VenomPlan>>,
 ) -> Option<FType> {
     if let (Some(target), Some(stack)) = (target.get_target(model, controller), stack) {
-        get_affs_from_plan(&stack, 1, target).get(0).cloned()
+        get_affs_from_plan(&stack, 1, target, &vec![])
+            .get(0)
+            .cloned()
     } else {
         None
     }
@@ -230,6 +237,14 @@ impl UnpoweredFunction for AetPredicate {
         controller: &mut Self::Controller,
     ) -> UnpoweredFunctionState {
         match self {
+            AetPredicate::Persuading(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.persuasion_state.get_target().is_some() {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
             AetPredicate::AllAffs(target, affs) => {
                 if all_affs(target, model, controller, affs) {
                     UnpoweredFunctionState::Complete
@@ -302,6 +317,22 @@ impl UnpoweredFunction for AetPredicate {
                 }
                 UnpoweredFunctionState::Failed
             }
+            AetPredicate::IsProne(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.is_prone() {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::IsRestoringAny(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.get_restoring().is_some() {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
             AetPredicate::IsRestoring(target, limb_descriptor) => {
                 if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
                     if let Some(target) = target.get_target(model, controller) {
@@ -340,6 +371,18 @@ impl UnpoweredFunction for AetPredicate {
                             limb_state.assume_restore();
                         }
                         if limb_state.damage > *damage {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::CanMend(target, limb_descriptor) => {
+                if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
+                    if let Some(target) = target.get_target(model, controller) {
+                        if target.get_limb_state(limb).crippled
+                            && !target.get_limb_state(limb).broken
+                        {
                             return UnpoweredFunctionState::Complete;
                         }
                     }
@@ -577,6 +620,14 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::HasClassCure(target, buffer) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.get_balance(BType::ClassCure1) < QUEUE_TIME + *buffer {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::CanDodge(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.dodge_state.can_dodge() {
                         return UnpoweredFunctionState::Complete;
                     }
                 }

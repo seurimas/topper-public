@@ -7,6 +7,7 @@ use std::ascii::AsciiExt;
 use std::convert::{TryFrom, TryInto};
 use std::fmt;
 use topper_core::timeline::BaseAgentState;
+use topper_persuasion::PersuasionAff;
 
 #[derive(Deserialize, Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Timer {
@@ -95,7 +96,7 @@ impl Timer {
                 expire_at,
                 progress,
                 ..
-            } => *progress = *expire_at,
+            } => *progress = *expire_at + 1,
         }
     }
 
@@ -113,7 +114,7 @@ impl Timer {
                 progress,
                 ..
             } => {
-                if *progress < *expire_at {
+                if *progress <= *expire_at {
                     *progress += duration;
                 }
             }
@@ -127,7 +128,7 @@ impl Timer {
                 expire_at,
                 progress,
                 ..
-            } => *progress < *expire_at,
+            } => *progress <= *expire_at,
         }
     }
 
@@ -183,6 +184,7 @@ pub enum BType {
     // Timers
     // Disabled,
     Hypnosis,
+    Marked,
     Fangbarrier,
     Rebounding,
     Void,
@@ -190,6 +192,7 @@ pub enum BType {
     SelfLoathing,
     // Manabarbs,
     Pacifism,
+    Boar,
 
     // Writhe
     WritheDartpinned,
@@ -271,8 +274,7 @@ pub enum FType {
     Deathsight,
     Insomnia,
     Instawake,
-    Deafness,
-    Blindness,
+    Courage,
     Thirdeye,
     Daydreams,
     Fangbarrier,
@@ -337,8 +339,8 @@ pub enum FType {
     Hatred,
     Addiction,
     Hypersomnia,
-    BloodCurse,
-    Blighted,
+    Psychosis,
+    Blight,
 
     // Euphoriant
     SelfPity,
@@ -349,49 +351,46 @@ pub enum FType {
     Epilepsy,
     Impatience,
     Dissonance,
-    Infested,
+    Infestation,
     // Insomnia,
 
     // Eucrasia
-    Worrywart,
     Misery,
-    Hollow,
+    Hopelessness,
     Echoes,
+    Hollow,
     Narcolepsy,
-    Perplexed,
+    Loneliness,
+    Perplexity,
 
     // Decongestant
-    Baldness,
     Clumsiness,
     Hypochondria,
     Weariness,
     Asthma,
-    Sensitivity,
     RingingEars,
+    Sensitivity,
     Impairment,
-    BloodPoison,
+    Sepsis,
 
     // Depressant
-    CommitmentFear,
-    Merciful,
+    Mercy,
     Recklessness,
-    Egocentric,
+    Egocentrism,
     Masochism,
     Agoraphobia,
-    Loneliness,
-    Berserking,
+    Mania,
     Vertigo,
     Claustrophobia,
     Nyctophobia,
 
     // Coagulation
-    BodyOdor,
     Lethargy,
-    MentalDisruption,
-    PhysicalDisruption,
+    Delirium,
+    Extravasation,
     Vomiting,
-    Exhausted,
-    ThinBlood,
+    Exhaustion,
+    Dyscrasia,
     Rend,
     Haemophilia,
 
@@ -401,8 +400,8 @@ pub enum FType {
     Peace,
     Agony,
     Accursed,
-    LimpVeins,
-    LoversEffect,
+    Hypotension,
+    Infatuation,
     Laxity,
     Superstition,
     Generosity,
@@ -417,7 +416,7 @@ pub enum FType {
     Crippled,
     Blisters,
     Slickness,
-    Heartflutter,
+    Arrhythmia,
     Slough,
 
     // Anabiotic
@@ -455,11 +454,11 @@ pub enum FType {
     // Epidermal Head
     Indifference,
     Stuttering,
+    WateryEyes,
     BlurryVision,
-    BurntEyes,
-    // Blindness,
+    Blindness,
     Gloom,
-    // Deafness,
+    Deafness,
 
     // Epidermal Toros
     Anorexia,
@@ -481,6 +480,12 @@ pub enum FType {
     CrackedRibs,
     TorsoBruisedModerate,
     TorsoBruised,
+
+    // Mending Arms
+    FeebleArms,
+
+    // Mending Legs
+    FeebleLegs,
 
     // Mending Left Arm
     LeftArmBruisedCritical,
@@ -548,6 +553,7 @@ pub enum FType {
     NumbedSkin,
     MentalFatigue,
     Thorns,
+    Marked,
 
     // Zealot Uncurable
     InfernalSeal,
@@ -569,6 +575,9 @@ pub enum FType {
     Frostbrand,
     Thunderbrand,
     FrozenFeet,
+
+    // Shapeshifter
+    RippedThroat,
 
     // Special
     Asleep,
@@ -651,6 +660,33 @@ pub enum FType {
     // Mirrored affs
     Remorse,
     Contrition,
+
+    // Firstaid flags
+    FirstaidPredictAnyLimb,
+    FirstaidPredictArms,
+    FirstaidPredictLegs,
+    FirstaidFocusMuddled,
+    PreRestoreHead,
+    PreRestoreTorso,
+    PreRestoreLeftArm,
+    PreRestoreRightArm,
+    PreRestoreLeftLeg,
+    PreRestoreRightLeg,
+
+    // Persuasion
+    Conflicted,
+    Confounded,
+    Engrossed,
+    Entrenched,
+    Fatigued,
+    Pressured,
+    LimitedAppeals,
+    Slandered,
+    Revelation,
+    Gravitas,
+    Influence,
+    Conviction,
+    Tradition,
 }
 
 lazy_static! {
@@ -674,8 +710,42 @@ lazy_static! {
 }
 
 impl FType {
+    pub fn to_persuasion_aff(&self) -> Option<PersuasionAff> {
+        match self {
+            FType::Conflicted => Some(PersuasionAff::Conflicted),
+            FType::Confounded => Some(PersuasionAff::Confounded),
+            FType::Engrossed => Some(PersuasionAff::Engrossed),
+            FType::Entrenched => Some(PersuasionAff::Entrenched),
+            FType::Fatigued => Some(PersuasionAff::Fatigued),
+            FType::Pressured => Some(PersuasionAff::Pressured),
+            FType::LimitedAppeals => Some(PersuasionAff::LimitedAppeals),
+            FType::Slandered => Some(PersuasionAff::Slandered),
+            FType::Revelation => Some(PersuasionAff::Revelation),
+            FType::Gravitas => Some(PersuasionAff::Gravitas),
+            FType::Influence => Some(PersuasionAff::Influence),
+            FType::Conviction => Some(PersuasionAff::Conviction),
+            FType::Tradition => Some(PersuasionAff::Tradition),
+            _ => None,
+        }
+    }
+
     pub fn is_affliction(&self) -> bool {
         self >= &FType::Sadness
+    }
+
+    pub fn is_general_defence(&self) -> bool {
+        match self {
+            FType::Courage
+            | FType::Insomnia
+            | FType::Fangbarrier
+            | FType::Levitation
+            | FType::Instawake
+            | FType::Speed
+            | FType::Arcane
+            | FType::Density
+            | FType::Vigor => true,
+            _ => false,
+        }
     }
 
     pub fn from_name(aff_name: &String) -> Option<FType> {
@@ -730,6 +800,22 @@ impl FType {
         self > &FType::TIMED && self < &FType::FULL
     }
 
+    pub fn is_controller(&self) -> bool {
+        match self {
+            FType::FirstaidPredictAnyLimb
+            | FType::FirstaidPredictArms
+            | FType::FirstaidPredictLegs
+            | FType::FirstaidFocusMuddled
+            | FType::PreRestoreHead
+            | FType::PreRestoreTorso
+            | FType::PreRestoreLeftArm
+            | FType::PreRestoreRightArm
+            | FType::PreRestoreLeftLeg
+            | FType::PreRestoreRightLeg => true,
+            _ => false,
+        }
+    }
+
     pub fn default_time(&self) -> f32 {
         match self {
             FType::Blackout => 3.0,
@@ -774,7 +860,7 @@ pub struct FlagSet {
 impl FlagSet {
     pub fn wait(&mut self, duration: CType) {
         let confused = self.is_flag_set(FType::Confusion);
-        let thin_blooded = self.is_flag_set(FType::ThinBlood);
+        let thin_blooded = self.is_flag_set(FType::Dyscrasia);
         for (i, timer) in self.timed.iter_mut().enumerate() {
             let flag = FType::try_from(i as u16 + FType::TIMED as u16 + 1).unwrap();
             if flag == FType::Disrupted && confused {
@@ -809,6 +895,9 @@ impl FlagSet {
             self.get_counter(flag) > 0
         } else if flag.is_timed() {
             self.get_timer(flag).is_active()
+        } else if flag.is_controller() {
+            // Ignore controller flags.
+            false
         } else {
             self.simple[flag as usize]
         }
@@ -825,6 +914,9 @@ impl FlagSet {
             } else {
                 0
             }
+        } else if flag.is_controller() {
+            // Ignore controller flags.
+            0
         } else {
             if self.simple[flag as usize] {
                 1
@@ -850,6 +942,8 @@ impl FlagSet {
             } else {
                 Timer::default()
             };
+        } else if flag.is_controller() {
+            // Ignore controller flags.
         } else {
             self.simple[flag as usize] = value;
         }
@@ -866,7 +960,9 @@ impl FlagSet {
             } else {
                 Timer::default()
             };
-        } else {
+        } else if flag.is_controller() {
+            // Ignore controller flags.
+        } else if flag != FType::Fleshbane {
             self.simple[flag as usize] = value > 0;
         }
     }
@@ -1284,24 +1380,30 @@ pub enum ClassState {
 }
 
 impl ClassState {
-    pub fn wait(&mut self, duration: CType) {
+    pub fn wait(&mut self, duration: CType, cooldown_effect: CooldownEffect) {
         match self {
             ClassState::Zealot(ZealotClassState { zenith, pyromania }) => {
-                zenith.wait(duration);
+                if !cooldown_effect {
+                    zenith.wait(duration);
+                }
                 pyromania.wait(duration);
             }
-            ClassState::Bard(bard_class_state) => bard_class_state.wait(duration),
-            ClassState::Predator(predator_class_state) => predator_class_state.wait(duration),
+            ClassState::Bard(bard_class_state) => bard_class_state.wait(duration, cooldown_effect),
+            ClassState::Predator(predator_class_state) => {
+                predator_class_state.wait(duration, cooldown_effect)
+            }
             // ClassState::Sentinel(sentinel_class_state) => sentinel_class_state.wait(duration),
             ClassState::Infiltrator(infiltrator_class_state) => {
                 // infiltrator_class_state.wait(duration)
             }
             ClassState::Siderealist(siderealist_class_state) => {
-                siderealist_class_state.wait(duration)
+                siderealist_class_state.wait(duration, cooldown_effect)
             }
             // ClassState::Shifter(howling_state) => howling_state.wait(duration),
             // ClassState::Monk(monk_class_state) => monk_class_state.wait(duration),
-            ClassState::Ascendril(ascendril_class_state) => ascendril_class_state.wait(duration),
+            ClassState::Ascendril(ascendril_class_state) => {
+                ascendril_class_state.wait(duration, cooldown_effect)
+            }
             _ => {}
         }
     }
@@ -1367,6 +1469,7 @@ pub enum ChannelType {
     Shatter,
     Death,
     Moonlet,
+    Tumbling,
 }
 
 impl ChannelType {
@@ -1378,6 +1481,7 @@ impl ChannelType {
             (ChannelType::Moonlet, FType::LeftArmCrippled) => true,
             (ChannelType::Moonlet, FType::RightArmCrippled) => true,
             (ChannelType::Moonlet, FType::Paresis) => true,
+            (ChannelType::Tumbling, FType::WritheImpaled) => true,
             _ => false,
         }
     }

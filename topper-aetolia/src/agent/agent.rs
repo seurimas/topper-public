@@ -3,9 +3,10 @@ use crate::classes::Class;
 use crate::curatives::statics::RESTORE_CURE_ORDERS;
 use num_enum::TryFromPrimitive;
 use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use std::fmt;
 use topper_core::timeline::BaseAgentState;
+use topper_persuasion::PersuasionState;
 
 pub const SHOCK_TIME: f32 = 20.0;
 pub const BURNOUT_TIME: f32 = 20.0;
@@ -35,14 +36,19 @@ pub struct AgentState {
     pub siderealist_board: SiderealistBoard,
     pub room_id: i64,
     pub elevation: Elevation,
+    pub persuasion_state: PersuasionState,
 }
+
+// True = Aeon = Pause cooldowns.
+pub type CooldownEffect = bool;
 
 impl BaseAgentState for AgentState {
     fn wait(&mut self, duration: i32) {
+        let cooldown_effect = self.is(FType::Aeon);
         self.aggro.wait(duration);
         self.relapses.wait(duration);
         self.resin_state.wait(duration);
-        self.class_state.wait(duration);
+        self.class_state.wait(duration, cooldown_effect);
         self.dodge_state.wait(duration);
         self.pipe_state.wait(duration);
         self.ascendril_board.wait(duration);
@@ -83,7 +89,21 @@ impl BaseAgentState for AgentState {
         }
         let rebound_pending = !self.balanced(BType::Rebounding) && !self.is(FType::Rebounding);
         for i in 0..self.balances.len() {
-            self.balances[i].wait(duration);
+            match (i.try_into(), cooldown_effect) {
+                (
+                    Ok(BType::Fitness)
+                    | Ok(BType::Fitness)
+                    | Ok(BType::ClassCure1)
+                    | Ok(BType::ClassCure2)
+                    | Ok(BType::Regenerate),
+                    true,
+                ) => {
+                    // Aeon pauses cooldowns.
+                }
+                _ => {
+                    self.balances[i].wait(duration);
+                }
+            }
         }
         if rebound_pending && self.balanced(BType::Rebounding) {
             self.set_flag(FType::AssumedRebounding, true);
@@ -101,6 +121,14 @@ impl BaseAgentState for AgentState {
         }
         if self.is(FType::WritheWeb) && self.balanced(BType::WritheWeb) {
             self.set_flag(FType::WritheWeb, false);
+        }
+        if self.is(FType::Marked) && self.balanced(BType::Marked) {
+            self.set_flag(FType::Marked, false);
+        }
+        // TODO: Add a myself/other player flag?
+        if !self.balanced(BType::Boar) && self.get_max_stat(SType::Health) == 100 {
+            self.restore_stat(SType::Health, 6);
+            self.set_balance(BType::Boar, 10.);
         }
         if self.is(FType::SelfLoathing) {
             let observed = self.get_count(FType::SelfLoathing);
@@ -123,8 +151,7 @@ impl BaseAgentState for AgentState {
         val.initialize_stat(SType::Health, 100);
         val.initialize_stat(SType::Mana, 100);
         val.set_flag(FType::Player, true);
-        val.set_flag(FType::Blindness, true);
-        val.set_flag(FType::Deafness, true);
+        val.set_flag(FType::Courage, true);
         val.set_flag(FType::Arcane, true);
         val.set_flag(FType::Levitation, true);
         val.set_flag(FType::Speed, true);
@@ -157,6 +184,8 @@ impl AgentState {
 
     pub fn is(&self, flag: FType) -> bool {
         match flag {
+            FType::RingingEars => self.flags.is_flag_set(flag) || self.is(FType::Sensitivity),
+            FType::WateryEyes => self.flags.is_flag_set(flag) || self.is(FType::BlurryVision),
             FType::Acid => self.predator_board.acid.is_active(),
             FType::Fleshbane => self.predator_board.fleshbane.is_active(),
             FType::Bloodscourge => self.predator_board.bloodscourge.is_active(),
@@ -184,6 +213,19 @@ impl AgentState {
             FType::RightLegAmputated => self.limb_damage.amputated(LType::RightLegDamage),
             FType::LeftArmAmputated => self.limb_damage.amputated(LType::LeftArmDamage),
             FType::RightArmAmputated => self.limb_damage.amputated(LType::RightArmDamage),
+            FType::Conflicted
+            | FType::Confounded
+            | FType::Engrossed
+            | FType::Entrenched
+            | FType::Fatigued
+            | FType::Pressured
+            | FType::LimitedAppeals
+            | FType::Slandered
+            | FType::Revelation
+            | FType::Gravitas
+            | FType::Influence
+            | FType::Conviction
+            | FType::Tradition => self.persuasion_state.is(flag.to_persuasion_aff().unwrap()),
             _ => {
                 if flag.is_mirror() {
                     self.flags.is_flag_set(flag.normalize())
@@ -253,6 +295,9 @@ impl AgentState {
     pub fn set_flag(&mut self, flag: FType, value: bool) {
         if !value {
             self.hidden_state.unhide(flag);
+        }
+        if flag == FType::Asleep && value {
+            self.clear_channel();
         }
         match flag {
             FType::Acid => {
@@ -332,6 +377,21 @@ impl AgentState {
             | FType::LeftArmAmputated
             | FType::RightLegAmputated
             | FType::RightArmAmputated => {}
+            FType::Conflicted
+            | FType::Confounded
+            | FType::Engrossed
+            | FType::Entrenched
+            | FType::Fatigued
+            | FType::Pressured
+            | FType::LimitedAppeals
+            | FType::Slandered
+            | FType::Revelation
+            | FType::Gravitas
+            | FType::Influence
+            | FType::Conviction
+            | FType::Tradition => self
+                .persuasion_state
+                .set(flag.to_persuasion_aff().unwrap(), value),
             _ => self.flags.set_flag(flag, value),
         }
         if flag == FType::Rebounding {
@@ -354,6 +414,9 @@ impl AgentState {
         }
         if value && flag == FType::WritheWeb {
             self.set_balance(BType::WritheWeb, 3.0);
+        }
+        if value && flag == FType::Marked {
+            self.set_balance(BType::Marked, 30.0);
         }
         match flag {
             FType::Zenith => {
@@ -629,13 +692,12 @@ impl AgentState {
     }
 
     pub fn can_wield(&self, left: bool, right: bool) -> bool {
-        if left && self.get_limb_state(LType::LeftArmDamage).crippled {
+        if self.get_limb_state(LType::LeftArmDamage).crippled
+            || self.get_limb_state(LType::RightArmDamage).crippled
+        {
             return false;
         }
-        if right && self.get_limb_state(LType::RightArmDamage).crippled {
-            return false;
-        }
-        if self.is(FType::Paralysis) || self.is(FType::Perplexed) {
+        if self.is(FType::Paralysis) || self.is(FType::Perplexity) {
             return false;
         }
         true
@@ -687,7 +749,7 @@ impl AgentState {
         !self.is(FType::Paresis)
             && !self.is(FType::Paralysis)
             && !(self.is(FType::LeftArmCrippled) && self.is(FType::RightArmCrippled))
-            && !self.is(FType::Perplexed)
+            && !self.is(FType::Perplexity)
             && self.balanced(BType::Balance)
             && self.balanced(BType::Equil)
     }
@@ -709,7 +771,6 @@ impl AgentState {
     pub fn can_parry(&self) -> bool {
         self.affs_count(&vec![
             // Fallen counts for prone, but not parrying.
-            FType::Indifference,
             FType::Asleep,
             FType::Stun,
             FType::Paralysis,
@@ -735,7 +796,6 @@ impl AgentState {
         self.affs_count(&vec![
             // Fallen counts for prone, but not parrying.
             FType::Fallen,
-            FType::Indifference,
             FType::Asleep,
             FType::Stun,
             FType::Paralysis,
@@ -754,13 +814,13 @@ impl AgentState {
             FType::WritheGrappled,
             FType::WritheStasis,
         ]) > 0
+            || (self.is(FType::FeebleArms) && self.is(FType::FeebleLegs))
     }
 
     pub fn observe_not_prone(&mut self) {
         if self.is_prone() {
             println!("Not actually prone!");
             self.observe_flag(FType::Fallen, false);
-            self.observe_flag(FType::Indifference, false);
             self.observe_flag(FType::Asleep, false);
             self.observe_flag(FType::Stun, false);
             // No writhes!
@@ -985,6 +1045,10 @@ impl AgentState {
             }
         }
         found
+    }
+
+    pub fn clear_channel(&mut self) {
+        self.channel_state = ChannelState::Inactive;
     }
 
     pub fn set_channel(&mut self, channel_type: ChannelType, time: f32) {

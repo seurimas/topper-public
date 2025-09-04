@@ -175,7 +175,7 @@ lazy_static! {
             val.insert(*aff, SecondStrike::Stab(venom));
         }
         val.insert(FType::Impatience, SecondStrike::Gouge);
-        val.insert(FType::Heartflutter, SecondStrike::Heartbreaker);
+        val.insert(FType::Arrhythmia, SecondStrike::Heartbreaker);
         val.insert(FType::CrippledThroat, SecondStrike::Slit);
         val
     };
@@ -602,7 +602,7 @@ pub fn handle_combat_action(
             attack_afflictions(
                 agent_states,
                 &combat_action.target,
-                vec![FType::Heartflutter],
+                vec![FType::Arrhythmia],
                 after,
             );
         }
@@ -705,7 +705,7 @@ pub fn handle_combat_action(
                 attack_afflictions(
                     agent_states,
                     &combat_action.target,
-                    vec![FType::Berserking],
+                    vec![FType::Mania],
                     after,
                 );
             }
@@ -754,7 +754,7 @@ lazy_static! {
         FType::Anorexia,
         FType::Stupidity,
         FType::Confusion,
-        FType::Heartflutter,
+        FType::Arrhythmia,
         FType::LeftLegCrippled,
         FType::RightLegCrippled,
         FType::Vomiting,
@@ -763,7 +763,7 @@ lazy_static! {
         FType::RightArmCrippled,
         FType::Dizziness,
         FType::Epilepsy,
-        FType::Sensitivity,
+        FType::RingingEars,
         FType::Recklessness,
     ];
 }
@@ -781,7 +781,7 @@ fn get_stack<'s>(
         FType::Impatience
         | FType::Epilepsy
         | FType::Laxity
-        | FType::Heartflutter
+        | FType::Arrhythmia
         | FType::Impairment => !you.can_parry(),
         _ => true,
     });
@@ -804,7 +804,7 @@ fn want_spinecut(you: &AgentState) -> bool {
         FType::LeftLegCrippled,
         FType::RightLegCrippled,
         FType::Confusion,
-        FType::Heartflutter,
+        FType::Arrhythmia,
     ]) >= 4
 }
 
@@ -886,7 +886,18 @@ pub fn get_balance_attack<'s>(
                 side.clone(),
             ));
         } else {
-            let first_strike = get_first_strike_from_plan(&stack, 1, &you).pop();
+            let first_strike = get_first_strike_from_plan(
+                &stack,
+                1,
+                &you,
+                &vec![
+                    FType::LeftLegCrippled,
+                    FType::RightLegCrippled,
+                    FType::LeftArmCrippled,
+                    FType::RightArmCrippled,
+                ],
+            )
+            .pop();
             if let Some(mut first_strike) = first_strike {
                 if you.is(FType::Rebounding) && !first_strike.ignores_rebounding() {
                     first_strike = FirstStrike::Reave;
@@ -894,11 +905,32 @@ pub fn get_balance_attack<'s>(
                 assume_hit(&mut you, &first_strike);
                 stack = get_stack(timeline, &you, strategy, db);
                 let second_strike = if first_strike.flourish() {
-                    get_venoms_from_plan(&stack, 1, &you)
-                        .pop()
-                        .map(|venom| SecondStrike::Flourish(venom))
+                    get_venoms_from_plan(
+                        &stack,
+                        1,
+                        &you,
+                        &vec![
+                            FType::LeftLegCrippled,
+                            FType::RightLegCrippled,
+                            FType::LeftArmCrippled,
+                            FType::RightArmCrippled,
+                        ],
+                    )
+                    .pop()
+                    .map(|venom| SecondStrike::Flourish(venom))
                 } else {
-                    get_second_strike_from_plan(&stack, 1, &you).pop()
+                    get_second_strike_from_plan(
+                        &stack,
+                        1,
+                        &you,
+                        &vec![
+                            FType::LeftLegCrippled,
+                            FType::RightLegCrippled,
+                            FType::LeftArmCrippled,
+                            FType::RightArmCrippled,
+                        ],
+                    )
+                    .pop()
                 };
                 if let Some(second_strike) = second_strike {
                     return Box::new(ComboAction::new(

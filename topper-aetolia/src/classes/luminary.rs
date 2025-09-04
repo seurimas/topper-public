@@ -7,9 +7,9 @@ lazy_static! {
         FType::Stupidity,
         FType::Impatience,
         FType::Vertigo,
-        FType::Sensitivity,
+        FType::RingingEars,
         FType::SelfPity,
-        FType::Berserking,
+        FType::Mania,
         FType::Migraine,
     ];
     pub static ref CHASTEN_AFFS: Vec<FType> = vec![
@@ -18,7 +18,7 @@ lazy_static! {
         FType::Hypochondria,
         FType::Lethargy,
         FType::SelfLoathing,
-        FType::Masochism,
+        FType::Justice,
         FType::Paranoia,
         FType::Recklessness,
         FType::Stupidity,
@@ -80,7 +80,7 @@ pub fn handle_combat_action(
                 if perspective != Perspective::Bystander {
                     for_agent_uncertain_closure(
                         agent_states,
-                        &combat_action.target,
+                        &combat_action.caster,
                         Box::new(move |you| {
                             apply_or_infer_random_afflictions(
                                 you,

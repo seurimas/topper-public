@@ -24,6 +24,7 @@ const HEARTCAGE_DITHER: usize = 5;
 const IRONCOLLAR_DITHER: usize = 2;
 const IMPETUS_DITHER: usize = 3;
 const SWINDLE_DITHER: usize = 4;
+const MASTERSTROKE_DITHER: usize = 8;
 
 pub const NULLSTONE: &str = "a stone of annulment";
 pub const HOROLOGE: &str = "a faded hourglass";
@@ -51,6 +52,29 @@ pub fn handle_weaving_action(
     let first_person = combat_action.caster.eq(&agent_states.me);
     let hints = agent_states.get_player_hint(&combat_action.caster, &"CALLED_VENOMS".to_string());
     match combat_action.skill.as_ref() {
+        "Masterstroke" => {
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &move |me: &mut AgentState| {
+                    me.assume_bard(&|bard: &mut BardClassState| {
+                        bard.dithering = MASTERSTROKE_DITHER;
+                    });
+                    use_destiny_eq(me, &observations);
+                },
+            );
+            for_agent(
+                agent_states,
+                &combat_action.target,
+                &|me: &mut AgentState| {
+                    me.bard_board.runeband_state = RunebandState::initial();
+                    me.bard_board.globes_state = GlobesState::initial();
+                },
+            );
+            if let Some(my_room) = agent_states.get_my_room_mut() {
+                my_room.add_tag("boundary");
+            }
+        }
         "Runeband" => {
             for_agent(
                 agent_states,
@@ -531,7 +555,12 @@ pub fn handle_weaving_action(
 }
 
 fn use_destiny_eq(me: &mut AgentState, observations: &Vec<AetObservation>) {
-    if !me.is(FType::SongDestiny) {
+    if observations.iter().any(|obs| match obs {
+        AetObservation::Stripped(stripped) => stripped.eq("song_destiny"),
+        _ => false,
+    }) {
+        // Destiny stripped observed!
+    } else if !me.is(FType::SongDestiny) {
         apply_or_infer_balance(me, (BType::Equil, 2.0), observations);
     } else {
         me.set_flag(FType::SongDestiny, false);
@@ -579,7 +608,7 @@ pub fn handle_performance_action(
             attack_afflictions(
                 agent_states,
                 &combat_action.target,
-                vec![FType::Dizziness, FType::Perplexed, FType::Stun],
+                vec![FType::Dizziness, FType::Perplexity, FType::Stun],
                 after,
             );
             for_agent(
@@ -619,7 +648,7 @@ pub fn handle_performance_action(
                 attack_afflictions(
                     agent_states,
                     &combat_action.caster,
-                    vec![FType::LoversEffect],
+                    vec![FType::Infatuation],
                     after,
                 );
             }
@@ -629,7 +658,7 @@ pub fn handle_performance_action(
                 attack_afflictions(
                     agent_states,
                     &combat_action.caster,
-                    vec![FType::Berserking],
+                    vec![FType::Mania],
                     after,
                 );
             } else {
@@ -703,8 +732,9 @@ pub fn handle_performance_action(
                 },
             );
         }
-        "Tempo" | "Harry" | "Bravado" | "Rhythm" => {
-            if !combat_action.skill.eq("Rhythm") {
+        "Tempo" | "Harry" | "Bravado" | "Rhythm One" | "Rhythm Two" | "Rhythm Three"
+        | "Cadence" => {
+            if !combat_action.skill.starts_with("Rhythm") {
                 for_agent(
                     agent_states,
                     &combat_action.caster,
@@ -721,32 +751,32 @@ pub fn handle_performance_action(
                 first_person,
                 &hints,
             );
-            if combat_action.skill.eq("Tempo") || combat_action.skill.eq("Rhythm") {
-                let annotation = combat_action.annotation.clone();
+            if combat_action.skill.eq("Tempo") || combat_action.skill.starts_with("Rhythm") {
+                let skill = combat_action.skill.clone();
                 for_agent(
                     agent_states,
                     &combat_action.target,
                     &move |me: &mut AgentState| {
-                        if annotation.eq("one") {
+                        if skill.eq("Rhythm One") {
                             me.observe_flag(FType::Paresis, true);
-                        } else if annotation.eq("two") {
+                        } else if skill.eq("Rhythm Two") {
                             me.observe_flag(FType::Shyness, true);
-                        } else if annotation.eq("three") {
+                        } else if skill.eq("Rhythm Three") {
                             me.observe_flag(FType::Besilence, true);
                         }
                     },
                 );
-                let annotation = combat_action.annotation.clone();
+                let skill = combat_action.skill.clone();
                 for_agent(
                     agent_states,
                     &combat_action.caster,
                     &|me: &mut AgentState| {
                         me.assume_bard(&|bard: &mut BardClassState| {
-                            bard.on_tempo(if annotation.eq("one") {
+                            bard.on_tempo(if skill.eq("Rhythm One") {
                                 2
-                            } else if annotation.eq("two") {
+                            } else if skill.eq("Rhthym Two") {
                                 3
-                            } else if annotation.eq("three") {
+                            } else if skill.eq("Rhthym Three") {
                                 4
                             } else {
                                 1
@@ -968,7 +998,7 @@ pub fn handle_songcalling_action(
             attack_afflictions(
                 agent_states,
                 &combat_action.target,
-                vec![FType::Generosity],
+                vec![FType::Magnanimity],
                 after,
             );
         }

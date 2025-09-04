@@ -118,6 +118,7 @@ pub enum WeavingAttack {
     Ironcollar,
     Headstitch,
     Heartcage,
+    Masterstroke,
 }
 
 pub struct WeavingAttackAction {
@@ -225,6 +226,13 @@ impl WeavingAttackAction {
             attack: WeavingAttack::Patchwork,
         }
     }
+    pub fn masterstroke(caster: String, target: String) -> Self {
+        WeavingAttackAction {
+            caster,
+            target,
+            attack: WeavingAttack::Masterstroke,
+        }
+    }
 
     pub fn get_skill(&self) -> &str {
         match self.attack {
@@ -241,6 +249,7 @@ impl WeavingAttackAction {
             WeavingAttack::Ironcollar => "Ironcollar",
             WeavingAttack::Headstitch => "Headstitch",
             WeavingAttack::Heartcage => "Heartcage",
+            WeavingAttack::Masterstroke => "Masterstroke",
         }
     }
 }
@@ -272,6 +281,7 @@ impl ActiveTransition for WeavingAttackAction {
             WeavingAttack::Ironcollar => format!("weave ironcollar {}", self.target),
             WeavingAttack::Headstitch => format!("weave headstitch {}", self.target),
             WeavingAttack::Heartcage => format!("weave heartcage {}", self.target),
+            WeavingAttack::Masterstroke => format!("weave masterstroke {}", self.target),
         })
     }
 }
@@ -293,7 +303,8 @@ pub enum PerformanceAttack {
     Quip,
     Sock,
     Hiltblow,
-    Cadence,
+    CadenceNaked,
+    Cadence(String),
 }
 
 impl PerformanceAttack {
@@ -305,7 +316,8 @@ impl PerformanceAttack {
             | Self::TempoThree(_, _, _)
             | Self::Harry(_)
             | Self::Bravado(_)
-            | Self::Cadence
+            | Self::CadenceNaked
+            | Self::Cadence(_)
             | Self::Pierce
             | Self::Hiltblow => true,
             _ => false,
@@ -334,7 +346,8 @@ impl PerformanceAttack {
             | Self::TempoThree(_, _, _)
             | Self::Harry(_)
             | Self::Bravado(_)
-            | Self::Cadence
+            | Self::Cadence(_)
+            | Self::CadenceNaked
             | Self::Pierce
             | Self::Hiltblow
             | Self::Crackshot
@@ -351,7 +364,8 @@ impl PerformanceAttack {
             | Self::TempoTwo(_, _)
             | Self::TempoThree(_, _, _)
             | Self::Harry(_)
-            | Self::Cadence
+            | Self::CadenceNaked
+            | Self::Cadence(_)
             | Self::Pierce
             | Self::Hiltblow
             | Self::Crackshot
@@ -376,7 +390,8 @@ impl PerformanceAttack {
             | Self::TempoThree(_, _, _)
             | Self::Harry(_)
             | Self::Bravado(_)
-            | Self::Cadence
+            | Self::Cadence(_)
+            | Self::CadenceNaked
             | Self::Hiltblow => true,
             _ => false,
         }
@@ -452,11 +467,18 @@ impl PerformanceAttackAction {
             attack: PerformanceAttack::TempoThree(venom_one, venom_two, venom_three),
         }
     }
-    pub fn cadence(caster: String, target: String) -> Self {
+    pub fn cadence_naked(caster: String, target: String) -> Self {
         PerformanceAttackAction {
             caster,
             target,
-            attack: PerformanceAttack::Cadence,
+            attack: PerformanceAttack::CadenceNaked,
+        }
+    }
+    pub fn cadence(caster: String, target: String, venom: String) -> Self {
+        PerformanceAttackAction {
+            caster,
+            target,
+            attack: PerformanceAttack::Cadence(venom),
         }
     }
     pub fn crackshot(caster: String, target: String) -> Self {
@@ -544,7 +566,8 @@ impl ActiveTransition for PerformanceAttackAction {
             PerformanceAttack::Quip => format!("quip {}", self.target),
             PerformanceAttack::Sock => format!("sock {}", self.target),
             PerformanceAttack::Hiltblow => format!("hiltblow {}", self.target),
-            PerformanceAttack::Cadence => format!("cadence {}", self.target),
+            PerformanceAttack::CadenceNaked => format!("cadence {}", self.target),
+            PerformanceAttack::Cadence(venom) => format!("cadence {} {}", self.target, venom),
         };
         if should_call_venoms(timeline) {
             let called = match &self.attack {
@@ -567,6 +590,7 @@ impl ActiveTransition for PerformanceAttackAction {
                 PerformanceAttack::Needle(venom) => call_venom(&self.target, venom, None),
                 PerformanceAttack::Harry(venom) => call_venom(&self.target, venom, None),
                 PerformanceAttack::Bravado(venom) => call_venom(&self.target, venom, None),
+                PerformanceAttack::Cadence(venom) => call_venom(&self.target, venom, None),
                 _ => "".to_string(),
             };
             Ok(format!("{};;{}", called, action))
@@ -728,5 +752,26 @@ impl ActiveTransition for HorologeAction {
         } else {
             Ok(format!("give hourglass to {}", self.target))
         }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+pub struct EnvenomFalchionAction {
+    pub caster: String,
+    pub venom: String,
+}
+
+impl EnvenomFalchionAction {
+    pub fn new(caster: String, venom: String) -> Self {
+        EnvenomFalchionAction { caster, venom }
+    }
+}
+
+impl ActiveTransition for EnvenomFalchionAction {
+    fn simulate(&self, timeline: &AetTimeline) -> Vec<ProbableEvent> {
+        vec![]
+    }
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("envenom falchion with {}", self.venom))
     }
 }

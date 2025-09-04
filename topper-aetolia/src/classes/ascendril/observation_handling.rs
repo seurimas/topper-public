@@ -92,7 +92,7 @@ pub fn handle_combat_action(
                 });
             } else {
                 for_agent(agent_states, &combat_action.target, &|me| {
-                    me.set_flag(FType::Deafness, false);
+                    me.set_flag(FType::Courage, false);
                 });
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.assume_ascendril(&|ascendril| {

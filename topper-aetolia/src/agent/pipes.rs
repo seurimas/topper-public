@@ -21,7 +21,7 @@ pub enum PipeState {
 
 impl Default for PipeState {
     fn default() -> Self {
-        Self::UnknownFilled
+        Self::UnknownMaybeUnfilled
     }
 }
 
@@ -214,5 +214,8 @@ impl PipesState {
         self.yarrow == PipeState::UnknownUnfilled
             || self.willow == PipeState::UnknownUnfilled
             || self.reishi == PipeState::UnknownUnfilled
+            || self.yarrow == PipeState::UnknownMaybeUnfilled
+            || self.willow == PipeState::UnknownMaybeUnfilled
+            || self.reishi == PipeState::UnknownMaybeUnfilled
     }
 }

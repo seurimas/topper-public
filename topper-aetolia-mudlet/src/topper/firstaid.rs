@@ -80,6 +80,9 @@ impl FirstAidModule {
     fn infer_predict_and_elevate_clears(&mut self, timeline: &AetTimeline) {
         let mut clear_settings = Vec::new();
         for predicted in &self.active.predicted {
+            if predicted.is_controller() {
+                continue;
+            }
             if let Some(states) = timeline.state.get_agent(&timeline.who_am_i()) {
                 if states.iter().all(|state| !state.is(*predicted)) {
                     clear_settings.push(FirstAidSetting::UnPredict(*predicted));

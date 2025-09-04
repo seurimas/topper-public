@@ -54,6 +54,13 @@ pub fn handle_combat_action(
     after: &Vec<AetObservation>,
 ) -> Result<(), String> {
     match combat_action.skill.as_ref() {
+        "Refraction" => {
+            for_agent(agent_states, &combat_action.caster, &move |me| {
+                me.assume_siderealist(&|me| {
+                    me.refract(combat_action.target.clone());
+                });
+            });
+        }
         "Embed" => {
             println!(
                 "Hint: {:?}",
@@ -161,7 +168,7 @@ pub fn handle_combat_action(
             attack_first_affliction(
                 agent_states,
                 &combat_action.target,
-                vec![FType::Epilepsy, FType::Berserking],
+                vec![FType::Epilepsy, FType::Mania],
                 after,
             );
             for_agent(agent_states, &combat_action.caster, &move |me| {
@@ -170,10 +177,10 @@ pub fn handle_combat_action(
         }
         "Tones Stridulation" => {
             for_agent(agent_states, &combat_action.target, &move |me| {
-                if me.is(FType::Deafness) {
-                    me.toggle_flag(FType::Deafness, false);
+                if me.is(FType::Courage) {
+                    me.toggle_flag(FType::Courage, false);
                 } else {
-                    me.toggle_flag(FType::Sensitivity, true);
+                    me.toggle_flag(FType::RingingEars, true);
                 }
             });
             for_agent(agent_states, &combat_action.caster, &move |me| {
@@ -639,11 +646,25 @@ pub fn handle_combat_action(
                     );
                 }
             } else if combat_action.annotation.eq_ignore_ascii_case("failure") {
-                for_agent(agent_states, &combat_action.target, &move |me| {
+                for_agent(agent_states, &combat_action.caster, &move |me| {
                     me.observe_flag(FType::Echoes, false);
                 });
             } else {
                 // Nothing to do.
+            }
+        }
+        "Alteration" => {
+            if let Some(aff) = FType::from_name(&combat_action.annotation[4..].to_string()) {
+                for_agent(agent_states, &combat_action.target, &move |me| {
+                    me.toggle_flag(aff, false);
+                });
+            }
+        }
+        "Alteration fail" => {
+            if let Some(aff) = FType::from_name(&combat_action.annotation) {
+                for_agent(agent_states, &combat_action.caster, &move |me| {
+                    me.observe_flag(aff, false);
+                });
             }
         }
         "Syzygy" => {

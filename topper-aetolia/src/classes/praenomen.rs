@@ -17,8 +17,8 @@ pub fn handle_combat_action(
                     "Mesmerize" => {
                         if perspective != Perspective::Target {
                             for_agent(agent_states, &combat_action.target, &|me| {
-                                if me.is(FType::Blindness) {
-                                    me.set_flag(FType::Blindness, false);
+                                if me.is(FType::Courage) {
+                                    me.set_flag(FType::Courage, false);
                                 } else {
                                     me.set_flag(FType::WritheTransfix, true);
                                 }
@@ -73,19 +73,19 @@ pub fn handle_combat_action(
                 attack_afflictions(
                     agent_states,
                     &combat_action.target,
-                    vec![FType::BloodCurse],
+                    vec![FType::Psychosis],
                     after,
                 );
             }
             "Spew" => for_agent(agent_states, &combat_action.target, &|me| {
-                me.set_flag(FType::Blindness, false);
-                me.set_flag(FType::Deafness, false);
+                me.set_flag(FType::Courage, false);
+                me.set_flag(FType::RingingEars, true);
             }),
             "Poison" => {
                 attack_afflictions(
                     agent_states,
                     &combat_action.target,
-                    vec![FType::BloodPoison],
+                    vec![FType::Sepsis],
                     after,
                 );
             }

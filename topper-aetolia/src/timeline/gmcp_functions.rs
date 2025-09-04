@@ -3,7 +3,10 @@ use topper_core::timeline::*;
 use crate::{
     classes::Class,
     db::*,
-    non_agent::{AetTimelineDenizenExt, AetTimelineRoomExt, Direction, Room},
+    non_agent::{
+        AetTimelineDenizenExt, AetTimelineRoomExt, Direction, PersuasionStatus, Room,
+        CONVINCED_TAG, MOB_TAG,
+    },
     types::*,
 };
 
@@ -28,6 +31,12 @@ pub fn apply_gmcp<DB: AetDatabaseModule>(
         _ => {}
     }
     Ok(())
+}
+
+fn get_stat(gmcp: &serde_json::Value, stat: &str) -> Option<i32> {
+    gmcp.get(stat)
+        .and_then(|stat| stat.as_str())
+        .and_then(|stat| stat.parse::<i32>().ok())
 }
 
 fn handle_char_vitals(
@@ -96,19 +105,13 @@ fn handle_char_vitals(
         );
     }
 
-    if let (Some(hp), Some(mp), Some(max_hp), Some(max_mp)) = (
-        gmcp.get("hp")
-            .and_then(|hp| hp.as_str())
-            .and_then(|hp| hp.parse::<i32>().ok()),
-        gmcp.get("mp")
-            .and_then(|mp| mp.as_str())
-            .and_then(|mp| mp.parse::<i32>().ok()),
-        gmcp.get("maxhp")
-            .and_then(|max_hp| max_hp.as_str())
-            .and_then(|max_hp| max_hp.parse::<i32>().ok()),
-        gmcp.get("maxmp")
-            .and_then(|max_mp| max_mp.as_str())
-            .and_then(|max_mp| max_mp.parse::<i32>().ok()),
+    if let (Some(hp), Some(mp), Some(acu), Some(max_hp), Some(max_mp), Some(max_acu)) = (
+        get_stat(gmcp, "hp"),
+        get_stat(gmcp, "mp"),
+        get_stat(gmcp, "acu"),
+        get_stat(gmcp, "maxhp"),
+        get_stat(gmcp, "maxmp"),
+        get_stat(gmcp, "maxacu"),
     ) {
         for_agent(
             timeline,
@@ -117,8 +120,10 @@ fn handle_char_vitals(
                 if !me.is(FType::Recklessness) {
                     me.set_stat(SType::Health, hp);
                     me.set_stat(SType::Mana, mp);
+                    me.persuasion_state.acumen = acu;
                     me.set_max_stat(SType::Health, max_hp);
                     me.set_max_stat(SType::Mana, max_mp);
+                    me.persuasion_state.max_acumen = max_acu;
                 } else if max_mp != mp || max_hp != hp {
                     me.observe_flag(FType::Recklessness, false);
                 }
@@ -319,7 +324,8 @@ fn handle_item_added(
                     None
                 };
                 if let Some(room_id) = in_room {
-                    timeline.add_denizen(id, "".to_string(), room_id, name.to_string(), None);
+                    timeline.add_denizen(id, room_id, name.to_string(), None);
+                    handle_item_attribs(id, timeline, item);
                 }
                 timeline.for_all_agents(&|agent| {
                     if agent.class_state.get_normalized_class() == Some(Class::Bard) {
@@ -377,6 +383,7 @@ fn handle_item_list(
         None
     };
     if let Some(room_id) = in_room {
+        // Clear the room before adding the new items.
         for denizen in timeline.find_denizens_in_room(room_id) {
             timeline.observe_denizen_out_of_room(denizen, room_id);
         }
@@ -390,9 +397,32 @@ fn handle_item_list(
                 item.get("name").and_then(|name| name.as_str()),
             ) {
                 if let Some(room_id) = in_room {
-                    timeline.add_denizen(id, "".to_string(), room_id, name.to_string(), None);
+                    timeline.add_denizen(id, room_id, name.to_string(), None);
+                    handle_item_attribs(id, timeline, item);
                 }
+            } else {
+                println!("Item added without name or id");
             }
         }
+    } else {
+        println!("No items found in list");
+    }
+}
+
+fn handle_item_attribs(
+    id: i64,
+    timeline: &mut TimelineState<crate::types::AgentState, crate::non_agent::AetNonAgent>,
+    item: &serde_json::Value,
+) {
+    if let Some(attribs) = item.get("attrib").and_then(|id| id.as_str()) {
+        timeline.for_denizen(id, &move |denizen| {
+            if attribs.contains('m') {
+                denizen.tags.insert(MOB_TAG.to_string());
+            }
+            if attribs.contains('C') {
+                denizen.tags.insert(CONVINCED_TAG.to_string());
+                denizen.persuasion_status = PersuasionStatus::Convinced;
+            }
+        });
     }
 }
