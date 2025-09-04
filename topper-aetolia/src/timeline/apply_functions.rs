@@ -70,6 +70,8 @@ pub fn apply_observation(
             for_agent(timeline, who, &|me| {
                 if let Some(aff_flag) = FType::from_name(&affliction) {
                     me.toggle_flag(aff_flag, false);
+                } else {
+                    me.unknown_flags.remove_flag(affliction);
                 }
             });
             if let Some(AetObservation::Devenoms(venom)) = before.last() {
@@ -103,6 +105,8 @@ pub fn apply_observation(
             timeline.for_agent(&who_am_i, &move |me: &mut AgentState| {
                 if let Some(aff_flag) = FType::from_name(&flag_name) {
                     me.observe_flag(aff_flag, true);
+                } else {
+                    me.unknown_flags.add_flag(&flag_name);
                 }
             });
         }
@@ -112,6 +116,15 @@ pub fn apply_observation(
                 if let (Some(old), Some(new)) = (FType::from_name(from), FType::from_name(to)) {
                     me.toggle_flag(old, false);
                     me.toggle_flag(new, true);
+                } else if let Some(new) = FType::from_name(to) {
+                    me.toggle_flag(new, true);
+                    me.unknown_flags.remove_flag(from);
+                } else if let Some(old) = FType::from_name(from) {
+                    me.toggle_flag(old, false);
+                    me.unknown_flags.add_flag(to);
+                } else {
+                    me.unknown_flags.remove_flag(from);
+                    me.unknown_flags.add_flag(to);
                 }
             });
         }
@@ -1070,12 +1083,16 @@ pub fn apply_or_strike_random_cure(
             (_, AetObservation::Cured(aff_name)) => {
                 if let Some(aff) = FType::from_name(&aff_name) {
                     who.toggle_flag(aff, false);
+                } else {
+                    who.unknown_flags.remove_flag(aff_name);
                 }
                 discerned += 1;
             }
             (_, AetObservation::DiscernedCure(_, aff_name)) => {
                 if let Some(aff) = FType::from_name(&aff_name) {
                     who.toggle_flag(aff, false);
+                } else {
+                    who.unknown_flags.remove_flag(aff_name);
                 }
                 discerned += 1;
             }
@@ -1107,6 +1124,8 @@ pub fn apply_or_infer_random_afflictions(
                 if perspective == Perspective::Target {
                     if let Some(aff) = FType::from_name(&aff_name) {
                         who.toggle_flag(aff, true);
+                    } else {
+                        who.unknown_flags.add_flag(aff_name);
                     }
                     discerned = true;
                 }
@@ -1115,6 +1134,8 @@ pub fn apply_or_infer_random_afflictions(
                 if perspective == Perspective::Target {
                     if let Some(def) = FType::from_name(&def_name) {
                         who.toggle_flag(def, false);
+                    } else {
+                        who.unknown_flags.remove_flag(def_name);
                     }
                     discerned = true;
                 }
@@ -1123,6 +1144,8 @@ pub fn apply_or_infer_random_afflictions(
                 if perspective != Perspective::Target {
                     if let Some(aff) = FType::from_name(&aff_name) {
                         who.toggle_flag(aff, true);
+                    } else {
+                        who.unknown_flags.add_flag(aff_name);
                     }
                     discerned = true;
                 }
@@ -1173,12 +1196,18 @@ pub fn apply_or_infer_cures(
                             who.set_flag(FType::Weakvoid, true);
                         }
                         found_cures.push(aff);
+                    } else {
+                        found_cures.push(FType::Asleep); // Dummy to avoid empty
+                        who.unknown_flags.remove_flag(aff_name);
                     }
                 }
                 AetObservation::Stripped(def_name) => {
                     if let Some(def) = FType::from_name(&def_name) {
                         who.toggle_flag(def, false);
                         found_cures.push(def);
+                    } else {
+                        found_cures.push(FType::Asleep); // Dummy to avoid empty
+                        who.unknown_flags.remove_flag(def_name);
                     }
                 }
                 _ => {}
@@ -1267,6 +1296,9 @@ pub fn apply_or_infer_cure(
             }
             who.toggle_flag(aff, false);
             found_cures.push(aff);
+        } else {
+            println!("Unknown simple cure: {}", aff_name);
+            found_cures.push(FType::Asleep); // Dummy to avoid empty
         }
     } else if let Some(AetObservation::Stripped(def_name)) = after.get(1) {
         if let Some(def) = FType::from_name(&def_name) {
@@ -1325,6 +1357,9 @@ pub fn apply_or_infer_cure(
             }
             who.toggle_flag(def, false);
             found_cures.push(def);
+        } else {
+            println!("Unknown simple cure: {}", def_name);
+            who.unknown_flags.remove_flag(def_name);
         }
     } else {
         match cure {

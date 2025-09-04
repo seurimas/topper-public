@@ -326,7 +326,7 @@ impl AetTimelineStateTrait for AetTimelineState {
                     me.set_flag(aff_flag, val);
                 }
             } else {
-                // Err(format!("Failed to find flag {}", flag_name));
+                me.unknown_flags.add_flag(&flag_name);
             }
         });
         Ok(())
@@ -346,7 +346,7 @@ impl AetTimelineStateTrait for AetTimelineState {
                     // return Err(format!("Tried to tick non-counter: {}", flag_name));
                 }
             } else {
-                // return Err(format!("Failed to find flag {}", flag_name));
+                me.unknown_flags.add_flag(&flag_name);
             }
         });
         Ok(())

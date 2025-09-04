@@ -18,6 +18,7 @@ pub struct AgentState {
     pub max_stats: [CType; SType::SIZE as usize],
     pub aggro: AggroState,
     pub flags: FlagSet,
+    pub unknown_flags: UnknownFlagSet,
     pub limb_damage: LimbSet,
     pub hypno_state: HypnoState,
     pub class_state: ClassState,
