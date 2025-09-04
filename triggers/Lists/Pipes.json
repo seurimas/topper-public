@@ -18,7 +18,7 @@
         "observation_name": "ListStart"
     },
     {
-        "regex": "^pipe(\\d+)\\s+((?:empty|some willow bark|a yarrow root|a reishi mushromm)\\s+\\d+)\\s+(A|\\d+)\\s+(Yes|No)",
+        "regex": "^pipe(\\d+)\\s+((?:empty|some willow bark|a yarrow root|a reishi mushroom)\\s+\\d+)\\s+(A|\\d+)\\s+(Yes|No)",
         "args": [
             {
                 "Literal": "Pipes"

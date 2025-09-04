@@ -588,7 +588,7 @@ pub fn handle_combat_action(
                 if combat_action.annotation.contains("glimmercrest")
                     || combat_action.annotation.contains("sprite")
                 {
-                    for_agent(agent_states, &combat_action.caster, &|me| {
+                    for_agent(agent_states, &agent_states.me.clone(), &|me| {
                         let room_id = me.room_id;
                         me.assume_siderealist(&|siderealist| {
                             siderealist.kill_companion();
