@@ -998,7 +998,7 @@ pub fn handle_songcalling_action(
             attack_afflictions(
                 agent_states,
                 &combat_action.target,
-                vec![FType::Magnanimity],
+                vec![FType::Peace],
                 after,
             );
         }

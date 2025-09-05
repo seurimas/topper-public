@@ -400,6 +400,12 @@ pub fn apply_observation(
                 });
             }
         }
+        AetObservation::DefenseUp(defense) => {
+            timeline.set_flag_for_agent(&timeline.me.clone(), &defense, true)?;
+        }
+        AetObservation::DefenseDown(defense) => {
+            timeline.set_flag_for_agent(&timeline.me.clone(), &defense, false)?;
+        }
         AetObservation::LimbDamage(what, much) => {
             timeline.adjust_agent_limb(&timeline.me.clone(), what, *much)?;
         }

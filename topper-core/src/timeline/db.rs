@@ -9,6 +9,8 @@ pub trait DatabaseModule {
 
     fn get(&self, tree: &str, key: &String) -> Option<Arc<[u8]>>;
     fn get_json<T: DeserializeOwned>(&self, tree: &str, key: &String) -> Option<T>;
+
+    fn remove(&self, tree: &str, key: &String);
 }
 
 pub struct DummyDatabaseModule;
@@ -26,6 +28,10 @@ impl DatabaseModule for DummyDatabaseModule {
     }
 
     fn get(&self, tree: &str, key: &String) -> Option<Arc<[u8]>> {
+        panic!("Dummy called");
+    }
+
+    fn remove(&self, tree: &str, key: &String) {
         panic!("Dummy called");
     }
 }

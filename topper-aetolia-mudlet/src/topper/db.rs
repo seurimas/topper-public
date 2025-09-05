@@ -27,7 +27,7 @@ use topper_core_mudlet::topper::{
 use super::battle_stats::BattleStats;
 
 pub struct AetMudletDatabaseModule {
-    db: Db,
+    pub db: Db,
     thread: JoinHandle<()>,
     // api_sender: Sender<ApiRequest>,
     // api_receiver: Receiver<CharacterApiResponse>,
@@ -131,6 +131,14 @@ impl DatabaseModule for AetMudletDatabaseModule {
             .get(key)
             .expect(format!("Bad {} get", key).as_ref())
             .map(|ivec| ivec.into())
+    }
+
+    fn remove(&self, tree: &str, key: &String) {
+        self.db
+            .open_tree(tree)
+            .expect(format!("Bad {} tree", tree).as_ref())
+            .remove(key)
+            .expect(format!("Bad {} remove", key).as_ref());
     }
 }
 

@@ -1,11 +1,12 @@
 use std::convert::TryFrom;
 
-use topper_core::timeline::db::DatabaseModule;
+use topper_core::{observations::strip_ansi, timeline::db::DatabaseModule};
 
 use crate::{
     agent::Hypnosis,
     classes::{Class, VenomPlan},
     curatives::firstaid::FirstAidPriorities,
+    timeline::{AetObservation, AetTimeSlice},
 };
 
 pub const HINT_TREE: &str = "HINTS";
@@ -35,6 +36,43 @@ pub trait AetDatabaseModule {
     fn insert_hint(&self, key: &String, value: &String);
 
     fn get_hint(&self, key: &String) -> Option<String>;
+
+    fn set_defense_order(&self, class_who: &String, order: Vec<String>);
+    fn get_defense_order(&self, class_who: &String) -> Option<Vec<String>>;
+
+    fn add_defense_command(&self, defense: &String, command: &String);
+    fn get_defense_command(&self, defense: &String) -> Option<String>;
+    fn remove_defense_command(&self, defense: &String);
+
+    fn add_defense_trigger(&self, defense: &String, trigger: &String);
+    fn get_defense_trigger(&self, trigger: &String) -> Option<String>;
+    fn remove_defense_trigger(&self, trigger: &String);
+
+    fn add_defense_missing_trigger(&self, defense: &String, trigger: &String);
+    fn get_defense_missing_trigger(&self, trigger: &String) -> Option<String>;
+    fn remove_defense_missing_trigger(&self, trigger: &String);
+
+    fn get_db_observation(&self, trigger: &String) -> Option<AetObservation> {
+        if let Some(defense) = self.get_defense_trigger(&strip_ansi(trigger)) {
+            Some(AetObservation::DefenseUp(defense))
+        } else if let Some(defense) = self.get_defense_missing_trigger(&strip_ansi(trigger)) {
+            Some(AetObservation::DefenseDown(defense))
+        } else {
+            None
+        }
+    }
+
+    fn observe(&self, time_slice: &mut AetTimeSlice) {
+        let Some(observations) = &mut time_slice.observations else {
+            println!("No observations vector in time slice");
+            return;
+        };
+        for (line, _) in &time_slice.lines {
+            if let Some(obs) = self.get_db_observation(line) {
+                observations.push(obs);
+            }
+        }
+    }
 }
 
 impl<T: DatabaseModule> AetDatabaseModule for T {
@@ -93,5 +131,55 @@ impl<T: DatabaseModule> AetDatabaseModule for T {
                 .map(|str_ref| str_ref.to_string())
                 .ok()
         })
+    }
+
+    fn set_defense_order(&self, class_who: &String, order: Vec<String>) {
+        self.insert_json::<Vec<String>>("defense_orders", class_who, order);
+    }
+    fn get_defense_order(&self, class_who: &String) -> Option<Vec<String>> {
+        self.get_json::<Vec<String>>("defense_orders", class_who)
+    }
+
+    fn add_defense_command(&self, defense: &String, command: &String) {
+        self.insert("defense_commands", defense, command.as_bytes());
+    }
+    fn get_defense_command(&self, defense: &String) -> Option<String> {
+        self.get("defense_commands", defense).and_then(|bytes| {
+            std::str::from_utf8(&bytes)
+                .map(|str_ref| str_ref.to_string())
+                .ok()
+        })
+    }
+    fn remove_defense_command(&self, defense: &String) {
+        self.remove("defense_commands", defense);
+    }
+
+    fn add_defense_trigger(&self, defense: &String, trigger: &String) {
+        self.insert("defense_triggers", trigger, defense.as_bytes());
+    }
+    fn get_defense_trigger(&self, trigger: &String) -> Option<String> {
+        self.get("defense_triggers", trigger).and_then(|bytes| {
+            std::str::from_utf8(&bytes)
+                .map(|str_ref| str_ref.to_string())
+                .ok()
+        })
+    }
+    fn remove_defense_trigger(&self, trigger: &String) {
+        self.remove("defense_triggers", trigger);
+    }
+
+    fn add_defense_missing_trigger(&self, defense: &String, trigger: &String) {
+        self.insert("defense_missing_triggers", trigger, defense.as_bytes());
+    }
+    fn get_defense_missing_trigger(&self, trigger: &String) -> Option<String> {
+        self.get("defense_missing_triggers", trigger)
+            .and_then(|bytes| {
+                std::str::from_utf8(&bytes)
+                    .map(|str_ref| str_ref.to_string())
+                    .ok()
+            })
+    }
+    fn remove_defense_missing_trigger(&self, trigger: &String) {
+        self.remove("defense_missing_triggers", trigger);
     }
 }

@@ -254,6 +254,8 @@ pub enum AetObservation {
         max_resolve: i32,
     },
     Persuaded(String),
+    DefenseUp(String),
+    DefenseDown(String),
 }
 
 pub trait AetTimelineStateTrait {

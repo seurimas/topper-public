@@ -6,6 +6,7 @@ use std::sync::mpsc::Sender;
 use std::sync::{Arc, RwLock};
 use topper_aetolia::bt::{clear_behavior_trees, DEBUG_TREES};
 use topper_aetolia::classes::{clear_aff_stacks, get_attack, VenomPlan};
+use topper_aetolia::db::AetDatabaseModule;
 use topper_aetolia::defense::DEFENSE_DATABASE;
 use topper_aetolia::non_agent::{AetNonAgent, AetTimelineDenizenExt, AetTimelineRoomExt};
 use topper_aetolia::timeline::*;
@@ -20,6 +21,7 @@ pub mod basher;
 pub mod battle_stats;
 mod behavior_trees;
 pub mod db;
+pub mod defup;
 pub mod firstaid;
 pub mod group;
 pub mod prediction;
@@ -27,6 +29,7 @@ pub mod stacks;
 pub mod web_ui;
 use crate::topper::basher::BasherModule;
 use crate::topper::behavior_trees::initialize_load_tree_func;
+use crate::topper::defup::DefupModule;
 use crate::topper::prediction::prioritize_cures;
 use crate::topper::stacks::initialize_load_stack_func;
 
@@ -139,6 +142,7 @@ pub struct AetTopper {
     pub database_module: Arc<RwLock<AetMudletDatabaseModule>>,
     pub web_module: WebModule,
     pub observation_parser: ObservationParser<AetObservation>,
+    pub defup_module: DefupModule,
 }
 
 impl Topper<AetObservation, AetPrompt, AgentState, AetNonAgent, AetMudletDatabaseModule>
@@ -187,6 +191,7 @@ impl AetTopper {
                 aet_observation_creator,
             )
             .unwrap(),
+            defup_module: DefupModule::default(),
         }
     }
 }
@@ -211,15 +216,17 @@ impl TopperHandler<BattleStats> for AetTopper {
                     Err(err) => println!("Could not assign database: {:?}", err),
                 }
                 let mut new_observations = self.observation_parser.observe(&slice);
-                if self.debug_mode {
-                    println!("{:?}", new_observations);
-                    println!("{:?}", slice.gmcp);
-                    println!("{:?}", self.timeline_module.timeline.state.get_my_room());
-                }
                 slice
                     .observations
                     .get_or_insert(Vec::new())
                     .append(&mut new_observations);
+                let db = self.database_module.read().map_err(|err| err.to_string())?;
+                db.observe(slice);
+                if self.debug_mode {
+                    println!("{:?}", slice.observations);
+                    println!("{:?}", slice.gmcp);
+                    println!("{:?}", self.timeline_module.timeline.state.get_my_room());
+                }
             }
             TopperMessage::Request(TopperRequest::ModuleMsg(module, command)) => {
                 if "core".eq(module) && "debug".eq(command) {
@@ -274,6 +281,9 @@ impl TopperHandler<BattleStats> for AetTopper {
                 } else if "core".eq(module) && "reload stacks".eq(command) {
                     println!("Reloading aff stacks");
                     clear_aff_stacks();
+                }
+                if self.debug_mode {
+                    println!("Module command: {}: {}", module, command);
                 }
             }
             _ => {}
@@ -334,6 +344,10 @@ impl TopperHandler<BattleStats> for AetTopper {
                     &self.timeline_module.timeline,
                     &database_module,
                 ),
+            )?)
+            .then(self.defup_module.handle_message(
+                &topper_msg,
+                (&self.timeline_module.timeline, &database_module),
             )?))
     }
 }

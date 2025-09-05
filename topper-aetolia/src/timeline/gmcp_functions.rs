@@ -25,6 +25,7 @@ pub fn apply_gmcp<DB: AetDatabaseModule>(
             handle_room_players(&gmcp.1, timeline);
         }
         "gmcp.Char.Vitals" => handle_char_vitals(&gmcp.1, timeline),
+        "gmcp.Char.Status" => handle_char_status(&gmcp.1, timeline),
         "gmcp.Char.Items.List" => handle_item_list(&gmcp.1, timeline),
         "gmcp.Char.Items.Add" => handle_item_added(&gmcp.1, timeline),
         "gmcp.Char.Items.Remove" => handle_item_removed(&gmcp.1, timeline),
@@ -127,6 +128,26 @@ fn handle_char_vitals(
                 } else if max_mp != mp || max_hp != hp {
                     me.observe_flag(FType::Recklessness, false);
                 }
+            },
+        );
+    }
+}
+
+fn handle_char_status(
+    gmcp: &serde_json::Value,
+    timeline: &mut TimelineState<crate::types::AgentState, crate::non_agent::AetNonAgent>,
+) {
+    if let Some(class) = gmcp
+        .get("class")
+        .and_then(|class| class.as_str())
+        .and_then(Class::from_str)
+    {
+        for_agent(
+            timeline,
+            &timeline.me.clone(),
+            &move |me: &mut AgentState| {
+                me.class_state
+                    .initialize_for_normalized_class(class.normal());
             },
         );
     }
