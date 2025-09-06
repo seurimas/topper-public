@@ -42,11 +42,13 @@ lazy_static! {
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum AetBehaviorTreeNode {
-    Action(AetBehavior),
-    Predicate(AetPredicate),
     AddFirstAidSettings(Vec<FirstAidSetting>),
     ResetFirstAidPriorities,
     SubTree(String),
+    #[serde(untagged)]
+    Action(AetBehavior),
+    #[serde(untagged)]
+    Predicate(AetPredicate),
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
