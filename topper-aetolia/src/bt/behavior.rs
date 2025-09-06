@@ -31,13 +31,21 @@ pub enum AetBehavior {
     CopyHint(String, String),
     SetLimbHint(AetTarget, LimbDescriptor, String),
     PlainQebBehavior(String),
+    #[serde(untagged)]
     EnchantmentBehavior(EnchantmentBehavior),
+    #[serde(untagged)]
     CurativeBehavior(CurativeBehavior),
+    #[serde(untagged)]
     DefenseBehavior(DefenseBehavior),
+    #[serde(untagged)]
     BardBehavior(BardBehavior),
+    #[serde(untagged)]
     PredatorBehavior(PredatorBehavior),
+    #[serde(untagged)]
     InfiltratorBehavior(InfiltratorBehavior),
+    #[serde(untagged)]
     AscendrilBehavior(AscendrilBehavior),
+    #[serde(untagged)]
     SiderealistBehavior(SiderealistBehavior),
 }
 

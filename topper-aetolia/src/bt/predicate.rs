@@ -130,6 +130,7 @@ pub enum AetPredicate {
     // Class-specific
     IsAffectedBy(AetTarget, FType),
     ClassIn(AetTarget, Vec<Class>),
+    // Class predicates
     BardPredicate(AetTarget, BardPredicate),
     PredatorPredicate(AetTarget, PredatorPredicate),
     InfiltratorPredicate(AetTarget, InfiltratorPredicate),
