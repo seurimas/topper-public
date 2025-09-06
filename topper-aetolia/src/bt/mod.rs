@@ -94,6 +94,7 @@ pub enum ClassController {
         monk_combo_generator: MonkComboGenerator,
         monk_combos: MonkComboSet,
     },
+    Zealot {},
 }
 
 impl BehaviorController {
@@ -199,6 +200,10 @@ impl BehaviorController {
         } else {
             panic!("Not a predator!")
         }
+    }
+
+    pub fn init_zealot(&mut self) {
+        self.class_controller = ClassController::Zealot {};
     }
 
     pub fn get_highest_scored_predator_combo(

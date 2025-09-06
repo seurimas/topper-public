@@ -12,7 +12,7 @@ pub enum MonkBehavior {
     // Class cure.
     Push(AetTarget),
     // Combo attacks
-    AddComboAttacks(Vec<MonkComboAttack>),
+    AddMonkComboAttacks(Vec<MonkComboAttack>),
     Combo(AetTarget, Vec<MonkComboGrader>, Option<CType>),
     // Non-combo Tekura actions
     Backbreaker(AetTarget),
@@ -200,7 +200,7 @@ impl UnpoweredFunction for MonkBehavior {
                     .add_to_qeb(MindBatter::from_target_boxed(target, model, controller));
                 UnpoweredFunctionState::Complete
             }
-            MonkBehavior::AddComboAttacks(attacks) => {
+            MonkBehavior::AddMonkComboAttacks(attacks) => {
                 controller
                     .monk_combo_generator()
                     .add_attacks(attacks.iter());

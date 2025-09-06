@@ -294,6 +294,12 @@ pub fn get_battle_stats(
             plan.as_ref().unwrap_or(&"".to_string()),
             Some(db),
         ),
+        "Zealot" => topper_aetolia::classes::zealot::get_class_state(
+            &timeline,
+            target.as_ref().unwrap_or(&"".to_string()),
+            plan.as_ref().unwrap_or(&"".to_string()),
+            Some(db),
+        ),
         _ => "".to_string(),
     };
     for timeslice in timeline.slices.iter().rev() {

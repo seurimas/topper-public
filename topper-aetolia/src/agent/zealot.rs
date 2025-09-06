@@ -54,6 +54,13 @@ impl ZenithState {
             _ => false,
         }
     }
+
+    pub fn time_to_active(&self) -> Option<CType> {
+        match self {
+            ZenithState::Rising(remaining) => Some(*remaining),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]

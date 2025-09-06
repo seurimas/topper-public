@@ -1093,6 +1093,14 @@ impl AgentState {
         }
     }
 
+    pub fn check_if_zealot<R>(&self, action: &Fn(&ZealotClassState) -> R) -> Option<R> {
+        if let ClassState::Zealot(zealot) = &self.class_state {
+            Some(action(zealot))
+        } else {
+            None
+        }
+    }
+
     pub fn assume_bard<R>(&mut self, action: &Fn(&mut BardClassState) -> R) -> R {
         if let ClassState::Bard(bard) = &mut self.class_state {
             action(bard)

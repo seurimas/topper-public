@@ -9,6 +9,7 @@ use crate::classes::infiltrator::InfiltratorPredicate;
 use crate::classes::is_affected_by;
 use crate::classes::predator::PredatorPredicate;
 use crate::classes::siderealist::SiderealistPredicate;
+use crate::classes::zealot::ZealotPredicate;
 use crate::classes::Class;
 use crate::classes::LockType;
 use crate::classes::VenomPlan;
@@ -136,6 +137,7 @@ pub enum AetPredicate {
     InfiltratorPredicate(AetTarget, InfiltratorPredicate),
     AscendrilPredicate(AetTarget, AscendrilPredicate),
     SiderealistPredicate(AetTarget, SiderealistPredicate),
+    ZealotPredicate(AetTarget, ZealotPredicate),
 }
 
 pub trait TargetPredicate {
@@ -674,6 +676,13 @@ impl UnpoweredFunction for AetPredicate {
             }
             AetPredicate::SiderealistPredicate(target, siderealist_predicate) => {
                 if siderealist_predicate.check(target, model, controller) {
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetPredicate::ZealotPredicate(target, zealot_predicate) => {
+                if zealot_predicate.check(target, model, controller) {
                     UnpoweredFunctionState::Complete
                 } else {
                     UnpoweredFunctionState::Failed

@@ -37,10 +37,17 @@ macro_rules! untargetted_action {
             pub fn new(caster: String) -> Self {
                 $name { caster }
             }
+
+            pub fn boxed(caster: String) -> Box<dyn crate::observables::ActiveTransition> {
+                Box::new($name::new(caster))
+            }
         }
 
-        impl ActiveTransition for $name {
-            fn act(&self, timline: &AetTimeline) -> ActivateResult {
+        impl crate::observables::ActiveTransition for $name {
+            fn act(
+                &self,
+                timline: &crate::timeline::AetTimeline,
+            ) -> crate::observables::ActivateResult {
                 Ok($action.to_string())
             }
         }
@@ -60,25 +67,35 @@ macro_rules! targetted_action {
                 $name { caster, target }
             }
 
+            pub fn boxed(
+                caster: String,
+                target: String,
+            ) -> Box<dyn crate::observables::ActiveTransition> {
+                Box::new($name::new(caster, target))
+            }
+
             pub fn from_target(
-                target: &AetTarget,
-                model: &BehaviorModel,
-                controller: &BehaviorController,
+                target: &crate::classes::AetTarget,
+                model: &crate::classes::BehaviorModel,
+                controller: &crate::classes::BehaviorController,
             ) -> Self {
                 $name::new(model.who_am_i(), target.get_name(model, controller))
             }
 
             pub fn from_target_boxed(
-                target: &AetTarget,
-                model: &BehaviorModel,
-                controller: &BehaviorController,
-            ) -> Box<dyn ActiveTransition> {
+                target: &crate::classes::AetTarget,
+                model: &crate::classes::BehaviorModel,
+                controller: &crate::classes::BehaviorController,
+            ) -> Box<dyn crate::observables::ActiveTransition> {
                 Box::new($name::from_target(target, model, controller))
             }
         }
 
-        impl ActiveTransition for $name {
-            fn act(&self, timline: &AetTimeline) -> ActivateResult {
+        impl crate::observables::ActiveTransition for $name {
+            fn act(
+                &self,
+                timline: &crate::timeline::AetTimeline,
+            ) -> crate::observables::ActivateResult {
                 Ok(format!($action, self.target))
             }
         }
