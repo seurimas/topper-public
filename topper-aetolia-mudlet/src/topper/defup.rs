@@ -34,7 +34,7 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for DefupModule {
                     self.defence_player = Some(me.clone());
                     require_update = true;
                 }
-                let my_class = my_agent.get_normalized_class();
+                let my_class = db.get_class(&me).map(|c| c.normal());
                 if self.defence_class != my_class {
                     self.defence_class = my_class;
                     require_update = true;
