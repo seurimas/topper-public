@@ -955,9 +955,13 @@ pub fn get_action_plan(
 ) -> ActionPlan {
     let mut action_plan = ActionPlan::new(me);
     let mut balance = get_balance_attack(timeline, me, target, strategy, db);
-    if let Some(parry) = get_needed_parry(timeline, me, target, strategy, db) {
+    if let Some(parry) = get_needed_parry(timeline, me, target, db) {
         balance = Box::new(SeparatorAction::pair(
-            Box::new(ParryAction::new(me.to_string(), parry)),
+            Box::new(ParryAction::by_class(
+                me.to_string(),
+                parry,
+                Class::Sentinel,
+            )),
             balance,
         ));
     }

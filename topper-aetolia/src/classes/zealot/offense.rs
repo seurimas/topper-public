@@ -1129,9 +1129,7 @@ pub fn get_balance_attack(
     let me = timeline.state.borrow_me();
     let mut you = timeline.state.borrow_agent(target);
     if !me.is(FType::Wrath) && check_config(timeline, &"PREDICT_PARRY".to_string()) {
-        if let Ok(new_parry) =
-            get_preferred_parry(timeline, target, &timeline.who_am_i(), &"".to_string(), db)
-        {
+        if let Ok(new_parry) = get_preferred_parry(timeline, target, &timeline.who_am_i(), db) {
             you.set_parrying(new_parry);
         }
     }
@@ -1280,7 +1278,7 @@ pub fn get_balance_attack(
     if me.is(FType::Fallen) && !full_combo.contains("risekick") {
         full_combo = format!("stand;;{}", full_combo);
     }
-    if let Some(parry) = get_needed_parry(timeline, &timeline.who_am_i(), target, strategy, db) {
+    if let Some(parry) = get_needed_parry(timeline, &timeline.who_am_i(), target, db) {
         full_combo = format!("fend {};;{}", parry.to_string(), full_combo);
     }
     let db_p = db.map(|db| (db, target));

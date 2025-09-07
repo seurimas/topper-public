@@ -14,7 +14,9 @@ use crate::classes::Class;
 use crate::classes::LockType;
 use crate::classes::VenomPlan;
 use crate::curatives::get_cure_depth;
+use crate::curatives::MENTAL_AFFLICTIONS;
 use crate::curatives::RANDOM_CURES;
+use crate::defense::get_preferred_parry;
 use crate::defense::DEFENSE_DATABASE;
 use crate::non_agent::AetTimelineRoomExt;
 use crate::timeline::*;
@@ -79,16 +81,39 @@ pub enum AetPredicate {
     AffCountOver(AetTarget, usize, Vec<FType>),
     AffCountUnder(AetTarget, usize, Vec<FType>),
     RandomCuresOver(AetTarget, usize),
+    MentalAffsOver(AetTarget, usize),
     AffStacksOver(AetTarget, usize, FType),
     IsProne(AetTarget),
     // Limbs
+    LimbsEqual(AetTarget, LimbDescriptor, LimbDescriptor),
     IsRestoringAny(AetTarget),
     IsRestoring(AetTarget, LimbDescriptor),
+    IsOverRestoring(AetTarget, LimbDescriptor),
     CanBreak(AetTarget, LimbDescriptor, f32),
+    RestoredBreak(AetTarget, LimbDescriptor, f32),
     CanMangled(AetTarget, LimbDescriptor, f32),
+    RestoredMangle(AetTarget, LimbDescriptor, f32),
     LimbOver(AetTarget, LimbDescriptor, f32, bool),
     CanMend(AetTarget, LimbDescriptor),
     AtLeastNLimbsOver(AetTarget, Vec<LimbDescriptor>, usize, f32, bool),
+    LimbsBreakableCount {
+        target: AetTarget,
+        #[serde(default)]
+        head_damage: Option<f32>,
+        #[serde(default)]
+        torso_damage: Option<f32>,
+        #[serde(default)]
+        left_arm_damage: Option<f32>,
+        #[serde(default)]
+        right_arm_damage: Option<f32>,
+        #[serde(default)]
+        left_leg_damage: Option<f32>,
+        #[serde(default)]
+        right_leg_damage: Option<f32>,
+        min_count: usize,
+        #[serde(default)]
+        assume_restoration: bool,
+    },
     // Priorities
     PriorityAffIs(AetTarget, FType),
     // Buffer/locks
@@ -127,6 +152,7 @@ pub enum AetPredicate {
     RoomIsTagged(String),
     // Parries
     KnownParry(AetTarget, LimbDescriptor),
+    ExpectedParry(AetTarget, LimbDescriptor),
     CanParry(AetTarget),
     // Class-specific
     IsAffectedBy(AetTarget, FType),
@@ -312,6 +338,16 @@ impl UnpoweredFunction for AetPredicate {
                 }
                 UnpoweredFunctionState::Failed
             }
+            AetPredicate::MentalAffsOver(target, min_count) => {
+                if let Some(aff_count) =
+                    aff_counts(target, model, controller, MENTAL_AFFLICTIONS.as_ref())
+                {
+                    if aff_count >= *min_count {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
             AetPredicate::AffStacksOver(target, min_stacks, aff) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.get_count(*aff) >= *min_stacks as u8 {
@@ -324,6 +360,18 @@ impl UnpoweredFunction for AetPredicate {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.is_prone() {
                         return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::LimbsEqual(target, limb_a, limb_b) => {
+                if let Some(limb_a) = limb_a.get_limb(model, controller, target) {
+                    if let Some(limb_b) = limb_b.get_limb(model, controller, target) {
+                        return if limb_a == limb_b {
+                            UnpoweredFunctionState::Complete
+                        } else {
+                            UnpoweredFunctionState::Failed
+                        };
                     }
                 }
                 UnpoweredFunctionState::Failed
@@ -346,6 +394,17 @@ impl UnpoweredFunction for AetPredicate {
                 }
                 UnpoweredFunctionState::Failed
             }
+            AetPredicate::IsOverRestoring(target, limb_descriptor) => {
+                if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
+                    if let Some(target) = target.get_target(model, controller) {
+                        let limb_state = target.get_limb_state(limb);
+                        if limb_state.is_restoring && limb_state.damage <= 30. {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
             AetPredicate::CanBreak(target, limb_descriptor, damage) => {
                 if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
                     if let Some(target) = target.get_target(model, controller) {
@@ -356,10 +415,38 @@ impl UnpoweredFunction for AetPredicate {
                 }
                 UnpoweredFunctionState::Failed
             }
+            AetPredicate::RestoredBreak(target, limb_descriptor, damage) => {
+                if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
+                    if let Some(target) = target.get_target(model, controller) {
+                        let mut limb_state = target.get_limb_state(limb);
+                        if limb_state.is_restoring {
+                            limb_state.assume_restore();
+                        }
+                        if limb_state.hits_to_break(*damage) == 1 {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
             AetPredicate::CanMangled(target, limb_descriptor, damage) => {
                 if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
                     if let Some(target) = target.get_target(model, controller) {
                         if target.get_limb_state(limb).hits_to_mangle(*damage) == 1 {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::RestoredMangle(target, limb_descriptor, damage) => {
+                if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
+                    if let Some(target) = target.get_target(model, controller) {
+                        let mut limb_state = target.get_limb_state(limb);
+                        if limb_state.is_restoring {
+                            limb_state.assume_restore();
+                        }
+                        if limb_state.hits_to_mangle(*damage) == 1 {
                             return UnpoweredFunctionState::Complete;
                         }
                     }
@@ -425,6 +512,80 @@ impl UnpoweredFunction for AetPredicate {
                     if count >= *min_count {
                         return UnpoweredFunctionState::Complete;
                     }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::LimbsBreakableCount {
+                target,
+                head_damage,
+                torso_damage,
+                left_arm_damage,
+                right_arm_damage,
+                left_leg_damage,
+                right_leg_damage,
+                min_count,
+                assume_restoration,
+            } => {
+                let Some(target_state) = target.get_target(model, controller) else {
+                    return UnpoweredFunctionState::Failed;
+                };
+                let mut count = 0;
+                if let Some(damage) = *head_damage {
+                    let mut limb_state = target_state.get_limb_state(LType::HeadDamage);
+                    if limb_state.is_restoring && *assume_restoration {
+                        limb_state.assume_restore();
+                    }
+                    if limb_state.hits_to_break(damage) == 1 {
+                        count += 1;
+                    }
+                }
+                if let Some(damage) = *torso_damage {
+                    let mut limb_state = target_state.get_limb_state(LType::TorsoDamage);
+                    if limb_state.is_restoring && *assume_restoration {
+                        limb_state.assume_restore();
+                    }
+                    if limb_state.hits_to_break(damage) == 1 {
+                        count += 1;
+                    }
+                }
+                if let Some(damage) = *left_arm_damage {
+                    let mut limb_state = target_state.get_limb_state(LType::LeftArmDamage);
+                    if limb_state.is_restoring && *assume_restoration {
+                        limb_state.assume_restore();
+                    }
+                    if limb_state.hits_to_break(damage) == 1 {
+                        count += 1;
+                    }
+                }
+                if let Some(damage) = *right_arm_damage {
+                    let mut limb_state = target_state.get_limb_state(LType::RightArmDamage);
+                    if limb_state.is_restoring && *assume_restoration {
+                        limb_state.assume_restore();
+                    }
+                    if limb_state.hits_to_break(damage) == 1 {
+                        count += 1;
+                    }
+                }
+                if let Some(damage) = *left_leg_damage {
+                    let mut limb_state = target_state.get_limb_state(LType::LeftLegDamage);
+                    if limb_state.is_restoring && *assume_restoration {
+                        limb_state.assume_restore();
+                    }
+                    if limb_state.hits_to_break(damage) == 1 {
+                        count += 1;
+                    }
+                }
+                if let Some(damage) = *right_leg_damage {
+                    let mut limb_state = target_state.get_limb_state(LType::RightLegDamage);
+                    if limb_state.is_restoring && *assume_restoration {
+                        limb_state.assume_restore();
+                    }
+                    if limb_state.hits_to_break(damage) == 1 {
+                        count += 1;
+                    }
+                }
+                if count >= *min_count {
+                    return UnpoweredFunctionState::Complete;
                 }
                 UnpoweredFunctionState::Failed
             }
@@ -569,10 +730,38 @@ impl UnpoweredFunction for AetPredicate {
                 UnpoweredFunctionState::Failed
             }
             AetPredicate::KnownParry(target, limb_descriptor) => {
+                if !model.state.borrow_me().is(FType::Wrath) {
+                    // We cannot know parries if we are not wrath.
+                    return UnpoweredFunctionState::Failed;
+                }
                 if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
                     if let Some(target) = target.get_target(model, controller) {
-                        if target.get_parrying() == Some(limb) {
+                        if target.get_parrying() == Some(limb) && target.can_parry() {
                             return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::ExpectedParry(aet_target, limb_descriptor) => {
+                if let Some(limb) = limb_descriptor.get_limb(model, controller, aet_target) {
+                    if let Some(target) = aet_target.get_target(model, controller) {
+                        if !target.can_parry() {
+                            return UnpoweredFunctionState::Failed;
+                        } else if model.state.borrow_me().is(FType::Wrath) {
+                            // If we are wrath, we can know the parry directly.
+                            if target.get_parrying() == Some(limb) {
+                                return UnpoweredFunctionState::Complete;
+                            } else {
+                                return UnpoweredFunctionState::Failed;
+                            }
+                        }
+                        if controller.get_expected_parry(model).is_some() {
+                            if controller.get_expected_parry(model) == Some(limb) {
+                                return UnpoweredFunctionState::Complete;
+                            } else {
+                                return UnpoweredFunctionState::Failed;
+                            }
                         }
                     }
                 }

@@ -899,7 +899,7 @@ pub fn get_action_plan(
     if should_regenerate(&timeline, me) {
         balance = Box::new(RegenerateAction::new(me.to_string()));
     }
-    if let Some(parry) = get_needed_parry(timeline, me, target, strategy, db) {
+    if let Some(parry) = get_needed_parry(timeline, me, target, db) {
         balance = Box::new(SeparatorAction::pair(
             Box::new(ParryAction::new(me.to_string(), parry)),
             balance,

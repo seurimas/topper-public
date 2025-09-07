@@ -18,7 +18,10 @@ pub enum DisableTargets {
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum ZealotBehavior {
     // Combo actions
-    AddZealotComboAttacks(Vec<ComboAttack>),
+    AddComboAttackAtPriority(ZealotComboAction, i32),
+    TakeComboAttacks(AetTarget),
+    TakeComboAttacksIfOver(AetTarget, i32),
+    FullCombo(AetTarget, ZealotComboAction, ZealotComboAction),
     // Simple actions
     Wrath,
     Swagger,
@@ -45,6 +48,9 @@ pub enum ZealotBehavior {
     HacklesAnklepin(AetTarget),
     HacklesDescent(AetTarget),
     HacklesTrammel(AetTarget),
+    // Smart pendulum
+    PickBestPendulum(AetTarget, i32),
+    HacklesWelt(AetTarget, bool),
 }
 
 impl UnpoweredFunction for ZealotBehavior {
@@ -56,7 +62,75 @@ impl UnpoweredFunction for ZealotBehavior {
         model: &Self::Model,
         controller: &mut Self::Controller,
     ) -> UnpoweredFunctionState {
-        match self {
+        match &self {
+            ZealotBehavior::AddComboAttackAtPriority(action, priority) => {
+                if let ClassController::Zealot {
+                    combo_attack_priorities,
+                } = &mut controller.class_controller
+                {
+                    combo_attack_priorities.push((*priority, action.clone()));
+                    combo_attack_priorities.sort_by(|a, b| b.0.cmp(&a.0));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    println!("Failed to add combo attack: not a zealot");
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            ZealotBehavior::TakeComboAttacks(aet_target)
+            | ZealotBehavior::TakeComboAttacksIfOver(aet_target, _) => {
+                let Some(target) = aet_target.get_target(model, controller) else {
+                    return UnpoweredFunctionState::Failed;
+                };
+                if let ClassController::Zealot {
+                    combo_attack_priorities,
+                } = &mut controller.class_controller
+                {
+                    if combo_attack_priorities.len() < 2 {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if let ZealotBehavior::TakeComboAttacksIfOver(_, limit) = &self {
+                        if combo_attack_priorities[0].0 <= *limit {
+                            return UnpoweredFunctionState::Failed;
+                        }
+                    }
+                    let me = model.state.borrow_me();
+                    let mut actual_attacks = vec![];
+                    for (_, action) in combo_attack_priorities.drain(..) {
+                        if !action.check_action(&me, target) {
+                            continue;
+                        }
+                        actual_attacks.push(action);
+                        if actual_attacks.len() >= 2 {
+                            break;
+                        }
+                    }
+                    if actual_attacks.len() < 2 {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    controller.plan.add_to_qeb(Box::new(FlowAttack::new(
+                        actual_attacks,
+                        aet_target.get_name(model, controller),
+                    )));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    println!("Failed to take combo attacks: not a zealot");
+                    return UnpoweredFunctionState::Failed;
+                }
+            }
+            ZealotBehavior::FullCombo(aet_target, first, second) => {
+                let Some(target) = aet_target.get_target(model, controller) else {
+                    return UnpoweredFunctionState::Failed;
+                };
+                let me = model.state.borrow_me();
+                if !first.check_action(&me, target) || !second.check_action(&me, target) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                controller.plan.add_to_qeb(Box::new(FlowAttack::new(
+                    vec![*first, *second],
+                    aet_target.get_name(model, controller),
+                )));
+                UnpoweredFunctionState::Complete
+            }
             ZealotBehavior::Wrath => {
                 let me = model.state.borrow_me();
                 if !me.balanced(BType::wrath()) {
@@ -382,6 +456,107 @@ impl UnpoweredFunction for ZealotBehavior {
                     aet_target.get_name(model, controller),
                 ));
                 UnpoweredFunctionState::Complete
+            }
+            ZealotBehavior::PickBestPendulum(aet_target, min_damage_value) => {
+                let me = model.state.borrow_me();
+                if !me.balanced(BType::pendulum()) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let Some(target) = aet_target.get_target(model, controller) else {
+                    return UnpoweredFunctionState::Failed;
+                };
+                let pendulum_values = get_pendulum_values(&target, false);
+                let reverse_pendulum_values = get_pendulum_values(&target, true);
+                let pendulum_damage_value = pendulum_values.iter().sum::<i32>();
+                let reverse_pendulum_damage_value = reverse_pendulum_values.iter().sum::<i32>();
+                if pendulum_damage_value < *min_damage_value
+                    && reverse_pendulum_damage_value < *min_damage_value
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
+                if pendulum_damage_value >= reverse_pendulum_damage_value {
+                    println!("Pendulum values: {:?}", pendulum_values);
+                    controller.plan.add_to_qeb(Pendulum::boxed(
+                        model.who_am_i(),
+                        aet_target.get_name(model, controller),
+                    ));
+                } else {
+                    println!("Pendulum values: {:?}", reverse_pendulum_values);
+                    controller.plan.add_to_qeb(PendulumReverse::boxed(
+                        model.who_am_i(),
+                        aet_target.get_name(model, controller),
+                    ));
+                }
+                UnpoweredFunctionState::Complete
+            }
+            ZealotBehavior::HacklesWelt(aet_target, avoid_restoring) => {
+                let me = model.state.borrow_me();
+                if me.get_qeb_balance() <= 0. || !me.balanced(BType::Secondary) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let Some(target) = aet_target.get_target(model, controller) else {
+                    return UnpoweredFunctionState::Failed;
+                };
+                if target.get_limb_state(LType::HeadDamage).welt {
+                    if *avoid_restoring && target.get_limb_state(LType::HeadDamage).is_restoring {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    controller.plan.add_to_qeb(HacklesUprise::boxed(
+                        model.who_am_i(),
+                        aet_target.get_name(model, controller),
+                    ));
+                    return UnpoweredFunctionState::Complete;
+                } else if target.get_limb_state(LType::TorsoDamage).welt {
+                    if *avoid_restoring && target.get_limb_state(LType::TorsoDamage).is_restoring {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    controller.plan.add_to_qeb(HacklesDescent::boxed(
+                        model.who_am_i(),
+                        aet_target.get_name(model, controller),
+                    ));
+                    return UnpoweredFunctionState::Complete;
+                } else if target.get_limb_state(LType::LeftArmDamage).welt {
+                    if *avoid_restoring && target.get_limb_state(LType::LeftArmDamage).is_restoring
+                    {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    controller.plan.add_to_qeb(HacklesWristlash::boxed(
+                        model.who_am_i(),
+                        aet_target.get_name(model, controller),
+                    ));
+                    return UnpoweredFunctionState::Complete;
+                } else if target.get_limb_state(LType::RightArmDamage).welt {
+                    if *avoid_restoring && target.get_limb_state(LType::RightArmDamage).is_restoring
+                    {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    controller.plan.add_to_qeb(HacklesWristlash::boxed(
+                        model.who_am_i(),
+                        aet_target.get_name(model, controller),
+                    ));
+                    return UnpoweredFunctionState::Complete;
+                } else if target.get_limb_state(LType::LeftLegDamage).welt {
+                    if *avoid_restoring && target.get_limb_state(LType::LeftLegDamage).is_restoring
+                    {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    controller.plan.add_to_qeb(HacklesAnklepin::boxed(
+                        model.who_am_i(),
+                        aet_target.get_name(model, controller),
+                    ));
+                    return UnpoweredFunctionState::Complete;
+                } else if target.get_limb_state(LType::RightLegDamage).welt {
+                    if *avoid_restoring && target.get_limb_state(LType::RightLegDamage).is_restoring
+                    {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    controller.plan.add_to_qeb(HacklesAnklepin::boxed(
+                        model.who_am_i(),
+                        aet_target.get_name(model, controller),
+                    ));
+                    return UnpoweredFunctionState::Complete;
+                }
+                UnpoweredFunctionState::Failed
             }
         }
     }

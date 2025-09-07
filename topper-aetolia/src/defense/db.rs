@@ -12,7 +12,7 @@ lazy_static! {
 #[macro_export]
 macro_rules! with_defense_db {
     ($db:ident, $body:block) => {
-        match DEFENSE_DATABASE.as_ref().try_lock() {
+        match crate::defense::DEFENSE_DATABASE.as_ref().try_lock() {
             Ok(outer_guard) => {
                 let option = outer_guard.as_ref();
                 if let Some(inner_mutex) = option {

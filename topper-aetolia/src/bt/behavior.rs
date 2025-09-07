@@ -8,9 +8,9 @@ use crate::classes::enchants::EnchantmentBehavior;
 use crate::classes::infiltrator::InfiltratorBehavior;
 use crate::classes::predator::PredatorBehavior;
 use crate::classes::siderealist::SiderealistBehavior;
+use crate::classes::zealot::ZealotBehavior;
 use crate::classes::LockType;
 use crate::classes::VenomPlan;
-use crate::curatives::CurativeBehavior;
 use crate::curatives::FirstAidSetting;
 use crate::defense::DefenseBehavior;
 use crate::observables::PlainAction;
@@ -34,8 +34,6 @@ pub enum AetBehavior {
     #[serde(untagged)]
     EnchantmentBehavior(EnchantmentBehavior),
     #[serde(untagged)]
-    CurativeBehavior(CurativeBehavior),
-    #[serde(untagged)]
     DefenseBehavior(DefenseBehavior),
     #[serde(untagged)]
     BardBehavior(BardBehavior),
@@ -47,6 +45,8 @@ pub enum AetBehavior {
     AscendrilBehavior(AscendrilBehavior),
     #[serde(untagged)]
     SiderealistBehavior(SiderealistBehavior),
+    #[serde(untagged)]
+    ZealotBehavior(ZealotBehavior),
 }
 
 impl UnpoweredFunction for AetBehavior {
@@ -124,9 +124,6 @@ impl UnpoweredFunction for AetBehavior {
             AetBehavior::EnchantmentBehavior(enchantment_behavior) => {
                 enchantment_behavior.resume_with(model, controller)
             }
-            AetBehavior::CurativeBehavior(curative_behavior) => {
-                curative_behavior.resume_with(model, controller)
-            }
             AetBehavior::DefenseBehavior(defense_behavior) => {
                 defense_behavior.resume_with(model, controller)
             }
@@ -144,6 +141,9 @@ impl UnpoweredFunction for AetBehavior {
             }
             AetBehavior::SiderealistBehavior(siderealist_behavior) => {
                 siderealist_behavior.resume_with(model, controller)
+            }
+            AetBehavior::ZealotBehavior(zealot_behavior) => {
+                zealot_behavior.resume_with(model, controller)
             }
         }
     }

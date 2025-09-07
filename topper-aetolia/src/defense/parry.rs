@@ -4,10 +4,9 @@ pub fn get_needed_parry<DB: AetDatabaseModule + ?Sized>(
     timeline: &AetTimeline,
     me: &String,
     target: &String,
-    strategy: &String,
     db: Option<&DB>,
 ) -> Option<LType> {
-    if let Ok(parry) = get_preferred_parry(timeline, me, target, strategy, db) {
+    if let Ok(parry) = get_preferred_parry(timeline, me, target, db) {
         let me = timeline.state.borrow_agent(me);
         if let Some(current) = me.parrying {
             if current == parry {
@@ -19,6 +18,10 @@ pub fn get_needed_parry<DB: AetDatabaseModule + ?Sized>(
             Some(parry)
         }
     } else {
+        println!(
+            "Could not determine needed parry for {} against {}",
+            me, target
+        );
         None
     }
 }
@@ -77,7 +80,6 @@ pub fn get_preferred_parry<DB: AetDatabaseModule + ?Sized>(
     timeline: &AetTimeline,
     me: &String,
     target: &String,
-    strategy: &String,
     db: Option<&DB>,
 ) -> Result<LType, String> {
     if let Some(mut class) = db.and_then(|db| db.get_class(target)).or_else(|| {

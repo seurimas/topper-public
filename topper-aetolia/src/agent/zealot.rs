@@ -1,3 +1,5 @@
+use topper_core::timeline::BaseAgentState;
+
 use super::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -67,4 +69,30 @@ impl ZenithState {
 pub struct ZealotClassState {
     pub zenith: ZenithState,
     pub pyromania: TimedFlagState,
+}
+
+pub fn get_pendulum_values(you: &AgentState, reverse: bool) -> Vec<CType> {
+    let mut rotated = you.clone();
+    rotated.limb_damage.first_person_restore = false;
+    rotated.limb_damage.rotate(reverse);
+    rotated.wait(BALANCE_SCALE as i32 * 10);
+    let mut base = you.clone();
+    base.limb_damage.first_person_restore = false;
+    base.wait(BALANCE_SCALE as i32 * 10);
+    let after_rotate_state = rotated.limb_damage;
+    let after_base_state = base.limb_damage;
+    vec![
+        after_rotate_state.get_damage(LType::HeadDamage)
+            - after_base_state.get_damage(LType::HeadDamage),
+        after_rotate_state.get_damage(LType::TorsoDamage)
+            - after_base_state.get_damage(LType::TorsoDamage),
+        after_rotate_state.get_damage(LType::LeftArmDamage)
+            - after_base_state.get_damage(LType::LeftArmDamage),
+        after_rotate_state.get_damage(LType::RightArmDamage)
+            - after_base_state.get_damage(LType::RightArmDamage),
+        after_rotate_state.get_damage(LType::LeftLegDamage)
+            - after_base_state.get_damage(LType::LeftLegDamage),
+        after_rotate_state.get_damage(LType::RightLegDamage)
+            - after_base_state.get_damage(LType::RightLegDamage),
+    ]
 }

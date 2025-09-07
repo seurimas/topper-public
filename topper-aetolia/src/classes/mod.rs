@@ -355,7 +355,7 @@ pub fn get_attack(
                 infiltrator::get_attack(timeline, target, strategy, db, first_aid_settings)
             }
             Class::Bard => bard::get_attack(timeline, target, strategy, db, first_aid_settings),
-            Class::Zealot => zealot::get_attack(timeline, target, strategy, db),
+            Class::Zealot => zealot::get_attack(timeline, target, strategy, db, first_aid_settings),
             Class::Predator => {
                 predator::get_attack(timeline, target, strategy, db, first_aid_settings)
             }
@@ -1451,11 +1451,19 @@ targetted_action!(Contemplate, "contemplate {}");
 pub struct ParryAction {
     caster: String,
     limb: LType,
+    verb: &'static str,
 }
 
 impl ParryAction {
-    pub fn new(caster: String, limb: LType) -> Self {
-        ParryAction { caster, limb }
+    pub fn by_class(caster: String, limb: LType, class: Class) -> Self {
+        ParryAction {
+            caster,
+            limb,
+            verb: match class {
+                Class::Zealot => "fend",
+                _ => "parry",
+            },
+        }
     }
 }
 
@@ -1467,7 +1475,7 @@ impl ActiveTransition for ParryAction {
         )])
     }
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
-        Ok(format!("parry {}", self.limb.to_string()))
+        Ok(format!("{} {}", self.verb, self.limb.to_string()))
     }
 }
 

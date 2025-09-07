@@ -1,6 +1,11 @@
-use crate::{observables::ActiveTransition, targetted_action, untargetted_action};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+use crate::{
+    agent::*, classes::zealot::constants::SWAGGER_LIMIT, observables::ActiveTransition,
+    targetted_action, untargetted_action,
+};
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ZealotComboAction {
     // Punches
     PummelLeft,
@@ -84,6 +89,80 @@ impl ZealotComboAction {
             _ => true,
         }
     }
+
+    pub fn check_action(&self, me: &AgentState, target: &AgentState) -> bool {
+        match self {
+            ZealotComboAction::PummelLeft
+                | ZealotComboAction::PummelRight
+                | ZealotComboAction::Palmforce
+                | ZealotComboAction::Clawtwist
+                | ZealotComboAction::DislocateLeftArm
+                | ZealotComboAction::DislocateRightArm
+                | ZealotComboAction::DislocateLeftLeg
+                | ZealotComboAction::DislocateRightLeg
+                | ZealotComboAction::Twinpress
+                | ZealotComboAction::Direblow
+                 => {
+                if me.get_count(FType::SappedStrength) >= SWAGGER_LIMIT {
+                    return false;
+                }
+            }
+            ZealotComboAction::Risekick => {
+                if !me.is(FType::Fallen) {
+                    return false;
+                }
+            }
+            ZealotComboAction::Dropkick => {
+                if !target.is(FType::Fallen)
+                    || !target.get_limb_state(LType::LeftArmDamage).amputated
+                    || !target.get_limb_state(LType::RightArmDamage).amputated
+                {
+                    return false;
+                }
+            }
+            ZealotComboAction::Anklepin
+            | ZealotComboAction::Jawcrack
+            | ZealotComboAction::Descent
+            | ZealotComboAction::Wristlash
+            | ZealotComboAction::Trammel
+            // | ZealotComboAction::Rive
+            // | ZealotComboAction::Whipburst
+            | ZealotComboAction::Uprise  => {
+                if me.get_balance(BType::Secondary) < 2. {
+                    return false;
+                }
+            }
+            _ => {}
+        };
+        match self {
+            ZealotComboAction::DislocateLeftArm => {
+                let limb_state = target.get_limb_state(LType::LeftArmDamage);
+                if limb_state.broken || limb_state.is_dislocated {
+                    return false;
+                }
+            }
+            ZealotComboAction::DislocateRightArm => {
+                let limb_state = target.get_limb_state(LType::RightArmDamage);
+                if limb_state.broken || limb_state.is_dislocated {
+                    return false;
+                }
+            }
+            ZealotComboAction::DislocateLeftLeg => {
+                let limb_state = target.get_limb_state(LType::LeftLegDamage);
+                if limb_state.broken || limb_state.is_dislocated {
+                    return false;
+                }
+            }
+            ZealotComboAction::DislocateRightLeg => {
+                let limb_state = target.get_limb_state(LType::RightLegDamage);
+                if limb_state.broken || limb_state.is_dislocated {
+                    return false;
+                }
+            }
+            _ => {}
+        }
+        true
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -93,11 +172,8 @@ pub struct FlowAttack {
 }
 
 impl FlowAttack {
-    pub fn new(attacks: Vec<ZealotComboAction>, target: &str) -> Self {
-        FlowAttack {
-            attacks,
-            target: target.to_string(),
-        }
+    pub fn new(attacks: Vec<ZealotComboAction>, target: String) -> Self {
+        FlowAttack { attacks, target }
     }
 
     pub fn to_string(&self) -> String {

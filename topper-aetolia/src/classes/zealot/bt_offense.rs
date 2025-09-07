@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use behavior_bark::unpowered::*;
+use topper_core::timeline::BaseAgentState;
 
 use super::*;
 
@@ -28,16 +29,16 @@ pub fn get_action_plan(
     controller.init_zealot();
     add_hints(db, &mut controller);
     let tree_name = if strategy.eq("class") {
-        format!("predator/base")
+        format!("zealot/base")
     } else {
-        format!("predator/{}", strategy)
+        format!("zealot/{}", strategy)
     };
     let tree = get_tree(&tree_name);
     if let Ok(mut tree) = tree.lock() {
         unsafe {
             if DEBUG_TREES {
                 if let Some(you) = AetTarget::Target.get_target(&timeline, &controller) {
-                    println!("Predator: {:?}", you);
+                    println!("Zealot: {:?}", you);
                 }
             }
         }
@@ -73,15 +74,13 @@ pub fn get_attack(
     action_plan.get_inputs(&timeline)
 }
 
-fn get_stance_color(stance: &KnifeStance) -> String {
-    match stance {
-        KnifeStance::None => "white".to_string(),
-        KnifeStance::Gyanis => "red".to_string(),
-        KnifeStance::VaeSant => "orange".to_string(),
-        KnifeStance::Rizet => "yellow".to_string(),
-        KnifeStance::EinFasit => "green".to_string(),
-        KnifeStance::Laesan => "blue".to_string(),
-        KnifeStance::Bladesurge => "purple".to_string(),
+fn format_pendulum(difference: CType) -> String {
+    if difference > 1000 {
+        format!("<green>{}", difference / 100)
+    } else if difference < -1000 {
+        format!("<red>{}", difference / 100)
+    } else {
+        format!("<white>{}", difference / 100)
     }
 }
 
@@ -117,13 +116,35 @@ pub fn get_class_state(
             }
         })
         .unwrap_or("<white>------");
+    let pendulum_display = if me.balanced(BType::pendulum()) && you.get_restoring().is_some() {
+        let pendulum_values = get_pendulum_values(&you, false);
+        let reverse_pendulum_values = get_pendulum_values(&you, true);
+        let best_values =
+            if pendulum_values.iter().sum::<i32>() > reverse_pendulum_values.iter().sum::<i32>() {
+                pendulum_values
+            } else {
+                reverse_pendulum_values
+            };
+        format!(
+            "{:>3} {:>3}\n{:>3} {:>3}\n{:>3} {:>3}",
+            format_pendulum(best_values[0]),
+            format_pendulum(best_values[1]),
+            format_pendulum(best_values[2]),
+            format_pendulum(best_values[3]),
+            format_pendulum(best_values[4]),
+            format_pendulum(best_values[5]),
+        )
+    } else {
+        "<gray>------".to_string()
+    };
     format!(
-        "{}\n{}",
+        "{}\n{}\n{}",
         if pyromania {
             "<red>PYROMANIA"
         } else {
             "<white>---------"
         },
-        zenith
+        zenith,
+        pendulum_display
     )
 }

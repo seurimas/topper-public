@@ -20,12 +20,15 @@ use crate::{
         predator::{
             ComboAttack, ComboGrader, ComboPredicate, ComboSet, ComboSolver, PredatorCombo,
         },
+        zealot::ZealotComboAction,
         VenomPlan,
     },
     curatives::FirstAidSetting,
+    defense::get_preferred_parry,
     observables::ActionPlan,
     timeline::AetTimeline,
     types::{AgentState, FType, Hypnosis, KnifeStance, LType},
+    with_defense_db,
 };
 
 use self::wrappers::WithoutAffsInStack;
@@ -36,7 +39,7 @@ pub static mut DEBUG_TREES: bool = false;
 
 lazy_static! {
     pub static ref DEFAULT_BEHAVIOR_TREE: AetBehaviorTreeDef =
-        serde_json::from_str::<AetBehaviorTreeDef>(include_str!("./DEFAULT_BEHAVIOR_TREE.ron"))
+        serde_json::from_str::<AetBehaviorTreeDef>(include_str!("./DEFAULT_BEHAVIOR_TREE.json"))
             .unwrap();
 }
 
@@ -76,6 +79,7 @@ pub struct BehaviorController {
     pub class_controller: ClassController,
     pub first_aid_settings: Vec<FirstAidSetting>,
     pub stripping_shield: bool,
+    pub expected_parry: Option<LType>,
 }
 
 #[derive(Default, Debug)]
@@ -94,10 +98,23 @@ pub enum ClassController {
         monk_combo_generator: MonkComboGenerator,
         monk_combos: MonkComboSet,
     },
-    Zealot {},
+    Zealot {
+        combo_attack_priorities: Vec<(i32, ZealotComboAction)>,
+    },
 }
 
 impl BehaviorController {
+    pub fn get_expected_parry(&mut self, model: &AetTimeline) -> Option<LType> {
+        if self.expected_parry.is_none() {
+            let me = model.who_am_i();
+            let target = self.target.clone().unwrap_or_default();
+            with_defense_db!(db, {
+                self.expected_parry = get_preferred_parry(model, &target, &me, Some(&*db)).ok();
+            });
+        }
+        self.expected_parry
+    }
+
     pub fn has_qeb(&self) -> bool {
         !self.used_balance && !self.used_equilibrium
     }
@@ -203,7 +220,9 @@ impl BehaviorController {
     }
 
     pub fn init_zealot(&mut self) {
-        self.class_controller = ClassController::Zealot {};
+        self.class_controller = ClassController::Zealot {
+            combo_attack_priorities: vec![],
+        };
     }
 
     pub fn get_highest_scored_predator_combo(

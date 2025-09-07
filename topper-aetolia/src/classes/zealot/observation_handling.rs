@@ -404,7 +404,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &move |me: &mut AgentState| {
                     apply_or_infer_balance(me, (BType::Equil, 3.0), &observations);
-                    me.set_balance(BType::pendulum(), 10.0);
+                    me.set_balance(BType::pendulum(), 20.0);
                 },
             );
             let annotation = combat_action.annotation.clone();
