@@ -80,6 +80,7 @@ pub struct BehaviorController {
     pub first_aid_settings: Vec<FirstAidSetting>,
     pub stripping_shield: bool,
     pub expected_parry: Option<LType>,
+    pub nonce: i32,
 }
 
 #[derive(Default, Debug)]

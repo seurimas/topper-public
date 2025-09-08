@@ -1080,6 +1080,7 @@ fn get_controller(
                 }
             })
             .unwrap_or_default(),
+        nonce: timeline.state.time / 100,
         ..Default::default()
     }
 }

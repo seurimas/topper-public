@@ -201,6 +201,7 @@ targetted_action!(Cinderkin, "order hellcat attack {}");
 targetted_action!(Immolation, "enact immolation {}");
 targetted_action!(PsiDisableAeon, "psi disable {} tarot aeon");
 targetted_action!(PsiDull, "psi dull {}");
+targetted_action!(PsiShock, "psi shock {}");
 targetted_action!(Pendulum, "enact pendulum {}");
 targetted_action!(PendulumReverse, "enact pendulum {} reverse");
 targetted_action!(Scorch, "enact scorch {}");

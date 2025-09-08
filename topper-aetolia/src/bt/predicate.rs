@@ -27,7 +27,7 @@ use super::BehaviorController;
 use super::BehaviorModel;
 use super::LimbDescriptor;
 
-pub const QUEUE_TIME: f32 = 0.1;
+pub const QUEUE_TIME: f32 = 0.15;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Copy)]
 pub enum AetTarget {
@@ -72,6 +72,10 @@ impl AetTarget {
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum AetPredicate {
+    NonceModEqual {
+        modulus: i32,
+        remainder: i32,
+    },
     Persuading(AetTarget),
     // Affs
     AllAffs(AetTarget, Vec<FType>),
@@ -94,6 +98,7 @@ pub enum AetPredicate {
     CanMangled(AetTarget, LimbDescriptor, f32),
     RestoredMangle(AetTarget, LimbDescriptor, f32),
     LimbOver(AetTarget, LimbDescriptor, f32, bool),
+    LimbsOver(AetTarget, Vec<LimbDescriptor>, f32, bool),
     CanMend(AetTarget, LimbDescriptor),
     AtLeastNLimbsOver(AetTarget, Vec<LimbDescriptor>, usize, f32, bool),
     LimbsBreakableCount {
@@ -266,6 +271,12 @@ impl UnpoweredFunction for AetPredicate {
         controller: &mut Self::Controller,
     ) -> UnpoweredFunctionState {
         match self {
+            AetPredicate::NonceModEqual { modulus, remainder } => {
+                if controller.nonce % *modulus == *remainder {
+                    return UnpoweredFunctionState::Complete;
+                }
+                UnpoweredFunctionState::Failed
+            }
             AetPredicate::Persuading(target) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.persuasion_state.get_target().is_some() {
@@ -398,7 +409,7 @@ impl UnpoweredFunction for AetPredicate {
                 if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
                     if let Some(target) = target.get_target(model, controller) {
                         let limb_state = target.get_limb_state(limb);
-                        if limb_state.is_restoring && limb_state.damage <= 30. {
+                        if limb_state.is_restoring && limb_state.damage <= 33. {
                             return UnpoweredFunctionState::Complete;
                         }
                     }
@@ -464,6 +475,36 @@ impl UnpoweredFunction for AetPredicate {
                             return UnpoweredFunctionState::Complete;
                         }
                     }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::LimbsOver(target, limbs, damage, apply_restoration) => {
+                let limbs = if limbs.len() == 0 {
+                    vec![
+                        LimbDescriptor::Static(LType::LeftArmDamage),
+                        LimbDescriptor::Static(LType::RightArmDamage),
+                        LimbDescriptor::Static(LType::LeftLegDamage),
+                        LimbDescriptor::Static(LType::RightLegDamage),
+                        LimbDescriptor::Static(LType::HeadDamage),
+                        LimbDescriptor::Static(LType::TorsoDamage),
+                    ]
+                } else {
+                    limbs.clone()
+                };
+                let mut total_damage = 0.0;
+                if let Some(target_state) = target.get_target(model, controller) {
+                    for limb_descriptor in limbs {
+                        if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
+                            let mut limb_state = target_state.get_limb_state(limb);
+                            if limb_state.is_restoring && *apply_restoration {
+                                limb_state.assume_restore();
+                            }
+                            total_damage += limb_state.damage;
+                        }
+                    }
+                }
+                if total_damage > *damage {
+                    return UnpoweredFunctionState::Complete;
                 }
                 UnpoweredFunctionState::Failed
             }
@@ -755,6 +796,10 @@ impl UnpoweredFunction for AetPredicate {
                             } else {
                                 return UnpoweredFunctionState::Failed;
                             }
+                        }
+                        if target.parrying == Some(limb) {
+                            // Maybe controversial, but let's avoid whatever they were last parrying.
+                            return UnpoweredFunctionState::Complete;
                         }
                         if controller.get_expected_parry(model).is_some() {
                             if controller.get_expected_parry(model) == Some(limb) {

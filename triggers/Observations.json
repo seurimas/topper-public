@@ -573,6 +573,24 @@
     "observation_name": "ParryStart"
   },
   {
+    "regex": "^Struggling to defend (you)rself, the final blow leaves you reeling.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "ParryStop"
+  },
+  {
     "regex": "^(\\w+) stands? up and stretche?s? \\w+ arms out wide.$",
     "args": [
       {

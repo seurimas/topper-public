@@ -19,11 +19,13 @@ pub enum DisableTargets {
 pub enum ZealotBehavior {
     // Combo actions
     AddComboAttackAtPriority(ZealotComboAction, i32),
+    AdjustPriority(Vec<ZealotComboAction>, i32),
     TakeComboAttacks(AetTarget),
     TakeComboAttacksIfOver(AetTarget, i32),
     FullCombo(AetTarget, ZealotComboAction, ZealotComboAction),
     // Simple actions
     Wrath,
+    SafeSwagger,
     Swagger,
     Firefist,
     RespirationHold,
@@ -34,7 +36,8 @@ pub enum ZealotBehavior {
     Cinderkin(AetTarget),
     Immolation(AetTarget),
     PsiDisable(AetTarget, DisableTargets),
-    Dull(AetTarget),
+    PsiDull(AetTarget),
+    PsiShock(AetTarget),
     Scorch(AetTarget),
     Quicken(AetTarget),
     Heatspear(AetTarget),
@@ -76,11 +79,31 @@ impl UnpoweredFunction for ZealotBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
+            ZealotBehavior::AdjustPriority(actions, adjustment) => {
+                if let ClassController::Zealot {
+                    combo_attack_priorities,
+                } = &mut controller.class_controller
+                {
+                    combo_attack_priorities.iter_mut().for_each(|(p, a)| {
+                        if actions.contains(a) {
+                            *p += *adjustment;
+                        }
+                    });
+                    combo_attack_priorities.sort_by(|a, b| b.0.cmp(&a.0));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    println!("Failed to adjust priority: not a zealot");
+                    UnpoweredFunctionState::Failed
+                }
+            }
             ZealotBehavior::TakeComboAttacks(aet_target)
             | ZealotBehavior::TakeComboAttacksIfOver(aet_target, _) => {
                 let Some(target) = aet_target.get_target(model, controller) else {
                     return UnpoweredFunctionState::Failed;
                 };
+                if target.is(FType::Shielded) {
+                    return UnpoweredFunctionState::Failed;
+                }
                 if let ClassController::Zealot {
                     combo_attack_priorities,
                 } = &mut controller.class_controller
@@ -121,6 +144,9 @@ impl UnpoweredFunction for ZealotBehavior {
                 let Some(target) = aet_target.get_target(model, controller) else {
                     return UnpoweredFunctionState::Failed;
                 };
+                if target.is(FType::Shielded) {
+                    return UnpoweredFunctionState::Failed;
+                }
                 let me = model.state.borrow_me();
                 if !first.check_action(&me, target) || !second.check_action(&me, target) {
                     return UnpoweredFunctionState::Failed;
@@ -139,12 +165,14 @@ impl UnpoweredFunction for ZealotBehavior {
                 controller.plan.add_to_qeb(Wrath::boxed(model.who_am_i()));
                 UnpoweredFunctionState::Complete
             }
-            ZealotBehavior::Swagger => {
+            ZealotBehavior::Swagger | ZealotBehavior::SafeSwagger => {
                 let me = model.state.borrow_me();
                 let sapped = me.get_count(FType::SappedStrength);
                 if me.is(FType::Swagger) {
                     return UnpoweredFunctionState::Failed;
                 } else if sapped >= SWAGGER_LIMIT {
+                    return UnpoweredFunctionState::Failed;
+                } else if sapped >= SWAGGER_LIMIT - 1 && *self == ZealotBehavior::Swagger {
                     return UnpoweredFunctionState::Failed;
                 }
                 controller.plan.add_to_qeb(Swagger::boxed(model.who_am_i()));
@@ -176,9 +204,25 @@ impl UnpoweredFunction for ZealotBehavior {
                     .add_to_qeb(PsiRecover::boxed(model.who_am_i()));
                 UnpoweredFunctionState::Complete
             }
+            ZealotBehavior::PsiShock(aet_target) => {
+                let Some(target) = aet_target.get_target(model, controller) else {
+                    return UnpoweredFunctionState::Failed;
+                };
+                if target.is(FType::Shielded) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                controller.plan.add_to_plain(PsiShock::boxed(
+                    model.who_am_i(),
+                    aet_target.get_name(model, controller),
+                ));
+                UnpoweredFunctionState::Complete
+            }
             ZealotBehavior::Zenith => {
                 let me = model.state.borrow_me();
-                if me.is(FType::Zenith) {
+                if me
+                    .check_if_zealot(&|z| z.zenith.active() || z.zenith.time_to_active().is_some())
+                    .unwrap_or(false)
+                {
                     return UnpoweredFunctionState::Failed;
                 }
                 controller.plan.add_to_qeb(Zenith::boxed(model.who_am_i()));
@@ -214,7 +258,7 @@ impl UnpoweredFunction for ZealotBehavior {
                 let Some(target) = aet_target.get_target(model, controller) else {
                     return UnpoweredFunctionState::Failed;
                 };
-                if target.get_count(FType::Ablaze) <= 12 || target.is(FType::Shielded) {
+                if target.get_count(FType::Ablaze) < 12 || target.is(FType::Shielded) {
                     return UnpoweredFunctionState::Failed;
                 }
                 controller.plan.add_to_qeb(Immolation::boxed(
@@ -249,7 +293,7 @@ impl UnpoweredFunction for ZealotBehavior {
                 });
                 UnpoweredFunctionState::Complete
             }
-            ZealotBehavior::Dull(aet_target) => {
+            ZealotBehavior::PsiDull(aet_target) => {
                 let Some(target) = aet_target.get_target(model, controller) else {
                     return UnpoweredFunctionState::Failed;
                 };
@@ -288,6 +332,9 @@ impl UnpoweredFunction for ZealotBehavior {
                 if !target.is(FType::Ablaze) {
                     return UnpoweredFunctionState::Failed;
                 }
+                if target.is(FType::Shielded) {
+                    return UnpoweredFunctionState::Failed;
+                }
                 controller.plan.add_to_qeb(Quicken::boxed(
                     model.who_am_i(),
                     aet_target.get_name(model, controller),
@@ -299,7 +346,10 @@ impl UnpoweredFunction for ZealotBehavior {
                 let Some(target) = aet_target.get_target(model, controller) else {
                     return UnpoweredFunctionState::Failed;
                 };
-                if !target.is(FType::Ablaze) {
+                if !target.is(FType::Ablaze) || target.is(FType::Heatspear) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                if target.is(FType::Shielded) {
                     return UnpoweredFunctionState::Failed;
                 }
                 controller.plan.add_to_qeb(Heatspear::boxed(
@@ -341,6 +391,9 @@ impl UnpoweredFunction for ZealotBehavior {
                 let Some(target) = aet_target.get_target(model, controller) else {
                     return UnpoweredFunctionState::Failed;
                 };
+                if target.is(FType::Shielded) {
+                    return UnpoweredFunctionState::Failed;
+                }
                 if !target.get_limb_state(LType::TorsoDamage).broken {
                     return UnpoweredFunctionState::Failed;
                 } else if target.is(FType::InfernalSeal) || target.is(FType::InfernalShroud) {
@@ -360,6 +413,9 @@ impl UnpoweredFunction for ZealotBehavior {
                 if !me.balanced(BType::Secondary) {
                     return UnpoweredFunctionState::Failed;
                 }
+                if target.is(FType::Shielded) {
+                    return UnpoweredFunctionState::Failed;
+                }
                 controller.plan.add_to_qeb(HacklesWhipburst::boxed(
                     model.who_am_i(),
                     aet_target.get_name(model, controller),
@@ -372,6 +428,9 @@ impl UnpoweredFunction for ZealotBehavior {
                     return UnpoweredFunctionState::Failed;
                 };
                 if !me.balanced(BType::Secondary) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                if target.is(FType::Shielded) {
                     return UnpoweredFunctionState::Failed;
                 }
                 controller.plan.add_to_qeb(HacklesJawcrack::boxed(
@@ -388,6 +447,9 @@ impl UnpoweredFunction for ZealotBehavior {
                 if !me.balanced(BType::Secondary) {
                     return UnpoweredFunctionState::Failed;
                 }
+                if target.is(FType::Shielded) {
+                    return UnpoweredFunctionState::Failed;
+                }
                 controller.plan.add_to_qeb(HacklesUprise::boxed(
                     model.who_am_i(),
                     aet_target.get_name(model, controller),
@@ -400,6 +462,9 @@ impl UnpoweredFunction for ZealotBehavior {
                     return UnpoweredFunctionState::Failed;
                 };
                 if !me.balanced(BType::Secondary) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                if target.is(FType::Shielded) {
                     return UnpoweredFunctionState::Failed;
                 }
                 controller.plan.add_to_qeb(HacklesWristlash::boxed(
@@ -416,6 +481,9 @@ impl UnpoweredFunction for ZealotBehavior {
                 if !me.balanced(BType::Secondary) {
                     return UnpoweredFunctionState::Failed;
                 }
+                if target.is(FType::Shielded) {
+                    return UnpoweredFunctionState::Failed;
+                }
                 controller.plan.add_to_qeb(HacklesAnklepin::boxed(
                     model.who_am_i(),
                     aet_target.get_name(model, controller),
@@ -430,6 +498,9 @@ impl UnpoweredFunction for ZealotBehavior {
                 if !me.balanced(BType::Secondary) {
                     return UnpoweredFunctionState::Failed;
                 }
+                if target.is(FType::Shielded) {
+                    return UnpoweredFunctionState::Failed;
+                }
                 controller.plan.add_to_qeb(HacklesDescent::boxed(
                     model.who_am_i(),
                     aet_target.get_name(model, controller),
@@ -442,6 +513,9 @@ impl UnpoweredFunction for ZealotBehavior {
                     return UnpoweredFunctionState::Failed;
                 };
                 if !me.balanced(BType::Secondary) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                if target.is(FType::Shielded) {
                     return UnpoweredFunctionState::Failed;
                 }
                 if !(target.get_limb_state(LType::LeftArmDamage).mangled
@@ -497,11 +571,14 @@ impl UnpoweredFunction for ZealotBehavior {
                 let Some(target) = aet_target.get_target(model, controller) else {
                     return UnpoweredFunctionState::Failed;
                 };
+                if target.is(FType::Shielded) {
+                    return UnpoweredFunctionState::Failed;
+                }
                 if target.get_limb_state(LType::HeadDamage).welt {
                     if *avoid_restoring && target.get_limb_state(LType::HeadDamage).is_restoring {
                         return UnpoweredFunctionState::Failed;
                     }
-                    controller.plan.add_to_qeb(HacklesUprise::boxed(
+                    controller.plan.add_to_plain(HacklesUprise::boxed(
                         model.who_am_i(),
                         aet_target.get_name(model, controller),
                     ));
@@ -510,7 +587,7 @@ impl UnpoweredFunction for ZealotBehavior {
                     if *avoid_restoring && target.get_limb_state(LType::TorsoDamage).is_restoring {
                         return UnpoweredFunctionState::Failed;
                     }
-                    controller.plan.add_to_qeb(HacklesDescent::boxed(
+                    controller.plan.add_to_plain(HacklesDescent::boxed(
                         model.who_am_i(),
                         aet_target.get_name(model, controller),
                     ));
@@ -520,7 +597,7 @@ impl UnpoweredFunction for ZealotBehavior {
                     {
                         return UnpoweredFunctionState::Failed;
                     }
-                    controller.plan.add_to_qeb(HacklesWristlash::boxed(
+                    controller.plan.add_to_plain(HacklesWristlash::boxed(
                         model.who_am_i(),
                         aet_target.get_name(model, controller),
                     ));
@@ -530,7 +607,7 @@ impl UnpoweredFunction for ZealotBehavior {
                     {
                         return UnpoweredFunctionState::Failed;
                     }
-                    controller.plan.add_to_qeb(HacklesWristlash::boxed(
+                    controller.plan.add_to_plain(HacklesWristlash::boxed(
                         model.who_am_i(),
                         aet_target.get_name(model, controller),
                     ));
@@ -540,7 +617,7 @@ impl UnpoweredFunction for ZealotBehavior {
                     {
                         return UnpoweredFunctionState::Failed;
                     }
-                    controller.plan.add_to_qeb(HacklesAnklepin::boxed(
+                    controller.plan.add_to_plain(HacklesAnklepin::boxed(
                         model.who_am_i(),
                         aet_target.get_name(model, controller),
                     ));
@@ -550,7 +627,7 @@ impl UnpoweredFunction for ZealotBehavior {
                     {
                         return UnpoweredFunctionState::Failed;
                     }
-                    controller.plan.add_to_qeb(HacklesAnklepin::boxed(
+                    controller.plan.add_to_plain(HacklesAnklepin::boxed(
                         model.who_am_i(),
                         aet_target.get_name(model, controller),
                     ));

@@ -30,6 +30,7 @@ pub enum AetBehavior {
     HintPlan(String, String),
     CopyHint(String, String),
     SetLimbHint(AetTarget, LimbDescriptor, String),
+    TouchHammer(AetTarget),
     PlainQebBehavior(String),
     #[serde(untagged)]
     EnchantmentBehavior(EnchantmentBehavior),
@@ -114,6 +115,21 @@ impl UnpoweredFunction for AetBehavior {
                 } else {
                     UnpoweredFunctionState::Failed
                 }
+            }
+            AetBehavior::TouchHammer(aet_target) => {
+                let Some(target) = aet_target.get_target(model, controller) else {
+                    return UnpoweredFunctionState::Failed;
+                };
+                if !target.is(FType::Shielded) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                controller
+                    .plan
+                    .add_to_qeb(Box::new(PlainAction::new(format!(
+                        "touch hammer {}",
+                        aet_target.get_name(model, controller),
+                    ))));
+                UnpoweredFunctionState::Complete
             }
             AetBehavior::PlainQebBehavior(action) => {
                 controller

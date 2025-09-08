@@ -11,6 +11,8 @@ pub enum ZealotPredicate {
     HasPyromania,
     HasInfernalAny,
     HasInfernalFull,
+    ZenithUp,
+    ZenithRising(f32),
 }
 
 impl TargetPredicate for ZealotPredicate {
@@ -39,6 +41,18 @@ impl TargetPredicate for ZealotPredicate {
                 target.is(FType::InfernalSeal) || target.is(FType::InfernalShroud)
             }
             ZealotPredicate::HasInfernalFull => target.is(FType::InfernalShroud),
+            ZealotPredicate::ZenithUp => target
+                .check_if_zealot(&|z| z.zenith.active())
+                .unwrap_or(false),
+            ZealotPredicate::ZenithRising(max_time) => target
+                .check_if_zealot(&|z| {
+                    if let Some(ttz) = z.zenith.time_to_active() {
+                        (ttz as f32 / BALANCE_SCALE) <= *max_time
+                    } else {
+                        false
+                    }
+                })
+                .unwrap_or(false),
         }
     }
 }

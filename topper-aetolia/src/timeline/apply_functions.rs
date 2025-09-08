@@ -447,6 +447,11 @@ pub fn apply_observation(
                 me.set_parrying(limb);
             });
         }
+        AetObservation::ParryStop(who) => {
+            for_agent(timeline, who, &move |me: &mut AgentState| {
+                me.parrying = None;
+            });
+        }
         AetObservation::Envenom(venom) => {
             let venom = venom.clone();
             for_agent(
