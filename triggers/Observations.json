@@ -324,6 +324,24 @@
     "observation_name": "OtherAfflicted"
   },
   {
+    "regex": "^The horrible wounds upon (\\w+)'s body send .* into shock.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "shock"
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "OtherAfflicted"
+  },
+  {
     "regex": "^(\\w+) opens (\\w+) ?\\w* eyes and yawns? mightily.$",
     "args": [
       {

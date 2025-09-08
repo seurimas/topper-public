@@ -84,6 +84,27 @@
     "observation_name": "Proc"
   },
   {
+    "regex": "^The Infernal Seal on (\\w+)'s chest releases a shower of holy flame, blanketing the air about .* with a burning shroud.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Zeal"
+      },
+      {
+        "Literal": "InfernalShrouded"
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
     "regex": "^A hellcat shreds (\\w+) with blazing claws, heat lashing forth to scourge \\w+.$",
     "args": [
       {

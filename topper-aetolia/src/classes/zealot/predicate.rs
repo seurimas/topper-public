@@ -10,6 +10,7 @@ pub enum ZealotPredicate {
     SappedStrengthUnder(u8),
     HasPyromania,
     HasInfernalAny,
+    HasInfernalPartial,
     HasInfernalFull,
     ZenithUp,
     ZenithRising(f32),
@@ -40,6 +41,7 @@ impl TargetPredicate for ZealotPredicate {
             ZealotPredicate::HasInfernalAny => {
                 target.is(FType::InfernalSeal) || target.is(FType::InfernalShroud)
             }
+            ZealotPredicate::HasInfernalPartial => target.is(FType::InfernalSeal),
             ZealotPredicate::HasInfernalFull => target.is(FType::InfernalShroud),
             ZealotPredicate::ZenithUp => target
                 .check_if_zealot(&|z| z.zenith.active())

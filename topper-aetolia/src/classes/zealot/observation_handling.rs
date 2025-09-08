@@ -464,6 +464,12 @@ pub fn handle_combat_action(
                 you.set_flag(FType::Shielded, false);
             });
         }
+        "InfernalShrouded" => {
+            for_agent(agent_states, &combat_action.caster, &|you| {
+                you.toggle_flag(FType::InfernalSeal, false);
+                you.toggle_flag(FType::InfernalShroud, true);
+            });
+        }
         "Scorch" => {
             let observations = after.clone();
             for_agent(
