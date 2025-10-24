@@ -3,13 +3,12 @@ use std::collections::HashMap;
 use crate::timeline::*;
 use crate::types::*;
 
-use self::akkari::map_mentis;
-
 mod akkari;
 mod executor;
 mod oneiromancer;
 mod ravager;
 mod revenant;
+mod sylvan;
 mod voidseer;
 
 lazy_static! {
@@ -45,6 +44,7 @@ lazy_static! {
         akkari::add_mappings(&mut mapping);
         executor::add_mappings(&mut mapping);
         voidseer::add_mappings(&mut mapping);
+        sylvan::add_mappings(&mut mapping);
         mapping
     };
 }
@@ -60,7 +60,9 @@ pub fn normalize_combat_action(combat_action: &CombatAction) -> CombatAction {
             skill: skill.clone(),
             category: category.clone(),
         }
-    } else if let Some((category, skill)) = map_mentis(&combat_action) {
+    } else if let Some((category, skill)) =
+        akkari::map_mentis(&combat_action).or_else(|| sylvan::map_mentis(&combat_action))
+    {
         CombatAction {
             caster: combat_action.caster.clone(),
             target: combat_action.target.clone(),

@@ -286,6 +286,26 @@ pub fn handle_combat_action(
                 after,
             );
         }
+        "Edgekick" => {
+            apply_combo_balance(
+                agent_states,
+                &combat_action.caster,
+                (BType::Balance, 3.5),
+                after,
+            );
+            attack_limb_damage(
+                agent_states,
+                &combat_action.target,
+                (LType::HeadDamage, EDGEKICK_DAMAGE, true),
+                after,
+            );
+            attack_afflictions(
+                agent_states,
+                &combat_action.target,
+                vec![FType::CrippledThroat, FType::Stuttering],
+                after,
+            );
+        }
         "Palmforce" => {
             apply_combo_balance(
                 agent_states,
@@ -345,6 +365,16 @@ pub fn handle_combat_action(
                 you.limb_damage.dewelt(LType::LeftLegDamage);
                 you.limb_damage.dewelt(LType::RightLegDamage);
             });
+        }
+        "Trammel" => {
+            let amputation = match combat_action.annotation.as_ref() {
+                "left arm" => FType::LeftArmAmputated,
+                "right arm" => FType::RightArmAmputated,
+                "left leg" => FType::LeftLegAmputated,
+                "right leg" => FType::RightLegAmputated,
+                _ => FType::SIZE, // I don't want to panic
+            };
+            attack_afflictions(agent_states, &combat_action.target, vec![amputation], after);
         }
         "Wristlash" => {
             attack_afflictions(

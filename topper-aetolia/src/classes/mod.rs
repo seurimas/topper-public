@@ -97,6 +97,7 @@ pub enum Class {
     Bloodborn,    // Ascendril
     Voidseer,     // Archivist
     Executor,     // Sentinel
+    Sylvan,       // Praenomen again
 }
 
 impl Class {
@@ -142,6 +143,7 @@ impl Class {
             "Bloodborn" => Some(Class::Bloodborn),
             "Voidseer" => Some(Class::Voidseer),
             "Executor" => Some(Class::Executor),
+            "Sylvan" => Some(Class::Sylvan),
             _ => None,
         }
     }
@@ -185,6 +187,7 @@ impl Class {
             Class::Bloodborn => "Bloodborn",
             Class::Voidseer => "Voidseer",
             Class::Executor => "Executor",
+            Class::Sylvan => "Sylvan",
             _ => "Unknown",
         }
     }
@@ -201,7 +204,8 @@ impl Class {
             | Class::Runecarver
             | Class::Bloodborn
             | Class::Voidseer
-            | Class::Executor => true,
+            | Class::Executor
+            | Class::Sylvan => true,
             _ => false,
         }
     }
@@ -219,6 +223,7 @@ impl Class {
             Class::Bloodborn => Class::Ascendril,
             Class::Voidseer => Class::Archivist,
             Class::Executor => Class::Sentinel,
+            Class::Sylvan => Class::Praenomen,
             _ => self.clone(),
         }
     }
@@ -271,6 +276,7 @@ pub fn get_skill_class(category: &String) -> Option<Class> {
         "Humourism" | "Esoterica" | "Hematurgy" => Some(Class::Bloodborn),
         "Enlightenment" | "Cultivation" | "Voidgazing" => Some(Class::Voidseer),
         "Bladedancing" | "Artifice" | "Subversion" => Some(Class::Executor),
+        "Extirpation" | "Caprice" | "Glamours" => Some(Class::Sylvan),
         _ => None,
     }
 }

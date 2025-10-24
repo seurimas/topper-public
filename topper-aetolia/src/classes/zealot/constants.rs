@@ -2,6 +2,7 @@ pub const PUMMEL_DAMAGE: f32 = 9.5;
 pub const WANEKICK_DAMAGE: f32 = 9.0;
 pub const CLAWTWIST_DAMAGE: f32 = 8.5;
 pub const SUNKICK_DAMAGE: f32 = 6.0;
+pub const EDGEKICK_DAMAGE: f32 = 3.5;
 pub const RISEKICK_DAMAGE: f32 = 5.0;
 pub const HEELRUSH_ONE_DAMAGE: f32 = 5.5;
 pub const HEELRUSH_TWO_DAMAGE: f32 = 8.0;
