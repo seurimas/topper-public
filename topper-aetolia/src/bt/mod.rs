@@ -101,6 +101,7 @@ pub enum ClassController {
     },
     Zealot {
         combo_attack_priorities: Vec<(i32, ZealotComboAction)>,
+        wristlash_active: bool,
     },
 }
 
@@ -223,6 +224,7 @@ impl BehaviorController {
     pub fn init_zealot(&mut self) {
         self.class_controller = ClassController::Zealot {
             combo_attack_priorities: vec![],
+            wristlash_active: false,
         };
     }
 

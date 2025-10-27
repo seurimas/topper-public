@@ -92,6 +92,17 @@ impl ZealotComboAction {
 
     pub fn check_action(&self, me: &AgentState, target: &AgentState) -> bool {
         match self {
+            ZealotComboAction::DislocateLeftArm
+            | ZealotComboAction::DislocateRightArm
+            | ZealotComboAction::DislocateLeftLeg
+            | ZealotComboAction::DislocateRightLeg => {
+                if !me.arms_free() {
+                    return false;
+                }
+            }
+            _ => {}
+        }
+        match self {
             ZealotComboAction::PummelLeft
                 | ZealotComboAction::PummelRight
                 | ZealotComboAction::Palmforce

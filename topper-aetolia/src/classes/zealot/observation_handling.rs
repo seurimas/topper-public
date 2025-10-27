@@ -414,7 +414,7 @@ pub fn handle_combat_action(
             attack_afflictions(
                 agent_states,
                 &combat_action.target,
-                vec![FType::Stuttering, FType::WateryEyes],
+                vec![FType::WateryEyes],
                 after,
             );
         }

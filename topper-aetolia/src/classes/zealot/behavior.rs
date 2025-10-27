@@ -22,6 +22,7 @@ pub enum ZealotBehavior {
     AdjustPriority(Vec<ZealotComboAction>, i32),
     TakeComboAttacks(AetTarget),
     TakeComboAttacksIfOver(AetTarget, i32),
+    ToggleWristlashOnCombo,
     FullCombo(AetTarget, ZealotComboAction, ZealotComboAction),
     // Simple actions
     Wrath,
@@ -69,6 +70,7 @@ impl UnpoweredFunction for ZealotBehavior {
             ZealotBehavior::AddComboAttackAtPriority(action, priority) => {
                 if let ClassController::Zealot {
                     combo_attack_priorities,
+                    ..
                 } = &mut controller.class_controller
                 {
                     combo_attack_priorities.push((*priority, action.clone()));
@@ -82,6 +84,7 @@ impl UnpoweredFunction for ZealotBehavior {
             ZealotBehavior::AdjustPriority(actions, adjustment) => {
                 if let ClassController::Zealot {
                     combo_attack_priorities,
+                    ..
                 } = &mut controller.class_controller
                 {
                     combo_attack_priorities.iter_mut().for_each(|(p, a)| {
@@ -96,6 +99,18 @@ impl UnpoweredFunction for ZealotBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
+            ZealotBehavior::ToggleWristlashOnCombo => {
+                if let ClassController::Zealot {
+                    wristlash_active, ..
+                } = &mut controller.class_controller
+                {
+                    *wristlash_active = !*wristlash_active;
+                    UnpoweredFunctionState::Complete
+                } else {
+                    println!("Failed to toggle wristlash: not a zealot");
+                    UnpoweredFunctionState::Failed
+                }
+            }
             ZealotBehavior::TakeComboAttacks(aet_target)
             | ZealotBehavior::TakeComboAttacksIfOver(aet_target, _) => {
                 let Some(target) = aet_target.get_target(model, controller) else {
@@ -106,6 +121,7 @@ impl UnpoweredFunction for ZealotBehavior {
                 }
                 if let ClassController::Zealot {
                     combo_attack_priorities,
+                    wristlash_active,
                 } = &mut controller.class_controller
                 {
                     if combo_attack_priorities.len() < 2 {
@@ -129,6 +145,12 @@ impl UnpoweredFunction for ZealotBehavior {
                     }
                     if actual_attacks.len() < 2 {
                         return UnpoweredFunctionState::Failed;
+                    }
+                    if *wristlash_active && me.balanced(BType::Secondary) {
+                        controller.plan.add_to_qeb(HacklesWristlash::boxed(
+                            model.who_am_i(),
+                            aet_target.get_name(model, controller),
+                        ));
                     }
                     controller.plan.add_to_qeb(Box::new(FlowAttack::new(
                         actual_attacks,
