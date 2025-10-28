@@ -584,7 +584,11 @@ pub fn handle_combat_action(
                         perspective,
                         (1, RANDOM_CURES.to_vec()),
                     );
-                    apply_or_infer_balance(me, (BType::ClassCure1, 20.0), &observations);
+                    let mut duration = 20.0;
+                    if me.is(FType::Laxity) {
+                        duration += 2.0;
+                    }
+                    apply_or_infer_balance(me, (BType::ClassCure1, duration), &observations);
                 },
             );
         }

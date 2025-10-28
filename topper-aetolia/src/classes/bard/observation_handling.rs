@@ -797,6 +797,10 @@ pub fn handle_performance_action(
                             perspective,
                             (1, RANDOM_CURES.to_vec()),
                         );
+                        let mut duration = BRAVADO_COOLDOWN;
+                        if me.is(FType::Laxity) {
+                            duration += 2.0;
+                        }
                         apply_or_infer_balance(
                             me,
                             (BType::ClassCure1, BRAVADO_COOLDOWN),

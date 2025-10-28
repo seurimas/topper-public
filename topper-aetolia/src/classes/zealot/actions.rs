@@ -100,6 +100,14 @@ impl ZealotComboAction {
                     return false;
                 }
             }
+            ZealotComboAction::WanekickLeft
+            | ZealotComboAction::WanekickRight
+            | ZealotComboAction::Edgekick
+            | ZealotComboAction::Sunkick => {
+                if !me.legs_free() {
+                    return false;
+                }
+            }
             _ => {}
         }
         match self {

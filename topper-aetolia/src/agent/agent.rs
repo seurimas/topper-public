@@ -869,6 +869,18 @@ impl AgentState {
         !self.is(FType::RightArmCrippled)
     }
 
+    pub fn legs_free(&self) -> bool {
+        self.leg_free_left() && self.leg_free_right()
+    }
+
+    pub fn leg_free_left(&self) -> bool {
+        !self.is(FType::LeftLegCrippled)
+    }
+
+    pub fn leg_free_right(&self) -> bool {
+        !self.is(FType::RightLegCrippled)
+    }
+
     pub fn push_toxin(&mut self, venom: String) {
         self.relapses.push(venom);
     }

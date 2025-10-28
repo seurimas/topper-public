@@ -581,7 +581,11 @@ pub fn handle_combat_action(
                 agent_states,
                 &combat_action.caster,
                 &|me: &mut AgentState| {
-                    me.set_balance(BType::ClassCure1, 20.0);
+                    let mut duration = 20.0;
+                    if me.is(FType::Laxity) {
+                        duration += 2.0;
+                    }
+                    me.set_balance(BType::ClassCure1, duration);
                 },
             );
         }
