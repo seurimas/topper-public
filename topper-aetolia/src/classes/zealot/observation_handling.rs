@@ -3,7 +3,7 @@ use crate::{agent::*, classes::zealot::constants::*, timeline::*};
 pub fn handle_combat_action(
     combat_action: &CombatAction,
     agent_states: &mut AetTimelineState,
-    _before: &Vec<AetObservation>,
+    before: &Vec<AetObservation>,
     after: &Vec<AetObservation>,
 ) -> Result<(), String> {
     match combat_action.skill.as_ref() {
@@ -589,15 +589,6 @@ pub fn handle_combat_action(
                 },
             );
         }
-        "Hackles" => {
-            for_agent(
-                agent_states,
-                &combat_action.caster,
-                &|me: &mut AgentState| {
-                    me.set_balance(BType::Secondary, 6.5);
-                },
-            );
-        }
         "Disable" => {
             for_agent(
                 agent_states,
@@ -615,6 +606,23 @@ pub fn handle_combat_action(
             );
         }
         _ => {}
+    }
+    if before.iter().any(|obs| match obs {
+        AetObservation::Proc(ca) if ca.skill == "Hackles" => true,
+        _ => false,
+    }) {
+        match combat_action.skill.as_ref() {
+            "Anklepin" | "Trammel" | "Wristlash" | "Descent" | "Uprise" | "Jawcrack" => {
+                for_agent(
+                    agent_states,
+                    &combat_action.caster,
+                    &|me: &mut AgentState| {
+                        me.set_balance(BType::Secondary, 6.5);
+                    },
+                );
+            }
+            _ => {}
+        }
     }
     Ok(())
 }
