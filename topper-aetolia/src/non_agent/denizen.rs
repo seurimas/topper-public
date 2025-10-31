@@ -51,7 +51,7 @@ pub trait AetTimelineDenizenExt {
 
     fn borrow_denizen(&self, denizen_id: i64) -> Option<&Denizen>;
 
-    fn for_denizen(&mut self, denizen_id: i64, action: &Fn(&mut Denizen));
+    fn for_denizen(&mut self, denizen_id: i64, action: &dyn Fn(&mut Denizen));
 
     fn find_denizens_in_room(&self, room_id: i64) -> Vec<i64>;
 
@@ -61,7 +61,7 @@ pub trait AetTimelineDenizenExt {
 
     fn observe_denizen_in_room(&mut self, denizen_id: i64, room_id: i64, convinced: Option<bool>);
 
-    fn check_denizen<R>(&self, denizen_id: i64, predicate: &Fn(&Denizen) -> R) -> Option<R>;
+    fn check_denizen<R>(&self, denizen_id: i64, predicate: &dyn Fn(&Denizen) -> R) -> Option<R>;
 
     fn denizen_has_tag(&self, denizen_id: i64, tag: String) -> bool {
         self.check_denizen(denizen_id, &|denizen: &Denizen| denizen.tags.contains(&tag))
@@ -154,7 +154,7 @@ impl AetTimelineDenizenExt for AetTimelineState {
         })
     }
 
-    fn for_denizen(&mut self, denizen_id: i64, action: &Fn(&mut Denizen)) {
+    fn for_denizen(&mut self, denizen_id: i64, action: &dyn Fn(&mut Denizen)) {
         if denizen_id == 0 {
             // Do not do anything to the null room. It's wasted breath.
             return;
@@ -177,7 +177,7 @@ impl AetTimelineDenizenExt for AetTimelineState {
         }
     }
 
-    fn check_denizen<R>(&self, denizen_id: i64, predicate: &Fn(&Denizen) -> R) -> Option<R> {
+    fn check_denizen<R>(&self, denizen_id: i64, predicate: &dyn Fn(&Denizen) -> R) -> Option<R> {
         if let Some(denizen) = self
             .non_agent_states
             .get(&format_denizen_id(denizen_id))

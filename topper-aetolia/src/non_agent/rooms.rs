@@ -141,7 +141,7 @@ pub fn format_room_id(room_id: i64) -> String {
 }
 
 pub trait AetTimelineRoomExt {
-    fn for_room(&mut self, room_id: i64, action: &Fn(&mut Room));
+    fn for_room(&mut self, room_id: i64, action: &dyn Fn(&mut Room));
 
     fn get_my_room(&self) -> Option<&Room>;
 
@@ -171,7 +171,7 @@ pub trait AetTimelineRoomExt {
 }
 
 impl AetTimelineRoomExt for AetTimelineState {
-    fn for_room(&mut self, room_id: i64, action: &Fn(&mut Room)) {
+    fn for_room(&mut self, room_id: i64, action: &dyn Fn(&mut Room)) {
         if room_id == 0 {
             // Do not do anything to the null room. It's wasted breath.
             return;

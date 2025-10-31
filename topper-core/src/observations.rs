@@ -2,7 +2,7 @@ use crate::timeline::TimeSlice;
 use regex::{Captures, Match, Regex, RegexSet, RegexSetBuilder};
 use serde::{Deserialize, Serialize};
 use std::error::Error;
-use std::fs::{read_dir, DirEntry, File};
+use std::fs::{DirEntry, File, read_dir};
 use std::io::BufReader;
 use std::sync::Mutex;
 
@@ -144,7 +144,7 @@ where
     pub fn new_from_file(
         path: String,
         observation_creator: fn(&String, Vec<String>) -> O,
-    ) -> Result<Self, Box<Error>> {
+    ) -> Result<Self, Box<dyn Error>> {
         use std::fs::File;
         use std::io::BufReader;
         let file = File::open(path)?;
@@ -156,7 +156,7 @@ where
     pub fn new_from_string(
         psuedo_file: String,
         observation_creator: fn(&String, Vec<String>) -> O,
-    ) -> Result<Self, Box<Error>> {
+    ) -> Result<Self, Box<dyn Error>> {
         let mut mappings = Vec::new();
         Self::parse_mappings(psuedo_file.as_ref(), &mut mappings);
         Ok(ObservationParser::new(mappings, observation_creator))
@@ -165,7 +165,7 @@ where
     pub fn new_from_strings(
         psuedo_files: Vec<String>,
         observation_creator: fn(&String, Vec<String>) -> O,
-    ) -> Result<Self, Box<Error>> {
+    ) -> Result<Self, Box<dyn Error>> {
         let mut mappings = Vec::new();
         for psuedo_file in psuedo_files.iter() {
             Self::parse_mappings(psuedo_file.as_ref(), &mut mappings);
@@ -176,7 +176,7 @@ where
     fn parse_mappings(
         text: &str,
         mappings: &mut Vec<ObservationMapping>,
-    ) -> Result<(), Box<Error>> {
+    ) -> Result<(), Box<dyn Error>> {
         let mut new_mappings: Vec<ObservationMapping> =
             serde_json::from_str(text).map_err(move |err| ObservationParserError {
                 base: err,
@@ -190,7 +190,7 @@ where
         path: String,
         file: File,
         mappings: &mut Vec<ObservationMapping>,
-    ) -> Result<(), Box<Error>> {
+    ) -> Result<(), Box<dyn Error>> {
         let reader = BufReader::new(file);
         let mut new_mappings: Vec<ObservationMapping> = serde_json::from_reader(reader)
             .map_err(move |err| ObservationParserError { base: err, path })?;
@@ -201,7 +201,7 @@ where
     fn read_mappings(
         entry: DirEntry,
         mappings: &mut Vec<ObservationMapping>,
-    ) -> Result<(), Box<Error>> {
+    ) -> Result<(), Box<dyn Error>> {
         if entry.file_type()?.is_dir() {
             for path in read_dir(entry.path()).unwrap() {
                 Self::read_mappings(path.unwrap(), mappings)?;
@@ -217,7 +217,7 @@ where
     pub fn new_from_directory(
         dir: String,
         observation_creator: fn(&String, Vec<String>) -> O,
-    ) -> Result<Self, Box<Error>> {
+    ) -> Result<Self, Box<dyn Error>> {
         let mut mappings = Vec::new();
         for path in read_dir(dir).unwrap() {
             Self::read_mappings(path.unwrap(), &mut mappings)?;

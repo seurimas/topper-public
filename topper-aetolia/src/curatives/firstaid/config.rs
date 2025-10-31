@@ -359,7 +359,7 @@ impl FirstAidConfig {
 impl FirstAidSetting {
     pub fn get_command(&self) -> String {
         match self {
-            FirstAidSetting::SimplePriority(ft, mut prio) => {
+            &FirstAidSetting::SimplePriority(ref ft, mut prio) => {
                 if prio == 0 {
                     prio = 26;
                 }
@@ -657,8 +657,12 @@ impl FirstAidSetting {
         }
         if let Some(caps) = SET_USE_CLOTTING.captures(line) {
             return vec![FirstAidSetting::UseClotting(match &caps[0] {
-                "First Aid will no longer attempt to clot your bleeding damage." => ClottingType::Off,
-                "First Aid will clot your bleeding damage only if you do not have haemophilia and alike afflictions." => ClottingType::Safe,
+                "First Aid will no longer attempt to clot your bleeding damage." => {
+                    ClottingType::Off
+                }
+                "First Aid will clot your bleeding damage only if you do not have haemophilia and alike afflictions." => {
+                    ClottingType::Safe
+                }
                 _ => ClottingType::On,
             })];
         }
@@ -925,8 +929,7 @@ mod firstaid_tests {
         let line = "You will try to use the tree tattoo before using a primary curing method, such as consuming a pill, if possible.";
         let settings = FirstAidSetting::get_from_line(line);
         assert_eq!(settings, vec![FirstAidSetting::TreeCount(0)]);
-        let line =
-            "You will only use the tree tattoo if you have at least 1 random-curable affliction(s).";
+        let line = "You will only use the tree tattoo if you have at least 1 random-curable affliction(s).";
         let settings = FirstAidSetting::get_from_line(line);
         assert_eq!(settings, vec![FirstAidSetting::TreeCount(1)]);
     }

@@ -1,15 +1,15 @@
 use crate::classes::{
-    get_skill_class, handle_combat_action, handle_sent, Class, DIAGNOSE_FRESHNESS, DIAGNOSE_TIME,
-    VENOM_AFFLICTS,
+    Class, DIAGNOSE_FRESHNESS, DIAGNOSE_TIME, VENOM_AFFLICTS, get_skill_class,
+    handle_combat_action, handle_sent,
 };
 use crate::curatives::{
-    handle_simple_cure_action, remove_in_order, top_aff, CALORIC_TORSO_ORDER, ELIXIR_CURE_ORDERS,
-    ELIXIR_DEFENCES, PILL_CURE_ORDERS, PILL_DEFENCES, SALVE_CURE_ORDERS, SMOKE_CURE_ORDERS,
+    CALORIC_TORSO_ORDER, ELIXIR_CURE_ORDERS, ELIXIR_DEFENCES, PILL_CURE_ORDERS, PILL_DEFENCES,
+    SALVE_CURE_ORDERS, SMOKE_CURE_ORDERS, handle_simple_cure_action, remove_in_order, top_aff,
 };
 use crate::db::AetDatabaseModule;
 use crate::non_agent::{
-    get_persuasion_target, AetNonAgent, AetTimelineDenizenExt, AetTimelineRoomExt, Appeals,
-    PersuasionStatus,
+    AetNonAgent, AetTimelineDenizenExt, AetTimelineRoomExt, Appeals, PersuasionStatus,
+    get_persuasion_target,
 };
 use crate::timeline::*;
 use crate::types::*;
@@ -19,8 +19,8 @@ use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use std::f32::consts::E;
 use topper_core::observations::strip_ansi;
-use topper_core::timeline::db::DatabaseModule;
 use topper_core::timeline::CType;
+use topper_core::timeline::db::DatabaseModule;
 
 #[cfg(test)]
 #[path = "./tests/apply_tests.rs"]
@@ -1479,14 +1479,18 @@ pub fn apply_or_infer_cure(
     Ok(found_cures)
 }
 
-pub fn for_agent(agent_states: &mut AetTimelineState, target: &String, act: &Fn(&mut AgentState)) {
+pub fn for_agent(
+    agent_states: &mut AetTimelineState,
+    target: &String,
+    act: &impl Fn(&mut AgentState),
+) {
     agent_states.for_agent(target, act)
 }
 
 pub fn for_agent_uncertain(
     agent_states: &mut AetTimelineState,
     target: &String,
-    act: &Fn(&mut AgentState) -> Option<Vec<AgentState>>,
+    act: &impl Fn(&mut AgentState) -> Option<Vec<AgentState>>,
 ) {
     agent_states.for_agent_uncertain(target, act)
 }

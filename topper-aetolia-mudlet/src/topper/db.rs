@@ -3,18 +3,19 @@ use reqwest::Response;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str, to_string_pretty};
-use sled::{open, Db, IVec};
+use sled::{Db, IVec, open};
 use std::collections::HashMap;
+use std::convert::{From, Into};
 use std::convert::{TryFrom, TryInto};
 use std::path::Path;
-use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::Arc;
+use std::sync::mpsc::{Receiver, Sender, channel};
 use std::thread;
 use std::thread::JoinHandle;
 use std::time::{Duration, SystemTime};
 use tokio;
 use topper_aetolia::classes::{Class, VenomPlan};
-use topper_aetolia::curatives::firstaid::{parse_priority_set, FirstAidPriorities};
+use topper_aetolia::curatives::firstaid::{FirstAidPriorities, parse_priority_set};
 use topper_aetolia::db::AetDatabaseModule;
 use topper_aetolia::defense::DEFENSE_DATABASE;
 use topper_aetolia::timeline::*;
@@ -86,13 +87,15 @@ impl AetMudletDatabaseModule {
             db: open(path).unwrap(),
             // api_sender: send_request,
             // api_receiver: receive_response,
-            thread: thread::spawn(move || loop {
-                while let Ok(ApiRequest(who)) = receive_request.try_recv() {
-                    if let Ok(api_response) = retrieve_api(who) {
-                        send_response.send(api_response);
+            thread: thread::spawn(move || {
+                loop {
+                    while let Ok(ApiRequest(who)) = receive_request.try_recv() {
+                        if let Ok(api_response) = retrieve_api(who) {
+                            send_response.send(api_response);
+                        }
                     }
+                    thread::sleep_ms(100);
                 }
-                thread::sleep_ms(100);
             }),
         }
     }
@@ -130,7 +133,7 @@ impl DatabaseModule for AetMudletDatabaseModule {
             .expect(format!("Bad {} tree", tree).as_ref())
             .get(key)
             .expect(format!("Bad {} get", key).as_ref())
-            .map(|ivec| ivec.into())
+            .map(|ivec: IVec| Arc::from(ivec.as_ref()))
     }
 
     fn remove(&self, tree: &str, key: &String) {

@@ -918,11 +918,7 @@ impl FlagSet {
             // Ignore controller flags.
             0
         } else {
-            if self.simple[flag as usize] {
-                1
-            } else {
-                0
-            }
+            if self.simple[flag as usize] { 1 } else { 0 }
         }
     }
 
@@ -1059,7 +1055,7 @@ pub struct FlagSetIterator<'s> {
     index: usize,
     simple: bool,
     set: &'s FlagSet,
-    predicate: &'s Fn(FType) -> bool,
+    predicate: &'s dyn Fn(FType) -> bool,
 }
 
 impl<'s> FlagSetIterator<'s> {
@@ -1115,7 +1111,7 @@ impl<'s> Iterator for FlagSetIterator<'s> {
 }
 
 impl<'s> FlagSetIterator<'s> {
-    fn new(flagset: &'s FlagSet, predicate: &'s Fn(FType) -> bool) -> Self {
+    fn new(flagset: &'s FlagSet, predicate: &'s impl Fn(FType) -> bool) -> Self {
         FlagSetIterator {
             simple: true,
             index: 0,

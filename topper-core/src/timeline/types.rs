@@ -120,19 +120,19 @@ impl<A: BaseAgentState + Clone, N: NonAgentState + Clone> TimelineState<A, N> {
         self.borrow_agent(&self.me.clone())
     }
 
-    pub fn for_agent(&mut self, who: &String, act: &Fn(&mut A)) {
+    pub fn for_agent<T: Fn(&mut A)>(&mut self, who: &String, act: &T) {
         for you in self.get_mut_agent(who) {
             act(you);
         }
     }
 
-    pub fn for_all_agents(&mut self, act: &Fn(&mut A)) {
+    pub fn for_all_agents<T: Fn(&mut A)>(&mut self, act: &T) {
         for you in self.agent_states.values_mut().flatten() {
             act(you);
         }
     }
 
-    pub fn for_agent_uncertain(&mut self, who: &String, act: &Fn(&mut A) -> Option<Vec<A>>) {
+    pub fn for_agent_uncertain<T: Fn(&mut A) -> Option<Vec<A>>>(&mut self, who: &String, act: &T) {
         let mut branches = Vec::new();
         let mut unbranched = Vec::new();
         for (i, mut you) in self.get_mut_agent(who).iter_mut().enumerate() {

@@ -18,10 +18,7 @@ use crate::{
     sect_parser::{load_sect_into_iframe, AetoliaSectParser},
 };
 
-use self::{
-    page::ExplainerPageModel,
-    time_control::{_TimeControlProperties::end_time, get_start_and_end_time},
-};
+use self::{page::ExplainerPageModel, time_control::_TimeControlProperties::end_time};
 
 #[derive(Debug)]
 pub enum ExplainerModel {

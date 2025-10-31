@@ -1079,7 +1079,7 @@ impl AgentState {
         };
     }
 
-    pub fn assume_ascendril(&mut self, action: &Fn(&mut AscendrilClassState)) {
+    pub fn assume_ascendril(&mut self, action: &impl Fn(&mut AscendrilClassState)) {
         if let ClassState::Ascendril(ascendril) = &mut self.class_state {
             action(ascendril);
         } else {
@@ -1088,7 +1088,7 @@ impl AgentState {
         }
     }
 
-    pub fn check_if_ascendril<R>(&self, action: &Fn(&AscendrilClassState) -> R) -> Option<R> {
+    pub fn check_if_ascendril<R>(&self, action: &impl Fn(&AscendrilClassState) -> R) -> Option<R> {
         if let ClassState::Ascendril(ascendril) = &self.class_state {
             Some(action(ascendril))
         } else {
@@ -1105,7 +1105,7 @@ impl AgentState {
         }
     }
 
-    pub fn check_if_zealot<R>(&self, action: &Fn(&ZealotClassState) -> R) -> Option<R> {
+    pub fn check_if_zealot<R>(&self, action: &impl Fn(&ZealotClassState) -> R) -> Option<R> {
         if let ClassState::Zealot(zealot) = &self.class_state {
             Some(action(zealot))
         } else {
@@ -1113,7 +1113,7 @@ impl AgentState {
         }
     }
 
-    pub fn assume_bard<R>(&mut self, action: &Fn(&mut BardClassState) -> R) -> R {
+    pub fn assume_bard<R>(&mut self, action: &impl Fn(&mut BardClassState) -> R) -> R {
         if let ClassState::Bard(bard) = &mut self.class_state {
             action(bard)
         } else {
@@ -1122,7 +1122,7 @@ impl AgentState {
         }
     }
 
-    pub fn check_if_bard<R>(&self, action: &Fn(&BardClassState) -> R) -> Option<R> {
+    pub fn check_if_bard<R>(&self, action: &impl Fn(&BardClassState) -> R) -> Option<R> {
         if let ClassState::Bard(bard) = &self.class_state {
             Some(action(bard))
         } else {
@@ -1130,7 +1130,7 @@ impl AgentState {
         }
     }
 
-    pub fn assume_monk<R>(&mut self, action: &Fn(&mut MonkClassState) -> R) -> R {
+    pub fn assume_monk<R>(&mut self, action: &impl Fn(&mut MonkClassState) -> R) -> R {
         if let ClassState::Monk(monk) = &mut self.class_state {
             action(monk)
         } else {
@@ -1139,7 +1139,7 @@ impl AgentState {
         }
     }
 
-    pub fn check_if_monk<R>(&self, action: &Fn(&MonkClassState) -> R) -> Option<R> {
+    pub fn check_if_monk<R>(&self, action: &impl Fn(&MonkClassState) -> R) -> Option<R> {
         if let ClassState::Monk(monk) = &self.class_state {
             Some(action(monk))
         } else {
@@ -1147,7 +1147,10 @@ impl AgentState {
         }
     }
 
-    pub fn assume_infiltrator<R>(&mut self, action: &Fn(&mut InfiltratorClassState) -> R) -> R {
+    pub fn assume_infiltrator<R>(
+        &mut self,
+        action: &impl Fn(&mut InfiltratorClassState) -> R,
+    ) -> R {
         if let ClassState::Infiltrator(infiltrator) = &mut self.class_state {
             action(infiltrator)
         } else {
@@ -1156,7 +1159,10 @@ impl AgentState {
         }
     }
 
-    pub fn check_if_infiltrator<R>(&self, action: &Fn(&InfiltratorClassState) -> R) -> Option<R> {
+    pub fn check_if_infiltrator<R>(
+        &self,
+        action: &impl Fn(&InfiltratorClassState) -> R,
+    ) -> Option<R> {
         if let ClassState::Infiltrator(infiltrator) = &self.class_state {
             Some(action(infiltrator))
         } else {
@@ -1164,7 +1170,7 @@ impl AgentState {
         }
     }
 
-    pub fn assume_predator<R>(&mut self, action: &Fn(&mut PredatorClassState) -> R) -> R {
+    pub fn assume_predator<R>(&mut self, action: &impl Fn(&mut PredatorClassState) -> R) -> R {
         if let ClassState::Predator(predator) = &mut self.class_state {
             action(predator)
         } else {
@@ -1173,7 +1179,7 @@ impl AgentState {
         }
     }
 
-    pub fn check_if_predator<R>(&self, action: &Fn(&PredatorClassState) -> R) -> Option<R> {
+    pub fn check_if_predator<R>(&self, action: &impl Fn(&PredatorClassState) -> R) -> Option<R> {
         if let ClassState::Predator(predator) = &self.class_state {
             Some(action(predator))
         } else {
@@ -1181,7 +1187,10 @@ impl AgentState {
         }
     }
 
-    pub fn assume_siderealist<R>(&mut self, action: &Fn(&mut SiderealistClassState) -> R) -> R {
+    pub fn assume_siderealist<R>(
+        &mut self,
+        action: &impl Fn(&mut SiderealistClassState) -> R,
+    ) -> R {
         if let ClassState::Siderealist(siderealist) = &mut self.class_state {
             action(siderealist)
         } else {
@@ -1190,7 +1199,10 @@ impl AgentState {
         }
     }
 
-    pub fn check_if_siderealist<R>(&self, action: &Fn(&SiderealistClassState) -> R) -> Option<R> {
+    pub fn check_if_siderealist<R>(
+        &self,
+        action: &impl Fn(&SiderealistClassState) -> R,
+    ) -> Option<R> {
         if let ClassState::Siderealist(siderealist) = &self.class_state {
             Some(action(siderealist))
         } else {

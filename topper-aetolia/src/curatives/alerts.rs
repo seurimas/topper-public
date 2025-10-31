@@ -1,7 +1,10 @@
-use std::{fmt::Display, ops::DerefMut};
+use std::{
+    fmt::{Display, Formatter},
+    ops::DerefMut,
+};
 
-use serde::*;
 use behavior_bark::unpowered::*;
+use serde::*;
 
 use crate::{classes::*, db::AetDatabaseModule, timeline::*, types::*};
 
@@ -14,7 +17,7 @@ pub enum SafetyAlert {
 }
 
 impl Display for SafetyAlert {
-    fn fmt(&self, f: &mut __private::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             SafetyAlert::LowHealth => write!(f, "Low Health"),
             SafetyAlert::LockThreat(lock, affs) => write!(f, "Lock Threat ({})", lock),

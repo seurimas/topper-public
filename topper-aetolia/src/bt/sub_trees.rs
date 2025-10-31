@@ -16,7 +16,7 @@ lazy_static! {
             Arc<
                 Mutex<
                     Box<
-                        UnpoweredFunction<
+                        dyn UnpoweredFunction<
                                 Model = BehaviorModel,
                                 Controller = BehaviorController,
                             > + Sync
