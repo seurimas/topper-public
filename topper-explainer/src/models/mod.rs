@@ -170,7 +170,7 @@ impl Component for ExplainerModel {
                     Ok(page) => {
                         log("Found page from file!");
                         set_title(&page.id);
-                        let start_and_end_time = get_start_and_end_time(&page).unwrap_or((0, 0));
+                        let start_and_end_time = page.get_start_and_end_time().unwrap_or((0, 0));
                         *self = Self::LoadedPage {
                             page,
                             first_time: start_and_end_time.0,
@@ -188,7 +188,7 @@ impl Component for ExplainerModel {
             ExplainerMessage::LoadedPage(loaded) => {
                 log(&format!("Loaded {}!", loaded.len()));
                 set_title(&loaded.id);
-                let start_and_end_time = get_start_and_end_time(&loaded).unwrap_or((0, 0));
+                let start_and_end_time = loaded.get_start_and_end_time().unwrap_or((0, 0));
                 *self = Self::LoadedPage {
                     page: loaded,
                     first_time: start_and_end_time.0,
@@ -215,7 +215,7 @@ impl Component for ExplainerModel {
                     parser.parse_nodes(&iframe);
                     log("Parsed!");
                     let page = parser.get_page();
-                    let start_and_end_time = get_start_and_end_time(&page).unwrap_or((0, 0));
+                    let start_and_end_time = page.get_start_and_end_time().unwrap_or((0, 0));
                     *self = Self::LoadedPage {
                         page,
                         first_time: start_and_end_time.0,

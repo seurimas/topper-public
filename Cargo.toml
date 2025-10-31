@@ -9,4 +9,5 @@ members = [
     "topper-core-mudlet",
     "topper-explainer",
     "topper-persuasion",
+    "topper-sect-watch/src-wasm",
 ]

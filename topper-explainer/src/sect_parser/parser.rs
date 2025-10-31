@@ -1,17 +1,10 @@
 use crate::{bindings::*, explainer::ExplainerPage};
 use regex::Regex;
+use topper_aetolia::explainer::{PROMPT_REGEX, VS_REGEX, WHO_REGEX};
 use topper_core::colored_lines::get_content_of_raw_colored_text;
 use wasm_bindgen::JsCast;
 
 use web_sys::*;
-
-lazy_static! {
-    pub static ref PROMPT_REGEX: Regex =
-        Regex::new(r"\[(?P<hour>\d\d):(?P<minute>\d\d):(?P<second>\d\d):(?P<centi>\d\d)\]")
-            .unwrap();
-    static ref WHO_REGEX: Regex = Regex::new(r"^Who:\s+(?P<who>\w+)$").unwrap();
-    static ref VS_REGEX: Regex = Regex::new(r"^Vs:\s+(?P<vs>\w+)$").unwrap();
-}
 
 #[derive(Debug)]
 pub struct AetoliaSectParser {
@@ -119,7 +112,7 @@ pub fn parse_me_and_you(page: &ExplainerPage) -> (String, String) {
             if let Some(vs) = captures.name("vs") {
                 you = vs.as_str().to_string();
             }
-        } else if let Some(matches) = PROMPT_REGEX.find(&text) {
+        } else if PROMPT_REGEX.is_match(&text) {
             break;
         }
     }

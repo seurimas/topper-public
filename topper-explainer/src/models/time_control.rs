@@ -119,15 +119,3 @@ impl Component for TimeControl {
         }
     }
 }
-
-pub fn get_start_and_end_time(page: &ExplainerPage) -> Option<(i32, i32)> {
-    let start_time = page.get_body().iter().find_map(|line| {
-        let line = get_content_of_raw_colored_text(line);
-        parse_prompt_time(&line, 0)
-    })?;
-    let end_time = page.get_body().iter().rev().find_map(|line| {
-        let line = get_content_of_raw_colored_text(line);
-        parse_prompt_time(&line, start_time)
-    })?;
-    Some((start_time, end_time))
-}

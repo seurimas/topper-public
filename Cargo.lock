@@ -4355,6 +4355,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "src-wasm"
+version = "0.1.0"
+dependencies = [
+ "lazy_static",
+ "regex",
+ "serde",
+ "serde_json",
+ "topper-aetolia",
+ "topper-core",
+ "topper-derive",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "stable_deref_trait"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -2,19 +2,10 @@ use regex::Regex;
 use std::{cmp::Ordering, marker::PhantomData};
 use tl::*;
 use topper_aetolia::{
-    explainer::ExplainerPage,
+    explainer::{ExplainerPage, CLASS_REGEX, PROMPT_REGEX, VS_REGEX, WHO_REGEX},
     timeline::{AetPrompt, AetTimeSlice, AetTimeline},
 };
 use topper_core::colored_lines::get_content_of_raw_colored_text;
-
-lazy_static! {
-    pub static ref PROMPT_REGEX: Regex =
-        Regex::new(r"\[(?P<hour>\d\d):(?P<minute>\d\d):(?P<second>\d\d):(?P<centi>\d\d)\]")
-            .unwrap();
-    static ref WHO_REGEX: Regex = Regex::new(r"^Who:\s+(?P<who>\w+)$").unwrap();
-    static ref VS_REGEX: Regex = Regex::new(r"^Vs:\s+(?P<vs>\w+)$").unwrap();
-    static ref CLASS_REGEX: Regex = Regex::new(r"^Class:\s+(?P<class>\w+)$").unwrap();
-}
 
 #[derive(Debug)]
 pub struct AetoliaSectParser {
@@ -156,33 +147,6 @@ pub fn parse_me_and_you(page: &ExplainerPage) -> (String, String) {
         }
     }
     (me, you)
-}
-
-pub fn parse_prompt_time(line: &String, last_time: i32) -> Option<i32> {
-    if let Some(captures) = PROMPT_REGEX.captures(line.as_ref()) {
-        if let (Some(hour), Some(minute), Some(second), Some(centi)) = (
-            captures.name("hour"),
-            captures.name("minute"),
-            captures.name("second"),
-            captures.name("centi"),
-        ) {
-            let hour: i32 = hour.as_str().parse().unwrap();
-            let minute: i32 = minute.as_str().parse().unwrap();
-            let second: i32 = second.as_str().parse().unwrap();
-            let centi: i32 = centi.as_str().parse().unwrap();
-            let mut time = centi + (((((hour * 60) + minute) * 60) + second) * 100);
-            if time < last_time {
-                // It's a braaand neww day, and the sun is hiiigh.
-                time = time + (24 * 360000);
-            }
-            return Some(time);
-        }
-    }
-    None
-}
-
-pub fn is_prompt(line: &String) -> bool {
-    parse_prompt_time(line, 0).is_some()
 }
 
 pub fn get_color_from_node(node: &Node) -> String {

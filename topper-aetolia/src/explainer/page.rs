@@ -1,4 +1,7 @@
 use serde::{Deserialize, Serialize};
+use topper_core::colored_lines::get_content_of_raw_colored_text;
+
+use crate::explainer::parse_prompt_time;
 
 use super::{Comment, Mutation};
 
@@ -96,5 +99,17 @@ impl ExplainerPage {
 
     pub fn delete_comment(&mut self, line: usize) {
         self.comments.retain(|comment| !comment.is_for_line(line));
+    }
+
+    pub fn get_start_and_end_time(&self) -> Option<(i32, i32)> {
+        let start_time = self.get_body().iter().find_map(|line| {
+            let line = get_content_of_raw_colored_text(line);
+            parse_prompt_time(&line, 0)
+        })?;
+        let end_time = self.get_body().iter().rev().find_map(|line| {
+            let line = get_content_of_raw_colored_text(line);
+            parse_prompt_time(&line, start_time)
+        })?;
+        Some((start_time, end_time))
     }
 }
