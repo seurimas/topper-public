@@ -1,10 +1,9 @@
-use regex::Regex;
-use topper_aetolia::explainer::{ExplainerPage, PROMPT_REGEX, VS_REGEX, WHO_REGEX};
-use topper_core::colored_lines::get_content_of_raw_colored_text;
+use topper_aetolia::explainer::{PROMPT_REGEX, VS_REGEX, WHO_REGEX};
+use wasm_bindgen::prelude::*;
 
 #[derive(Debug)]
-pub struct AetoliaSectParser {
-    pub text: String,
+#[wasm_bindgen]
+pub struct ExplainerPageBuilder {
     last_color: String,
     lines: Vec<String>,
     line_remaining: String,
@@ -13,10 +12,10 @@ pub struct AetoliaSectParser {
     you: String,
 }
 
-impl AetoliaSectParser {
-    pub fn new(text: String) -> Self {
+#[wasm_bindgen]
+impl ExplainerPageBuilder {
+    pub fn new() -> Self {
         Self {
-            text,
             last_color: String::new(),
             lines: Vec::new(),
             line_remaining: String::new(),
@@ -42,9 +41,12 @@ impl AetoliaSectParser {
         }
     }
 
-    pub fn get_page(&self) -> ExplainerPage {
-        let id = format!("{} vs {} ({})", self.me, self.you, self.time);
-        ExplainerPage::new(id, self.lines.clone())
+    pub fn get_title(&self) -> String {
+        format!("{} vs {} ({})", self.me, self.you, self.time)
+    }
+
+    pub fn get_lines(&self) -> Vec<String> {
+        self.lines.clone()
     }
 
     pub fn append_colored_text(&mut self, mut text: String, color: String) {
