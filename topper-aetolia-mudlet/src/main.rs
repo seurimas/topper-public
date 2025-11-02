@@ -14,19 +14,18 @@ extern crate simplelog;
 use chrono::prelude::*;
 use simplelog::*;
 use std::env;
-use std::fs::create_dir;
 use std::fs::File;
+use std::fs::create_dir;
 use std::io::ErrorKind;
 use std::path::Path;
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
-use topper_core_mudlet::topper::telnet::proxy;
 use topper_core_mudlet::topper::Topper;
+use topper_core_mudlet::topper::telnet::proxy;
 
-use crate::topper::battle_stats::BattleStats;
 use crate::topper::AetTopper;
-mod sect_parser;
+use crate::topper::battle_stats::BattleStats;
 mod topper;
 
 fn main() {

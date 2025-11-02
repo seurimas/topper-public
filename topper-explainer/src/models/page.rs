@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
 use topper_aetolia::timeline::{AetObservation, AetTimeSlice, AetTimeline, AetTimelineState};
-use topper_core::timeline::{db::DummyDatabaseModule, BaseTimeline};
+use topper_core::timeline::{BaseTimeline, db::DummyDatabaseModule};
 use yew::{prelude::*, virtual_dom::VNode};
 
 use crate::{
     bindings::{export_json, get_time, is_unlocked, log, trace},
     explainer::ExplainerPage,
     models::{comment::CommentBlock, line::PageLine, state::StateBlock},
-    sect_parser::{build_line_times, build_time_slices, parse_me_and_you},
+    sect_parser::{observations::OBSERVER, parse_me_and_you},
 };
 
 use crate::explainer::{Comment, Mutation};
@@ -212,8 +212,8 @@ impl Component for ExplainerPageModel {
             page: page.clone(),
             me,
             you,
-            time_slices: build_time_slices(&page),
-            line_times: build_line_times(&page),
+            time_slices: page.build_time_slices(&|slice| OBSERVER.observe(slice)),
+            line_times: page.build_line_times(),
             pass_msg: ctx.link().callback(|msg| msg),
         }
     }

@@ -1,6 +1,3 @@
-use topper_aetolia::timeline::{AetObservation, aet_observation_creator};
-use topper_core::observations::ObservationParser;
-
 lazy_static! {
     static ref OBSERVATIONS: Vec<String> = {
         let mut results = vec![];

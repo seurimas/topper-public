@@ -3,7 +3,7 @@ use topper_aetolia::timeline::AetTimeSlice;
 use topper_core_mudlet::topper::{TopperMessage, TopperModule, TopperRequest, TopperResponse};
 use web_view::*;
 
-use crate::sect_parser;
+use topper_aetolia::explainer::sect_parser;
 
 use super::battle_stats::BattleStats;
 

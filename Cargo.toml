@@ -1,6 +1,5 @@
 [workspace]
 resolver = "3"
-
 members = [
     "topper-core",
     # "topper-bt",
@@ -10,5 +9,5 @@ members = [
     "topper-core-mudlet",
     "topper-explainer",
     "topper-persuasion",
-    "topper-sect-watch/src-wasm",
+    "topper-sect-watch/supabase/functions/share-log/src-wasm",
 ]

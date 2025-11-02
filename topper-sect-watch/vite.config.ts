@@ -3,7 +3,26 @@ import { sveltekit } from '@sveltejs/kit/vite';
 
 export default defineConfig({
 	plugins: [sveltekit()],
+	server: {
+		fs: {
+			allow: ['src-wasm/pkg']
+		}
+	},
 	test: {
+		pool: 'forks',
+		poolOptions: {
+			forks: {
+				execArgv: [
+					'--cpu-prof',
+					'--cpu-prof-dir=test-runner-profile',
+					'--heap-prof',
+					'--heap-prof-dir=test-runner-profile'
+				],
+
+				// To generate a single profile
+				singleFork: true,
+			},
+		},
 		expect: { requireAssertions: true },
 		projects: [
 			{

@@ -1,10 +1,10 @@
+use crate::{
+    explainer::{CLASS_REGEX, ExplainerPage, PROMPT_REGEX, VS_REGEX, WHO_REGEX},
+    timeline::{AetPrompt, AetTimeSlice, AetTimeline},
+};
 use regex::Regex;
 use std::{cmp::Ordering, marker::PhantomData};
 use tl::*;
-use topper_aetolia::{
-    explainer::{ExplainerPage, CLASS_REGEX, PROMPT_REGEX, VS_REGEX, WHO_REGEX},
-    timeline::{AetPrompt, AetTimeSlice, AetTimeline},
-};
 use topper_core::colored_lines::get_content_of_raw_colored_text;
 
 #[derive(Debug)]
