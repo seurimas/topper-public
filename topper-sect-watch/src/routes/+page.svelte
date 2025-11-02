@@ -1,10 +1,53 @@
 <script lang="ts">
-	import init from 'topper';
+	import Readme from "$lib/Readme.svelte";
 
-	init().then(() => {
-		console.log('WASM module initialized');
-	});
 </script>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<Readme title="Seurimas' Sect Watch">
+	<p>
+		<span class="sect_watch">Sect Watch</span> is a tool for sharing, viewing, and commenting on logs for the online roleplaying MUD,
+		<a href="http://aetolia.com">Aetolia</a>. 
+	</p>
+
+	<p>
+		You can find the source code for this project on
+		<a href="http://github.com/seurimas/topper_public">GitHub</a>.
+	</p>
+
+	<h2>Viewing and Sharing Logs</h2>
+
+	<p>
+		To get started viewing logs, head to the <a href="/logs">Public Logs</a> page. There, you can browse logs that have been shared by other users.
+	</p>
+
+	<p>
+		You can also publish your own logs to share them with the community. To do so, you'll need to link your Discord account by signing in via the <a href="/signin">Sign In</a> page.
+		After signing in, you can upload logs using the upload form available on the main page. Rather than downloading and re-uploading log files manually, logs are shared through by the URL provided when reading your Sect logbook.
+	</p>
+
+	<h2>API Information</h2>
+
+	<p>
+		You may also upload logs directly to the Sect Watch API from your MUD client. Documentation for the API can be found on the <a href="/api">API Info</a> page.
+	</p>
+</Readme>
+
+<style>
+	@reference "tailwindcss";
+
+	h1 {
+		@apply text-4xl font-bold mb-4;
+	}
+
+	h2 {
+		@apply text-2xl font-bold mt-6 mb-2;
+	}
+
+	.sect_watch {
+		@apply font-bold text-amber-200;
+	}
+
+	a {
+		@apply text-blue-500 underline hover:text-blue-700;
+	}
+</style>

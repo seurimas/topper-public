@@ -16,7 +16,12 @@
 		"test": "npm run test:unit -- --run"
 	},
 	"dependencies": {
-		"cheerio": "^1.1.2"
+		"@supabase/supabase-js": "^2.78.0",
+		"@tailwindcss/vite": "^4.1.16",
+		"@tailwindplus/elements": "^1.0.18",
+		"ag-grid-community": "^34.3.1",
+		"ag-grid-svelte": "^0.3.0",
+		"tailwindcss": "^4.1.16"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",

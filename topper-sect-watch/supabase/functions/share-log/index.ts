@@ -4,9 +4,11 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import { createClient } from 'npm:@supabase/supabase-js@2'
 import { parse_html_to_page } from "./src-wasm/pkg/src_wasm.js";
 
 const VALID_URL_PREFIX = "https://aetolia.com/local/combatlogs/"
+const STORAGE_BUCKET_NAME = "sect_logs";
 
 type ExplainerPage = {
   id: string;
@@ -49,10 +51,48 @@ Deno.serve(async (req: Request) => {
     const html = await response.text()
     
     // Parse the HTML to an ExplainerPage
-    const explainerPage = parse_html_to_page(html)
+    const explainerPageString = parse_html_to_page(html);
+    const explainerPage: ExplainerPage = JSON.parse(explainerPageString);
+
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    await supabaseAdmin.storage.createBucket(STORAGE_BUCKET_NAME, {
+      public: true,
+    }).catch((e: Error) => {
+      // Ignore "Bucket already exists" error
+      if (!e.message.includes("Bucket already exists")) {
+        throw e;
+      }
+    });
+
+    const { data, error } = await supabaseAdmin.storage
+      .from(STORAGE_BUCKET_NAME)
+      .upload(
+        `logs/${explainerPage.id}.json`,
+        new Blob([JSON.stringify(explainerPage)], { type: "application/json" }),
+        { upsert: false }
+      );
+
+    if (error) {
+      console.error("Supabase storage upload error:", error);
+      return new Response(
+        JSON.stringify({ 
+          error: "Failed to save the explainer page to storage" 
+        }),
+        { 
+          status: 500,
+          headers: { "Content-Type": "application/json" } 
+        }
+      )
+    }
     
     return new Response(
-      JSON.stringify(explainerPage),
+      JSON.stringify({
+        saved: explainerPage.id,
+      }),
       { headers: { "Content-Type": "application/json" } }
     )
     
