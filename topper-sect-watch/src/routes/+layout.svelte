@@ -2,20 +2,19 @@
 	import "../app.css";
 	import { invalidate } from '$app/navigation'
 	import { onMount } from 'svelte'
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '$lib/assets/favicon.ico';
 	import Navbar from "$lib/Navbar.svelte";
 
 	let { data, children } = $props();
-	let { session, supabase } = $derived(data);
+	let { session, user, supabase } = $derived(data);
 
-	let logged_in = $state(false);
+	let logged_in = $derived(user !== null);
 
 	onMount(() => {
 		const { data } = supabase.auth.onAuthStateChange((_, newSession) => {
 			if (newSession?.expires_at !== session?.expires_at) {
 				invalidate('supabase:auth');
 			}
-			logged_in = newSession !== null;
 		});
 
 		return () => data.subscription.unsubscribe();

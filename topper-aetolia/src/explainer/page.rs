@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use topper_core::{colored_lines::get_content_of_raw_colored_text, timeline::TimeSlice};
 
 use crate::{
-    explainer::{parse_me_and_you, parse_prompt_time},
+    explainer::{parse_me_and_you, parse_prompt_time, replace_prompt_time},
     timeline::{AetObservation, AetPrompt, AetTimeSlice},
 };
 
@@ -46,6 +46,24 @@ impl ExplainerPage {
 
     pub fn get_body(&self) -> &Vec<String> {
         &self.body
+    }
+
+    pub fn hide_real_times(&mut self) {
+        let first_time = self
+            .get_body()
+            .iter()
+            .find_map(|line| {
+                let line = get_content_of_raw_colored_text(line);
+                parse_prompt_time(&line, 0)
+            })
+            .unwrap_or(0);
+        self.body.iter_mut().for_each(|line| {
+            let line_content = get_content_of_raw_colored_text(line);
+            if let Some(line_time) = parse_prompt_time(&line_content, first_time) {
+                let hidden_time = line_time - first_time;
+                *line = replace_prompt_time(line, hidden_time);
+            }
+        });
     }
 
     pub fn filter_out_from_body(&mut self, filter: &str) {

@@ -108,7 +108,7 @@ Deno.serve(async (req: Request) => {
       .upload(
         `logs/${explainerPage.id}.json`,
         new Blob([JSON.stringify(explainerPage)], { type: "application/json" }),
-        { upsert: false }
+        { upsert: true }
       );
 
     if (error) {

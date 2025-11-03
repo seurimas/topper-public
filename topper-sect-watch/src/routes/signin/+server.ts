@@ -1,5 +1,3 @@
-// src/routes/auth/confirm/+server.js
-import type { EmailOtpType } from '@supabase/supabase-js'
 import { redirect } from '@sveltejs/kit'
 
 import type { RequestHandler } from './$types'

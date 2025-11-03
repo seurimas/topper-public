@@ -29,6 +29,20 @@ pub fn parse_prompt_time(line: &String, last_time: i32) -> Option<i32> {
     None
 }
 
+pub fn format_prompt_time(time: i32) -> String {
+    let centi = time % 100;
+    let total_seconds = time / 100;
+    let seconds = total_seconds % 60;
+    let total_minutes = total_seconds / 60;
+    let minutes = total_minutes % 60;
+    let hours = total_minutes / 60;
+    format!("[{:02}:{:02}:{:02}:{:02}]", hours, minutes, seconds, centi)
+}
+
+pub fn replace_prompt_time(line: &String, new_time: i32) -> String {
+    line.replace(PROMPT_REGEX.as_str(), format_prompt_time(new_time).as_ref())
+}
+
 pub fn is_prompt(line: &String) -> bool {
     PROMPT_REGEX.is_match(line.as_ref())
 }

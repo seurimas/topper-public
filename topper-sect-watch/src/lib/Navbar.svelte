@@ -21,9 +21,9 @@
     {@render button('API Info', '/api')}
     {@render button('Terms', '/tos')}
     {#if logged_in}
-      <span class="px-3 py-2 text-sm font-medium text-gray-100 italic">Signed In</span>
+      {@render button('Sign Out', '/signout')}
     {:else}      
-    {@render button('Sign In', '/signin')}
+      {@render button('Sign In', '/signin')}
     {/if}
 {/snippet}
 

@@ -13,6 +13,7 @@ pub fn parse_html_to_page(
     let result = parser.parse_nodes(html_content);
     match result {
         Ok(mut page) => {
+            page.hide_real_times();
             for body in
                 serde_wasm_bindgen::from_value::<Vec<String>>(filtered_body).unwrap_or_default()
             {
