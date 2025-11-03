@@ -1,10 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { STORAGE_BUCKET_NAME } from '$lib/sect_logs';
-
-const I_WIN_REGEX = /^\((\w+)\)_(\w+)_vs_(\w+)_(\w+)_(\d+)$/;
-const YOU_WIN_REGEX = /^(\w+)_(\w+)_vs_\((\w+)\)_(\w+)_(\d+)$/;
-const DRAW_REGEX = /^(\w+)_(\w+)_vs_(\w+)_(\w+)_(\d+)$/;
+import { parseLogId, STORAGE_BUCKET_NAME } from '$lib/sect_logs';
 
 export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 
@@ -17,43 +13,7 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
     }
 
     const names = data.map(item => item.name.replace('.json', ''));
-    const logs = names.map(name => {
-        if (I_WIN_REGEX.test(name)) {
-            const [, myName, myClass, oppName, oppClass, length] = I_WIN_REGEX.exec(name)!;
-            return {
-                name,
-                myName,
-                myClass,
-                oppName,
-                oppClass,
-                length: parseInt(length),
-                winner: myName,
-            };
-        } else if (YOU_WIN_REGEX.test(name)) {
-            const [, myName, myClass, oppName, oppClass, length] = YOU_WIN_REGEX.exec(name)!;
-            return {
-                name,
-                myName,
-                myClass,
-                oppName,
-                oppClass,
-                length: parseInt(length),
-                winner: oppName,
-            };
-        } else if (DRAW_REGEX.test(name)) {
-            const [, myName, myClass, oppName, oppClass, length1,] = DRAW_REGEX.exec(name)!;
-            return {
-                name,
-                myName,
-                myClass,
-                oppName,
-                oppClass,
-                length: parseInt(length1), // both lengths are the same in a draw
-                winner: 'draw',
-            };
-        }
-        return { name, myName: 'unknown', myClass: 'unknown', oppName: 'unknown', oppClass: 'unknown', length: 0, winner: 'unknown' };
-    });
+    const logs = names.map(parseLogId);
 
     return { logs };
 }
