@@ -10,8 +10,6 @@
 <Readme title="API Information">
     <h2>Share Your Logs</h2>
 
-    <p>TODO: Better instructions here. I will put Lua code here instead.</p>
-
     <p>
         You can upload logs directly to the Sect Watch API from your MUD client. To do so, send a POST request to the following endpoint:
     </p>
@@ -44,6 +42,24 @@ POST {page.url.host}/
 {`{
     "saved": "log_id_here"
 }`}
+    </pre>
+
+    <h2>Mudlet Function</h2>
+
+    <p>
+        Here is a sample Mudlet function that demonstrates how to upload a Sect log to Sect Watch:
+    </p>
+
+    <pre class="p-4 rounded mb-4">
+{`function uploadSectLogToSectWatch(logUrl)
+    local url = "${page.url.host}/"
+    local body = string.format('{"url": "%s"}', logUrl)
+    local headers = {
+        ["Content-Type"] = "application/json"
+    }
+
+    postHTTP(body, url, headers)
+end`}
     </pre>
 </Readme>
 

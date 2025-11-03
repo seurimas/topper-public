@@ -1,7 +1,6 @@
 import { redirect } from '@sveltejs/kit'
 
 import type { RequestHandler } from './$types'
-import { invalidate } from '$app/navigation';
 
 export const GET: RequestHandler = async ({ url, locals: { supabase } }) => {
     const { data, error } = await supabase.auth.signInWithOAuth({
