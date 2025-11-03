@@ -16,6 +16,7 @@
 		"test": "npm run test:unit -- --run"
 	},
 	"dependencies": {
+		"@supabase/ssr": "^0.7.0",
 		"@supabase/supabase-js": "^2.78.0",
 		"@tailwindcss/vite": "^4.1.16",
 		"@tailwindplus/elements": "^1.0.18",

@@ -1,7 +1,10 @@
 <script lang="ts">
     import { page } from '$app/state';
 
-    const current = $derived(page.url.pathname);
+    let { logged_in }: { logged_in: boolean } = $props();
+
+    let current = $derived(page.url.pathname);
+
 </script>
 
 {#snippet button(name: string, path: string)}
@@ -16,8 +19,12 @@
     {@render button('Main', '/')}
     {@render button('Public Logs', '/logs')}
     {@render button('API Info', '/api')}
-    {@render button('Sign In', '/signin')}
     {@render button('Terms', '/tos')}
+    {#if logged_in}
+      <span class="px-3 py-2 text-sm font-medium text-gray-100 italic">Signed In</span>
+    {:else}      
+    {@render button('Sign In', '/signin')}
+    {/if}
 {/snippet}
 
 <nav class="relative bg-gray-800">

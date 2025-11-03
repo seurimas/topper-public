@@ -4402,6 +4402,7 @@ name = "src-wasm"
 version = "0.1.0"
 dependencies = [
  "serde",
+ "serde-wasm-bindgen",
  "serde_json",
  "topper-aetolia",
  "wasm-bindgen",

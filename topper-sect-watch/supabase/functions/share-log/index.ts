@@ -10,6 +10,41 @@ import { parse_html_to_page } from "./src-wasm/pkg/src_wasm.js";
 const VALID_URL_PREFIX = "https://aetolia.com/local/combatlogs/"
 const STORAGE_BUCKET_NAME = "sect_logs";
 
+// TODO: Allow users to specify which bodies/commands to strip
+const FILTERED_BODIES: string[] = [
+  "Tells",
+  "Council",
+  "a sprawing venantium cuff",
+  "an insignia of the Blades",
+];
+
+const FILTERED_COMMANDS: string[] = [
+  "auction",
+  "tell",
+  "otells",
+  "gtells",
+  "gtstells",
+  "ctells",
+  "clantells",
+  "clan",
+  "gw",
+  "owho",
+  "cw",
+  "who",
+  "rm",
+  "rn",
+  "nstat",
+  "message",
+  "msg",
+  "tell",
+  "ghelp",
+  "chelp",
+  "clhelp",
+  "ohelp",
+  "cohelp",
+  "clanhelp",
+];
+
 type ExplainerPage = {
   id: string;
   body: string[];
@@ -51,7 +86,7 @@ Deno.serve(async (req: Request) => {
     const html = await response.text()
     
     // Parse the HTML to an ExplainerPage
-    const explainerPageString = parse_html_to_page(html);
+    const explainerPageString = parse_html_to_page(html, FILTERED_BODIES, FILTERED_COMMANDS);
     const explainerPage: ExplainerPage = JSON.parse(explainerPageString);
 
     const supabaseAdmin = createClient(

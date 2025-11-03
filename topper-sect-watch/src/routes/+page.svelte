@@ -1,6 +1,9 @@
 <script lang="ts">
+	import PublishLog from "$lib/PublishLog.svelte";
 	import Readme from "$lib/Readme.svelte";
 
+	let { data } = $props();
+	let { logged_in } = $derived(data);
 </script>
 
 <Readme title="Seurimas' Sect Watch">
@@ -24,6 +27,8 @@
 		You can also publish your own logs to share them with the community. To do so, you'll need to link your Discord account by signing in via the <a href="/signin">Sign In</a> page.
 		After signing in, you can upload logs using the upload form available on the main page. Rather than downloading and re-uploading log files manually, logs are shared through by the URL provided when reading your Sect logbook.
 	</p>
+
+	<PublishLog {logged_in} />
 
 	<h2>API Information</h2>
 
