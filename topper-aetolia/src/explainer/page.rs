@@ -66,6 +66,18 @@ impl ExplainerPage {
         });
     }
 
+    pub fn get_duration(&self) -> Option<i32> {
+        let start_time = self.get_body().iter().find_map(|line| {
+            let line = get_content_of_raw_colored_text(line);
+            parse_prompt_time(&line, 0)
+        })?;
+        let end_time = self.get_body().iter().rev().find_map(|line| {
+            let line = get_content_of_raw_colored_text(line);
+            parse_prompt_time(&line, start_time)
+        })?;
+        Some(end_time - start_time)
+    }
+
     pub fn filter_out_from_body(&mut self, filter: &str) {
         self.body.retain(|line| !line.contains(filter))
     }

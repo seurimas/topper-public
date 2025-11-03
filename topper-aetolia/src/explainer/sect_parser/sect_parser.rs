@@ -108,9 +108,11 @@ impl AetoliaSectParser {
                 self.you.clone()
             },
             self.your_class,
-            self.lines.len()
+            self.lines.len(),
         );
-        Ok(ExplainerPage::new(id, self.lines.clone()))
+        let mut page = ExplainerPage::new(id, self.lines.clone());
+        page.id = format!("{}_{}", page.id, page.get_duration().unwrap_or(0));
+        Ok(page)
     }
 
     fn append_colored_text(&mut self, mut text: String, color: String) {

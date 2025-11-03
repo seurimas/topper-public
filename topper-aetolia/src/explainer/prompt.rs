@@ -40,7 +40,9 @@ pub fn format_prompt_time(time: i32) -> String {
 }
 
 pub fn replace_prompt_time(line: &String, new_time: i32) -> String {
-    line.replace(PROMPT_REGEX.as_str(), format_prompt_time(new_time).as_ref())
+    PROMPT_REGEX
+        .replace(line, &format_prompt_time(new_time))
+        .to_string()
 }
 
 pub fn is_prompt(line: &String) -> bool {

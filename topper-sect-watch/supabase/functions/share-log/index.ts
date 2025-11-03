@@ -89,12 +89,33 @@ Deno.serve(async (req: Request) => {
     const explainerPageString = parse_html_to_page(html, FILTERED_BODIES, FILTERED_COMMANDS);
     const explainerPage: ExplainerPage = JSON.parse(explainerPageString);
 
-    const supabaseAdmin = createClient(
+    const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      {
+        global: {
+          headers: { "Authorization": req.headers.get("Authorization") || "" },
+        },
+      }
     );
 
-    await supabaseAdmin.storage.createBucket(STORAGE_BUCKET_NAME, {
+    
+    const authHeader = req.headers.get('Authorization')!;
+    const token = authHeader.replace('Bearer ', '');
+    const { data: userData } = await supabase.auth.getUser(token);
+    if (!userData.user) {
+      return new Response(
+        JSON.stringify({ 
+          error: "Unauthorized: Invalid or missing token" 
+        }),
+        { 
+          status: 401,
+          headers: { "Content-Type": "application/json" } 
+        }
+      )
+    }
+
+    await supabase.storage.createBucket(STORAGE_BUCKET_NAME, {
       public: true,
     }).catch((e: Error) => {
       // Ignore "Bucket already exists" error
@@ -103,7 +124,7 @@ Deno.serve(async (req: Request) => {
       }
     });
 
-    const { data, error } = await supabaseAdmin.storage
+    const { data, error } = await supabase.storage
       .from(STORAGE_BUCKET_NAME)
       .upload(
         `logs/${explainerPage.id}.json`,

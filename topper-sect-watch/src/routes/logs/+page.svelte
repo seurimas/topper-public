@@ -41,6 +41,16 @@
             headerName: 'Winner',
             sortable: true,
             filter: true,
+        },
+        {
+            field: 'duration',
+            headerName: 'Duration',
+            valueFormatter: (params: { value: number }) => {
+                const minutes = Math.floor(params.value / 6000);
+                const seconds = params.value % 6000 / 100;
+                return `${minutes}m ${seconds}s`;
+            },
+            sortable: true,
         }
     ];
 
@@ -87,12 +97,21 @@
         rowData: logs,
         columnDefs,
         theme: myTheme,
+        defaultColDef: {
+            flex: 1,
+            minWidth: 80,
+            resizable: true,
+        },
     });
 
     onMount(() => {
         createGrid(gridElement, gridOptions);
     });
 </script>
+
+<svelte:head>
+	<title>Sect Watch - Logs</title>
+</svelte:head>
 
 <div class="mx-auto my-8 max-w-7xl px-4 sm:px-6 lg:px-8">
     <h1 class="text-3xl font-bold mb-4">Public Sect Logs</h1>

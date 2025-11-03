@@ -1,4 +1,4 @@
-import { redirect } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 
 export const actions = {
     default: async ({ cookies, request, locals: { supabase } }) => {
@@ -13,11 +13,10 @@ export const actions = {
             body: { url: logUrl },
         });
         if (error) {
-            return { success: false, error: error.message };
+            fail(500, { success: false, error: error.message });
         } else if (!data) {
-            return { success: false, error: 'No data returned from function' };
+            fail(500, { success: false, error: 'No data returned from function' });
         }
         redirect(303, `/logs/${data.saved}`);
-        return { success: true, data };
     }
 }

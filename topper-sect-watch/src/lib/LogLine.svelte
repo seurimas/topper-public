@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from "svelte";
 
     let { line } = $props();
 
@@ -29,6 +30,10 @@
             }
         }
         return parts;
+    });
+
+    onMount(() => {
+        
     });
 </script>
 
