@@ -22,7 +22,7 @@
     {@render button('Terms', '/tos')}
     {#if logged_in}
       {@render button('Sign Out', '/signout')}
-    {:else}      
+    {:else}
       {@render button('Sign In', '/signin')}
     {/if}
 {/snippet}

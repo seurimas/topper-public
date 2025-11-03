@@ -12,7 +12,5 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
         error(404, 'Log not found');
     }
 
-    console.log(data);
-
     return { logs: data.map(item => item.name.replace('.json', '')) };
 }
