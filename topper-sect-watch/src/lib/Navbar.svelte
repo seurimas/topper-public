@@ -19,7 +19,7 @@
     {@render button('Main', '/')}
     {@render button('Public Logs', '/logs')}
     {@render button('API Info', '/api')}
-    {@render button('Terms', '/tos')}
+    {@render button('Terms', '/terms')}
     {#if logged_in}
       {@render button('Sign Out', '/signout')}
     {:else}

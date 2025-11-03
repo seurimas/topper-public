@@ -55,10 +55,6 @@
 <style>
 	@reference "tailwindcss";
 
-	h1 {
-		@apply text-4xl font-bold mb-4;
-	}
-
 	h2 {
 		@apply text-2xl font-bold mt-6 mb-2;
 	}

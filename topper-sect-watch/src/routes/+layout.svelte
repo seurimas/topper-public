@@ -35,4 +35,12 @@
 	:global(body) {
 		@apply bg-gray-900 text-white;
 	}
+
+	:global(h2) {
+		@apply text-2xl font-bold mt-6 mb-2;
+	}
+
+    :global(p) {
+        @apply mb-4;
+    }
 </style>

@@ -13,9 +13,9 @@ export const actions = {
             body: { url: logUrl },
         });
         if (error) {
-            fail(500, { success: false, error: error.message });
+            return fail(500, { success: false, error: error.message });
         } else if (!data) {
-            fail(500, { success: false, error: 'No data returned from function' });
+            return fail(500, { success: false, error: 'No data returned from function' });
         }
         redirect(303, `/logs/${data.saved}`);
     }
