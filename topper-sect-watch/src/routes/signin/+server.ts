@@ -1,14 +1,11 @@
 import { redirect } from '@sveltejs/kit'
 
 import type { RequestHandler } from './$types'
-import { PUBLIC_REDIRECT_URL } from '$env/static/public';
+import { invalidate } from '$app/navigation';
 
 export const GET: RequestHandler = async ({ url, locals: { supabase } }) => {
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'discord',
-        options: {
-            redirectTo: PUBLIC_REDIRECT_URL,
-        },
     });
 
     if (data.url) {

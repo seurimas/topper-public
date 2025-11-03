@@ -11,6 +11,7 @@
 	let logged_in = $derived(user !== null);
 
 	onMount(() => {
+        invalidate('supabase:auth');
 		const { data } = supabase.auth.onAuthStateChange((_, newSession) => {
 			if (newSession?.expires_at !== session?.expires_at) {
 				invalidate('supabase:auth');

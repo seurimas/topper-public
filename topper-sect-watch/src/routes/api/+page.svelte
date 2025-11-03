@@ -26,7 +26,7 @@ POST {page.url.host}/
 
     <pre class="p-4 rounded mb-4">
 {`{
-    "log_url": "https://aetolia.com/local/combatlogs/your_log_file.log"
+    "url": "https://aetolia.com/local/combatlogs/your_log_file.log"
 }`}
     </pre>
 
