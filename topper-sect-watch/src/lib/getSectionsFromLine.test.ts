@@ -12,7 +12,7 @@ describe('getSectionsFromLine', () => {
             { text: "[cs][ebs] ", color: "#e5e5e5" },
             { text: "Morning", color: "#00ffff" },
             { text: " ", color: "#ffffff" },
-            { text: "[02:30:47:52]", color: "#ffffff", timeSection: true }
+            { text: "[02:30:47:52]", color: "#ffffff", time: 904752 }
         ]);
     });
 
