@@ -1,6 +1,7 @@
 <script lang="ts">
 	import LogLine from '$lib/LogLine.svelte';
 	import { parseLogId } from '$lib/sect_logs.js';
+	import { onMount } from 'svelte';
 
     let { data } = $props();
     let { log } = $derived(data);
@@ -19,6 +20,17 @@
         const { scrollX, scrollY } = window;
         boundingBoxes[lineIdx] = new DOMRect(x + scrollX, y + scrollY, width, height);
     }
+
+    onMount(() => {
+        window.addEventListener('resize', () => {
+            for (const lineIdx in timeRefs) {
+                const el = timeRefs[lineIdx];
+                const { x, y, width, height } = el.getBoundingClientRect();
+                const { scrollX, scrollY } = window;
+                boundingBoxes[lineIdx] = new DOMRect(x + scrollX, y + scrollY, width, height);
+            }
+        });
+    });
 </script>
 
 

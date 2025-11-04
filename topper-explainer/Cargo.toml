@@ -7,7 +7,7 @@ edition = "2024"
 
 [dependencies]
 topper-core = { path = "../topper-core" }
-topper-aetolia = { path = "../topper-aetolia" }
+topper-aetolia = { path = "../topper-aetolia", features = ["include_observations"] }
 topper-derive = { path = "../topper-derive" }
 num_enum = "0.7.3"
 serde = { version = "1.0", features = ["derive"]}

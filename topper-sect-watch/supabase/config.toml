@@ -359,4 +359,4 @@ import_map = "./functions/share-log/deno.json"
 entrypoint = "./functions/share-log/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
-static_files = [ "./functions/share-log/src-wasm/pkg/*" ]
+static_files = [ "./functions/share-log/share-log-wasm/pkg/*" ]

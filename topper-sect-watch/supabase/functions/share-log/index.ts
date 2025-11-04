@@ -5,7 +5,7 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import { parse_html_to_page } from "./src-wasm/pkg/src_wasm.js";
+import { parse_html_to_page } from "./share-log-wasm/pkg/share_log_wasm.js";
 
 const VALID_URL_PREFIX = "https://aetolia.com/local/combatlogs/"
 const STORAGE_BUCKET_NAME = "sect_logs";
