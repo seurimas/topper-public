@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
         error(404, 'Log not found');
     }
 
-    const names = data.map(item => item.name.replace('.json', ''));
+    const names = data.map(item => item.name.replace('.json', '')).filter(name => name !== '.emptyFolderPlaceholder');
     const logs = names.map(parseLogId);
 
     return { logs };

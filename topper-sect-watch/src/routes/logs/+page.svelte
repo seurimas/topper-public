@@ -6,44 +6,44 @@
 
     const columnDefs = [
         {
-            field: 'name',
-            headerName: 'Link',
+            field: 'name' as const,
+            headerName: 'Sect Watch',
             cellRenderer: (params: { value: string }) => {
-                return `<a class="text-indigo-400 hover:underline" href="/logs/${params.value}">${params.value}</a>`;
+                return `<a class="text-indigo-400 hover:underline" href="/logs/${params.value}">View</a>`;
             }
         },
         {
-            field: 'myName',
+            field: 'myName' as const,
             headerName: 'Shared By',
             sortable: true,
             filter: true,
         },
         {
-            field: 'myClass',
+            field: 'myClass' as const,
             headerName: 'Class',
             sortable: true,
             filter: true,
         },
         {
-            field: 'oppName',
+            field: 'oppName' as const,
             headerName: 'Opponent',
             sortable: true,
             filter: true,
         },
         {
-            field: 'oppClass',
+            field: 'oppClass' as const,
             headerName: 'Class',
             sortable: true,
             filter: true,
         },
         {
-            field: 'winner',
+            field: 'winner' as const,
             headerName: 'Winner',
             sortable: true,
             filter: true,
         },
         {
-            field: 'duration',
+            field: 'duration' as const,
             headerName: 'Duration',
             valueFormatter: (params: { value: number }) => {
                 const minutes = Math.floor(params.value / 6000);

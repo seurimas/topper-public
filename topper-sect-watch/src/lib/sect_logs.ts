@@ -9,7 +9,18 @@ const I_WIN_REGEX = /^\((\w+)\)_(\w+)_vs_(\w+)_(\w+)_(\d+)_(\d+)$/;
 const YOU_WIN_REGEX = /^(\w+)_(\w+)_vs_\((\w+)\)_(\w+)_(\d+)_(\d+)$/;
 const DRAW_REGEX = /^(\w+)_(\w+)_vs_(\w+)_(\w+)_(\d+)_(\d+)$/;
 
-export const parseLogId = (name: string) => {
+export type SectLog = {
+    name: string;
+    myName: string;
+    myClass: string;
+    oppName: string;
+    oppClass: string;
+    length: number;
+    duration?: number;
+    winner: string;
+};
+
+export const parseLogId = (name: string): SectLog => {
         if (I_WIN_REGEX.test(name)) {
             const [, myName, myClass, oppName, oppClass, length, duration] = I_WIN_REGEX.exec(name)!;
             return {
