@@ -20,8 +20,13 @@ pub fn parse_prompt_time(line: &String, last_time: i32) -> Option<i32> {
             let centi: i32 = centi.as_str().parse().unwrap();
             let mut time = centi + (((((hour * 60) + minute) * 60) + second) * 100);
             if time < last_time {
-                // It's a braaand neww day, and the sun is hiiigh.
-                time = time + (24 * 360000);
+                // Centi 0 sometimes mean it's actually the next second...
+                if centi == 0 && minute + hour > 0 {
+                    time = time + 100;
+                } else {
+                    // It's a braaand neww day, and the sun is hiiigh.
+                    time = time + (24 * 360000);
+                }
             }
             return Some(time);
         }

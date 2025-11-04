@@ -1,11 +1,9 @@
 mod utils;
 
-use std::sync::{LazyLock, Mutex};
-
-use serde::Serialize;
 use topper_aetolia::{
     explainer::{observations::OBSERVER, ExplainerPage},
     timeline::{AetTimeSlice, AetTimelineState, AetTimelineStateTrait},
+    types::{BType, FType},
 };
 use topper_core::timeline::db::DummyDatabaseModule;
 use wasm_bindgen::prelude::*;
@@ -38,6 +36,45 @@ pub fn get_time_slices(page_string: &str) -> WasmTimeSlices {
 pub struct WasmTimeline(AetTimelineState);
 
 #[wasm_bindgen]
+impl WasmTimeline {
+    #[wasm_bindgen]
+    pub fn get_current_time(&self) -> i32 {
+        self.0.time
+    }
+
+    #[wasm_bindgen]
+    pub fn get_limb_state(&self, who: &str) -> JsValue {
+        let me = self.0.borrow_agent(&who.to_string());
+        let limbs = me.get_limbs_state();
+        serde_wasm_bindgen::to_value(&limbs).unwrap()
+    }
+
+    #[wasm_bindgen]
+    pub fn get_balances(&self, who: &str) -> JsValue {
+        let me = self.0.borrow_agent(&who.to_string());
+        let balances: [f32; 5] = [
+            me.get_balance(BType::Tree),
+            me.get_balance(BType::Focus),
+            me.get_balance(BType::Fitness),
+            me.get_balance(BType::ClassCure1),
+            if me.is(FType::Rebounding) {
+                -1.0
+            } else {
+                me.get_balance(BType::Rebounding)
+            },
+        ];
+        serde_wasm_bindgen::to_value(&balances).unwrap()
+    }
+
+    #[wasm_bindgen]
+    pub fn get_afflictions(&self, who: &str) -> JsValue {
+        let me = self.0.borrow_agent(&who.to_string());
+        let afflictions = me.flags.aff_iter().collect::<Vec<FType>>();
+        serde_wasm_bindgen::to_value(&afflictions).unwrap()
+    }
+}
+
+#[wasm_bindgen]
 pub fn initialize_timeline(me: &str) -> WasmTimeline {
     let mut timeline = AetTimelineState::new();
     timeline.me = me.to_string();
@@ -58,8 +95,10 @@ pub fn set_timeline_time(timeline: &mut WasmTimeline, slices: &WasmTimeSlices, t
                 break;
             }
         }
-    } else {
+    } else if time < timeline_current_time {
+        let me = timeline.me.clone();
         *timeline = AetTimelineState::new();
+        timeline.me = me;
         for slice in slices.0.iter() {
             if slice.time <= time {
                 timeline.apply_time_slice(slice, None as Option<&DummyDatabaseModule>);
@@ -70,22 +109,4 @@ pub fn set_timeline_time(timeline: &mut WasmTimeline, slices: &WasmTimeSlices, t
         }
     }
     applied
-}
-
-/**
- * The UI state will be much less rich than the full timeline state.
- */
-#[derive(Serialize)]
-pub struct UiTimelineState {
-    pub time: i32,
-    // My agent state and theirs!
-}
-
-#[wasm_bindgen]
-pub fn get_current_state(timeline: &WasmTimeline, me: &str, you: &str) -> JsValue {
-    let timeline = &timeline.0;
-    let ui_state = UiTimelineState {
-        time: timeline.time,
-    };
-    serde_wasm_bindgen::to_value(&ui_state).unwrap()
 }

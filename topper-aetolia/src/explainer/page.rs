@@ -49,7 +49,7 @@ impl ExplainerPage {
     }
 
     pub fn hide_real_times(&mut self) {
-        let first_time = self
+        let mut first_time = self
             .get_body()
             .iter()
             .find_map(|line| {
@@ -57,11 +57,13 @@ impl ExplainerPage {
                 parse_prompt_time(&line, 0)
             })
             .unwrap_or(0);
+        let mut last_time = first_time;
         self.body.iter_mut().for_each(|line| {
             let line_content = get_content_of_raw_colored_text(line);
-            if let Some(line_time) = parse_prompt_time(&line_content, first_time) {
+            if let Some(line_time) = parse_prompt_time(&line_content, last_time) {
                 let hidden_time = line_time - first_time;
                 *line = replace_prompt_time(line, hidden_time);
+                last_time = line_time;
             }
         });
     }

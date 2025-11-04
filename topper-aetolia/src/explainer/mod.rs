@@ -3,7 +3,7 @@ mod matchup;
 #[cfg(feature = "include_observations")]
 pub mod observations;
 mod page;
-mod prompt;
+pub mod prompt;
 pub mod sect_parser;
 mod state;
 

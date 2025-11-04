@@ -119,31 +119,7 @@ pub fn parse_me_and_you(page: &ExplainerPage) -> (String, String) {
     (me, you)
 }
 
-pub fn parse_prompt_time(line: &String, last_time: i32) -> Option<i32> {
-    if let Some(captures) = PROMPT_REGEX.captures(line.as_ref()) {
-        if let (Some(hour), Some(minute), Some(second), Some(centi)) = (
-            captures.name("hour"),
-            captures.name("minute"),
-            captures.name("second"),
-            captures.name("centi"),
-        ) {
-            let hour: i32 = hour.as_str().parse().unwrap();
-            let minute: i32 = minute.as_str().parse().unwrap();
-            let second: i32 = second.as_str().parse().unwrap();
-            let centi: i32 = centi.as_str().parse().unwrap();
-            let mut time = centi + (((((hour * 60) + minute) * 60) + second) * 100);
-            if centi == 0 && time < last_time && time + 100 > last_time {
-                time = time + 99; // Rounding! Way to go, Rapture!
-            }
-            if time < last_time {
-                // It's a braaand neww day, and the sun is hiiigh.
-                time = time + (24 * 360000);
-            }
-            return Some(time);
-        }
-    }
-    None
-}
+pub use crate::explainer::prompt::parse_prompt_time;
 
 pub fn is_prompt(line: &String) -> bool {
     parse_prompt_time(line, 0).is_some()

@@ -2,7 +2,7 @@
 	import LogLine from '$lib/LogLine.svelte';
 	import { parseLogId } from '$lib/sect_logs.js';
 	import { onMount } from 'svelte';
-    import init, { get_time_slices, get_current_state, set_timeline_time, WasmTimeSlices, WasmTimeline, initialize_timeline } from 'topper';
+    import init, { get_time_slices, set_timeline_time, WasmTimeSlices, WasmTimeline, initialize_timeline } from 'topper';
 
     let timeSlices: WasmTimeSlices | undefined = undefined;
     let timelineState: WasmTimeline | undefined = undefined;
@@ -29,9 +29,8 @@
                 return;
             }
             console.log(`Setting time to ${time}`);
-            console.log('Before:', get_current_state(timelineState, myName, oppName));
             console.log('Applied slices:', set_timeline_time(timelineState, timeSlices, time));
-            console.log('After:', get_current_state(timelineState, myName, oppName));
+            console.log('My balances after time set:', timelineState.get_balances(myName));
         };
     }
 

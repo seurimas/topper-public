@@ -95,8 +95,13 @@ pub fn parse_time_slices(line_nodes: &Vec<Element>) -> (String, String, Vec<AetT
                 let centi: i32 = centi.as_str().parse().unwrap();
                 let mut time = centi + (((((hour * 60) + minute) * 60) + second) * 100);
                 if time < last_time {
-                    // It's a braaand neww day, and the sun is hiiigh.
-                    time = time + (24 * 360000);
+                    // Centi 0 sometimes mean it's actually the next second...
+                    if centi == 0 && minute + hour > 0 {
+                        time = time + 100;
+                    } else {
+                        // It's a braaand neww day, and the sun is hiiigh.
+                        time = time + (24 * 360000);
+                    }
                 }
                 last_time = time;
                 let mut slice = AetTimeSlice {

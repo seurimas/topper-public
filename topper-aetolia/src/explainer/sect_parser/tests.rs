@@ -78,11 +78,18 @@ mod tests {
 
         assert!(result.is_ok(), "Failed to parse HTML: {:?}", result.err());
 
-        let page = result.unwrap();
+        let mut page = result.unwrap();
 
         // Verify basic structure
         assert!(!page.id.is_empty(), "Page ID should not be empty");
         assert!(!page.body.is_empty(), "Page body should not be empty");
+
+        page.hide_real_times();
+        assert_eq!(
+            page.body[1377],
+            "<white><#00cd00>H:3249/4160 <#00ffff>M:3988 <#ff00ff>P:4044 <#e5e5e5>[c][e-s] <#00ffff>Morning<#ffffff> [00:02:19:48]<white>\r",
+            "Should hide real times, and account for rounding errors"
+        );
     }
 
     #[test]
