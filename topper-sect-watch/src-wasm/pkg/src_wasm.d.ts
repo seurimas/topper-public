@@ -1,26 +1,24 @@
 /* tslint:disable */
 /* eslint-disable */
-export function set_timeline_time(timeline: WasmTimeline, slices: WasmTimeSlices, time: number): number;
-export function initialize_timeline(me: string): WasmTimeline;
-/**
- *
- * * Critically, we need to parse the time slices from the explainer page and store them
- * * for later use. The timeline module does not care about the plain text values.
- * 
- */
-export function get_time_slices(page_string: string): WasmTimeSlices;
 export class WasmTimeSlices {
-  private constructor();
   free(): void;
+  /**
+   *
+   *     * Critically, we need to parse the time slices from the explainer page and store them
+   *     * for later use. The timeline module does not care about the plain text values.
+   *     
+   */
+  constructor(page_string: string);
   get_times(): Int32Array;
 }
 export class WasmTimeline {
-  private constructor();
   free(): void;
   get_balances(who: string): any;
   get_limb_state(who: string): any;
   get_afflictions(who: string): any;
   get_current_time(): number;
+  set_timeline_time(slices: WasmTimeSlices, time: number): number;
+  constructor(me: string);
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -29,14 +27,14 @@ export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly __wbg_wasmtimeline_free: (a: number, b: number) => void;
   readonly __wbg_wasmtimeslices_free: (a: number, b: number) => void;
-  readonly get_time_slices: (a: number, b: number) => number;
-  readonly initialize_timeline: (a: number, b: number) => number;
-  readonly set_timeline_time: (a: number, b: number, c: number) => number;
   readonly wasmtimeline_get_afflictions: (a: number, b: number, c: number) => any;
   readonly wasmtimeline_get_balances: (a: number, b: number, c: number) => any;
   readonly wasmtimeline_get_current_time: (a: number) => number;
   readonly wasmtimeline_get_limb_state: (a: number, b: number, c: number) => any;
+  readonly wasmtimeline_new: (a: number, b: number) => number;
+  readonly wasmtimeline_set_timeline_time: (a: number, b: number, c: number) => number;
   readonly wasmtimeslices_get_times: (a: number) => [number, number];
+  readonly wasmtimeslices_new: (a: number, b: number) => number;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;

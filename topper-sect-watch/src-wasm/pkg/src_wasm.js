@@ -160,6 +160,12 @@ function debugString(val) {
     return className;
 }
 
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
+}
+
 let cachedInt32ArrayMemory0 = null;
 
 function getInt32ArrayMemory0() {
@@ -174,63 +180,11 @@ function getArrayI32FromWasm0(ptr, len) {
     return getInt32ArrayMemory0().subarray(ptr / 4, ptr / 4 + len);
 }
 
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-}
-/**
- * @param {WasmTimeline} timeline
- * @param {WasmTimeSlices} slices
- * @param {number} time
- * @returns {number}
- */
-export function set_timeline_time(timeline, slices, time) {
-    _assertClass(timeline, WasmTimeline);
-    _assertClass(slices, WasmTimeSlices);
-    const ret = wasm.set_timeline_time(timeline.__wbg_ptr, slices.__wbg_ptr, time);
-    return ret;
-}
-
-/**
- * @param {string} me
- * @returns {WasmTimeline}
- */
-export function initialize_timeline(me) {
-    const ptr0 = passStringToWasm0(me, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.initialize_timeline(ptr0, len0);
-    return WasmTimeline.__wrap(ret);
-}
-
-/**
- *
- * * Critically, we need to parse the time slices from the explainer page and store them
- * * for later use. The timeline module does not care about the plain text values.
- *
- * @param {string} page_string
- * @returns {WasmTimeSlices}
- */
-export function get_time_slices(page_string) {
-    const ptr0 = passStringToWasm0(page_string, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.get_time_slices(ptr0, len0);
-    return WasmTimeSlices.__wrap(ret);
-}
-
 const WasmTimeSlicesFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_wasmtimeslices_free(ptr >>> 0, 1));
 
 export class WasmTimeSlices {
-
-    static __wrap(ptr) {
-        ptr = ptr >>> 0;
-        const obj = Object.create(WasmTimeSlices.prototype);
-        obj.__wbg_ptr = ptr;
-        WasmTimeSlicesFinalization.register(obj, obj.__wbg_ptr, obj);
-        return obj;
-    }
 
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
@@ -242,6 +196,21 @@ export class WasmTimeSlices {
     free() {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_wasmtimeslices_free(ptr, 0);
+    }
+    /**
+     *
+     *     * Critically, we need to parse the time slices from the explainer page and store them
+     *     * for later use. The timeline module does not care about the plain text values.
+     *
+     * @param {string} page_string
+     */
+    constructor(page_string) {
+        const ptr0 = passStringToWasm0(page_string, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.wasmtimeslices_new(ptr0, len0);
+        this.__wbg_ptr = ret >>> 0;
+        WasmTimeSlicesFinalization.register(this, this.__wbg_ptr, this);
+        return this;
     }
     /**
      * @returns {Int32Array}
@@ -259,14 +228,6 @@ const WasmTimelineFinalization = (typeof FinalizationRegistry === 'undefined')
     : new FinalizationRegistry(ptr => wasm.__wbg_wasmtimeline_free(ptr >>> 0, 1));
 
 export class WasmTimeline {
-
-    static __wrap(ptr) {
-        ptr = ptr >>> 0;
-        const obj = Object.create(WasmTimeline.prototype);
-        obj.__wbg_ptr = ptr;
-        WasmTimelineFinalization.register(obj, obj.__wbg_ptr, obj);
-        return obj;
-    }
 
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
@@ -315,6 +276,27 @@ export class WasmTimeline {
     get_current_time() {
         const ret = wasm.wasmtimeline_get_current_time(this.__wbg_ptr);
         return ret;
+    }
+    /**
+     * @param {WasmTimeSlices} slices
+     * @param {number} time
+     * @returns {number}
+     */
+    set_timeline_time(slices, time) {
+        _assertClass(slices, WasmTimeSlices);
+        const ret = wasm.wasmtimeline_set_timeline_time(this.__wbg_ptr, slices.__wbg_ptr, time);
+        return ret;
+    }
+    /**
+     * @param {string} me
+     */
+    constructor(me) {
+        const ptr0 = passStringToWasm0(me, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.wasmtimeline_new(ptr0, len0);
+        this.__wbg_ptr = ret >>> 0;
+        WasmTimelineFinalization.register(this, this.__wbg_ptr, this);
+        return this;
     }
 }
 
