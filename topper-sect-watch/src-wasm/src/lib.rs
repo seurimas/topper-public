@@ -13,23 +13,23 @@ pub struct WasmTimeSlices(Vec<AetTimeSlice>);
 
 #[wasm_bindgen]
 impl WasmTimeSlices {
+    /**
+     * Critically, we need to parse the time slices from the explainer page and store them
+     * for later use. The timeline module does not care about the plain text values.
+     */
+    #[wasm_bindgen(constructor)]
+    pub fn new(page_string: &str) -> WasmTimeSlices {
+        utils::set_panic_hook();
+
+        let page = serde_json::from_str::<ExplainerPage>(page_string).unwrap();
+        let slices = page.build_time_slices(&|slice| OBSERVER.observe(slice));
+        WasmTimeSlices(slices)
+    }
+
     #[wasm_bindgen]
     pub fn get_times(&self) -> Vec<i32> {
         self.0.iter().map(|slice| slice.time).collect()
     }
-}
-
-/**
- * Critically, we need to parse the time slices from the explainer page and store them
- * for later use. The timeline module does not care about the plain text values.
- */
-#[wasm_bindgen]
-pub fn get_time_slices(page_string: &str) -> WasmTimeSlices {
-    utils::set_panic_hook();
-
-    let page = serde_json::from_str::<ExplainerPage>(page_string).unwrap();
-    let slices = page.build_time_slices(&|slice| OBSERVER.observe(slice));
-    WasmTimeSlices(slices)
 }
 
 #[wasm_bindgen]
@@ -37,6 +37,13 @@ pub struct WasmTimeline(AetTimelineState);
 
 #[wasm_bindgen]
 impl WasmTimeline {
+    #[wasm_bindgen(constructor)]
+    pub fn new(me: &str) -> WasmTimeline {
+        let mut timeline = AetTimelineState::new();
+        timeline.me = me.to_string();
+        WasmTimeline(timeline)
+    }
+
     #[wasm_bindgen]
     pub fn get_current_time(&self) -> i32 {
         self.0.time
@@ -72,41 +79,34 @@ impl WasmTimeline {
         let afflictions = me.flags.aff_iter().collect::<Vec<FType>>();
         serde_wasm_bindgen::to_value(&afflictions).unwrap()
     }
-}
 
-#[wasm_bindgen]
-pub fn initialize_timeline(me: &str) -> WasmTimeline {
-    let mut timeline = AetTimelineState::new();
-    timeline.me = me.to_string();
-    WasmTimeline(timeline)
-}
-
-#[wasm_bindgen]
-pub fn set_timeline_time(timeline: &mut WasmTimeline, slices: &WasmTimeSlices, time: i32) -> i32 {
-    let mut applied = 0;
-    let timeline = &mut timeline.0;
-    let timeline_current_time = timeline.time;
-    if time > timeline_current_time {
-        for slice in slices.0.iter() {
-            if slice.time > timeline_current_time && slice.time <= time {
-                timeline.apply_time_slice(slice, None as Option<&DummyDatabaseModule>);
-                applied += 1;
-            } else if slice.time > time {
-                break;
+    #[wasm_bindgen]
+    pub fn set_timeline_time(&mut self, slices: &WasmTimeSlices, time: i32) -> i32 {
+        let mut applied = 0;
+        let timeline = &mut self.0;
+        let timeline_current_time = timeline.time;
+        if time > timeline_current_time {
+            for slice in slices.0.iter() {
+                if slice.time > timeline_current_time && slice.time <= time {
+                    timeline.apply_time_slice(slice, None as Option<&DummyDatabaseModule>);
+                    applied += 1;
+                } else if slice.time > time {
+                    break;
+                }
+            }
+        } else if time < timeline_current_time {
+            let me = timeline.me.clone();
+            *timeline = AetTimelineState::new();
+            timeline.me = me;
+            for slice in slices.0.iter() {
+                if slice.time <= time {
+                    timeline.apply_time_slice(slice, None as Option<&DummyDatabaseModule>);
+                    applied += 1;
+                } else if slice.time > time {
+                    break;
+                }
             }
         }
-    } else if time < timeline_current_time {
-        let me = timeline.me.clone();
-        *timeline = AetTimelineState::new();
-        timeline.me = me;
-        for slice in slices.0.iter() {
-            if slice.time <= time {
-                timeline.apply_time_slice(slice, None as Option<&DummyDatabaseModule>);
-                applied += 1;
-            } else if slice.time > time {
-                break;
-            }
-        }
+        applied
     }
-    applied
 }

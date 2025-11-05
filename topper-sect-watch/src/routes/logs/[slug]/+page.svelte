@@ -1,16 +1,17 @@
 <script lang="ts">
+	import CombatStateViewer from '$lib/combat/CombatStateViewer.svelte';
 	import LogLine from '$lib/LogLine.svelte';
 	import { parseLogId } from '$lib/sect_logs.js';
 	import { onMount } from 'svelte';
-    import init, { get_time_slices, set_timeline_time, WasmTimeSlices, WasmTimeline, initialize_timeline } from 'topper';
+    import init, { WasmTimeSlices, WasmTimeline } from 'topper';
 
     let timeSlices: WasmTimeSlices | undefined = undefined;
-    let timelineState: WasmTimeline | undefined = undefined;
+    let timelineState: WasmTimeline | undefined = $state(undefined);
 
     let { data } = $props();
     let { log } = $derived(data);
 
-    const { name, myName, oppName } = $derived(parseLogId(log.id));
+    const { name, myName, oppName, myClass, oppClass } = $derived(parseLogId(log.id));
 
     // We need to keep references to the elements which display the times for each time slice.
     // These are used for matching scroll position to time.
@@ -29,7 +30,7 @@
                 return;
             }
             console.log(`Setting time to ${time}`);
-            console.log('Applied slices:', set_timeline_time(timelineState, timeSlices, time));
+            console.log('Applied slices:', timelineState.set_timeline_time(timeSlices, time));
             console.log('My balances after time set:', timelineState.get_balances(myName));
         };
     }
@@ -46,9 +47,9 @@
 
         init().then(() => {
             console.log('WASM initialized for log page.');
-            timeSlices = get_time_slices(JSON.stringify(log));
+            timeSlices = new WasmTimeSlices(JSON.stringify(log));
             console.log('Time slices loaded:', timeSlices.get_times());
-            timelineState = initialize_timeline(myName);
+            timelineState = new WasmTimeline(myName);
             console.log('Timeline initialized:', timelineState);
         });
     });
@@ -66,3 +67,6 @@
         {/each}
     </div>
 </div>
+{#if timelineState}
+    <CombatStateViewer {timelineState} {myName} {oppName} {myClass} {oppClass} />
+{/if}
