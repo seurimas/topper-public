@@ -6,7 +6,10 @@
     import init, { WasmTimeSlices, WasmTimeline } from 'topper';
 
     let timeSlices: WasmTimeSlices | undefined = undefined;
-    let timelineState: WasmTimeline | undefined = $state(undefined);
+    // svelte-ignore non_reactive_update // wasm objects don't do reactivity well.
+    let timelineState: WasmTimeline | undefined = undefined;
+    // Use a simple, reactive primitive for the time. Changes here will trigger necessary re-renders.
+    let timelineTime: number | undefined = $state(undefined);
 
     let { data } = $props();
     let { log } = $derived(data);
@@ -31,16 +34,16 @@
             }
             console.log(`Setting time to ${time}`);
             console.log('Applied slices:', timelineState.set_timeline_time(timeSlices, time));
-            console.log('My balances after time set:', timelineState.get_balances(myName));
+            timelineTime = time;
         };
     }
 
     onMount(() => {
         window.addEventListener('resize', () => {
+            const { scrollX, scrollY } = window;
             for (const lineIdx in timeRefs) {
                 const el = timeRefs[lineIdx];
                 const { x, y, width, height } = el.getBoundingClientRect();
-                const { scrollX, scrollY } = window;
                 boundingBoxes[lineIdx] = new DOMRect(x + scrollX, y + scrollY, width, height);
             }
         });
@@ -51,6 +54,7 @@
             console.log('Time slices loaded:', timeSlices.get_times());
             timelineState = new WasmTimeline(myName);
             console.log('Timeline initialized:', timelineState);
+            timelineTime = 0;
         });
     });
 </script>
@@ -67,6 +71,6 @@
         {/each}
     </div>
 </div>
-{#if timelineState}
-    <CombatStateViewer {timelineState} {myName} {oppName} {myClass} {oppClass} />
+{#if timelineTime !== undefined}
+    <CombatStateViewer timelineState={timelineState!} {timelineTime} {myName} {oppName} {myClass} {oppClass} />
 {/if}

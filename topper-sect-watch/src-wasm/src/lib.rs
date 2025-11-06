@@ -1,5 +1,6 @@
 mod utils;
 
+use serde_json::json;
 use topper_aetolia::{
     explainer::{observations::OBSERVER, ExplainerPage},
     timeline::{AetTimeSlice, AetTimelineState, AetTimelineStateTrait},
@@ -59,24 +60,23 @@ impl WasmTimeline {
     #[wasm_bindgen]
     pub fn get_balances(&self, who: &str) -> JsValue {
         let me = self.0.borrow_agent(&who.to_string());
-        let balances: [f32; 5] = [
-            me.get_balance(BType::Tree),
-            me.get_balance(BType::Focus),
-            me.get_balance(BType::Fitness),
-            me.get_balance(BType::ClassCure1),
-            if me.is(FType::Rebounding) {
-                -1.0
-            } else {
-                me.get_balance(BType::Rebounding)
-            },
-        ];
-        serde_wasm_bindgen::to_value(&balances).unwrap()
+        serde_wasm_bindgen::to_value(&json!({
+            "Tree": me.get_balance(BType::Tree),
+            "Focus": me.get_balance(BType::Focus),
+            "Fitness": me.get_balance(BType::Fitness),
+            "ClassCure1": me.get_balance(BType::ClassCure1),
+            "Rebounding": if me.is(FType::Rebounding) { None } else { Some(me.get_balance(BType::Rebounding)) },
+        })).unwrap()
     }
 
     #[wasm_bindgen]
     pub fn get_afflictions(&self, who: &str) -> JsValue {
         let me = self.0.borrow_agent(&who.to_string());
-        let afflictions = me.flags.aff_iter().collect::<Vec<FType>>();
+        let afflictions = me
+            .flags
+            .aff_iter()
+            .map(|aff: FType| aff.to_name())
+            .collect::<Vec<String>>();
         serde_wasm_bindgen::to_value(&afflictions).unwrap()
     }
 
