@@ -1,9 +1,13 @@
 mod utils;
 
+use std::vec;
+
 use serde_json::json;
 use topper_aetolia::{
     explainer::{observations::OBSERVER, ExplainerPage},
-    timeline::{AetTimeSlice, AetTimelineState, AetTimelineStateTrait},
+    timeline::{
+        AetObservation, AetTimeSlice, AetTimelineState, AetTimelineStateTrait, CombatAction,
+    },
     types::{BType, FType},
 };
 use topper_core::timeline::db::DummyDatabaseModule;
@@ -81,15 +85,24 @@ impl WasmTimeline {
     }
 
     #[wasm_bindgen]
-    pub fn set_timeline_time(&mut self, slices: &WasmTimeSlices, time: i32) -> i32 {
-        let mut applied = 0;
+    pub fn set_timeline_time(&mut self, slices: &WasmTimeSlices, time: i32) -> Vec<String> {
+        let mut combat_actions = vec![];
         let timeline = &mut self.0;
         let timeline_current_time = timeline.time;
         if time > timeline_current_time {
             for slice in slices.0.iter() {
                 if slice.time > timeline_current_time && slice.time <= time {
                     timeline.apply_time_slice(slice, None as Option<&DummyDatabaseModule>);
-                    applied += 1;
+                    slice
+                        .observations
+                        .iter()
+                        .flatten()
+                        .for_each(|obs| match obs {
+                            AetObservation::CombatAction(CombatAction { skill, .. }) => {
+                                combat_actions.push(skill.clone());
+                            }
+                            _ => {}
+                        });
                 } else if slice.time > time {
                     break;
                 }
@@ -101,12 +114,21 @@ impl WasmTimeline {
             for slice in slices.0.iter() {
                 if slice.time <= time {
                     timeline.apply_time_slice(slice, None as Option<&DummyDatabaseModule>);
-                    applied += 1;
+                    slice
+                        .observations
+                        .iter()
+                        .flatten()
+                        .for_each(|obs| match obs {
+                            AetObservation::CombatAction(CombatAction { skill, .. }) => {
+                                combat_actions.push(skill.clone());
+                            }
+                            _ => {}
+                        });
                 } else if slice.time > time {
                     break;
                 }
             }
         }
-        applied
+        combat_actions
     }
 }

@@ -19,7 +19,6 @@
 		"@supabase/ssr": "^0.7.0",
 		"@supabase/supabase-js": "^2.78.0",
 		"@tailwindcss/vite": "^4.1.16",
-		"@tailwindplus/elements": "^1.0.18",
 		"ag-grid-community": "^34.3.1",
 		"tailwindcss": "^4.1.16"
 	},

@@ -1,10 +1,13 @@
 <script lang="ts">
 	import type { WasmTimeline } from 'topper';
-	import Combatant from './Combatant.svelte';
+	import Combatant from '../combat/Combatant.svelte';
+	import type { TimelineControl } from '../combat/types';
+	import TimelineController from './TimelineController.svelte';
 
     let {
         timelineState,
-        timelineTime,
+        timelineTime = $bindable(),
+        timelineControl,
         myName,
         oppName,
         myClass,
@@ -12,6 +15,7 @@
     }: {
         timelineState: WasmTimeline,
         timelineTime: number,
+        timelineControl: TimelineControl,
         myName: string,
         oppName: string,
         myClass: string,
@@ -36,21 +40,23 @@
 </script>
 
 <div class="container">
-    <h2 class="section-header">Combatants</h2>
-    <Combatant
-        name={myName}
-        className={myClass}
-        balances={balances[myName]}
-        afflictions={afflictions[myName]}
-        limbs={limbs[myName]}
-    />
-    <Combatant
-        name={oppName}
-        className={oppClass}
-        balances={balances[oppName]}
-        afflictions={afflictions[oppName]}
-        limbs={limbs[oppName]}
-    />
+    <div class="combatants"><h2 class="section-header">Combatants</h2>
+        <Combatant
+            name={myName}
+            className={myClass}
+            balances={balances[myName]}
+            afflictions={afflictions[myName]}
+            limbs={limbs[myName]}
+        />
+        <Combatant
+            name={oppName}
+            className={oppClass}
+            balances={balances[oppName]}
+            afflictions={afflictions[oppName]}
+            limbs={limbs[oppName]}
+        />
+    </div>
+    <TimelineController bind:timelineControl={timelineControl} bind:timelineTime={timelineTime} />
 </div>
 
 <style>
@@ -58,6 +64,10 @@
 
     .container {
         @apply fixed top-16 right-16 w-auto bg-amber-900 border-l border-gray-700 p-4 overflow-y-auto rounded-xl max-h-[calc(100vh-8rem)];
+    }
+
+    .combatants {
+        @apply hidden lg:block;
     }
 
     .section-header {

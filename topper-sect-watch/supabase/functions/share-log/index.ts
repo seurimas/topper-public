@@ -115,15 +115,6 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    await supabase.storage.createBucket(STORAGE_BUCKET_NAME, {
-      public: true,
-    }).catch((e: Error) => {
-      // Ignore "Bucket already exists" error
-      if (!e.message.includes("Bucket already exists")) {
-        throw e;
-      }
-    });
-
     const { data, error } = await supabase.storage
       .from(STORAGE_BUCKET_NAME)
       .upload(

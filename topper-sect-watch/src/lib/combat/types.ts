@@ -40,3 +40,12 @@ export type LimbsState = {
 export type Balances = Map<string, number | undefined>;
 
 export type Afflictions = string[];
+
+export type TimelineControl = {
+    type: 'scrollLock',
+} | {
+    type: 'timeStep',
+    speed: number,
+} | {
+    type: 'manual',
+};
