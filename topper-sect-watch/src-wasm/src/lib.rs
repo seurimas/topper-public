@@ -89,6 +89,18 @@ impl WasmTimeline {
         let mut combat_actions = vec![];
         let timeline = &mut self.0;
         let timeline_current_time = timeline.time;
+        let me = timeline.me.clone();
+
+        // We return combat actions that target me, so we can announce them.
+        let mut add_combat_action = |obs: &AetObservation| match obs {
+            AetObservation::CombatAction(CombatAction { skill, target, .. }) => {
+                if target == &me {
+                    combat_actions.push(skill.clone());
+                }
+            }
+            _ => {}
+        };
+
         if time > timeline_current_time {
             for slice in slices.0.iter() {
                 if slice.time > timeline_current_time && slice.time <= time {
@@ -97,12 +109,7 @@ impl WasmTimeline {
                         .observations
                         .iter()
                         .flatten()
-                        .for_each(|obs| match obs {
-                            AetObservation::CombatAction(CombatAction { skill, .. }) => {
-                                combat_actions.push(skill.clone());
-                            }
-                            _ => {}
-                        });
+                        .for_each(&mut add_combat_action);
                 } else if slice.time > time {
                     break;
                 }
@@ -118,12 +125,7 @@ impl WasmTimeline {
                         .observations
                         .iter()
                         .flatten()
-                        .for_each(|obs| match obs {
-                            AetObservation::CombatAction(CombatAction { skill, .. }) => {
-                                combat_actions.push(skill.clone());
-                            }
-                            _ => {}
-                        });
+                        .for_each(&mut add_combat_action);
                 } else if slice.time > time {
                     break;
                 }

@@ -3,6 +3,7 @@
 	import Combatant from '../combat/Combatant.svelte';
 	import type { TimelineControl } from '../combat/types';
 	import TimelineController from './TimelineController.svelte';
+	import VoiceController from './VoiceController.svelte';
 
     let {
         timelineState,
@@ -58,6 +59,7 @@
     </div>
     <span class="combatants-mobile">View combatants' state on larger screens.</span>
     <TimelineController bind:timelineControl={timelineControl} bind:timelineTime={timelineTime} />
+    <VoiceController />
 </div>
 
 <style>

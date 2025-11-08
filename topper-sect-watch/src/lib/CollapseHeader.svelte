@@ -1,11 +1,18 @@
 <script lang="ts">
-    let { children, collapsed = $bindable() }: { children: any, collapsed: boolean } = $props();
+    let { children, collapsed = $bindable(), force = undefined }: { children: any, collapsed: boolean, force?: boolean } = $props();
+
+    let isCollapsed = $derived.by(() => {
+        if (force !== undefined) {
+            return force;
+        }
+        return collapsed;
+    });
 </script>
 
 
 <div class="header-section">
-    <button class="collapser" onclick={() => {collapsed = !collapsed}}>
-        {#if collapsed}
+    <button class="collapser" disabled={force !== undefined} onclick={() => {collapsed = !collapsed}}>
+        {#if isCollapsed}
             ▶
         {:else}
             ▼

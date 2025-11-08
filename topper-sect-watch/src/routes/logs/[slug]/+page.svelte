@@ -8,6 +8,7 @@
 	import { onMount } from 'svelte';
     import init, { WasmTimeSlices, WasmTimeline } from 'topper';
 	import { FRAME_INTERVAL, intervalHandler } from '$lib/log_viewer/interval.js';
+	import { speakIfEnabled } from '$lib/log_viewer/voice.svelte.js';
 
     let timeSlices: WasmTimeSlices | undefined = undefined;
     // svelte-ignore non_reactive_update // wasm objects don't do reactivity well.
@@ -32,7 +33,10 @@
             console.warn('WASM not initialized yet, cannot set time.');
             return;
         }
-        timelineState.set_timeline_time(timeSlices, time);
+        const lastCombatActions = timelineState.set_timeline_time(timeSlices, time);
+        if (lastCombatActions.length > 0) {
+            speakIfEnabled(lastCombatActions[lastCombatActions.length - 1], timelineControl.type);
+        }
         timelineTime = time;
     }
 
