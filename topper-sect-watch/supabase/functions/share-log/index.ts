@@ -7,7 +7,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { parse_html_to_page } from "./share-log-wasm/pkg/share_log_wasm.js";
 
-const VALID_URL_PREFIX = "https://aetolia.com/local/combatlogs/"
+const VALID_URL_PREFIX = "http://aetolia.com/local/combatlogs/"
 const STORAGE_BUCKET_NAME = "sect_logs";
 
 // TODO: Allow users to specify which bodies/commands to strip
@@ -53,13 +53,16 @@ type ExplainerPage = {
 
 Deno.serve(async (req: Request) => {
   try {
-    const { url, apiKey } = await req.json()
+    let { url, apiKey } = await req.json()
+    if (url.startsWith('https://')) {
+      url = url.replace('https://', 'http://');
+    }
     
     // Validate that URL starts with the expected prefix
     if (!url || typeof url !== 'string' || !url.startsWith(VALID_URL_PREFIX)) {
       return new Response(
         JSON.stringify({ 
-          error: "Invalid URL. Must start with https://aetolia.com/local/combatlogs/" 
+          error: "Invalid URL. Must start with http://aetolia.com/local/combatlogs/" 
         }),
         { 
           status: 400,
