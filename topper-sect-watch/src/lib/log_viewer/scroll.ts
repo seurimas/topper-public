@@ -56,5 +56,5 @@ export function getScrollPositionForTime(
         return 0;
     }
     const box = boundingBoxes[closestLineIdx];
-    return box.bottom;
+    return box.bottom - window.innerHeight;
 }

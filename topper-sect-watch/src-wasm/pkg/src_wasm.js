@@ -166,6 +166,17 @@ function _assertClass(instance, klass) {
     }
 }
 
+function getArrayJsValueFromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    const mem = getDataViewMemory0();
+    const result = [];
+    for (let i = ptr; i < ptr + 4 * len; i += 4) {
+        result.push(wasm.__wbindgen_export_3.get(mem.getUint32(i, true)));
+    }
+    wasm.__externref_drop_slice(ptr, len);
+    return result;
+}
+
 let cachedInt32ArrayMemory0 = null;
 
 function getInt32ArrayMemory0() {
@@ -280,12 +291,14 @@ export class WasmTimeline {
     /**
      * @param {WasmTimeSlices} slices
      * @param {number} time
-     * @returns {number}
+     * @returns {string[]}
      */
     set_timeline_time(slices, time) {
         _assertClass(slices, WasmTimeSlices);
         const ret = wasm.wasmtimeline_set_timeline_time(this.__wbg_ptr, slices.__wbg_ptr, time);
-        return ret;
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
     }
     /**
      * @param {string} me

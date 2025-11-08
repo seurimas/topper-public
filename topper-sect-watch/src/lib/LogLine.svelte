@@ -23,7 +23,7 @@
 <div class={["log", timelineControl.type]}>
     {#each sections as section}
         {#if section.time !== undefined}
-            <span bind:this={() => timeRef, (ref) => {timeRef = ref; addTimeRef(lineIdx, section.time, ref)}} style="color: {section.color}">{section.text}</span>
+            <span class="time" bind:this={() => timeRef, (ref) => {timeRef = ref; addTimeRef(lineIdx, section.time, ref)}} style="color: {section.color}">{section.text}</span>
         {:else}
             <span style="color: {section.color}">{section.text}</span>
         {/if}
@@ -35,5 +35,9 @@
 
     .log {
         @apply font-mono text-sm whitespace-pre-wrap block;
+    }
+
+    .manual .time {
+        @apply cursor-pointer underline;
     }
 </style>

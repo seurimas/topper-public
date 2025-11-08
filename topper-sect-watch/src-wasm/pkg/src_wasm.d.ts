@@ -17,7 +17,7 @@ export class WasmTimeline {
   get_limb_state(who: string): any;
   get_afflictions(who: string): any;
   get_current_time(): number;
-  set_timeline_time(slices: WasmTimeSlices, time: number): number;
+  set_timeline_time(slices: WasmTimeSlices, time: number): string[];
   constructor(me: string);
 }
 
@@ -32,13 +32,14 @@ export interface InitOutput {
   readonly wasmtimeline_get_current_time: (a: number) => number;
   readonly wasmtimeline_get_limb_state: (a: number, b: number, c: number) => any;
   readonly wasmtimeline_new: (a: number, b: number) => number;
-  readonly wasmtimeline_set_timeline_time: (a: number, b: number, c: number) => number;
+  readonly wasmtimeline_set_timeline_time: (a: number, b: number, c: number) => [number, number];
   readonly wasmtimeslices_get_times: (a: number) => [number, number];
   readonly wasmtimeslices_new: (a: number, b: number) => number;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_export_3: WebAssembly.Table;
+  readonly __externref_drop_slice: (a: number, b: number) => void;
   readonly __wbindgen_start: () => void;
 }
 

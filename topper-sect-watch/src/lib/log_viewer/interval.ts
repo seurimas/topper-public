@@ -11,12 +11,14 @@ export function intervalHandler(
     boundingBoxes: Record<number, DOMRect>,
     timelineTime: number,
     setTimelineTime: (time: number) => void,
+    deltaTime: number,
 ) {
     if (timelineControl.type !== 'timeStep' || timelineControl.speed <= 0 || timelineTime === undefined) {
         return;
     }
     const currentTime = timelineTime;
-    const timeStep = 1000 / timelineControl.speed;
+    // Timeline time is in centiseconds, so we divide by 10 to convert milliseconds to centiseconds
+    const timeStep = deltaTime * timelineControl.speed / 10;
     let newTime = currentTime + timeStep;
     setTimelineTime(newTime);
     const scrollPosition = getScrollPositionForTime(newTime, timeRefs, boundingBoxes);

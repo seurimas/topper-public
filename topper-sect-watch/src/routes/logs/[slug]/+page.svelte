@@ -63,11 +63,15 @@
             scrollHandler(timelineControl, timeRefs, boundingBoxes, timelineTime, setTimelineTime);
         });
 
+        let lastInterval = Date.now();
         setInterval(() => {
             if (!timeSlices || !timelineState || timelineTime === undefined) {
                 return;
             }
-            intervalHandler(timelineControl, timeRefs, boundingBoxes, timelineTime, setTimelineTime);
+            const now = Date.now();
+            const deltaTime = now - lastInterval;
+            intervalHandler(timelineControl, timeRefs, boundingBoxes, timelineTime, setTimelineTime, deltaTime);
+            lastInterval = now;
         }, FRAME_INTERVAL);
 
         init().then(() => {
