@@ -10,13 +10,17 @@
     function toggleMobileMenu() {
         mobileVisible = !mobileVisible;
     }
+
+    function closeMobileMenu() {
+        mobileVisible = false;
+    }
 </script>
 
 {#snippet button(name: string, path: string)}
     {#if current === path}
-        <a href={path} onclick={toggleMobileMenu} aria-current="page" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white">{name}</a>
+        <a href={path} onclick={closeMobileMenu} aria-current="page" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white">{name}</a>
     {:else}
-        <a href={path} onclick={toggleMobileMenu} class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">{name}</a>
+        <a href={path} onclick={closeMobileMenu} class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">{name}</a>
     {/if}
 {/snippet}
 
