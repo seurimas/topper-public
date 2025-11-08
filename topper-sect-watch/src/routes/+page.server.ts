@@ -9,8 +9,12 @@ export const actions = {
             return { success: false, error: 'Invalid log URL' };
         }
 
+        const { data: apiKey } = await supabase.functions.invoke('get-key');
+        if (!apiKey) {
+            return fail(500, { success: false, error: 'Failed to retrieve API key' });
+        }
         const { data, error } = await supabase.functions.invoke('share-log', {
-            body: { url: logUrl },
+            body: { url: logUrl, apiKey },
         });
         if (error) {
             return fail(500, { success: false, error: error.message });

@@ -1,6 +1,9 @@
 <script lang="ts">
     import Readme from "$lib/Readme.svelte";
     import { page } from '$app/state';
+
+    let { data } = $props();
+    let { apiKey } = $derived(data);
 </script>
 
 <svelte:head>
@@ -8,6 +11,19 @@
 </svelte:head>
 
 <Readme title="API Information">
+    <h2>Your API Key</h2>
+
+    <p>
+        To use the Sect Watch API, you will need an API key. You can find your API key below when logged in:
+    </p>
+    {#if apiKey}<pre class="p-4 rounded mb-4">
+{`${apiKey}`}
+    </pre>{:else}
+    <p>
+        You do not currently have an API key. Please sign in to generate one.
+    </p>
+    {/if}
+
     <h2>Share Your Logs</h2>
 
     <p>

@@ -53,7 +53,7 @@ type ExplainerPage = {
 
 Deno.serve(async (req: Request) => {
   try {
-    const { url } = await req.json()
+    const { url, apiKey } = await req.json()
     
     // Validate that URL starts with the expected prefix
     if (!url || typeof url !== 'string' || !url.startsWith(VALID_URL_PREFIX)) {
@@ -91,36 +91,22 @@ Deno.serve(async (req: Request) => {
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      {
-        global: {
-          headers: { "Authorization": req.headers.get("Authorization") || "" },
-        },
-      }
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    
-    const authHeader = req.headers.get('Authorization')!;
-    const token = authHeader.replace('Bearer ', '');
-    const { data: userData } = await supabase.auth.getUser(token);
-    if (!userData.user) {
-      return new Response(
-        JSON.stringify({ 
-          error: "Unauthorized: Invalid or missing token" 
-        }),
-        { 
-          status: 401,
-          headers: { "Content-Type": "application/json" } 
-        }
-      )
-    }
+    const userId = await supabase.rpc('get_user_id_from_api_key', { api_key: apiKey }).then(res => {
+      if (res.error || !res.data) {
+        throw new Error(`Invalid API key: ${JSON.stringify(res.error)}`);
+      }
+      return res.data;
+    });
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from(STORAGE_BUCKET_NAME)
       .upload(
         `logs/${explainerPage.id}.json`,
         new Blob([JSON.stringify(explainerPage)], { type: "application/json" }),
-        { upsert: true }
+        { metadata: { userId }, upsert: true }
       );
 
     if (error) {
