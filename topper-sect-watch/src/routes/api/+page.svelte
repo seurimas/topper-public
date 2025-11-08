@@ -79,7 +79,7 @@ POST {page.url.protocol}://{page.url.host}/logs/publish
 
     <pre class="p-4 rounded mb-4 border-gray-600 border">
 {`
-SECT_WATCH_URL = "https://{page.url.host}/logs/publish"
+SECT_WATCH_URL = "https://${page.url.host}/logs/publish"
 SECT_WATCH_API_KEY = "your_api_key_here"  -- Replace with your actual API key
 
 function uploadSectLogToSectWatch(logUrl)

@@ -35,7 +35,7 @@
     }
 
     onMount(() => {
-        window.addEventListener('keypress', (e: KeyboardEvent) => {
+        window.addEventListener('keydown', (e: KeyboardEvent) => {
             if (e.key === ' ') {
                 if (timelineControl.type !== 'manual') {
                     unpausedType = timelineControl.type;
