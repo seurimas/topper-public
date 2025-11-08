@@ -56,6 +56,7 @@
             limbs={limbs[oppName]}
         />
     </div>
+    <span class="combatants-mobile">View combatants' state on larger screens.</span>
     <TimelineController bind:timelineControl={timelineControl} bind:timelineTime={timelineTime} />
 </div>
 
@@ -68,6 +69,10 @@
 
     .combatants {
         @apply hidden lg:block;
+    }
+
+    .combatants-mobile {
+        @apply block lg:hidden mx-4 mb-4 text-sm text-gray-400;
     }
 
     .section-header {

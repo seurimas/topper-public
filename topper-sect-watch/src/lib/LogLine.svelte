@@ -3,12 +3,10 @@
 	import type { TimelineControl } from "./combat/types";
 
     let {
-        timelineControl,
         line,
         lineIdx,
         addTimeRef
     }: {
-        timelineControl: TimelineControl,
         line: string,
         lineIdx: number,
         addTimeRef: (idx: number, time: number, ref: HTMLElement) => void
@@ -20,7 +18,7 @@
     let sections = $derived(getSectionsFromLine(line));
 </script>
 
-<div class={["log", timelineControl.type]}>
+<div class={["log"]}>
     {#each sections as section}
         {#if section.time !== undefined}
             <span class="time" bind:this={() => timeRef, (ref) => {timeRef = ref; addTimeRef(lineIdx, section.time, ref)}} style="color: {section.color}">{section.text}</span>
@@ -37,7 +35,7 @@
         @apply font-mono text-sm whitespace-pre-wrap block;
     }
 
-    .manual .time {
+    :global(.manual .time) {
         @apply cursor-pointer underline;
     }
 </style>

@@ -16,10 +16,10 @@
     let currentTime = $derived.by(() => {
         if (timelineTime === undefined) return 'Time: N/A';
         const totalSeconds = Math.floor(timelineTime / 100);
-        const centiseconds = timelineTime % 100;
+        const centiseconds = Math.floor(timelineTime % 100);
         const minutes = Math.floor(totalSeconds / 60);
         const seconds = totalSeconds % 60;
-        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${centiseconds.toFixed(0).padStart(2, '0')}`;
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(centiseconds).padStart(2, '0')}`;
     });
 
     let unpausedType: TimelineControl['type'] = 'scrollLock';
@@ -43,8 +43,8 @@
                 } else {
                     setTimelineControlType(unpausedType);
                 }
-                e.preventDefault();
             }
+            e.preventDefault();
         });
     });
 </script>
@@ -74,8 +74,9 @@
         {@render radioButton('Scroll Lock', 'scrollLock')}
 
         {#if timelineControl.type === 'timeStep'}
-            <div class="mt-4">
-                <label for="speed" class="block mb-2">Speed: {timelineControl.speed}x</label>
+            <div class="controls">
+                <label for="speed" class="mb-2">Speed: {timelineControl.speed}x</label>
+                <span class="toggle-notice">Use spacebar to pause/resume.</span>
                 <input
                     type="range"
                     id="speed"
@@ -86,6 +87,8 @@
                     class="w-full"
                 />
             </div>
+        {:else}
+            <span class="toggle-notice block">Use spacebar to pause/resume.</span>
         {/if}
     {/if}
 </div>
@@ -97,7 +100,19 @@
         @apply flex-1;
     }
 
+    .time-header {
+        @apply font-mono ms-2;
+    }
+
     .timeline-controller {
         @apply justify-end;
+    }
+
+    .controls {
+        @apply mt-4 min-w-fit max-w-min;
+    }
+
+    .toggle-notice {
+        @apply text-sm text-gray-400;
     }
 </style>

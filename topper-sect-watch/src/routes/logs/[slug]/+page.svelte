@@ -51,7 +51,23 @@
         };
     }
 
+    function preventScrollInTimeStep(e: Event) {
+        if (timelineControl.type === 'timeStep') {
+            if (e.target instanceof HTMLElement) {
+                if (e.target.closest('.combatant')) {
+                    // Allow scrolling inside combatant panels.
+                    return;
+                }
+            }
+            e.preventDefault();
+        }
+    }
+
     onMount(() => {
+        // The space button is already handled in TimelineController for play/pause.
+        window.addEventListener('wheel', preventScrollInTimeStep, { passive: false });
+        window.addEventListener('touchmove', preventScrollInTimeStep, { passive: false });
+
         window.addEventListener('resize', () => {
             boundingBoxes = recalculateBoundingBoxes(timeRefs);
         });
@@ -91,9 +107,9 @@
 </svelte:head>
 
 <div class="p-6">
-    <div class="p-2 border-amber-900 border-2 mb-4 pb-2">
+    <div class={['p-2 border-amber-900 border-2 mb-4 pb-2', timelineControl.type]}>
         {#each log.body as line, lineIdx}
-            <LogLine {timelineControl} {line} {lineIdx} {addTimeRef} />
+            <LogLine {line} {lineIdx} {addTimeRef} />
         {/each}
     </div>
 </div>
