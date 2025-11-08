@@ -117,7 +117,7 @@ registerNamedEventHandler("SectWatch", "PostError", "sysPostHttpError", onHttpSe
         You can also add this trigger to automatically upload logs when they are read from the scorebook:
     </p>
 
-    <pre class="p-4 rounded mb-4 border-gray-600 border">{`^https?://aetolia.com/local/combatlogs/\w+_(\d+)_.*html$`}</pre>
+    <pre class="p-4 rounded mb-4 border-gray-600 border">{`^https?://aetolia.com/local/combatlogs/\\w+_(\\d+)_.*html$`}</pre>
 
     <p>
         And use the following script for the trigger action:
