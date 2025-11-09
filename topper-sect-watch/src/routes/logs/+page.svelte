@@ -1,6 +1,7 @@
 <script lang="ts">
-    import { createGrid, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+    import { createGrid, ModuleRegistry, AllCommunityModule, type GridApi } from 'ag-grid-community';
 	import { onMount } from 'svelte';
+    import { page } from '$app/state';
 
     ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -93,7 +94,7 @@
     let { data } = $props();
     let { logs } = $derived(data);
 
-    const gridOptions = $derived({
+    const gridOptions = {
         rowData: logs,
         columnDefs,
         theme: myTheme,
@@ -102,10 +103,24 @@
             minWidth: 80,
             resizable: true,
         },
-    });
+    };
+
+    let gridSearch = $state(page.url.searchParams.get('search') || '');
+    let gridSearchData: string | null = null;
+    let gridApi: GridApi | null = $state(null);
 
     onMount(() => {
-        createGrid(gridElement, gridOptions);
+        gridApi = createGrid(gridElement, gridOptions);
+        gridSearchData = gridSearch;
+    });
+
+    $effect(() => {
+        if (page.url.searchParams.get('search') !== gridSearchData) {
+            if (gridApi) {
+                gridApi.setGridOption('rowData', logs);
+            }
+            gridSearchData = gridSearch;
+        }
     });
 </script>
 
@@ -115,6 +130,25 @@
 
 <div class="mx-auto my-8 max-w-7xl px-4 sm:px-6 lg:px-8">
     <h1 class="text-3xl font-bold mb-4">Public Sect Logs</h1>
+    <form method="GET" class="ml-4">
+        <input
+            name="search"
+            type="text"
+            placeholder="Search all logs... (e.g., class, player name)"
+            class="border border-gray-300 rounded-md px-3 py-2 w-full max-w-sm"
+            bind:value={gridSearch}
+        />
+        <button
+            type="submit"
+            class="ml-2 bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+        >
+            Search
+        </button>
+    </form>
+    {#if !page.url.searchParams.get('search')}
+        <span class="text-sm text-gray-500">100 most recent shown</span>
+    {/if}
+
     <div class="ag-theme-alpine" style="height: 600px; width: 100%;" bind:this={gridElement}>
         
     </div>
