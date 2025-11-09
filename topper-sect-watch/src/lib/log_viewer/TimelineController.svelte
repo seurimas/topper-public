@@ -43,8 +43,17 @@
                 } else {
                     setTimelineControlType(unpausedType);
                 }
+                e.preventDefault();
+            } else if (timelineControl.type === 'timeStep') {
+                if (e.key === 'PageUp') {
+                    timelineTime -= 100 * 10; // 10 seconds
+                    e.preventDefault();
+                } else if (e.key === 'PageDown') {
+                    timelineTime += 100 * 10; // 10 seconds
+                    e.preventDefault();
+                }
             }
-            e.preventDefault();
+                
         });
     });
 </script>
