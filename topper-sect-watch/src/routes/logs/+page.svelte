@@ -109,17 +109,18 @@
                 resizable: true,
             },
         };
-        
+
         gridApi = createGrid(gridElement, gridOptions);
         gridSearchData = gridSearch;
     });
 
     $effect(() => {
         if (page.url.searchParams.get('search') !== gridSearchData) {
+            console.log('Updating grid data for search:', page.url.searchParams.get('search'));
             if (gridApi) {
                 gridApi.setGridOption('rowData', logs);
             }
-            gridSearchData = gridSearch;
+            gridSearchData = page.url.searchParams.get('search');
         }
     });
 </script>
