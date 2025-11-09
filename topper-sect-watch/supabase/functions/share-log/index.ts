@@ -5,7 +5,7 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import { parse_html_to_page } from "./share-log-wasm/pkg/share_log_wasm.js";
+import { cleanup_old_log, parse_html_to_page } from "./share-log-wasm/pkg/share_log_wasm.js";
 
 const VALID_URL_PREFIX = "http://aetolia.com/local/combatlogs/"
 const STORAGE_BUCKET_NAME = "sect_logs";
@@ -51,18 +51,69 @@ type ExplainerPage = {
   comments: string[];
 };
 
+const OLD_LOG_REGEX = /(.*)_(\d\d_\d\d_\d\d)_(\d+)_(\d+)$/
+
 Deno.serve(async (req: Request) => {
   try {
-    let { url, apiKey } = await req.json()
-    if (url.startsWith('https://')) {
-      url = url.replace('https://', 'http://');
-    }
+    let { url, page, apiKey } = await req.json()
     
-    // Validate that URL starts with the expected prefix
-    if (!url || typeof url !== 'string' || !url.startsWith(VALID_URL_PREFIX)) {
+    let explainerPage: ExplainerPage;
+    
+    if (page) {
+      // If page is provided, use it directly
+      const oldLog = page as ExplainerPage;
+      const cleanedOldLog = JSON.parse(cleanup_old_log(JSON.stringify(oldLog)));
+      const match = OLD_LOG_REGEX.exec(cleanedOldLog.id);
+      if (match) {
+        const baseId = match[1];
+        const lineCount = match[3];
+        const duration = match[4];
+        cleanedOldLog.id = `${baseId}_${lineCount}_${duration}`;
+      }
+      explainerPage = cleanedOldLog;
+    } else if (url) {
+      // If url is provided, fetch and parse it
+      if (url.startsWith('https://')) {
+        url = url.replace('https://', 'http://');
+      }
+      
+      // Validate that URL starts with the expected prefix
+      if (typeof url !== 'string' || !url.startsWith(VALID_URL_PREFIX)) {
+        return new Response(
+          JSON.stringify({ 
+            error: "Invalid URL. Must start with http://aetolia.com/local/combatlogs/" 
+          }),
+          { 
+            status: 400,
+            headers: { "Content-Type": "application/json" } 
+          }
+        )
+      }
+
+      // Fetch the HTML content from the URL
+      const response = await fetch(url)
+      
+      if (!response.ok) {
+        return new Response(
+          JSON.stringify({ 
+            error: `Failed to fetch URL: ${response.status} ${response.statusText}` 
+          }),
+          { 
+            status: 400,
+            headers: { "Content-Type": "application/json" } 
+          }
+        )
+      }
+
+      const html = await response.text()
+      
+      // Parse the HTML to an ExplainerPage
+      const explainerPageString = parse_html_to_page(html, FILTERED_BODIES, FILTERED_COMMANDS);
+      explainerPage = JSON.parse(explainerPageString);
+    } else {
       return new Response(
         JSON.stringify({ 
-          error: "Invalid URL. Must start with http://aetolia.com/local/combatlogs/" 
+          error: "'url' must be provided" 
         }),
         { 
           status: 400,
@@ -70,27 +121,6 @@ Deno.serve(async (req: Request) => {
         }
       )
     }
-
-    // Fetch the HTML content from the URL
-    const response = await fetch(url)
-    
-    if (!response.ok) {
-      return new Response(
-        JSON.stringify({ 
-          error: `Failed to fetch URL: ${response.status} ${response.statusText}` 
-        }),
-        { 
-          status: 400,
-          headers: { "Content-Type": "application/json" } 
-        }
-      )
-    }
-
-    const html = await response.text()
-    
-    // Parse the HTML to an ExplainerPage
-    const explainerPageString = parse_html_to_page(html, FILTERED_BODIES, FILTERED_COMMANDS);
-    const explainerPage: ExplainerPage = JSON.parse(explainerPageString);
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
