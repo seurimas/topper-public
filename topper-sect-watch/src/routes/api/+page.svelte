@@ -89,9 +89,9 @@ function onHttpSectWatchPostDone(_, url, body)
   end
   local json = yajl.to_value(body)
   if json['success'] then
-    cecho(string.format("<green>Successfully posted log to Sect watch: <white>%s", json['saved']))
+    cecho(string.format("<green>Successfully posted log to Sect Watch: <white>%s", json['saved']))
   else
-    cecho(string.format("<red>Failed to post log to Sect watch: <white>%s", json['error']))
+    cecho(string.format("<red>Failed to post log to Sect Watch: <white>%s", json['error']))
   end
 end
 registerNamedEventHandler("SectWatch", "Post", "sysPostHttpDone", onHttpSectWatchPostDone)
@@ -100,7 +100,7 @@ function onHttpSectWatchPostError(_, response, url)
   if url ~= SECT_WATCH_URL then
     return
   end
-  cecho(string.format("<white>Failed to post log to Sect watch: <red>%s", response))
+  cecho(string.format("<white>Failed to post log to Sect Watch: <red>%s", response))
 end
 registerNamedEventHandler("SectWatch", "PostError", "sysPostHttpError", onHttpSectWatchPostError)`}
     </pre>
