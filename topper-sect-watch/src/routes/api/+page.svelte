@@ -125,7 +125,7 @@ registerNamedEventHandler("SectWatch", "PostError", "sysPostHttpError", onHttpSe
 
     <pre class="p-4 rounded mb-4 border-gray-600 border">
 {`local url = line
-local code = "uploadSectLogToSectWatch(\"" .. url .. "\")"
+local code = "uploadSectLogToSectWatch(\\"" .. url .. "\\")"
 tempTimer(2, code)`}
     </pre>
 </Readme>

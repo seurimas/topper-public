@@ -94,22 +94,22 @@
     let { data } = $props();
     let { logs } = $derived(data);
 
-    const gridOptions = {
-        rowData: logs,
-        columnDefs,
-        theme: myTheme,
-        defaultColDef: {
-            flex: 1,
-            minWidth: 80,
-            resizable: true,
-        },
-    };
-
     let gridSearch = $state(page.url.searchParams.get('search') || '');
-    let gridSearchData: string | null = null;
+    let gridSearchData: string | null = $state(page.url.searchParams.get('search') || null);
     let gridApi: GridApi | null = $state(null);
 
     onMount(() => {
+        const gridOptions = {
+            rowData: logs,
+            columnDefs,
+            theme: myTheme,
+            defaultColDef: {
+                flex: 1,
+                minWidth: 80,
+                resizable: true,
+            },
+        };
+        
         gridApi = createGrid(gridElement, gridOptions);
         gridSearchData = gridSearch;
     });
@@ -146,7 +146,9 @@
         </button>
     </form>
     {#if !page.url.searchParams.get('search')}
-        <span class="text-sm text-gray-500">100 most recent shown</span>
+        <span class="text-sm text-gray-500">{logs.length} most recent shown</span>
+    {:else}
+        <span class="text-sm text-gray-500">Showing {logs.length} results for "{gridSearchData}"</span>
     {/if}
 
     <div class="ag-theme-alpine" style="height: 600px; width: 100%;" bind:this={gridElement}>
