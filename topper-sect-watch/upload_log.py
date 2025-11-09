@@ -3,7 +3,7 @@
 Upload a JSON log file to the Supabase edge function.
 
 Usage:
-    python upload_log.py <filename_or_directory> <api_key>
+    python upload_log.py <url> <jwt_token> <filename_or_directory> <api_key>
 """
 
 import sys
@@ -13,12 +13,14 @@ from pathlib import Path
 import requests
 
 
-def upload_log(filename: str, api_key: str) -> bool:
+def upload_log(filename: str, url: str, jwt_token: str, api_key: str) -> bool:
     """
     Read JSON from file and send it to the Supabase edge function.
     
     Args:
         filename: Path to the JSON file to upload
+        url: URL of the edge function
+        jwt_token: JWT token for authorization
         api_key: API key for authentication
         
     Returns:
@@ -36,9 +38,8 @@ def upload_log(filename: str, api_key: str) -> bool:
         return False
     
     # Prepare the request
-    url = 'http://127.0.0.1:54321/functions/v1/share-log'
     headers = {
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0',
+        'Authorization': f'Bearer {jwt_token}',
         'Content-Type': 'application/json'
     }
     payload = {
@@ -67,12 +68,14 @@ def upload_log(filename: str, api_key: str) -> bool:
         return False
 
 
-def process_path(path: str, api_key: str) -> None:
+def process_path(path: str, url: str, jwt_token: str, api_key: str) -> None:
     """
     Process a file or directory path. If it's a directory, upload all JSON files.
     
     Args:
         path: Path to a file or directory
+        url: URL of the edge function
+        jwt_token: JWT token for authorization
         api_key: API key for authentication
     """
     path_obj = Path(path)
@@ -83,7 +86,7 @@ def process_path(path: str, api_key: str) -> None:
     
     if path_obj.is_file():
         # Single file
-        success = upload_log(str(path_obj), api_key)
+        success = upload_log(str(path_obj), url, jwt_token, api_key)
         if not success:
             sys.exit(1)
     elif path_obj.is_dir():
@@ -101,7 +104,7 @@ def process_path(path: str, api_key: str) -> None:
         
         for json_file in json_files:
             print(f"\n--- Processing {json_file.name} ---")
-            if upload_log(str(json_file), api_key):
+            if upload_log(str(json_file), url, jwt_token, api_key):
                 success_count += 1
             else:
                 failed_count += 1
@@ -118,14 +121,16 @@ def process_path(path: str, api_key: str) -> None:
 
 
 def main():
-    if len(sys.argv) != 3:
-        print("Usage: python upload_log.py <filename_or_directory> <api_key>", file=sys.stderr)
+    if len(sys.argv) != 5:
+        print("Usage: python upload_log.py <url> <jwt_token> <filename_or_directory> <api_key>", file=sys.stderr)
         sys.exit(1)
     
-    path = sys.argv[1]
-    api_key = sys.argv[2]
+    url = sys.argv[1]
+    jwt_token = sys.argv[2]
+    path = sys.argv[3]
+    api_key = sys.argv[4]
     
-    process_path(path, api_key)
+    process_path(path, url, jwt_token, api_key)
 
 
 if __name__ == '__main__':
