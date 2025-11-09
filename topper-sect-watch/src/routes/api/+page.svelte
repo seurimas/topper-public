@@ -20,9 +20,7 @@
     </p>
     {#if apiKey}
         {#if revealed}
-            <pre class="p-4 rounded mb-4">
-{`${apiKey}`}
-            </pre>
+            <pre class="code">{`${apiKey}`}</pre>
         {:else}
             <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded mb-4" on:click={() => { revealed = true; }}>
                 Reveal API Key
@@ -40,20 +38,16 @@
         You can upload logs directly to the Sect Watch API from your MUD client. To do so, send a POST request to the following endpoint:
     </p>
 
-    <pre class="p-4 rounded mb-4">
-POST {page.url.protocol}://{page.url.host}/logs/publish
-    </pre>
+    <pre class="code">POST {page.url.protocol}://{page.url.host}/logs/publish</pre>
 
     <p>
         The request should include a JSON body with the following structure:
     </p>
 
-    <pre class="p-4 rounded mb-4">
-{`{
+    <pre class="code">{`{
     "url": "https://aetolia.com/local/combatlogs/your_log_file.log",
     "api_key": "your_api_key_here"
-}`}
-    </pre>
+}`}</pre>
 
     <p>
         Replace <code>your_log_file.log</code> with the actual URL of your Sect log file. Make sure that the log file is accessible and that you have permission to share it.
@@ -65,11 +59,9 @@ POST {page.url.protocol}://{page.url.host}/logs/publish
         Upon successful upload, the API will respond with a JSON object containing the ID of the uploaded log:
     </p>
 
-    <pre class="p-4 rounded mb-4">
-{`{
+    <pre class="code">{`{
     "saved": "log_id_here"
-}`}
-    </pre>
+}`}</pre>
 
     <h2>Mudlet Function</h2>
 
@@ -77,7 +69,7 @@ POST {page.url.protocol}://{page.url.host}/logs/publish
         Here is a sample Mudlet function and event handlers that demonstrates how to upload a Sect log to Sect Watch:
     </p>
 
-    <pre class="p-4 rounded mb-4 border-gray-600 border">
+    <pre class="code">
 {`
 SECT_WATCH_URL = "https://${page.url.host}/logs/publish"
 SECT_WATCH_API_KEY = "your_api_key_here"  -- Replace with your actual API key
@@ -117,13 +109,13 @@ registerNamedEventHandler("SectWatch", "PostError", "sysPostHttpError", onHttpSe
         You can also add this trigger to automatically upload logs when they are read from the scorebook:
     </p>
 
-    <pre class="p-4 rounded mb-4 border-gray-600 border">{`^https?://aetolia.com/local/combatlogs/\\w+_(\\d+)_.*html$`}</pre>
+    <pre class="code">{`^https?://aetolia.com/local/combatlogs/\\w+_(\\d+)_.*html$`}</pre>
 
     <p>
         And use the following script for the trigger action:
     </p>
 
-    <pre class="p-4 rounded mb-4 border-gray-600 border">
+    <pre class="code">
 {`local url = line
 local code = "uploadSectLogToSectWatch(\\"" .. url .. "\\")"
 tempTimer(2, code)`}
@@ -135,5 +127,9 @@ tempTimer(2, code)`}
 
     p {
         @apply mb-4;
+    }
+
+    .code {
+        @apply p-4 rounded mb-4 border-gray-600 border; 
     }
 </style>
