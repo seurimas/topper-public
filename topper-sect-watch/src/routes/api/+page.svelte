@@ -9,7 +9,7 @@
 </script>
 
 <svelte:head>
-	<title>Sect Watch - Terms</title>
+	<title>Sect Watch - API Info</title>
 </svelte:head>
 
 <Readme title="API Information">
