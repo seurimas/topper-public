@@ -9,6 +9,7 @@ export const load: PageServerLoad = async ({ url, locals: { supabase } }) => {
       .list(`logs`, {
         limit: url.searchParams.get('search') ? 1000 : 100,
         search: url.searchParams.get('search') || undefined,
+        sortBy: { column: 'created_at', order: 'desc' },
       });
 
     if (storage_error || !data) {
