@@ -24,6 +24,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<meta name="description" content="Topper Sect Watch - Share and view Sect of Blades combat logs." />
 </svelte:head>
 
 

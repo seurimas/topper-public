@@ -4,8 +4,8 @@ use crate::{
     classes::Class,
     db::*,
     non_agent::{
-        AetTimelineDenizenExt, AetTimelineRoomExt, Direction, PersuasionStatus, Room,
-        CONVINCED_TAG, MOB_TAG,
+        AetTimelineDenizenExt, AetTimelineRoomExt, CONVINCED_TAG, Direction, MOB_TAG,
+        PersuasionStatus, Room,
     },
     types::*,
 };
@@ -146,8 +146,7 @@ fn handle_char_status(
             timeline,
             &timeline.me.clone(),
             &move |me: &mut AgentState| {
-                me.class_state
-                    .initialize_for_normalized_class(class.normal());
+                me.class_state.initialize_for_class(class);
             },
         );
     }

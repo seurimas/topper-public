@@ -1,7 +1,7 @@
 use crate::bt::{AetTarget, BehaviorController, BehaviorModel};
 use crate::curatives::{
-    get_firstaid_settings_for_class, get_firstaid_settings_no_class, FirstAidSetting, SafetyAlert,
-    MENTAL_AFFLICTIONS, RANDOM_CURES,
+    FirstAidSetting, MENTAL_AFFLICTIONS, RANDOM_CURES, SafetyAlert,
+    get_firstaid_settings_for_class, get_firstaid_settings_no_class,
 };
 use crate::db::AetDatabaseModule;
 use crate::non_agent::AetNonAgent;
@@ -356,7 +356,9 @@ pub fn get_attack(
 ) -> String {
     if let Some(class) = db.and_then(|db| db.get_class(me)) {
         match class {
-            Class::Sentinel => sentinel::get_attack(timeline, target, strategy, db),
+            Class::Sentinel => {
+                sentinel::get_attack(timeline, target, strategy, db, first_aid_settings)
+            }
             Class::Infiltrator => {
                 infiltrator::get_attack(timeline, target, strategy, db, first_aid_settings)
             }

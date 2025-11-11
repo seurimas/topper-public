@@ -22,7 +22,7 @@
         {#if revealed}
             <pre class="code">{`${apiKey}`}</pre>
         {:else}
-            <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded mb-4" on:click={() => { revealed = true; }}>
+            <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded mb-4" onclick={() => { revealed = true; }}>
                 Reveal API Key
             </button>
         {/if}
@@ -38,7 +38,7 @@
         You can upload logs directly to the Sect Watch API from your MUD client. To do so, send a POST request to the following endpoint:
     </p>
 
-    <pre class="code">POST {page.url.protocol}://{page.url.host}/logs/publish</pre>
+    <pre class="code">POST {page.url.protocol}//{page.url.host}/logs/publish</pre>
 
     <p>
         The request should include a JSON body with the following structure:

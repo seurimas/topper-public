@@ -1099,6 +1099,8 @@ impl AgentState {
     pub fn assume_zealot(&mut self, action: fn(&mut ZealotClassState)) {
         if let ClassState::Zealot(zealot) = &mut self.class_state {
             action(zealot);
+        } else if let ClassState::Ravager(zealot) = &mut self.class_state {
+            action(zealot);
         } else {
             self.class_state = ClassState::Zealot(ZealotClassState::default());
             self.assume_zealot(action);

@@ -1,4 +1,4 @@
-use crate::timeline::{simulation_slice, AetObservation, AetTimeSlice, AetTimeline};
+use crate::timeline::{AetObservation, AetTimeSlice, AetTimeline, simulation_slice};
 use crate::types::BType;
 use std::collections::HashMap;
 use topper_core::timeline::CType;
@@ -29,6 +29,9 @@ pub trait ActiveTransition {
 #[macro_export]
 macro_rules! untargetted_action {
     ($name:ident, $action:expr) => {
+        untargetted_action!($name, $action, $action);
+    };
+    ($name:ident, $action:expr, $mirror:expr) => {
         pub struct $name {
             pub caster: String,
         }
@@ -48,7 +51,16 @@ macro_rules! untargetted_action {
                 &self,
                 timline: &crate::timeline::AetTimeline,
             ) -> crate::observables::ActivateResult {
-                Ok($action.to_string())
+                if timline
+                    .state
+                    .borrow_agent(&self.caster)
+                    .class_state
+                    .is_mirrored()
+                {
+                    Ok(format!($mirror))
+                } else {
+                    Ok(format!($action))
+                }
             }
         }
     };
@@ -57,6 +69,9 @@ macro_rules! untargetted_action {
 #[macro_export]
 macro_rules! targetted_action {
     ($name:ident, $action:expr) => {
+        targetted_action!($name, $action, $action);
+    };
+    ($name:ident, $action:expr, $mirror:expr) => {
         pub struct $name {
             pub caster: String,
             pub target: String,
@@ -96,7 +111,16 @@ macro_rules! targetted_action {
                 &self,
                 timline: &crate::timeline::AetTimeline,
             ) -> crate::observables::ActivateResult {
-                Ok(format!($action, self.target))
+                if timline
+                    .state
+                    .borrow_agent(&self.caster)
+                    .class_state
+                    .is_mirrored()
+                {
+                    Ok(format!($mirror, self.target))
+                } else {
+                    Ok(format!($action, self.target))
+                }
             }
         }
     };

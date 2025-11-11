@@ -50,8 +50,7 @@ pub fn apply_observation(
                 }) {
                     db.set_class(&combat_action.caster, class);
                     for_agent(timeline, &combat_action.caster, &|me| {
-                        me.class_state
-                            .initialize_for_normalized_class(class.normal());
+                        me.class_state.initialize_for_class(class);
                     });
                 }
             }

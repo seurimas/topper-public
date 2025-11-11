@@ -274,7 +274,7 @@ pub fn handle_combat_action(
             }
         }
         "Daunt" => match combat_action.annotation.as_ref() {
-            "direwolf" => {
+            "coyote" | "darkhound" => {
                 for_agent(
                     agent_states,
                     &combat_action.caster,
@@ -289,7 +289,7 @@ pub fn handle_combat_action(
                     after,
                 );
             }
-            "raloth" => {
+            "raloth" | "brutaliser" => {
                 for_agent(
                     agent_states,
                     &combat_action.caster,
@@ -304,7 +304,7 @@ pub fn handle_combat_action(
                     after,
                 );
             }
-            "crocodile" => {
+            "crocodile" | "eviscerator" => {
                 for_agent(
                     agent_states,
                     &combat_action.caster,
@@ -319,7 +319,7 @@ pub fn handle_combat_action(
                     after,
                 );
             }
-            "cockatrice" => {
+            "cockatrice" | "terrifier" => {
                 for_agent(
                     agent_states,
                     &combat_action.caster,

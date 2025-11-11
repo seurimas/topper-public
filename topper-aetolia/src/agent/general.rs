@@ -1363,8 +1363,11 @@ impl DodgeState {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum ClassState {
     Ascendril(AscendrilClassState),
+    Bloodborn(AscendrilClassState), // Mirror of Ascendril
     Zealot(ZealotClassState),
+    Ravager(ZealotClassState), // Mirror of Zealot
     Sentinel(SentinelClassState),
+    Executor(SentinelClassState), // Mirror of Sentinel
     Predator(PredatorClassState),
     Monk(MonkClassState),
     Bard(BardClassState),
@@ -1378,7 +1381,8 @@ pub enum ClassState {
 impl ClassState {
     pub fn wait(&mut self, duration: CType, cooldown_effect: CooldownEffect) {
         match self {
-            ClassState::Zealot(ZealotClassState { zenith, pyromania }) => {
+            ClassState::Zealot(ZealotClassState { zenith, pyromania })
+            | ClassState::Ravager(ZealotClassState { zenith, pyromania }) => {
                 if !cooldown_effect {
                     zenith.wait(duration);
                 }
@@ -1397,7 +1401,8 @@ impl ClassState {
             }
             // ClassState::Shifter(howling_state) => howling_state.wait(duration),
             // ClassState::Monk(monk_class_state) => monk_class_state.wait(duration),
-            ClassState::Ascendril(ascendril_class_state) => {
+            ClassState::Ascendril(ascendril_class_state)
+            | ClassState::Bloodborn(ascendril_class_state) => {
                 ascendril_class_state.wait(duration, cooldown_effect)
             }
             _ => {}
@@ -1406,10 +1411,10 @@ impl ClassState {
 
     pub fn get_normalized_class(&self) -> Option<Class> {
         match self {
-            Self::Ascendril(_) => Some(Class::Ascendril),
-            Self::Zealot(_) => Some(Class::Zealot),
+            Self::Bloodborn(_) | Self::Ascendril(_) => Some(Class::Ascendril),
+            Self::Ravager(_) | Self::Zealot(_) => Some(Class::Zealot),
             Self::Predator(_) => Some(Class::Predator),
-            Self::Sentinel(_) => Some(Class::Sentinel),
+            Self::Executor(_) | Self::Sentinel(_) => Some(Class::Sentinel),
             Self::Bard(_) => Some(Class::Bard),
             Self::Infiltrator(_) => Some(Class::Infiltrator),
             Self::Siderealist(_) => Some(Class::Siderealist),
@@ -1420,12 +1425,21 @@ impl ClassState {
         }
     }
 
-    pub fn initialize_for_normalized_class(&mut self, class: Class) {
+    pub fn initialize_for_class(&mut self, class: Class) {
         if let Some(new_class_state) = match (&self, class) {
             // Already initialized,
             (Self::Ascendril(_), Class::Ascendril) => None,
+            (Self::Bloodborn(_), Class::Bloodborn) => None,
+            (Self::Ascendril(state), Class::Bloodborn) => Some(Self::Bloodborn(state.clone())),
+            (Self::Bloodborn(state), Class::Ascendril) => Some(Self::Ascendril(state.clone())),
             (Self::Zealot(_), Class::Zealot) => None,
+            (Self::Ravager(_), Class::Ravager) => None,
+            (Self::Zealot(state), Class::Ravager) => Some(Self::Ravager(state.clone())),
+            (Self::Ravager(state), Class::Zealot) => Some(Self::Zealot(state.clone())),
             (Self::Sentinel(_), Class::Sentinel) => None,
+            (Self::Executor(_), Class::Executor) => None,
+            (Self::Sentinel(state), Class::Executor) => Some(Self::Executor(state.clone())),
+            (Self::Executor(state), Class::Sentinel) => Some(Self::Sentinel(state.clone())),
             (Self::Bard(_), Class::Bard) => None,
             (Self::Shifter(_), Class::Shapeshifter) => None,
             (Self::Predator(_), Class::Predator) => None,
@@ -1434,8 +1448,11 @@ impl ClassState {
             (Self::Monk(_), Class::Monk) => None,
             // Changed.
             (_, Class::Ascendril) => Some(Self::Ascendril(AscendrilClassState::default())),
+            (_, Class::Bloodborn) => Some(Self::Bloodborn(AscendrilClassState::default())),
             (_, Class::Zealot) => Some(Self::Zealot(ZealotClassState::default())),
+            (_, Class::Ravager) => Some(Self::Ravager(ZealotClassState::default())),
             (_, Class::Sentinel) => Some(Self::Sentinel(SentinelClassState::default())),
+            (_, Class::Executor) => Some(Self::Executor(SentinelClassState::default())),
             (_, Class::Bard) => Some(Self::Bard(BardClassState::default())),
             (_, Class::Shapeshifter) => Some(Self::Shifter(HowlingState::default())),
             (_, Class::Predator) => Some(Self::Predator(PredatorClassState::default())),
@@ -1448,6 +1465,13 @@ impl ClassState {
             }
         } {
             *self = new_class_state;
+        }
+    }
+
+    pub fn is_mirrored(&self) -> bool {
+        match self {
+            ClassState::Bloodborn(_) | ClassState::Ravager(_) | ClassState::Executor(_) => true,
+            _ => false,
         }
     }
 }

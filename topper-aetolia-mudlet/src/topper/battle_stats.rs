@@ -1,8 +1,8 @@
 use serde::Serialize;
 use std::collections::HashMap;
 use topper_aetolia::classes::infiltrator::{get_hypno_stack, get_hypno_stack_name};
-use topper_aetolia::classes::{get_attack, Class, LockType};
-use topper_aetolia::curatives::{gather_alerts, FirstAidSetting};
+use topper_aetolia::classes::{Class, LockType, get_attack};
+use topper_aetolia::curatives::{FirstAidSetting, gather_alerts};
 use topper_aetolia::db::AetDatabaseModule;
 use topper_aetolia::timeline::*;
 use topper_aetolia::types::*;
@@ -151,14 +151,10 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for BattleStatsModule {
             TopperMessage::Request(request) => match request {
                 TopperRequest::BattleStats(when) => {
                     timeline.update_time(*when);
-                    if let Some(class) = target
-                        .as_ref()
-                        .and_then(|target| db.get_class(target))
-                        .map(|c| c.normal())
-                    {
+                    if let Some(class) = target.as_ref().and_then(|target| db.get_class(target)) {
                         for_agent(&mut timeline.state, target.as_ref().unwrap(), &|you| {
                             if you.get_normalized_class().is_none() {
-                                you.class_state.initialize_for_normalized_class(class);
+                                you.class_state.initialize_for_class(class);
                             }
                         });
                     }
@@ -295,6 +291,12 @@ pub fn get_battle_stats(
             Some(db),
         ),
         "Zealot" => topper_aetolia::classes::zealot::get_class_state(
+            &timeline,
+            target.as_ref().unwrap_or(&"".to_string()),
+            plan.as_ref().unwrap_or(&"".to_string()),
+            Some(db),
+        ),
+        "Sentinel" | "Executor" => topper_aetolia::classes::sentinel::get_class_state(
             &timeline,
             target.as_ref().unwrap_or(&"".to_string()),
             plan.as_ref().unwrap_or(&"".to_string()),
