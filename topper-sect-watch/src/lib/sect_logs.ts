@@ -62,10 +62,18 @@ export const parseLogId = (name: string): SectLog => {
     };
 
 const TIME_REGEX = /\[(\d\d):(\d\d):(\d\d):(\d\d)\]/;
+const NEW_TIME_REGEX = /\[(\d+):(\d\d).(\d\d)\]/;
 
 export const parseTime = (timeStr: string) => {
     const match = TIME_REGEX.exec(timeStr);
-    if (!match) return 0;
+    if (!match) {
+        const newMatch = NEW_TIME_REGEX.exec(timeStr);
+        if (!newMatch) {
+            return 0;
+        }
+        const [, minutes, seconds, centiseconds] = newMatch;
+        return (parseInt(minutes) * 6000 + parseInt(seconds) * 100 + parseInt(centiseconds));
+    }
     const [, hours, minutes, seconds, centiseconds] = match;
     return (parseInt(hours) * 360000 + parseInt(minutes) * 6000 + parseInt(seconds) * 100 + parseInt(centiseconds));
 };

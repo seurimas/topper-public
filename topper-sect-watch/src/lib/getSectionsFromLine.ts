@@ -1,3 +1,5 @@
+import { parseTime } from "./sect_logs";
+
 export type LineSection = { text: string, color: string, time?: number };
 
 export const getSectionsFromLine = (line: string) => {
@@ -30,11 +32,11 @@ export const getSectionsFromLine = (line: string) => {
         return parts;
     }
     const finalPart = parts[parts.length - 1];
-    const timeMatch = finalPart.text.match(/\[(\d\d):(\d\d):(\d\d):(\d\d)]/);
+    const timeMatch = finalPart.text.match(/\[(\d\d):(\d\d):(\d\d):(\d\d)]|\[(\d+):(\d\d).(\d\d)\]/);
     if (timeMatch) {
         // We have a time slice at the end of the line. We need to create a ref for it.
-        const [timeText, hh, mm, ss, cc] = timeMatch;
-        const time = parseInt(hh) * 360000 + parseInt(mm) * 6000 + parseInt(ss) * 100 + parseInt(cc);
+        const time = parseTime(timeMatch[0]);
+        const timeText = timeMatch[0];
         const beforeTime = finalPart.text.slice(0, timeMatch.index);
         if (beforeTime.length > 0) {
             finalPart.text = beforeTime;
