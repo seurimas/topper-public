@@ -4,6 +4,8 @@ lazy_static! {
     pub static ref PROMPT_REGEX: Regex =
         Regex::new(r"\[(?P<hour>\d\d):(?P<minute>\d\d):(?P<second>\d\d):(?P<centi>\d\d)\]")
             .unwrap();
+    pub static ref NEW_PROMPT_REGEX: Regex =
+        Regex::new(r"\[(?P<minute>\d+):(?P<second>\d\d):(?P<centi>\d\d)\]").unwrap();
 }
 
 pub fn parse_prompt_time(line: &String, last_time: i32) -> Option<i32> {
@@ -28,6 +30,18 @@ pub fn parse_prompt_time(line: &String, last_time: i32) -> Option<i32> {
                     time = time + (24 * 360000);
                 }
             }
+            return Some(time);
+        }
+    } else if let Some(captures) = NEW_PROMPT_REGEX.captures(line.as_ref()) {
+        if let (Some(minute), Some(second), Some(centi)) = (
+            captures.name("minute"),
+            captures.name("second"),
+            captures.name("centi"),
+        ) {
+            let minute: i32 = minute.as_str().parse().unwrap();
+            let second: i32 = second.as_str().parse().unwrap();
+            let centi: i32 = centi.as_str().parse().unwrap();
+            let mut time = centi + (((minute * 60) + second) * 100);
             return Some(time);
         }
     }
