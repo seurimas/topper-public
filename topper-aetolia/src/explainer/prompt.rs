@@ -5,7 +5,7 @@ lazy_static! {
         Regex::new(r"\[(?P<hour>\d\d):(?P<minute>\d\d):(?P<second>\d\d):(?P<centi>\d\d)\]")
             .unwrap();
     pub static ref NEW_PROMPT_REGEX: Regex =
-        Regex::new(r"\[(?P<minute>\d+):(?P<second>\d\d):(?P<centi>\d\d)\]").unwrap();
+        Regex::new(r"\[(?P<minute>\d+):(?P<second>\d\d)\.(?P<centi>\d\d)\]").unwrap();
 }
 
 pub fn parse_prompt_time(line: &String, last_time: i32) -> Option<i32> {
