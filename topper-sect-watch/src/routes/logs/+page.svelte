@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { createGrid, ModuleRegistry, AllCommunityModule, type GridApi } from 'ag-grid-community';
+    import { createGrid, ModuleRegistry, AllCommunityModule, type GridApi, type CellKeyDownEvent } from 'ag-grid-community';
 	import { onMount } from 'svelte';
     import { page } from '$app/state';
 
@@ -107,6 +107,16 @@
                 flex: 1,
                 minWidth: 80,
                 resizable: true,
+            },
+            onCellKeyDown: (e: CellKeyDownEvent) => {
+                if (!e?.event) return;
+                const keyboardEvent = e.event as KeyboardEvent;
+                if (keyboardEvent.key === 'Enter') {
+                    const link = (e.event.target as HTMLElement).querySelector('a');
+                    if (link) {
+                        link.click();
+                    }
+                }
             },
         };
 
