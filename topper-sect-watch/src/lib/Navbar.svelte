@@ -65,7 +65,7 @@
     </div>
   </div>
 
-  <div id="mobile-menu" class={mobileVisible ? 'block' : 'hidden sm:block'}>
+  <div id="mobile-menu" class={mobileVisible ? 'block' : 'hidden'}>
     <div class="space-y-1 px-2 pt-2 pb-3">
         {@render all_buttons()}
     </div>
