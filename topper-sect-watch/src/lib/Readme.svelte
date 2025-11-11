@@ -1,7 +1,7 @@
 <script lang="ts">
     let { title, children } = $props();
 </script>
-<div class="font-sans antialiased p-6 leading-normal tracking-wider bg-cover">
+<div role="main" class="font-sans antialiased p-6 leading-normal tracking-wider bg-cover">
 	<h1>{title}</h1>
     {@render children()}
 </div>
