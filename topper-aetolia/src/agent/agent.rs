@@ -791,6 +791,7 @@ impl AgentState {
             FType::WritheStasis,
         ]) == 0
             && !(self.is(FType::LeftArmCrippled) && self.is(FType::RightArmCrippled))
+            && !(self.is(FType::FeebleArms) && self.is(FType::FeebleLegs))
     }
 
     pub fn is_prone(&self) -> bool {

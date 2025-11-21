@@ -1110,11 +1110,12 @@ lazy_static! {
         val.insert(FType::Vomiting, "euphorbia");
         val.insert(FType::Deafness, "colocasia");
         // val.insert(FType::CureBlind, "oculus");
+        val.insert(FType::WateryEyes, "oculus");
         val.insert(FType::Haemophilia, "hepafarin");
         val.insert(FType::Stuttering, "jalk");
         val.insert(FType::Weariness, "vernalius");
-        val.insert(FType::RightLegCrippled, "epseth");
-        val.insert(FType::LeftLegCrippled, "epseth");
+        val.insert(FType::FeebleArms, "epseth");
+        val.insert(FType::FeebleLegs, "epseth");
         val.insert(FType::Dizziness, "larkspur");
         val.insert(FType::Anorexia, "slike");
         val.insert(FType::Voyria, "voyria");
