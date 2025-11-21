@@ -961,11 +961,7 @@ impl ComboGrader {
                     }
                     stance = combo_attack.get_next_stance(stance);
                 }
-                if breaks >= *min_breaks {
-                    *value
-                } else {
-                    0
-                }
+                if breaks >= *min_breaks { *value } else { 0 }
             }
             ComboGrader::PerPossibleParry(value) => {
                 let mut parryable = HashMap::new();
@@ -976,7 +972,7 @@ impl ComboGrader {
                 for combo_attack in combo.get_attacks().iter() {
                     if combo_attack.can_drop_parry() {
                         return parryable.values().max().cloned().unwrap_or(0) * *value;
-                    } else if (!target.arm_free_left() || !target.arm_free_right())
+                    } else if (target.is(FType::FeebleArms) || target.is(FType::FeebleLegs))
                         && combo_attack.can_use_venom()
                     {
                         // Assume we use epteth or whatever.
@@ -992,7 +988,9 @@ impl ComboGrader {
                     ]
                     .iter()
                     {
-                        if combo_attack.parried_by(stance, *limb) {
+                        if combo_attack.parried_by(stance, *limb)
+                            && !target.is_definitely_not_parrying(*limb)
+                        {
                             *parryable.entry(*limb).or_insert(0) += 1;
                         }
                     }

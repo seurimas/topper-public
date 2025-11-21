@@ -38,6 +38,10 @@ lazy_static! {
             ("Riving".to_string(), "Rage".to_string()),
             ("Battlefury".to_string(), "Rage".to_string()),
         );
+        mapping.insert(
+            ("Hematurgy".to_string(), "Severance".to_string()),
+            ("Thaumaturgy".to_string(), "Schism".to_string()),
+        );
         oneiromancer::add_mappings(&mut mapping);
         revenant::add_mappings(&mut mapping);
         ravager::add_mappings(&mut mapping);

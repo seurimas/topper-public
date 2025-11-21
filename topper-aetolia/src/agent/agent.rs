@@ -24,6 +24,7 @@ pub struct AgentState {
     pub class_state: ClassState,
     pub relapses: RelapseState,
     pub parrying: Option<LType>,
+    pub parry_known: bool,
     pub wield_state: WieldState,
     pub dodge_state: DodgeState,
     pub channel_state: ChannelState,
@@ -113,6 +114,9 @@ impl BaseAgentState for AgentState {
             self.set_flag(FType::Void, false);
         } else if self.is(FType::Weakvoid) && self.balanced(BType::Void) {
             self.set_flag(FType::Weakvoid, false);
+        }
+        if self.balanced(BType::Balance) && self.balanced(BType::Equil) {
+            self.parry_known = false;
         }
         // if self.is(FType::Manabarbs) && self.balanced(BType::Manabarbs) {
         //     self.set_flag(FType::Manabarbs, false);
@@ -679,6 +683,16 @@ impl AgentState {
 
     pub fn set_parrying(&mut self, limb: LType) {
         self.parrying = Some(limb);
+    }
+
+    pub fn is_definitely_not_parrying(&self, limb: LType) -> bool {
+        if !self.parry_known {
+            return false;
+        }
+        match self.parrying {
+            Some(parrying_limb) => parrying_limb != limb,
+            None => true,
+        }
     }
 
     /*

@@ -168,6 +168,27 @@
         "observation_name": "Proc"
     },
     {
+        "regex": "^The bloody well's vile magic tries to sever (you)r body and soul, filling you with agony.",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Hematurgy"
+            },
+            {
+                "Literal": "Severance"
+            },
+            {
+                "Literal": "hit"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
         "regex": "^(You)r fulcrum strips Gherond of the arcane defence.$",
         "args": [
             {

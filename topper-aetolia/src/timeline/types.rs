@@ -1,9 +1,9 @@
 use super::apply_functions::*;
 use super::gmcp_functions::*;
-use crate::classes::{get_skill_class, handle_combat_action, handle_sent, Class, VENOM_AFFLICTS};
+use crate::classes::{Class, VENOM_AFFLICTS, get_skill_class, handle_combat_action, handle_sent};
 use crate::curatives::{
-    handle_simple_cure_action, top_aff, CALORIC_TORSO_ORDER, PILL_CURE_ORDERS, PILL_DEFENCES,
-    SALVE_CURE_ORDERS, SMOKE_CURE_ORDERS,
+    CALORIC_TORSO_ORDER, PILL_CURE_ORDERS, PILL_DEFENCES, SALVE_CURE_ORDERS, SMOKE_CURE_ORDERS,
+    handle_simple_cure_action, top_aff,
 };
 use crate::db::AetDatabaseModule;
 use crate::non_agent::AetNonAgent;
@@ -259,6 +259,24 @@ pub enum AetObservation {
     DefenseDown(String),
 }
 
+impl AetObservation {
+    pub fn is_skill_action(&self, skill_name: &str) -> bool {
+        match self {
+            AetObservation::CombatAction(ca) | AetObservation::Proc(ca) => ca.skill.eq(skill_name),
+            _ => false,
+        }
+    }
+
+    pub fn is_category_action(&self, category_name: &str) -> bool {
+        match self {
+            AetObservation::CombatAction(ca) | AetObservation::Proc(ca) => {
+                ca.category.eq(category_name)
+            }
+            _ => false,
+        }
+    }
+}
+
 pub trait AetTimelineStateTrait {
     fn get_perspective(&self, combat_action: &CombatAction) -> Perspective;
 
@@ -270,7 +288,7 @@ pub trait AetTimelineStateTrait {
     ) -> Result<(), String>;
 
     fn tick_counter_up_for_agent(&mut self, who: &String, flag_name: &String)
-        -> Result<(), String>;
+    -> Result<(), String>;
 
     fn adjust_agent_limb(&mut self, who: &String, what: &String, val: f32) -> Result<(), String>;
 

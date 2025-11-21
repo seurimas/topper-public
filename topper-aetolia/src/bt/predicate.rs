@@ -2,6 +2,9 @@ use behavior_bark::unpowered::*;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::classes::Class;
+use crate::classes::LockType;
+use crate::classes::VenomPlan;
 use crate::classes::ascendril::AscendrilPredicate;
 use crate::classes::bard::BardPredicate;
 use crate::classes::get_affs_from_plan;
@@ -10,14 +13,11 @@ use crate::classes::is_affected_by;
 use crate::classes::predator::PredatorPredicate;
 use crate::classes::siderealist::SiderealistPredicate;
 use crate::classes::zealot::ZealotPredicate;
-use crate::classes::Class;
-use crate::classes::LockType;
-use crate::classes::VenomPlan;
-use crate::curatives::get_cure_depth;
 use crate::curatives::MENTAL_AFFLICTIONS;
 use crate::curatives::RANDOM_CURES;
-use crate::defense::get_preferred_parry;
+use crate::curatives::get_cure_depth;
 use crate::defense::DEFENSE_DATABASE;
+use crate::defense::get_preferred_parry;
 use crate::non_agent::AetTimelineRoomExt;
 use crate::timeline::*;
 use crate::types::*;
@@ -771,14 +771,14 @@ impl UnpoweredFunction for AetPredicate {
                 UnpoweredFunctionState::Failed
             }
             AetPredicate::KnownParry(target, limb_descriptor) => {
-                if !model.state.borrow_me().is(FType::Wrath) {
-                    // We cannot know parries if we are not wrath.
-                    return UnpoweredFunctionState::Failed;
-                }
                 if let Some(limb) = limb_descriptor.get_limb(model, controller, target) {
                     if let Some(target) = target.get_target(model, controller) {
                         if target.get_parrying() == Some(limb) && target.can_parry() {
-                            return UnpoweredFunctionState::Complete;
+                            if model.state.borrow_me().is(FType::Wrath) {
+                                return UnpoweredFunctionState::Complete;
+                            } else if target.parry_known {
+                                return UnpoweredFunctionState::Complete;
+                            }
                         }
                     }
                 }
@@ -789,8 +789,8 @@ impl UnpoweredFunction for AetPredicate {
                     if let Some(target) = aet_target.get_target(model, controller) {
                         if !target.can_parry() {
                             return UnpoweredFunctionState::Failed;
-                        } else if model.state.borrow_me().is(FType::Wrath) {
-                            // If we are wrath, we can know the parry directly.
+                        } else if model.state.borrow_me().is(FType::Wrath) || target.parry_known {
+                            // If we are wrath, we can know the parry directly. We can also know if the target is off balance.
                             if target.get_parrying() == Some(limb) {
                                 return UnpoweredFunctionState::Complete;
                             } else {

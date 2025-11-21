@@ -4,7 +4,7 @@ use crate::types::*;
 pub fn handle_combat_action(
     combat_action: &CombatAction,
     agent_states: &mut AetTimelineState,
-    _before: &Vec<AetObservation>,
+    before: &Vec<AetObservation>,
     after: &Vec<AetObservation>,
 ) -> Result<(), String> {
     let perspective = agent_states.get_perspective(&combat_action);
@@ -12,6 +12,16 @@ pub fn handle_combat_action(
         "Mentis" => {
             if let Some(aff) = FType::from_name(&combat_action.skill) {
                 attack_afflictions(agent_states, &combat_action.target, vec![aff], after);
+                let observations = after.clone();
+                if before.iter().any(|o| o.is_category_action("Mentis")) {
+                    for_agent(agent_states, &combat_action.target, &|me| {
+                        apply_or_infer_balance(me, (BType::Equil, 4.25), &observations);
+                    });
+                } else {
+                    for_agent(agent_states, &combat_action.target, &|me| {
+                        apply_or_infer_balance(me, (BType::Equil, 3.2), &observations);
+                    });
+                }
             } else {
                 match combat_action.skill.as_ref() {
                     "Mesmerize" => {
