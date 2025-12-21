@@ -917,5 +917,23 @@
       }
     ],
     "observation_name": "AcumenLost"
+  },
+  {
+    "regex": "^You bleed (\\d+) health.$",
+    "args": [
+      {
+        "Group": 1
+      }
+    ],
+    "observation_name": "Bleed"
+  },
+  {
+    "regex": "^You do not bleed my friend.$",
+    "args": [
+      {
+        "Literal": "0"
+      }
+    ],
+    "observation_name": "Bleed"
   }
 ]

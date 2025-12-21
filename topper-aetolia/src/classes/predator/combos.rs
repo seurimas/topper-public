@@ -883,13 +883,23 @@ impl ComboGrader {
                         |(stance, total, mut parrying), combo_attack| {
                             if combo_attack.can_drop_parry() {
                                 parrying = None;
-                            } else if (!target.arm_free_left() || !target.arm_free_right())
+                            } else if (target.is(FType::FeebleArms) || target.is(FType::FeebleLegs))
                                 && combo_attack.can_use_venom()
                             {
                                 // Assume we use epteth or whatever.
                                 parrying = None;
                             }
                             if parrying.is_none() && combo_attack == attack {
+                                (
+                                    combo_attack.get_next_stance(stance),
+                                    total + *unparried_value,
+                                    parrying,
+                                )
+                            } else if parrying.is_some()
+                                && combo_attack == attack
+                                && !attack.parried_by(stance, parrying.unwrap())
+                                && target.parry_known
+                            {
                                 (
                                     combo_attack.get_next_stance(stance),
                                     total + *unparried_value,

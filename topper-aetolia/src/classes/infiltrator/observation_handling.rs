@@ -239,8 +239,8 @@ pub fn handle_combat_action(
                 },
             );
             let mark = match combat_action.annotation.as_ref() {
-                "Numbness" => FType::NumbedSkin,
-                "Fatigue" => FType::MentalFatigue,
+                "numbness" => FType::NumbedSkin,
+                "fatigue" => FType::MentalFatigue,
                 _ => FType::Thorns,
             };
             for_agent(agent_states, &combat_action.target, &move |you| {

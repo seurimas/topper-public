@@ -477,6 +477,11 @@ impl AgentState {
     }
 
     pub fn set_balance(&mut self, balance: BType, value: f32) {
+        if balance == BType::Balance || balance == BType::Equil {
+            if value >= 0.0 {
+                self.parry_known = false;
+            }
+        }
         match balance {
             BType::Induce => self.assume_bard(&|mut bard| bard.set_induce_timer(value)),
             _ => self.balances[balance as usize].start_count_down_seconds(value),

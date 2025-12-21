@@ -247,6 +247,7 @@ pub enum AetObservation {
     PersuasionDiscard(String, String),
     ResolveAffect(String, String),
     AcumenLost(String),
+    Bleed(String),
     #[skip_args]
     Scrutinise {
         who: String,
