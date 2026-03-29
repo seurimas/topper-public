@@ -89,6 +89,10 @@ pub fn add_mappings(mut mapping: &mut HashMap<(String, String), (String, String)
         ("Dhuriv".to_string(), "Spinecut".to_string()),
     );
     mapping.insert(
+        ("Shadowdancing".to_string(), "Pirouette".to_string()),
+        ("Dhuriv".to_string(), "Whirl".to_string()),
+    );
+    mapping.insert(
         ("Shadowdancing".to_string(), "Stifle".to_string()),
         ("Dhuriv".to_string(), "Throatcrush".to_string()),
     );

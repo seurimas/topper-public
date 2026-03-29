@@ -124,7 +124,7 @@ untargetted_action!(MightAction, "might", "grit", "Might", "MightAction");
 targetted_action!(
     DualrazeAction,
     "dhuriv dualraze {}",
-    "ringblade dualraze {}",
+    "ringblade twinraze {}",
     "Dualraze",
     "DualrazeAction"
 );
@@ -134,6 +134,13 @@ targetted_action!(
     "ringblade terminate {}",
     "Spinecut",
     "SpinecutAction"
+);
+targetted_action!(
+    WhirlAction,
+    "dhuriv whirl {}",
+    "ringblade pirouette {}",
+    "Whirl",
+    "WhirlAction"
 );
 
 pub struct ComboAction {

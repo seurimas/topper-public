@@ -139,12 +139,33 @@ pub fn handle_combat_action(
         }
         "Lysirine" => match combat_action.annotation.as_ref() {
             "hot" => {
-                attack_afflictions(
-                    agent_states,
-                    &combat_action.caster,
-                    vec![FType::Paresis, FType::Hallucinations, FType::Confusion],
-                    after,
-                );
+                // Hot burn: Paresis+Impatience+Confusion, but each upgrades if the target
+                // already has that affliction (Paresis→Arrhythmia, Impatience→Hallucinations,
+                // Confusion→Stupidity).
+                let caster = combat_action.caster.clone();
+                let affs = {
+                    let you = agent_states.borrow_agent(&caster);
+                    let a1 = if you.is(FType::Paresis) {
+                        FType::Arrhythmia
+                    } else {
+                        FType::Paresis
+                    };
+                    let a2 = if you.is(FType::Impatience) {
+                        FType::Hallucinations
+                    } else {
+                        FType::Impatience
+                    };
+                    let a3 = if you.is(FType::Confusion) {
+                        FType::Stupidity
+                    } else {
+                        FType::Confusion
+                    };
+                    vec![a1, a2, a3]
+                };
+                attack_afflictions(agent_states, &caster, affs, after);
+                for_agent(agent_states, &caster, &|you: &mut AgentState| {
+                    you.resin_state.hot_burn();
+                });
             }
             _ => {}
         },
@@ -169,7 +190,52 @@ pub fn handle_combat_action(
             }
         }
         "Weaken" => {
-            // TODO: Parse out which limb was hit and its effect
+            // Annotation is "left arm", "right arm", "left leg", or "right leg".
+            // Arms: drop parry + 278 limb damage. Legs: lethargy + 278 limb damage.
+            let rebounds = after.iter().any(|obs| matches!(obs, AetObservation::Rebounds));
+            if !rebounds {
+                let annotation = combat_action.annotation.clone();
+                for_agent(
+                    agent_states,
+                    &combat_action.target,
+                    &move |you: &mut AgentState| match annotation.as_ref() {
+                        "left arm" => {
+                            you.limb_damage.adjust_limb(LType::LeftArmDamage, 278);
+                            you.clear_parrying();
+                        }
+                        "right arm" => {
+                            you.limb_damage.adjust_limb(LType::RightArmDamage, 278);
+                            you.clear_parrying();
+                        }
+                        "left leg" => {
+                            you.limb_damage.adjust_limb(LType::LeftLegDamage, 278);
+                        }
+                        "right leg" => {
+                            you.limb_damage.adjust_limb(LType::RightLegDamage, 278);
+                        }
+                        _ => {}
+                    },
+                );
+                match combat_action.annotation.as_ref() {
+                    "left leg" | "right leg" => {
+                        attack_afflictions(
+                            agent_states,
+                            &combat_action.target,
+                            vec![FType::Lethargy],
+                            after,
+                        );
+                    }
+                    _ => {}
+                }
+            }
+            let observations = after.clone();
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &move |me: &mut AgentState| {
+                    apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
+                },
+            );
         }
         "Trip" => {
             for_agent(
@@ -246,6 +312,107 @@ pub fn handle_combat_action(
                 after,
             );
         }
+        "Trientia" => match combat_action.annotation.as_ref() {
+            "hot" => {
+                let caster = combat_action.caster.clone();
+                for_agent(agent_states, &caster, &|you: &mut AgentState| {
+                    you.resin_state.hot_burn();
+                });
+            }
+            "cold" => {
+                // Cold burn (9 cycles): if the target has dizziness, the fumes cause faintness.
+                let caster = combat_action.caster.clone();
+                let has_dizziness = agent_states.borrow_agent(&caster).is(FType::Dizziness);
+                if has_dizziness {
+                    attack_afflictions(
+                        agent_states,
+                        &caster,
+                        vec![FType::Faintness],
+                        after,
+                    );
+                }
+                for_agent(agent_states, &caster, &|you: &mut AgentState| {
+                    you.resin_state.cold_burn();
+                });
+            }
+            _ => {}
+        },
+        // State tracking for remaining resins. Hot burns clear the resin state; cold burns
+        // advance the tick counter. Specific cold/hot effects (damage, allergy severity,
+        // coagulation, etc.) are not modelled here.
+        "Pyrolum" | "Corsin" | "Harimel" | "Glauxe" | "Badulem" => {
+            match combat_action.annotation.as_ref() {
+                "hot" => {
+                    let caster = combat_action.caster.clone();
+                    for_agent(agent_states, &caster, &|you: &mut AgentState| {
+                        you.resin_state.hot_burn();
+                    });
+                }
+                "cold" => {
+                    let caster = combat_action.caster.clone();
+                    for_agent(agent_states, &caster, &|you: &mut AgentState| {
+                        you.resin_state.cold_burn();
+                    });
+                }
+                _ => {}
+            }
+        }
+        "Whirl" => {
+            // Both the initial hit and the delayed second hit arrive under this skill.
+            // The second hit fires while off balance and requires no equilibrium.
+            let observations = after.clone();
+            let first_person = combat_action.caster.eq(&agent_states.me);
+            let hints =
+                agent_states.get_player_hint(&combat_action.caster, &"CALLED_VENOMS".to_string());
+            apply_weapon_hits(
+                agent_states,
+                &combat_action.caster,
+                &combat_action.target,
+                after,
+                first_person,
+                &hints,
+            );
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &move |me: &mut AgentState| {
+                    apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
+                },
+            );
+        }
+        "Combust" => {
+            // Ignite the resin currently on the target. Also opens a Flourish/Brandish window
+            // (handled by the planner — no state flag needed here).
+            for_agent(
+                agent_states,
+                &combat_action.target,
+                &|you: &mut AgentState| {
+                    you.resin_state.ignite();
+                },
+            );
+            let observations = after.clone();
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &move |me: &mut AgentState| {
+                    apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
+                },
+            );
+        }
+        "Alacrity" => {
+            // Grants three uses of reduced balance cost for the next shots/splatter/lays.
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &|me: &mut AgentState| {
+                    me.assume_sentinel(|s| s.alacrity = 3);
+                    me.set_balance(BType::Equil, 2.25);
+                },
+            );
+        }
+        // Thrust (Sentinel) / Inveigle (Executor): when the target has Arrhythmia, this
+        // should also knock their pill balance. TODO: model pill balance knock duration
+        // and wire it up here once confirmed.
         // Passive actions
         "Gyrfalcon" => {
             attack_afflictions(

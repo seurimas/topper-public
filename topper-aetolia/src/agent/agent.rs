@@ -1232,6 +1232,23 @@ impl AgentState {
         }
     }
 
+    pub fn assume_sentinel(&mut self, action: fn(&mut SentinelClassState)) {
+        match &mut self.class_state {
+            ClassState::Sentinel(s) | ClassState::Executor(s) => action(s),
+            _ => {
+                self.class_state = ClassState::Sentinel(SentinelClassState::default());
+                self.assume_sentinel(action);
+            }
+        }
+    }
+
+    pub fn check_if_sentinel<R>(&self, action: &impl Fn(&SentinelClassState) -> R) -> Option<R> {
+        match &self.class_state {
+            ClassState::Sentinel(s) | ClassState::Executor(s) => Some(action(s)),
+            _ => None,
+        }
+    }
+
     pub fn get_predator_stance(&self) -> KnifeStance {
         if let ClassState::Predator(predator) = &self.class_state {
             predator.stance
