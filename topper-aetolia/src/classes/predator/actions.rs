@@ -182,6 +182,10 @@ impl SeriesAttack {
 }
 
 impl ActiveTransition for SeriesAttack {
+    fn skill_name(&self) -> String {
+        "Series".to_string()
+    }
+
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         if should_call_venoms(timeline) {
             Ok(format!(
@@ -226,6 +230,10 @@ impl BloodscourgeAction {
 }
 
 impl ActiveTransition for BloodscourgeAction {
+    fn skill_name(&self) -> String {
+        "Bloodscourge".to_string()
+    }
+
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         if should_call_venoms(timeline) {
             Ok(format!(
@@ -256,6 +264,10 @@ impl FleshbaneAction {
 }
 
 impl ActiveTransition for FleshbaneAction {
+    fn skill_name(&self) -> String {
+        "Fleshbane".to_string()
+    }
+
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         if should_call_venoms(timline) {
             Ok(format!(
@@ -282,6 +294,10 @@ impl AcidAction {
 }
 
 impl ActiveTransition for AcidAction {
+    fn skill_name(&self) -> String {
+        "Acid".to_string()
+    }
+
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         Ok(format!("spider acid {}", self.target))
     }
@@ -299,6 +315,10 @@ impl StrandsAction {
 }
 
 impl ActiveTransition for StrandsAction {
+    fn skill_name(&self) -> String {
+        "Strands".to_string()
+    }
+
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         Ok(format!("spider strands {}", self.target))
     }
@@ -316,6 +336,10 @@ impl NegateAction {
 }
 
 impl ActiveTransition for NegateAction {
+    fn skill_name(&self) -> String {
+        "Negate".to_string()
+    }
+
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         Ok(format!("spider negate {}", self.target))
     }
@@ -333,6 +357,10 @@ impl WebAction {
 }
 
 impl ActiveTransition for WebAction {
+    fn skill_name(&self) -> String {
+        "Web".to_string()
+    }
+
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         Ok(format!("spider web {}", self.target))
     }
@@ -350,6 +378,10 @@ impl IntoxicateAction {
 }
 
 impl ActiveTransition for IntoxicateAction {
+    fn skill_name(&self) -> String {
+        "Intoxicate".to_string()
+    }
+
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         Ok(format!("spider intoxicate {}", self.target))
     }
@@ -371,6 +403,10 @@ impl DartshotAction {
 }
 
 impl ActiveTransition for DartshotAction {
+    fn skill_name(&self) -> String {
+        "Dartshot".to_string()
+    }
+
     fn act(&self, timline: &AetTimeline) -> ActivateResult {
         if should_call_venoms(timline) {
             Ok(format!(
@@ -403,6 +439,10 @@ impl TwinshotAction {
 }
 
 impl ActiveTransition for TwinshotAction {
+    fn skill_name(&self) -> String {
+        "Twinshot".to_string()
+    }
+
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         if should_call_venoms(timeline) {
             Ok(format!(
@@ -443,6 +483,10 @@ impl SwoopAction {
 }
 
 impl ActiveTransition for SwoopAction {
+    fn skill_name(&self) -> String {
+        "Swoop".to_string()
+    }
+
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         if should_call_venoms(timeline) {
             Ok(format!(
@@ -477,6 +521,10 @@ impl RakeAction {
 }
 
 impl ActiveTransition for RakeAction {
+    fn skill_name(&self) -> String {
+        "Rake".to_string()
+    }
+
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("orgyuk rake {}", self.target))
     }
@@ -494,6 +542,10 @@ impl SwipeAction {
 }
 
 impl ActiveTransition for SwipeAction {
+    fn skill_name(&self) -> String {
+        "Swipe".to_string()
+    }
+
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("orgyuk swipe {}", self.target))
     }
@@ -511,6 +563,10 @@ impl ThrowAction {
 }
 
 impl ActiveTransition for ThrowAction {
+    fn skill_name(&self) -> String {
+        "Throw".to_string()
+    }
+
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("orgyuk throw {}", self.target))
     }
@@ -526,6 +582,10 @@ impl RoarAction {
 }
 
 impl ActiveTransition for RoarAction {
+    fn skill_name(&self) -> String {
+        "Roar".to_string()
+    }
+
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("orgyuk roar"))
     }
@@ -543,6 +603,10 @@ impl WeakenAction {
 }
 
 impl ActiveTransition for WeakenAction {
+    fn skill_name(&self) -> String {
+        "Weaken".to_string()
+    }
+
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("orgyuk weaken {}", self.target))
     }
@@ -560,6 +624,10 @@ impl MawcrushAction {
 }
 
 impl ActiveTransition for MawcrushAction {
+    fn skill_name(&self) -> String {
+        "Mawcrush".to_string()
+    }
+
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("orgyuk mawcrush {}", self.target))
     }
@@ -578,6 +646,10 @@ impl PummelAction {
 }
 
 impl ActiveTransition for PummelAction {
+    fn skill_name(&self) -> String {
+        "Pummel".to_string()
+    }
+
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!(
             "orgyuk pummel {} {}",
@@ -597,6 +669,10 @@ impl ArouseAction {
 }
 
 impl ActiveTransition for ArouseAction {
+    fn skill_name(&self) -> String {
+        "Arouse".to_string()
+    }
+
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("arouse"))
     }
@@ -614,6 +690,10 @@ impl QuickassessAction {
 }
 
 impl ActiveTransition for QuickassessAction {
+    fn skill_name(&self) -> String {
+        "Quickassess".to_string()
+    }
+
     fn act(&self, timeline: &AetTimeline) -> ActivateResult {
         Ok(format!("quickassess {}", self.target))
     }

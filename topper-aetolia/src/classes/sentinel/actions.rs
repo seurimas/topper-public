@@ -4,104 +4,136 @@ use crate::timeline::*;
 use crate::types::*;
 use crate::untargetted_action;
 
-untargetted_action!(CallWisp, "call wisp", "fabricate lurker");
-untargetted_action!(CallWeasel, "call weasel", "fabricate wardpeeler");
+untargetted_action!(CallWisp, "call wisp", "fabricate lurker", "CallWisp", "CallWisp");
+untargetted_action!(CallWeasel, "call weasel", "fabricate wardpeeler", "CallWeasel", "CallWeasel");
 untargetted_action!(
     CallNightingale,
     "call nightingale",
-    "fabricate lightdrinker"
+    "fabricate lightdrinker",
+    "CallNightingale",
+    "CallNightingale"
 );
-untargetted_action!(CallRook, "call rook", "fabricate murder");
-untargetted_action!(CallCoyote, "call coyote", "fabricate darkhound");
-untargetted_action!(CallRaccoon, "call raccoon", "fabricate pilferer");
-untargetted_action!(CallElk, "call elk", "fabricate monstrosity");
-untargetted_action!(CallGyrfalcon, "call gyrfalcon", "fabricate throatripper");
-untargetted_action!(CallRaloth, "call raloth", "fabricate brutaliser");
-untargetted_action!(CallCrocodile, "call crocodile", "fabricate eviscerator");
-untargetted_action!(CallIcewyrm, "call icewyrm", "fabricate rimestalker");
-untargetted_action!(CallCockatrice, "call cockatrice", "fabricate terrifier");
+untargetted_action!(CallRook, "call rook", "fabricate murder", "CallRook", "CallRook");
+untargetted_action!(CallCoyote, "call coyote", "fabricate darkhound", "CallCoyote", "CallCoyote");
+untargetted_action!(CallRaccoon, "call raccoon", "fabricate pilferer", "CallRaccoon", "CallRaccoon");
+untargetted_action!(CallElk, "call elk", "fabricate monstrosity", "CallElk", "CallElk");
+untargetted_action!(CallGyrfalcon, "call gyrfalcon", "fabricate throatripper", "CallGyrfalcon", "CallGyrfalcon");
+untargetted_action!(CallRaloth, "call raloth", "fabricate brutaliser", "CallRaloth", "CallRaloth");
+untargetted_action!(CallCrocodile, "call crocodile", "fabricate eviscerator", "CallCrocodile", "CallCrocodile");
+untargetted_action!(CallIcewyrm, "call icewyrm", "fabricate rimestalker", "CallIcewyrm", "CallIcewyrm");
+untargetted_action!(CallCockatrice, "call cockatrice", "fabricate terrifier", "CallCockatrice", "CallCockatrice");
 targetted_action!(
     Icebreath,
     "order icewyrm icebreath {}",
-    "order rimestalker verglas {}"
+    "order rimestalker verglas {}",
+    "Icebreath",
+    "Icebreath"
 );
 
 targetted_action!(
     HurlPyrolum,
     "resin hurl pyrolum at {}",
-    "tokin splatter flammable at {}"
+    "tokin splatter flammable at {}",
+    "Hurl",
+    "HurlPyrolum"
 );
 targetted_action!(
     HurlCorsin,
     "resin hurl corsin at {}",
-    "tokin splatter coagulating at {}"
+    "tokin splatter coagulating at {}",
+    "Hurl",
+    "HurlCorsin"
 );
 targetted_action!(
     HurlTrientia,
     "resin hurl trientia at {}",
-    "tokin splatter hallucinatory at {}"
+    "tokin splatter hallucinatory at {}",
+    "Hurl",
+    "HurlTrientia"
 );
 targetted_action!(
     HurlHarimel,
     "resin hurl harimel at {}",
-    "tokin splatter adhesive at {}"
+    "tokin splatter adhesive at {}",
+    "Hurl",
+    "HurlHarimel"
 );
 targetted_action!(
     HurlGlauxe,
     "resin hurl glauxe at {}",
-    "tokin splatter choking at {}"
+    "tokin splatter choking at {}",
+    "Hurl",
+    "HurlGlauxe"
 );
 targetted_action!(
     HurlBadulem,
     "resin hurl badulem at {}",
-    "tokin splatter septic at {}"
+    "tokin splatter septic at {}",
+    "Hurl",
+    "HurlBadulem"
 );
 targetted_action!(
     HurlLysirine,
     "resin hurl lysirine at {}",
-    "tokin splatter paralytic at {}"
+    "tokin splatter paralytic at {}",
+    "Hurl",
+    "HurlLysirine"
 );
-targetted_action!(Combust, "resin combust {}", "toxin kindle {}");
-untargetted_action!(Alacrity, "alacrity", "efficiency");
+targetted_action!(Combust, "resin combust {}", "toxin kindle {}", "Combust", "Combust");
+untargetted_action!(Alacrity, "alacrity", "efficiency", "Alacrity", "Alacrity");
 
 targetted_action!(
     RalothTrample,
     "order raloth trample {}",
-    "order brutaliser rampage {}"
+    "order brutaliser rampage {}",
+    "RalothTrample",
+    "RalothTrample"
 );
 
 targetted_action!(
     PierceActionLeft,
     "dhuriv pierce {} left",
-    "ringblade incise {} left"
+    "ringblade incise {} left",
+    "Pierce",
+    "PierceActionLeft"
 );
 targetted_action!(
     PierceActionRight,
     "dhuriv pierce {} right",
-    "ringblade incise {} right"
+    "ringblade incise {} right",
+    "Pierce",
+    "PierceActionRight"
 );
 targetted_action!(
     SeverActionLeft,
     "dhuriv sever {} left",
-    "ringblade dissever {} left"
+    "ringblade dissever {} left",
+    "Sever",
+    "SeverActionLeft"
 );
 targetted_action!(
     SeverActionRight,
     "dhuriv sever {} right",
-    "ringblade dissever {} right"
+    "ringblade dissever {} right",
+    "Sever",
+    "SeverActionRight"
 );
 
-untargetted_action!(MightAction, "might", "grit");
+untargetted_action!(MightAction, "might", "grit", "Might", "MightAction");
 
 targetted_action!(
     DualrazeAction,
     "dhuriv dualraze {}",
-    "ringblade dualraze {}"
+    "ringblade dualraze {}",
+    "Dualraze",
+    "DualrazeAction"
 );
 targetted_action!(
     SpinecutAction,
     "dhuriv spinecut {}",
-    "ringblade terminate {}"
+    "ringblade terminate {}",
+    "Spinecut",
+    "SpinecutAction"
 );
 
 pub struct ComboAction {

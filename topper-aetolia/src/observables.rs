@@ -21,6 +21,17 @@ impl ProbableEvent {
 
 pub trait ActiveTransition {
     fn act(&self, timline: &AetTimeline) -> ActivateResult;
+    fn skill_name(&self) -> String {
+        String::new()
+    }
+    fn skill_names(&self) -> Vec<String> {
+        let name = self.skill_name();
+        if name.is_empty() {
+            vec![]
+        } else {
+            vec![name]
+        }
+    }
     fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
         todo!()
     }
@@ -28,10 +39,16 @@ pub trait ActiveTransition {
 
 #[macro_export]
 macro_rules! untargetted_action {
+    // 2-arg: skill name defaults to struct name, no separate mirror.
     ($name:ident, $action:expr) => {
-        untargetted_action!($name, $action, $action);
+        untargetted_action!($name, $action, $action, stringify!($name), stringify!($name));
     };
-    ($name:ident, $action:expr, $mirror:expr) => {
+    // 3-arg: explicit skill name, action used for both regular and mirror.
+    ($name:ident, $action:expr, $skill_name:expr) => {
+        untargetted_action!($name, $action, $action, $skill_name, $skill_name);
+    };
+    // 5-arg: full form — separate mirror action and both skill names.
+    ($name:ident, $action:expr, $mirror:expr, $skill_name:expr, $mirror_skill_name:expr) => {
         pub struct $name {
             pub caster: String,
         }
@@ -62,16 +79,34 @@ macro_rules! untargetted_action {
                     Ok(format!($action))
                 }
             }
+            fn skill_name(&self) -> String {
+                $skill_name.to_string()
+            }
+            fn skill_names(&self) -> Vec<String> {
+                let name = $skill_name.to_string();
+                let mirror_name = $mirror_skill_name.to_string();
+                if name == mirror_name {
+                    vec![name]
+                } else {
+                    vec![name, mirror_name]
+                }
+            }
         }
     };
 }
 
 #[macro_export]
 macro_rules! targetted_action {
+    // 2-arg: skill name defaults to struct name, no separate mirror.
     ($name:ident, $action:expr) => {
-        targetted_action!($name, $action, $action);
+        targetted_action!($name, $action, $action, stringify!($name), stringify!($name));
     };
-    ($name:ident, $action:expr, $mirror:expr) => {
+    // 3-arg: explicit skill name, action used for both regular and mirror.
+    ($name:ident, $action:expr, $skill_name:expr) => {
+        targetted_action!($name, $action, $action, $skill_name, $skill_name);
+    };
+    // 5-arg: full form — separate mirror action and both skill names.
+    ($name:ident, $action:expr, $mirror:expr, $skill_name:expr, $mirror_skill_name:expr) => {
         pub struct $name {
             pub caster: String,
             pub target: String,
@@ -120,6 +155,18 @@ macro_rules! targetted_action {
                     Ok(format!($mirror, self.target))
                 } else {
                     Ok(format!($action, self.target))
+                }
+            }
+            fn skill_name(&self) -> String {
+                $skill_name.to_string()
+            }
+            fn skill_names(&self) -> Vec<String> {
+                let name = $skill_name.to_string();
+                let mirror_name = $mirror_skill_name.to_string();
+                if name == mirror_name {
+                    vec![name]
+                } else {
+                    vec![name, mirror_name]
                 }
             }
         }
@@ -209,6 +256,17 @@ impl ActionPlan {
 
     pub fn queue_for(&mut self, bal: BType, action: Box<dyn ActiveTransition>) {
         self.other.insert(bal, action);
+    }
+
+    pub fn get_skills(&self) -> Vec<String> {
+        let mut skills = Vec::new();
+        if let Some(qeb) = &self.qeb {
+            skills.extend(qeb.skill_names());
+        }
+        if let Some(plain) = &self.plain {
+            skills.extend(plain.skill_names());
+        }
+        skills
     }
 
     pub fn get_inputs(&self, timeline: &AetTimeline) -> String {
@@ -327,6 +385,11 @@ impl ActiveTransition for SeparatorAction {
             self.0.act(&timeline)?,
             self.1.act(&timeline)?
         ))
+    }
+    fn skill_names(&self) -> Vec<String> {
+        let mut names = self.0.skill_names();
+        names.extend(self.1.skill_names());
+        names
     }
     fn simulate(&self, timeline: &AetTimeline) -> Vec<ProbableEvent> {
         let mut results = vec![];

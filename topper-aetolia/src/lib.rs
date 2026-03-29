@@ -13,6 +13,7 @@ extern crate chrono;
 extern crate simplelog;
 pub mod agent;
 pub mod alpha_beta;
+pub mod bt_match;
 pub mod basher;
 pub mod bt;
 pub mod classes;

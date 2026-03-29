@@ -1,6 +1,5 @@
 mod comment;
 mod matchup;
-#[cfg(feature = "include_observations")]
 pub mod observations;
 mod page;
 pub mod prompt;

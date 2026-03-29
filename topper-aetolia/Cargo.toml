@@ -10,6 +10,10 @@ edition = "2024"
 default = []
 include_observations = []
 
+[[bin]]
+name = "bt_match"
+path = "src/bin/bt_match.rs"
+
 [dependencies]
 behavior-bark = { path = "../../behavior-bark" }
 topper-core = { path = "../topper-core" }
