@@ -83,6 +83,20 @@ mod observer_tests {
     }
 
     #[test]
+    fn test_bleed() {
+        let slice = AetTimeSlice {
+            observations: None,
+            lines: vec![("You bleed 50 health.".to_string(), 0)],
+            gmcp: Vec::new(),
+            prompt: AetPrompt::Promptless,
+            time: 0,
+            me: "Seurimas".into(),
+        };
+        let observed = observer.observe(&slice);
+        assert_eq!(observed, vec![AetObservation::Bleed("50".to_string())]);
+    }
+
+    #[test]
     fn test_touch_tree() {
         let slice = AetTimeSlice {
             observations: None,
