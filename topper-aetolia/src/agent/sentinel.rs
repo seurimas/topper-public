@@ -2,6 +2,8 @@ use super::*;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, hash::Hash};
 
+use crate::agent::general::Timer;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SentinelBeast {
     Wisp,
@@ -23,6 +25,7 @@ pub struct SentinelClassState {
     pub alacrity: u32,
     pub spike: Option<String>,
     pub beasts: HashSet<SentinelBeast>,
+    pub first_strike_timer: Timer,
 }
 
 impl Hash for SentinelClassState {
@@ -33,6 +36,7 @@ impl Hash for SentinelClassState {
         let mut beasts: Vec<_> = self.beasts.iter().copied().collect();
         beasts.sort_by_key(|b| *b as u8);
         beasts.hash(state);
+        self.first_strike_timer.hash(state);
     }
 }
 
@@ -52,9 +56,25 @@ impl SentinelClassState {
     pub fn beast_count(&self) -> usize {
         self.beasts.len()
     }
+
+    pub fn start_first_strike(&mut self) {
+        self.first_strike_timer = Timer::count_down_seconds(1.2);
+    }
+
+    pub fn has_first_strike(&self) -> bool {
+        self.first_strike_timer.is_active()
+    }
+
+    pub fn second_strike(&mut self) {
+        self.first_strike_timer.reset();
+    }
+
+    pub fn wait(&mut self, duration: CType) {
+        self.first_strike_timer.wait(duration);
+    }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Resin {
     Pyrolum,
     Corsin,

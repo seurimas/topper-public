@@ -1392,7 +1392,8 @@ impl ClassState {
             ClassState::Predator(predator_class_state) => {
                 predator_class_state.wait(duration, cooldown_effect)
             }
-            // ClassState::Sentinel(sentinel_class_state) => sentinel_class_state.wait(duration),
+            ClassState::Sentinel(sentinel_class_state)
+            | ClassState::Executor(sentinel_class_state) => sentinel_class_state.wait(duration),
             ClassState::Infiltrator(infiltrator_class_state) => {
                 // infiltrator_class_state.wait(duration)
             }

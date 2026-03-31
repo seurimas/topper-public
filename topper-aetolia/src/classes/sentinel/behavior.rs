@@ -20,6 +20,9 @@ pub enum SentinelBehavior {
     // Resin
     Hurl(AetTarget, Resin),
     Combust(AetTarget),
+    // Standalone first/second strikes
+    SentinelFirstStrike(AetTarget, FirstStrikeSpec),
+    SentinelSecondStrike(AetTarget, SecondStrikeSpec),
     // Weapon combos (uses venom plan from controller)
     SentinelCombo(AetTarget),
     SentinelComboFull(AetTarget, FirstStrikeSpec, SecondStrikeSpec),
@@ -224,27 +227,42 @@ impl UnpoweredFunction for SentinelBehavior {
                 }
             }
             SentinelBehavior::Combust(target) => {
-                if let Some(target_agent) = target.get_target(model, controller) {
-                    let limb_filter = vec![
-                        FType::LeftLegCrippled,
-                        FType::RightLegCrippled,
-                        FType::LeftArmCrippled,
-                        FType::RightArmCrippled,
-                    ];
-                    let venom = controller
-                        .aff_priorities
-                        .as_ref()
-                        .and_then(|s| {
-                            get_venoms_from_plan(s, 1, target_agent, &limb_filter)
-                                .first()
-                                .copied()
-                        })
-                        .unwrap_or("curare");
-                    controller.plan.add_to_qeb(Box::new(ComboAction::new(
+                if let Some(_target_agent) = target.get_target(model, controller) {
+                    controller.plan.add_to_qeb(Box::new(FirstStrikeAction::new(
                         model.who_am_i(),
                         target.get_name(model, controller),
                         FirstStrike::Combust,
-                        SecondStrike::Flourish(venom),
+                    )));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+
+            // ── Standalone first strike ──────────────────────────────────
+            SentinelBehavior::SentinelFirstStrike(target, first_spec) => {
+                if let Some(target_agent) = target.get_target(model, controller) {
+                    let first_strike = resolve_first_strike(first_spec, controller, target_agent);
+                    controller.plan.add_to_qeb(Box::new(FirstStrikeAction::new(
+                        model.who_am_i(),
+                        target.get_name(model, controller),
+                        first_strike,
+                    )));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+
+            // ── Standalone second strike ─────────────────────────────────
+            SentinelBehavior::SentinelSecondStrike(target, second_spec) => {
+                if let Some(target_agent) = target.get_target(model, controller) {
+                    let second_strike =
+                        resolve_second_strike(second_spec, controller, target_agent);
+                    controller.plan.add_to_qeb(Box::new(SecondStrikeAction::new(
+                        model.who_am_i(),
+                        target.get_name(model, controller),
+                        second_strike,
                     )));
                     UnpoweredFunctionState::Complete
                 } else {

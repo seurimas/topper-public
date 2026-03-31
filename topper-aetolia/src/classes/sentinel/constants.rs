@@ -58,20 +58,46 @@ impl FirstStrike {
     }
 
     pub fn full_str(&self, target: &String, mirrored: bool) -> String {
-        match (self, mirrored) {
-            (FirstStrike::DauntCoyote, false) => format!("order coyote daunt {}", target),
-            (FirstStrike::DauntCoyote, true) => format!("order darkhound accost {}", target),
-            (FirstStrike::DauntRaloth, false) => format!("order raloth daunt {}", target),
-            (FirstStrike::DauntRaloth, true) => format!("order brutaliser accost {}", target),
-            (FirstStrike::DauntCrocodile, false) => format!("order crocodile daunt {}", target),
-            (FirstStrike::DauntCrocodile, true) => format!("order eviscerator accost {}", target),
-            (FirstStrike::DauntCockatrice, false) => format!("order cockatrice daunt {}", target),
-            (FirstStrike::DauntCockatrice, true) => format!("order terrifier accost {}", target),
-            (FirstStrike::Icebreath, false) => format!("order icewyrm icebreath {}", target),
-            (FirstStrike::Icebreath, true) => format!("order rimestalker verglas {}", target),
-            (FirstStrike::Combust, false) => format!("resin combust {}", target),
-            (FirstStrike::Combust, true) => format!("toxin kindle {}", target),
-            _ => "".to_string(), // TODO
+        if mirrored {
+            match self {
+                FirstStrike::Slash(venom) => format!("ringblade contrive {} {}", target, venom),
+                FirstStrike::Ambush(venom) => format!("ringblade waylay {} {}", target, venom),
+                FirstStrike::Blind => format!("ringblade ploy {}", target),
+                FirstStrike::Twirl => format!("ringblade ruse {}", target),
+                FirstStrike::Strike => format!("ringblade gambit {}", target),
+                FirstStrike::Crosscut => format!("ringblade phlebotomise {}", target),
+                FirstStrike::WeakenArms => format!("ringblade impair {} arms", target),
+                FirstStrike::WeakenLegs => format!("ringblade impair {} legs", target),
+                FirstStrike::Reave => format!("ringblade shave {}", target),
+                FirstStrike::Trip => format!("ringblade gambol {}", target),
+                FirstStrike::Slam => format!("ringblade perplex {}", target),
+                FirstStrike::DauntCoyote => format!("order darkhound accost {}", target),
+                FirstStrike::DauntRaloth => format!("order brutaliser accost {}", target),
+                FirstStrike::DauntCrocodile => format!("order eviscerator accost {}", target),
+                FirstStrike::DauntCockatrice => format!("order terrifier accost {}", target),
+                FirstStrike::Icebreath => format!("order rimestalker verglas {}", target),
+                FirstStrike::Combust => format!("toxin kindle {}", target),
+            }
+        } else {
+            match self {
+                FirstStrike::Slash(venom) => format!("dhuriv slash {} {}", target, venom),
+                FirstStrike::Ambush(venom) => format!("dhuriv ambush {} {}", target, venom),
+                FirstStrike::Blind => format!("dhuriv blind {}", target),
+                FirstStrike::Twirl => format!("dhuriv twirl {}", target),
+                FirstStrike::Strike => format!("dhuriv strike {}", target),
+                FirstStrike::Crosscut => format!("dhuriv crosscut {}", target),
+                FirstStrike::WeakenArms => format!("dhuriv weaken {} arms", target),
+                FirstStrike::WeakenLegs => format!("dhuriv weaken {} legs", target),
+                FirstStrike::Reave => format!("dhuriv reave {}", target),
+                FirstStrike::Trip => format!("dhuriv trip {}", target),
+                FirstStrike::Slam => format!("dhuriv slam {}", target),
+                FirstStrike::DauntCoyote => format!("order coyote daunt {}", target),
+                FirstStrike::DauntRaloth => format!("order raloth daunt {}", target),
+                FirstStrike::DauntCrocodile => format!("order crocodile daunt {}", target),
+                FirstStrike::DauntCockatrice => format!("order cockatrice daunt {}", target),
+                FirstStrike::Icebreath => format!("order icewyrm icebreath {}", target),
+                FirstStrike::Combust => format!("resin combust {}", target),
+            }
         }
     }
 
@@ -142,14 +168,28 @@ impl SecondStrike {
     }
 
     pub fn full_str(&self, target: &String, mirrored: bool) -> String {
-        match (self, mirrored) {
-            (SecondStrike::Flourish(venom), false) => {
-                format!("dhuriv flourish {} {}", target, venom)
+        if mirrored {
+            match self {
+                SecondStrike::Stab(venom) => format!("ringblade beguile {} {}", target, venom),
+                SecondStrike::Slice(venom) => format!("ringblade wile {} {}", target, venom),
+                SecondStrike::Thrust(venom) => format!("ringblade inveigle {} {}", target, venom),
+                SecondStrike::Flourish(venom) => format!("ringblade brandish {} {}", target, venom),
+                SecondStrike::Disarm => format!("ringblade conciliate {}", target),
+                SecondStrike::Gouge => format!("ringblade muddle {}", target),
+                SecondStrike::Heartbreaker => format!("ringblade desolate {}", target),
+                SecondStrike::Slit => format!("ringblade razor {}", target),
             }
-            (SecondStrike::Flourish(venom), true) => {
-                format!("ringblade brandish {} {}", target, venom)
+        } else {
+            match self {
+                SecondStrike::Stab(venom) => format!("dhuriv stab {} {}", target, venom),
+                SecondStrike::Slice(venom) => format!("dhuriv slice {} {}", target, venom),
+                SecondStrike::Thrust(venom) => format!("dhuriv thrust {} {}", target, venom),
+                SecondStrike::Flourish(venom) => format!("dhuriv flourish {} {}", target, venom),
+                SecondStrike::Disarm => format!("dhuriv disarm {}", target),
+                SecondStrike::Gouge => format!("dhuriv gouge {}", target),
+                SecondStrike::Heartbreaker => format!("dhuriv heartbreaker {}", target),
+                SecondStrike::Slit => format!("dhuriv slit {}", target),
             }
-            _ => "".to_string(), // TODO
         }
     }
 

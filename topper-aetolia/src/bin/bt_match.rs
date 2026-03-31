@@ -34,7 +34,7 @@ fn main() {
     let time_slices = page.build_time_slices(&|slice| OBSERVER.observe(slice));
     if slice_dump {
         for slice in &time_slices {
-            println!("{:#?}\n", slice);
+            println!("{:#?}\n", slice.observations);
         }
         return;
     }

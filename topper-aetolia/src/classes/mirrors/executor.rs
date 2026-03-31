@@ -120,4 +120,12 @@ pub fn add_mappings(mut mapping: &mut HashMap<(String, String), (String, String)
         ("Shadowdancing".to_string(), "Razor".to_string()),
         ("Dhuriv".to_string(), "Slit".to_string()),
     );
+    mapping.insert(
+        ("Subversion".to_string(), "Splatter".to_string()),
+        ("Tracking".to_string(), "Hurling".to_string()),
+    );
+    mapping.insert(
+        ("Subversion".to_string(), "Kindle".to_string()),
+        ("Tracking".to_string(), "Combust".to_string()),
+    );
 }

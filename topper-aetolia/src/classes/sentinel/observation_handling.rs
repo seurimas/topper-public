@@ -1,8 +1,22 @@
 use super::constants::*;
+use crate::agent::sentinel::Resin;
 use crate::classes::*;
 use crate::observables::*;
 use crate::timeline::*;
 use crate::types::*;
+
+fn resin_from_annotation(annotation: &str) -> Option<Resin> {
+    match annotation {
+        "pyrolum" | "flammable" => Some(Resin::Pyrolum),
+        "corsin" | "coagulating" => Some(Resin::Corsin),
+        "trientia" | "hallucinatory" => Some(Resin::Trientia),
+        "harimel" | "adhesive" => Some(Resin::Harimel),
+        "glauxe" | "choking" => Some(Resin::Glauxe),
+        "badulem" | "septic" => Some(Resin::Badulem),
+        "lysirine" | "paralytic" => Some(Resin::Lysirine),
+        _ => None,
+    }
+}
 
 pub fn handle_combat_action(
     combat_action: &CombatAction,
@@ -11,6 +25,14 @@ pub fn handle_combat_action(
     after: &Vec<AetObservation>,
 ) -> Result<(), String> {
     match combat_action.skill.as_ref() {
+        "Hurl" | "Splatter" => {
+            if let Some(resin) = resin_from_annotation(&combat_action.annotation) {
+                let target = combat_action.target.clone();
+                for_agent(agent_states, &target, &move |you: &mut AgentState| {
+                    you.resin_state.apply(resin.clone());
+                });
+            }
+        }
         "Might" => {
             for_agent(
                 agent_states,
@@ -24,7 +46,7 @@ pub fn handle_combat_action(
                 },
             );
         }
-        "Slash" | "Stab" | "Slice" | "Thrust" | "Ambush" | "Flourish" => {
+        "Slash" | "Ambush" => {
             let observations = after.clone();
             let first_person = combat_action.caster.eq(&agent_states.me);
             let hints =
@@ -42,6 +64,29 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &move |me: &mut AgentState| {
                     apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
+                    me.assume_sentinel(|s| s.start_first_strike());
+                },
+            );
+        }
+        "Stab" | "Slice" | "Thrust" | "Flourish" => {
+            let observations = after.clone();
+            let first_person = combat_action.caster.eq(&agent_states.me);
+            let hints =
+                agent_states.get_player_hint(&combat_action.caster, &"CALLED_VENOMS".to_string());
+            apply_weapon_hits(
+                agent_states,
+                &combat_action.caster,
+                &combat_action.target,
+                after,
+                first_person,
+                &hints,
+            );
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &move |me: &mut AgentState| {
+                    apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
+                    me.assume_sentinel(|s| s.second_strike());
                 },
             );
         }
@@ -120,6 +165,13 @@ pub fn handle_combat_action(
             if let Some(def_flag) = FType::from_name(&combat_action.annotation) {
                 attack_strip(agent_states, &combat_action.caster, vec![def_flag], after);
             }
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &|me: &mut AgentState| {
+                    me.assume_sentinel(|s| s.start_first_strike());
+                },
+            );
         }
         "Twirl" => {
             attack_afflictions(
@@ -127,6 +179,13 @@ pub fn handle_combat_action(
                 &combat_action.target,
                 vec![FType::Confusion],
                 after,
+            );
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &|me: &mut AgentState| {
+                    me.assume_sentinel(|s| s.start_first_strike());
+                },
             );
         }
         "Throatcrush" => {
@@ -188,11 +247,20 @@ pub fn handle_combat_action(
                     after,
                 );
             }
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &|me: &mut AgentState| {
+                    me.assume_sentinel(|s| s.start_first_strike());
+                },
+            );
         }
         "Weaken" => {
             // Annotation is "left arm", "right arm", "left leg", or "right leg".
             // Arms: drop parry + 278 limb damage. Legs: lethargy + 278 limb damage.
-            let rebounds = after.iter().any(|obs| matches!(obs, AetObservation::Rebounds));
+            let rebounds = after
+                .iter()
+                .any(|obs| matches!(obs, AetObservation::Rebounds));
             if !rebounds {
                 let annotation = combat_action.annotation.clone();
                 for_agent(
@@ -234,6 +302,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &move |me: &mut AgentState| {
                     apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
+                    me.assume_sentinel(|s| s.start_first_strike());
                 },
             );
         }
@@ -243,6 +312,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &|me: &mut AgentState| {
                     me.set_balance(BType::Balance, 2.25);
+                    me.assume_sentinel(|s| s.start_first_strike());
                 },
             );
             attack_afflictions(
@@ -258,6 +328,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &|me: &mut AgentState| {
                     me.set_balance(BType::Balance, 2.25);
+                    me.assume_sentinel(|s| s.start_first_strike());
                 },
             );
             attack_afflictions(
@@ -273,6 +344,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &|me: &mut AgentState| {
                     me.set_balance(BType::Balance, 2.25);
+                    me.assume_sentinel(|s| s.second_strike());
                 },
             );
             attack_afflictions(
@@ -288,6 +360,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &|me: &mut AgentState| {
                     me.set_balance(BType::Balance, 2.25);
+                    me.assume_sentinel(|s| s.second_strike());
                 },
             );
             attack_afflictions(
@@ -303,6 +376,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &|me: &mut AgentState| {
                     me.set_balance(BType::Balance, 2.25);
+                    me.assume_sentinel(|s| s.second_strike());
                 },
             );
             attack_afflictions(
@@ -324,12 +398,7 @@ pub fn handle_combat_action(
                 let caster = combat_action.caster.clone();
                 let has_dizziness = agent_states.borrow_agent(&caster).is(FType::Dizziness);
                 if has_dizziness {
-                    attack_afflictions(
-                        agent_states,
-                        &caster,
-                        vec![FType::Faintness],
-                        after,
-                    );
+                    attack_afflictions(agent_states, &caster, vec![FType::Faintness], after);
                 }
                 for_agent(agent_states, &caster, &|you: &mut AgentState| {
                     you.resin_state.cold_burn();
@@ -381,8 +450,7 @@ pub fn handle_combat_action(
             );
         }
         "Combust" => {
-            // Ignite the resin currently on the target. Also opens a Flourish/Brandish window
-            // (handled by the planner — no state flag needed here).
+            // Ignite the resin currently on the target. Also opens a Flourish/Brandish window.
             for_agent(
                 agent_states,
                 &combat_action.target,
@@ -396,6 +464,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &move |me: &mut AgentState| {
                     apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
+                    me.assume_sentinel(|s| s.start_first_strike());
                 },
             );
         }
@@ -447,6 +516,7 @@ pub fn handle_combat_action(
                     &combat_action.caster,
                     &|me: &mut AgentState| {
                         me.set_balance(BType::Equil, 2.25);
+                        me.assume_sentinel(|s| s.start_first_strike());
                     },
                 );
                 attack_afflictions(
@@ -462,6 +532,7 @@ pub fn handle_combat_action(
                     &combat_action.caster,
                     &|me: &mut AgentState| {
                         me.set_balance(BType::Equil, 2.25);
+                        me.assume_sentinel(|s| s.start_first_strike());
                     },
                 );
                 attack_afflictions(
@@ -477,6 +548,7 @@ pub fn handle_combat_action(
                     &combat_action.caster,
                     &|me: &mut AgentState| {
                         me.set_balance(BType::Equil, 2.25);
+                        me.assume_sentinel(|s| s.start_first_strike());
                     },
                 );
                 attack_afflictions(
@@ -492,6 +564,7 @@ pub fn handle_combat_action(
                     &combat_action.caster,
                     &|me: &mut AgentState| {
                         me.set_balance(BType::Equil, 2.25);
+                        me.assume_sentinel(|s| s.start_first_strike());
                     },
                 );
                 attack_afflictions(
@@ -509,6 +582,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &|me: &mut AgentState| {
                     me.set_balance(BType::Equil, 2.25);
+                    me.assume_sentinel(|s| s.start_first_strike());
                 },
             );
             attack_strip_or_afflict(
@@ -524,6 +598,20 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 vec![FType::Insulation, FType::Shivering, FType::Frozen],
                 after,
+            );
+        }
+        "Hurling" => {
+            let resin = if let Some(resin) = resin_from_annotation(&combat_action.annotation) {
+                resin
+            } else {
+                return Ok(());
+            };
+            for_agent(
+                agent_states,
+                &combat_action.target,
+                &move |you: &mut AgentState| {
+                    you.resin_state.apply(resin);
+                },
             );
         }
         _ => {}

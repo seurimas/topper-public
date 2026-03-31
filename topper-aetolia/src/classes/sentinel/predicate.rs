@@ -24,6 +24,9 @@ pub enum SentinelPredicate {
     AlacrityOver(u32),
     // Spike
     HasSpike,
+    // First strike follow-up window
+    HasFirstStrike,
+    FirstStrikeExpiring,
 }
 
 impl TargetPredicate for SentinelPredicate {
@@ -66,6 +69,17 @@ impl TargetPredicate for SentinelPredicate {
                 // ── Spike ────────────────────────────────────────────────
                 SentinelPredicate::HasSpike => target
                     .check_if_sentinel(&|s| s.spike.is_some())
+                    .unwrap_or(false),
+
+                // ── First strike window ─────────────────────────────────
+                SentinelPredicate::HasFirstStrike => target
+                    .check_if_sentinel(&|s| s.has_first_strike())
+                    .unwrap_or(false),
+                SentinelPredicate::FirstStrikeExpiring => target
+                    .check_if_sentinel(&|s| {
+                        s.first_strike_timer.is_active()
+                            && s.first_strike_timer.get_time_left() <= 20
+                    })
                     .unwrap_or(false),
             }
         } else {
