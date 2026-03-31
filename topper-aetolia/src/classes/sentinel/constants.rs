@@ -19,6 +19,7 @@ pub enum FirstStrike {
     DauntCrocodile,
     DauntCockatrice,
     Icebreath,
+    Combust,
 }
 
 impl FirstStrike {
@@ -68,6 +69,8 @@ impl FirstStrike {
             (FirstStrike::DauntCockatrice, true) => format!("order terrifier accost {}", target),
             (FirstStrike::Icebreath, false) => format!("order icewyrm icebreath {}", target),
             (FirstStrike::Icebreath, true) => format!("order rimestalker verglas {}", target),
+            (FirstStrike::Combust, false) => format!("resin combust {}", target),
+            (FirstStrike::Combust, true) => format!("toxin kindle {}", target),
             _ => "".to_string(), // TODO
         }
     }
@@ -85,7 +88,8 @@ impl FirstStrike {
             | FirstStrike::DauntCrocodile
             | FirstStrike::DauntCockatrice
             | FirstStrike::DauntRaloth
-            | FirstStrike::Icebreath => true,
+            | FirstStrike::Icebreath
+            | FirstStrike::Combust => true,
             _ => false,
         }
     }

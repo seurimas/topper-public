@@ -7,6 +7,7 @@ use crate::classes::bard::BardBehavior;
 use crate::classes::enchants::EnchantmentBehavior;
 use crate::classes::infiltrator::InfiltratorBehavior;
 use crate::classes::predator::PredatorBehavior;
+use crate::classes::sentinel::SentinelBehavior;
 use crate::classes::siderealist::SiderealistBehavior;
 use crate::classes::zealot::ZealotBehavior;
 use crate::classes::LockType;
@@ -44,6 +45,8 @@ pub enum AetBehavior {
     InfiltratorBehavior(InfiltratorBehavior),
     #[serde(untagged)]
     AscendrilBehavior(AscendrilBehavior),
+    #[serde(untagged)]
+    SentinelBehavior(SentinelBehavior),
     #[serde(untagged)]
     SiderealistBehavior(SiderealistBehavior),
     #[serde(untagged)]
@@ -154,6 +157,9 @@ impl UnpoweredFunction for AetBehavior {
             }
             AetBehavior::AscendrilBehavior(ascendril_behavior) => {
                 ascendril_behavior.resume_with(model, controller)
+            }
+            AetBehavior::SentinelBehavior(sentinel_behavior) => {
+                sentinel_behavior.resume_with(model, controller)
             }
             AetBehavior::SiderealistBehavior(siderealist_behavior) => {
                 siderealist_behavior.resume_with(model, controller)

@@ -15,12 +15,12 @@ extern crate lazy_static;
 use std::{collections::HashSet, env, fs};
 
 use topper_aetolia::{
-    bt_match::{set_bt_dir, BtMatchConfig, MatchRunner},
-    explainer::{observations::OBSERVER, parse_me_and_you, ExplainerPage},
+    bt_match::{BtMatchConfig, MatchRunner, set_bt_dir},
+    explainer::{ExplainerPage, observations::OBSERVER, parse_me_and_you},
 };
 
 fn main() {
-    let (log_path, player_name, tree_name, config_path) = parse_args();
+    let (log_path, player_name, tree_name, config_path, slice_dump) = parse_args();
     let ignored = load_config(&config_path);
     let (page, opponent_name) = load_log(&log_path, &player_name, &tree_name);
 
@@ -32,6 +32,12 @@ fn main() {
     set_bt_dir(&bt_dir);
 
     let time_slices = page.build_time_slices(&|slice| OBSERVER.observe(slice));
+    if slice_dump {
+        for slice in &time_slices {
+            println!("{:#?}\n", slice);
+        }
+        return;
+    }
     println!("Processing {} time slices...\n", time_slices.len());
 
     let mut runner = MatchRunner::new(player_name, opponent_name, tree_name, ignored);
@@ -44,12 +50,13 @@ fn main() {
     runner.finish();
 }
 
-fn parse_args() -> (String, String, String, String) {
+fn parse_args() -> (String, String, String, String, bool) {
     let args: Vec<String> = env::args().collect();
     let mut log_path: Option<String> = None;
     let mut player_name: Option<String> = None;
     let mut tree_name: Option<String> = None;
     let mut config_path = "bt_match.json".to_string();
+    let mut slice_dump = false;
 
     let mut i = 1;
     while i < args.len() {
@@ -70,6 +77,10 @@ fn parse_args() -> (String, String, String, String) {
                 config_path = args.get(i + 1).cloned().unwrap_or(config_path);
                 i += 2;
             }
+            "--slice_dump" => {
+                slice_dump = true;
+                i += 1;
+            }
             _ => {
                 i += 1;
             }
@@ -89,7 +100,7 @@ fn parse_args() -> (String, String, String, String) {
         eprintln!("{}", USAGE);
         std::process::exit(2);
     });
-    (log_path, player_name, tree_name, config_path)
+    (log_path, player_name, tree_name, config_path, slice_dump)
 }
 
 fn load_config(path: &str) -> HashSet<String> {
@@ -118,7 +129,11 @@ fn load_log(log_path: &str, player_name: &str, tree_name: &str) -> (ExplainerPag
         std::process::exit(2);
     });
     let (log_me, log_you) = parse_me_and_you(&page);
-    let opponent_name = if player_name == log_me { log_you } else { log_me };
+    let opponent_name = if player_name == log_me {
+        log_you
+    } else {
+        log_me
+    };
     println!(
         "Analyzing {} vs {} using tree '{}'",
         player_name, opponent_name, tree_name

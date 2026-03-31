@@ -1,12 +1,60 @@
 use super::*;
+use serde::{Deserialize, Serialize};
+use std::{collections::HashSet, hash::Hash};
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum SentinelBeast {
+    Wisp,
+    Weasel,
+    Nightingale,
+    Rook,
+    Coyote,
+    Raccoon,
+    Elk,
+    Gyrfalcon,
+    Raloth,
+    Crocodile,
+    Icewyrm,
+    Cockatrice,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct SentinelClassState {
     pub alacrity: u32,
     pub spike: Option<String>,
+    pub beasts: HashSet<SentinelBeast>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+impl Hash for SentinelClassState {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.alacrity.hash(state);
+        self.spike.hash(state);
+        // HashSet doesn't impl Hash; use sorted vec for determinism
+        let mut beasts: Vec<_> = self.beasts.iter().copied().collect();
+        beasts.sort_by_key(|b| *b as u8);
+        beasts.hash(state);
+    }
+}
+
+impl SentinelClassState {
+    pub fn has_beast(&self, beast: SentinelBeast) -> bool {
+        self.beasts.contains(&beast)
+    }
+
+    pub fn summon_beast(&mut self, beast: SentinelBeast) {
+        self.beasts.insert(beast);
+    }
+
+    pub fn dismiss_beast(&mut self, beast: SentinelBeast) {
+        self.beasts.remove(&beast);
+    }
+
+    pub fn beast_count(&self) -> usize {
+        self.beasts.len()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Resin {
     Pyrolum,
     Corsin,

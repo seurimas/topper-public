@@ -11,6 +11,7 @@ use crate::classes::get_affs_from_plan;
 use crate::classes::infiltrator::InfiltratorPredicate;
 use crate::classes::is_affected_by;
 use crate::classes::predator::PredatorPredicate;
+use crate::classes::sentinel::SentinelPredicate;
 use crate::classes::siderealist::SiderealistPredicate;
 use crate::classes::zealot::ZealotPredicate;
 use crate::curatives::MENTAL_AFFLICTIONS;
@@ -167,6 +168,7 @@ pub enum AetPredicate {
     PredatorPredicate(AetTarget, PredatorPredicate),
     InfiltratorPredicate(AetTarget, InfiltratorPredicate),
     AscendrilPredicate(AetTarget, AscendrilPredicate),
+    SentinelPredicate(AetTarget, SentinelPredicate),
     SiderealistPredicate(AetTarget, SiderealistPredicate),
     ZealotPredicate(AetTarget, ZealotPredicate),
 }
@@ -903,6 +905,13 @@ impl UnpoweredFunction for AetPredicate {
             }
             AetPredicate::AscendrilPredicate(target, ascendril_predicate) => {
                 if ascendril_predicate.check(target, model, controller) {
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetPredicate::SentinelPredicate(target, sentinel_predicate) => {
+                if sentinel_predicate.check(target, model, controller) {
                     UnpoweredFunctionState::Complete
                 } else {
                     UnpoweredFunctionState::Failed
