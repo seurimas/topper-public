@@ -227,11 +227,21 @@ impl UnpoweredFunction for SentinelBehavior {
                 }
             }
             SentinelBehavior::Combust(target) => {
-                if let Some(_target_agent) = target.get_target(model, controller) {
-                    controller.plan.add_to_qeb(Box::new(FirstStrikeAction::new(
+                if let Some(target_agent) = target.get_target(model, controller) {
+                    let venom = controller
+                        .aff_priorities
+                        .as_ref()
+                        .and_then(|s| {
+                            get_venoms_from_plan(s, 1, target_agent, &vec![])
+                                .first()
+                                .copied()
+                        })
+                        .unwrap_or("curare");
+                    controller.plan.add_to_qeb(Box::new(ComboAction::new(
                         model.who_am_i(),
                         target.get_name(model, controller),
                         FirstStrike::Combust,
+                        SecondStrike::Flourish(venom),
                     )));
                     UnpoweredFunctionState::Complete
                 } else {

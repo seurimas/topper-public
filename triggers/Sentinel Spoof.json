@@ -103,5 +103,26 @@
       }
     ],
     "observation_name": "Proc"
+  },
+  {
+    "regex": "^A lithesome coyote's arrival is accompanied by an unsettling growl.$",
+    "args": [
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": "Woodlore"
+      },
+      {
+        "Literal": "CallCoyote"
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
   }
 ]

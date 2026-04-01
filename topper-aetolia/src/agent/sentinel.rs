@@ -26,6 +26,7 @@ pub struct SentinelClassState {
     pub spike: Option<String>,
     pub beasts: HashSet<SentinelBeast>,
     pub first_strike_timer: Timer,
+    pub calling: bool,
 }
 
 impl Hash for SentinelClassState {
@@ -37,6 +38,7 @@ impl Hash for SentinelClassState {
         beasts.sort_by_key(|b| *b as u8);
         beasts.hash(state);
         self.first_strike_timer.hash(state);
+        self.calling.hash(state);
     }
 }
 

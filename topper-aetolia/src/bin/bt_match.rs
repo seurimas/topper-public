@@ -12,7 +12,7 @@
 #[macro_use]
 extern crate lazy_static;
 
-use std::{collections::HashSet, env, fs};
+use std::{env, fs};
 
 use topper_aetolia::{
     bt_match::{BtMatchConfig, MatchRunner, set_bt_dir},
@@ -21,7 +21,7 @@ use topper_aetolia::{
 
 fn main() {
     let (log_path, player_name, tree_name, config_path, slice_dump) = parse_args();
-    let ignored = load_config(&config_path);
+    let config = load_config(&config_path);
     let (page, opponent_name) = load_log(&log_path, &player_name, &tree_name);
 
     let bt_dir = {
@@ -40,7 +40,7 @@ fn main() {
     }
     println!("Processing {} time slices...\n", time_slices.len());
 
-    let mut runner = MatchRunner::new(player_name, opponent_name, tree_name, ignored);
+    let mut runner = MatchRunner::new(player_name, opponent_name, tree_name, config);
     for slice in &time_slices {
         if let Err(div) = runner.process_slice(slice) {
             print!("{}", div);
@@ -103,20 +103,11 @@ fn parse_args() -> (String, String, String, String, bool) {
     (log_path, player_name, tree_name, config_path, slice_dump)
 }
 
-fn load_config(path: &str) -> HashSet<String> {
-    let config: BtMatchConfig = fs::read_to_string(path)
+fn load_config(path: &str) -> BtMatchConfig {
+    fs::read_to_string(path)
         .ok()
         .and_then(|s| serde_json::from_str(&s).ok())
-        .unwrap_or_default();
-    let ignored: HashSet<String> = config
-        .ignore
-        .into_iter()
-        .map(|s| s.to_lowercase())
-        .collect();
-    if !ignored.is_empty() {
-        println!("Ignoring skills: {:?}", ignored);
-    }
-    ignored
+        .unwrap_or_default()
 }
 
 fn load_log(log_path: &str, player_name: &str, tree_name: &str) -> (ExplainerPage, String) {

@@ -1,5 +1,6 @@
 use super::constants::*;
-use crate::agent::sentinel::Resin;
+use crate::agent::sentinel::{Resin, SentinelBeast};
+use crate::non_agent::AetTimelineRoomExt;
 use crate::classes::*;
 use crate::observables::*;
 use crate::timeline::*;
@@ -613,6 +614,35 @@ pub fn handle_combat_action(
                     you.resin_state.apply(resin);
                 },
             );
+        }
+        "Calling" => {
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &|me: &mut AgentState| {
+                    me.assume_sentinel(|s| s.calling = true);
+                },
+            );
+        }
+        "CallCoyote" => {
+            if let Some(room) = agent_states.get_my_room() {
+                let players: Vec<String> = room.players.iter().cloned().collect();
+                for player in players {
+                    let is_calling = agent_states
+                        .borrow_agent(&player)
+                        .check_if_sentinel(&|s| s.calling)
+                        .unwrap_or(false);
+                    if is_calling {
+                        for_agent(agent_states, &player, &|me: &mut AgentState| {
+                            me.assume_sentinel(|s| {
+                                s.summon_beast(SentinelBeast::Coyote);
+                                s.calling = false;
+                            });
+                        });
+                        break;
+                    }
+                }
+            }
         }
         _ => {}
     }

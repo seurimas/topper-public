@@ -12,10 +12,10 @@ use topper_core::timeline::{BaseAgentState, BaseTimeline, db::DummyDatabaseModul
 use crate::{
     agent::{AgentState, FType},
     bt::{BehaviorController, BehaviorModel, get_tree},
-    bt_match::{Divergence, format_time},
+    bt_match::{BtMatchConfig, Divergence, format_time},
     classes::AFFLICT_VENOMS,
     observables::ActionPlan,
-    timeline::{AetObservation, AetTimeSlice, AetTimeline},
+    timeline::{AetObservation, AetTimeSlice, AetTimeline, simulation_slice},
 };
 
 /// What a single BT state-branch predicted.
@@ -42,7 +42,7 @@ pub struct MatchRunner {
     player_name: String,
     opponent_name: String,
     tree_name: String,
-    ignored: HashSet<String>,
+    config: BtMatchConfig,
     timeline: AetTimeline,
     tree_arc: TreeArc,
     pub match_count: usize,
@@ -53,14 +53,14 @@ impl MatchRunner {
         player_name: String,
         opponent_name: String,
         tree_name: String,
-        ignored: HashSet<String>,
+        config: BtMatchConfig,
     ) -> Self {
         let tree_arc = get_tree(&tree_name);
         Self {
             player_name,
             opponent_name,
             tree_name,
-            ignored,
+            config,
             timeline: AetTimeline::new(),
             tree_arc,
             match_count: 0,
@@ -80,7 +80,7 @@ impl MatchRunner {
             .filter_map(|o| match o {
                 AetObservation::CombatAction(ca)
                     if ca.caster == self.player_name
-                        && !self.ignored.contains(&ca.skill.to_lowercase()) =>
+                        && !self.config.ignore.iter().any(|s| s.eq_ignore_ascii_case(&ca.skill)) =>
                 {
                     Some(ca.skill.clone())
                 }
@@ -154,6 +154,26 @@ impl MatchRunner {
                 );
             }
             self.match_count += observed_skills.len();
+
+            // Fire skill traps: if any planned skill has a trap, inject
+            // those observations as a synthetic time slice.
+            let planned_skills: Vec<String> = branch_plans
+                .iter()
+                .flat_map(|bp| bp.skills.iter())
+                .cloned()
+                .collect();
+            let mut trap_obs: Vec<AetObservation> = Vec::new();
+            for skill in &planned_skills {
+                if let Some(obs) = self.config.skill_traps.get(skill) {
+                    trap_obs.extend(obs.iter().cloned());
+                }
+            }
+            if !trap_obs.is_empty() {
+                let trap_slice = simulation_slice(trap_obs, time_slice.time);
+                self.timeline
+                    .push_time_slice(trap_slice, None as Option<&DummyDatabaseModule>)
+                    .ok();
+            }
         } else {
             let player_state = self.timeline.state.borrow_agent(&self.player_name).clone();
             let opponent_state = self
