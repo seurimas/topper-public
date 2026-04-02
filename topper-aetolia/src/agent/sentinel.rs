@@ -26,7 +26,7 @@ pub struct SentinelClassState {
     pub spike: Option<String>,
     pub beasts: HashSet<SentinelBeast>,
     pub first_strike_timer: Timer,
-    pub calling: bool,
+    pub calling: Timer,
 }
 
 impl Hash for SentinelClassState {
@@ -71,8 +71,21 @@ impl SentinelClassState {
         self.first_strike_timer.reset();
     }
 
+    pub fn start_calling(&mut self) {
+        self.calling = Timer::count_down_seconds(25.0);
+    }
+
+    pub fn is_calling(&self) -> bool {
+        self.calling.is_active()
+    }
+
+    pub fn clear_calling(&mut self) {
+        self.calling.reset();
+    }
+
     pub fn wait(&mut self, duration: CType) {
         self.first_strike_timer.wait(duration);
+        self.calling.wait(duration);
     }
 }
 

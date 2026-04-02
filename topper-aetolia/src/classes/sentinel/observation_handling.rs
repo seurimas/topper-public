@@ -1,6 +1,5 @@
 use super::constants::*;
 use crate::agent::sentinel::{Resin, SentinelBeast};
-use crate::non_agent::AetTimelineRoomExt;
 use crate::classes::*;
 use crate::observables::*;
 use crate::timeline::*;
@@ -65,7 +64,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &move |me: &mut AgentState| {
                     apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
-                    me.assume_sentinel(|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike());
                 },
             );
         }
@@ -87,7 +86,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &move |me: &mut AgentState| {
                     apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
-                    me.assume_sentinel(|s| s.second_strike());
+                    me.assume_sentinel(&|s| s.second_strike());
                 },
             );
         }
@@ -170,7 +169,7 @@ pub fn handle_combat_action(
                 agent_states,
                 &combat_action.caster,
                 &|me: &mut AgentState| {
-                    me.assume_sentinel(|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike());
                 },
             );
         }
@@ -185,7 +184,7 @@ pub fn handle_combat_action(
                 agent_states,
                 &combat_action.caster,
                 &|me: &mut AgentState| {
-                    me.assume_sentinel(|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike());
                 },
             );
         }
@@ -252,7 +251,7 @@ pub fn handle_combat_action(
                 agent_states,
                 &combat_action.caster,
                 &|me: &mut AgentState| {
-                    me.assume_sentinel(|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike());
                 },
             );
         }
@@ -303,7 +302,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &move |me: &mut AgentState| {
                     apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
-                    me.assume_sentinel(|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike());
                 },
             );
         }
@@ -313,7 +312,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &|me: &mut AgentState| {
                     me.set_balance(BType::Balance, 2.25);
-                    me.assume_sentinel(|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike());
                 },
             );
             attack_afflictions(
@@ -329,7 +328,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &|me: &mut AgentState| {
                     me.set_balance(BType::Balance, 2.25);
-                    me.assume_sentinel(|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike());
                 },
             );
             attack_afflictions(
@@ -345,7 +344,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &|me: &mut AgentState| {
                     me.set_balance(BType::Balance, 2.25);
-                    me.assume_sentinel(|s| s.second_strike());
+                    me.assume_sentinel(&|s| s.second_strike());
                 },
             );
             attack_afflictions(
@@ -361,7 +360,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &|me: &mut AgentState| {
                     me.set_balance(BType::Balance, 2.25);
-                    me.assume_sentinel(|s| s.second_strike());
+                    me.assume_sentinel(&|s| s.second_strike());
                 },
             );
             attack_afflictions(
@@ -377,7 +376,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &|me: &mut AgentState| {
                     me.set_balance(BType::Balance, 2.25);
-                    me.assume_sentinel(|s| s.second_strike());
+                    me.assume_sentinel(&|s| s.second_strike());
                 },
             );
             attack_afflictions(
@@ -465,7 +464,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &move |me: &mut AgentState| {
                     apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
-                    me.assume_sentinel(|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike());
                 },
             );
         }
@@ -475,7 +474,7 @@ pub fn handle_combat_action(
                 agent_states,
                 &combat_action.caster,
                 &|me: &mut AgentState| {
-                    me.assume_sentinel(|s| s.alacrity = 3);
+                    me.assume_sentinel(&|s| s.alacrity = 3);
                     me.set_balance(BType::Equil, 2.25);
                 },
             );
@@ -517,7 +516,7 @@ pub fn handle_combat_action(
                     &combat_action.caster,
                     &|me: &mut AgentState| {
                         me.set_balance(BType::Equil, 2.25);
-                        me.assume_sentinel(|s| s.start_first_strike());
+                        me.assume_sentinel(&|s| s.start_first_strike());
                     },
                 );
                 attack_afflictions(
@@ -533,7 +532,7 @@ pub fn handle_combat_action(
                     &combat_action.caster,
                     &|me: &mut AgentState| {
                         me.set_balance(BType::Equil, 2.25);
-                        me.assume_sentinel(|s| s.start_first_strike());
+                        me.assume_sentinel(&|s| s.start_first_strike());
                     },
                 );
                 attack_afflictions(
@@ -549,7 +548,7 @@ pub fn handle_combat_action(
                     &combat_action.caster,
                     &|me: &mut AgentState| {
                         me.set_balance(BType::Equil, 2.25);
-                        me.assume_sentinel(|s| s.start_first_strike());
+                        me.assume_sentinel(&|s| s.start_first_strike());
                     },
                 );
                 attack_afflictions(
@@ -565,7 +564,7 @@ pub fn handle_combat_action(
                     &combat_action.caster,
                     &|me: &mut AgentState| {
                         me.set_balance(BType::Equil, 2.25);
-                        me.assume_sentinel(|s| s.start_first_strike());
+                        me.assume_sentinel(&|s| s.start_first_strike());
                     },
                 );
                 attack_afflictions(
@@ -583,7 +582,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &|me: &mut AgentState| {
                     me.set_balance(BType::Equil, 2.25);
-                    me.assume_sentinel(|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike());
                 },
             );
             attack_strip_or_afflict(
@@ -620,28 +619,49 @@ pub fn handle_combat_action(
                 agent_states,
                 &combat_action.caster,
                 &|me: &mut AgentState| {
-                    me.assume_sentinel(|s| s.calling = true);
+                    me.assume_sentinel(&|s| s.start_calling());
                 },
             );
         }
-        "CallCoyote" => {
-            if let Some(room) = agent_states.get_my_room() {
-                let players: Vec<String> = room.players.iter().cloned().collect();
-                for player in players {
-                    let is_calling = agent_states
-                        .borrow_agent(&player)
-                        .check_if_sentinel(&|s| s.calling)
-                        .unwrap_or(false);
-                    if is_calling {
-                        for_agent(agent_states, &player, &|me: &mut AgentState| {
-                            me.assume_sentinel(|s| {
-                                s.summon_beast(SentinelBeast::Coyote);
-                                s.calling = false;
-                            });
+        "Called" => {
+            let beast = match combat_action.annotation.to_lowercase().as_str() {
+                // Spirit (Sentinel)
+                "wisp" => Some(SentinelBeast::Wisp),
+                "weasel" => Some(SentinelBeast::Weasel),
+                "nightingale" => Some(SentinelBeast::Nightingale),
+                "rook" => Some(SentinelBeast::Rook),
+                "coyote" => Some(SentinelBeast::Coyote),
+                "raccoon" => Some(SentinelBeast::Raccoon),
+                "elk" => Some(SentinelBeast::Elk),
+                "gyrfalcon" => Some(SentinelBeast::Gyrfalcon),
+                "raloth" => Some(SentinelBeast::Raloth),
+                "crocodile" => Some(SentinelBeast::Crocodile),
+                "icewyrm" => Some(SentinelBeast::Icewyrm),
+                "cockatrice" => Some(SentinelBeast::Cockatrice),
+                // Shadow (Executor)
+                "lurker" => Some(SentinelBeast::Wisp),
+                "wardpeeler" => Some(SentinelBeast::Weasel),
+                "lightdrinker" => Some(SentinelBeast::Nightingale),
+                "murder" => Some(SentinelBeast::Rook),
+                "darkhound" => Some(SentinelBeast::Coyote),
+                "pilferer" => Some(SentinelBeast::Raccoon),
+                "monstrosity" => Some(SentinelBeast::Elk),
+                "throatripper" => Some(SentinelBeast::Gyrfalcon),
+                "brutaliser" => Some(SentinelBeast::Raloth),
+                "eviscerator" => Some(SentinelBeast::Crocodile),
+                "rimestalker" => Some(SentinelBeast::Icewyrm),
+                "terrifier" => Some(SentinelBeast::Cockatrice),
+                _ => None,
+            };
+            if let Some(beast) = beast {
+                agent_states.for_all_agents(&|me: &mut AgentState| {
+                    if me.check_if_sentinel(&|s| s.is_calling()).unwrap_or(false) {
+                        me.assume_sentinel(&|s| {
+                            s.summon_beast(beast);
+                            s.clear_calling();
                         });
-                        break;
                     }
-                }
+                });
             }
         }
         _ => {}

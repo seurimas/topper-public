@@ -6,8 +6,8 @@ use super::*;
 
 use crate::{
     bt::*,
-    classes::{get_controller, get_stack, VenomPlan, VenomType},
-    curatives::{get_cure_depth, FirstAidSetting},
+    classes::{VenomPlan, VenomType, get_controller, get_stack},
+    curatives::{FirstAidSetting, get_cure_depth},
     db::*,
     defense::*,
     non_agent::AetNonAgent,
@@ -191,7 +191,7 @@ pub fn get_hypno_stack_from_file(stack_name: &String) -> Option<Vec<Hypnosis>> {
         let mut trees = LOADED_HYPNO_STACKS.write().unwrap();
         let stack_json =
             unsafe { LOAD_HYPNO_STACK_FUNC.unwrap()(&"hypnosis".to_string(), stack_name) };
-        println!("Loading {} stack ({})", stack_name, stack_json.len());
+        // println!("Loading {} stack ({})", stack_name, stack_json.len());
         match serde_json::from_str::<Vec<Hypnosis>>(&stack_json) {
             Ok(stack_def) => {
                 trees.insert(stack_name.clone(), Some(stack_def.clone()));

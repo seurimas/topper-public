@@ -5,6 +5,26 @@ use crate::{
     bt_match::{BranchPlan, format_time},
 };
 
+fn write_agent_state(f: &mut fmt::Formatter<'_>, name: &str, state: &AgentState) -> fmt::Result {
+    let affs: Vec<String> = state.flags.aff_iter().map(|fl| format!("{}", fl)).collect();
+    let affs_str = if affs.is_empty() {
+        "none".to_string()
+    } else {
+        affs.join(", ")
+    };
+    writeln!(
+        f,
+        "  {} | bal={} eq={} pill={} salve={} smoke={} | affs=[{}]",
+        name,
+        state.balanced(BType::Balance),
+        state.balanced(BType::Equil),
+        state.balanced(BType::Pill),
+        state.balanced(BType::Salve),
+        state.balanced(BType::Smoke),
+        affs_str,
+    )
+}
+
 /// A structured description of the first divergence found in a log.
 pub struct Divergence {
     pub time: i32,
@@ -94,46 +114,8 @@ impl fmt::Display for Divergence {
         writeln!(f)?;
 
         // Agent states
-        {
-            let affs: Vec<String> = self
-                .player_state
-                .flags
-                .aff_iter()
-                .map(|fl| format!("{}", fl))
-                .collect();
-            writeln!(
-                f,
-                "  {} | balance={} equil={} | affs=[{}]",
-                self.player_name,
-                self.player_state.balanced(BType::Balance),
-                self.player_state.balanced(BType::Equil),
-                if affs.is_empty() {
-                    "none".to_string()
-                } else {
-                    affs.join(", ")
-                }
-            )?;
-        }
-        {
-            let affs: Vec<String> = self
-                .opponent_state
-                .flags
-                .aff_iter()
-                .map(|fl| format!("{}", fl))
-                .collect();
-            writeln!(
-                f,
-                "  {} | balance={} equil={} | affs=[{}]",
-                self.opponent_name,
-                self.opponent_state.balanced(BType::Balance),
-                self.opponent_state.balanced(BType::Equil),
-                if affs.is_empty() {
-                    "none".to_string()
-                } else {
-                    affs.join(", ")
-                }
-            )?;
-        }
+        write_agent_state(f, &self.player_name, &self.player_state)?;
+        write_agent_state(f, &self.opponent_name, &self.opponent_state)?;
 
         write!(
             f,

@@ -1,7 +1,7 @@
 use regex::Regex;
 
-use crate::curatives::remove_in_order;
 use crate::curatives::RANDOM_CURES;
+use crate::curatives::remove_in_order;
 use crate::non_agent::AetTimelineRoomExt;
 use crate::timeline::*;
 use crate::types::*;
@@ -529,7 +529,6 @@ pub fn handle_combat_action(
             });
         }
         "Parallax" => {
-            println!("Parallax: {:?}", after);
             if let Some(AetObservation::Proc(weave)) = after.get(1) {
                 if !weave.skill.eq_ignore_ascii_case("parallax weave") {
                     return Ok(());

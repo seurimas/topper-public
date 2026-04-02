@@ -20,7 +20,7 @@ use topper_aetolia::{
 };
 
 fn main() {
-    let (log_path, player_name, tree_name, config_path, slice_dump) = parse_args();
+    let (log_path, player_name, tree_name, config_path, slice_dump, verbose) = parse_args();
     let config = load_config(&config_path);
     let (page, opponent_name) = load_log(&log_path, &player_name, &tree_name);
 
@@ -40,7 +40,7 @@ fn main() {
     }
     println!("Processing {} time slices...\n", time_slices.len());
 
-    let mut runner = MatchRunner::new(player_name, opponent_name, tree_name, config);
+    let mut runner = MatchRunner::new(player_name, opponent_name, tree_name, config, verbose);
     for slice in &time_slices {
         if let Err(div) = runner.process_slice(slice) {
             print!("{}", div);
@@ -50,13 +50,14 @@ fn main() {
     runner.finish();
 }
 
-fn parse_args() -> (String, String, String, String, bool) {
+fn parse_args() -> (String, String, String, String, bool, bool) {
     let args: Vec<String> = env::args().collect();
     let mut log_path: Option<String> = None;
     let mut player_name: Option<String> = None;
     let mut tree_name: Option<String> = None;
     let mut config_path = "bt_match.json".to_string();
     let mut slice_dump = false;
+    let mut verbose = false;
 
     let mut i = 1;
     while i < args.len() {
@@ -81,6 +82,10 @@ fn parse_args() -> (String, String, String, String, bool) {
                 slice_dump = true;
                 i += 1;
             }
+            "--verbose" | "-v" => {
+                verbose = true;
+                i += 1;
+            }
             _ => {
                 i += 1;
             }
@@ -100,7 +105,7 @@ fn parse_args() -> (String, String, String, String, bool) {
         eprintln!("{}", USAGE);
         std::process::exit(2);
     });
-    (log_path, player_name, tree_name, config_path, slice_dump)
+    (log_path, player_name, tree_name, config_path, slice_dump, verbose)
 }
 
 fn load_config(path: &str) -> BtMatchConfig {

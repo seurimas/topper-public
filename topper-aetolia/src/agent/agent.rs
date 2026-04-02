@@ -1232,7 +1232,7 @@ impl AgentState {
         }
     }
 
-    pub fn assume_sentinel(&mut self, action: fn(&mut SentinelClassState)) {
+    pub fn assume_sentinel(&mut self, action: &impl Fn(&mut SentinelClassState)) {
         match &mut self.class_state {
             ClassState::Sentinel(s) | ClassState::Executor(s) => action(s),
             _ => {

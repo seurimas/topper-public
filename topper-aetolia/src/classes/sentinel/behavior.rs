@@ -565,6 +565,7 @@ fn call_beasts_behavior(
     if available_slots == 0 && !needed.is_empty() {
         // No room — dismiss an unwanted beast
         if let Some(to_dismiss) = unwanted.first() {
+            println!("Dismissing {:?} to summon {:?}", to_dismiss, needed.first().unwrap());
             let name = beast_dismiss_name(to_dismiss, mirrored);
             controller
                 .plan

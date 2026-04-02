@@ -2,5 +2,11 @@
   "ignore": [
     "Passive Order",
     "Focus"
-  ]
+  ],
+  "skill_traps": {
+    "CallCoyote": [
+      {"Proc": {"caster": "LOG_ME", "category": "Woodlore", "skill": "Calling", "annotation": "", "target": ""}},
+      {"Proc": {"caster": "", "category": "Woodlore", "skill": "Called", "annotation": "coyote", "target": ""}}
+    ]
+  }
 }

@@ -1036,12 +1036,12 @@ pub fn get_stack_from_file(class: &String, stack_name: &String) -> Option<Vec<Ve
     {
         let mut trees = LOADED_VENOM_PLANS.write().unwrap();
         let stack_json = unsafe { LOAD_STACK_FUNC.unwrap()(class, stack_name) };
-        println!(
-            "Loading {}'s {} stack ({})",
-            class,
-            stack_name,
-            stack_json.len()
-        );
+        // println!(
+        //     "Loading {}'s {} stack ({})",
+        //     class,
+        //     stack_name,
+        //     stack_json.len()
+        // );
         match serde_json::from_str::<Vec<VenomPlan>>(&stack_json) {
             Ok(stack_def) => {
                 trees.insert(format!("{}_{}", class, stack_name), Some(stack_def.clone()));
