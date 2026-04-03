@@ -9,11 +9,7 @@ pub fn get_needed_parry<DB: AetDatabaseModule + ?Sized>(
     if let Ok(parry) = get_preferred_parry(timeline, me, target, db) {
         let me = timeline.state.borrow_agent(me);
         if let Some(current) = me.parrying {
-            if current == parry {
-                None
-            } else {
-                Some(parry)
-            }
+            if current == parry { None } else { Some(parry) }
         } else {
             Some(parry)
         }
@@ -133,8 +129,8 @@ pub fn get_preferred_parry<DB: AetDatabaseModule + ?Sized>(
             }
             Class::Sentinel => {
                 let myself = timeline.state.borrow_agent(me);
-                if !myself.is(FType::Impatience) {
-                    Ok(LType::HeadDamage)
+                if !myself.is(FType::Arrhythmia) {
+                    Ok(LType::TorsoDamage)
                 } else if let Some(parry) = get_restore_parry(timeline, me) {
                     Ok(parry)
                 } else {

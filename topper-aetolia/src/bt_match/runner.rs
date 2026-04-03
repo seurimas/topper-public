@@ -13,12 +13,13 @@ use crate::{
     agent::{AgentState, BType, CType, FType},
     bt::{BehaviorController, BehaviorModel, DEBUG_TREES, get_tree},
     bt_match::{BtMatchConfig, Divergence, format_time},
-    classes::AFFLICT_VENOMS,
+    classes::{AFFLICT_VENOMS, get_controller},
     observables::ActionPlan,
     timeline::{AetObservation, AetTimeSlice, AetTimeline, CombatAction, simulation_slice},
 };
 
 /// What a single BT state-branch predicted.
+#[derive(Debug, Clone)]
 pub struct BranchPlan {
     pub skills: Vec<String>,
     /// Resolved venom names (empty when no venoms were checked for this run).
@@ -49,6 +50,7 @@ pub struct MatchRunner {
     timeline: AetTimeline,
     tree_arc: TreeArc,
     pub match_count: usize,
+    skips: Vec<i32>,
 }
 
 impl MatchRunner {
@@ -58,6 +60,7 @@ impl MatchRunner {
         tree_name: String,
         config: BtMatchConfig,
         verbose: bool,
+        skips: Vec<i32>,
     ) -> Self {
         let tree_arc = get_tree(&tree_name);
         Self {
@@ -69,6 +72,7 @@ impl MatchRunner {
             timeline: AetTimeline::new(),
             tree_arc,
             match_count: 0,
+            skips,
         }
     }
 
@@ -96,13 +100,6 @@ impl MatchRunner {
                 _ => None,
             })
             .collect();
-
-        if observed_skills.is_empty() {
-            self.timeline
-                .push_time_slice(time_slice.clone(), None as Option<&DummyDatabaseModule>)
-                .ok();
-            return Ok(());
-        }
 
         // 2. Venoms actually delivered in this slice.
         //    Source A: Devenoms (first-person, viewer is attacker).
@@ -157,7 +154,7 @@ impl MatchRunner {
             time_slice.time,
         );
 
-        if any_match {
+        if any_match && !observed_skills.is_empty() {
             let skill_str = observed_skills.join(", ");
             let suffix = fix_label.map(|l| format!(" ({})", l)).unwrap_or_default();
             if observed_venoms.is_empty() {
@@ -179,7 +176,15 @@ impl MatchRunner {
                 );
             }
             self.match_count += observed_skills.len();
-        } else {
+        } else if self.skips.contains(&time_slice.time) {
+            println!(
+                "[{}] SKIPPED {} -> {} (venoms: {})",
+                format_time(time_slice.time),
+                self.player_name,
+                observed_skills.join(", "),
+                observed_venoms.join(", ")
+            );
+        } else if !observed_skills.is_empty() {
             if self.verbose {
                 unsafe {
                     DEBUG_TREES = true;
@@ -229,6 +234,13 @@ impl MatchRunner {
         }
     }
 
+    /// Create a copy of the timeline with `me` set to the player being analyzed.
+    fn player_timeline(&self) -> AetTimeline {
+        let mut tl = self.timeline.clone();
+        tl.state.me = self.player_name.clone();
+        tl
+    }
+
     /// Run the BT against every state branch; return whether any branch matched
     /// all observed skills and venoms.
     fn check_tree(
@@ -238,12 +250,25 @@ impl MatchRunner {
         n_skippable: usize,
     ) -> (bool, Vec<BranchPlan>) {
         let class_hint = self.tree_name.split('/').next().unwrap_or("");
+        let strategy_hint = self.tree_name.split('/').nth(1).unwrap_or("");
         let mut tree_guard = self.tree_arc.lock().unwrap();
         let mut branch_plans: Vec<BranchPlan> = Vec::new();
 
-        let mut controller = BehaviorController::default();
-        controller.plan = ActionPlan::new(&self.player_name);
-        controller.target = Some(self.opponent_name.clone());
+        let mut controller = get_controller(
+            match class_hint {
+                "predator" => "predator",
+                "monk" => "monk",
+                "zealot" => "zealot",
+                "infiltrator" => "infiltrator",
+                "sentinel" => "sentinel",
+                _ => "",
+            },
+            &self.player_name,
+            &self.opponent_name,
+            &self.timeline,
+            &strategy_hint.to_string(),
+            None as Option<&DummyDatabaseModule>,
+        );
         match class_hint {
             "predator" => controller.init_predator(),
             "monk" => controller.init_monk(),
@@ -252,18 +277,15 @@ impl MatchRunner {
             _ => {}
         }
 
-        tree_guard.reset(&self.timeline);
-        tree_guard.resume_with(&self.timeline, &mut controller);
+        let player_tl = self.player_timeline();
+        tree_guard.reset(&player_tl);
+        tree_guard.resume_with(&player_tl, &mut controller);
 
         let skills = controller.plan.get_skills();
 
         // Resolve planned venoms when the slice has venom activity.
         let venoms: Vec<String> = if !observed_venoms.is_empty() || n_skippable > 0 {
-            let opp_state = self
-                .timeline
-                .state
-                .borrow_agent(&self.opponent_name)
-                .clone();
+            let opp_state = player_tl.state.borrow_agent(&self.opponent_name).clone();
             controller
                 .get_venoms_from_plan(observed_venoms.len() + n_skippable, &opp_state, &vec![])
                 .iter()
@@ -305,14 +327,27 @@ impl MatchRunner {
         timeline_fixes: &'a [(&'a str, Box<dyn Fn(&mut AgentState)>)],
         time: CType,
     ) -> (bool, Vec<BranchPlan>, Option<&'a str>) {
+        if observed_skills.is_empty() {
+            return (true, vec![], None);
+        }
+        let mut plans: Vec<BranchPlan> = Vec::new();
         // First try without any fixes.
-        let (matched, plans) = self.check_tree(observed_skills, observed_venoms, n_skippable);
+        let (matched, base_plans) = self.check_tree(observed_skills, observed_venoms, n_skippable);
+        plans.extend(base_plans.clone());
         let traps_fired = self.fire_skill_traps(&plans, time);
         if matched {
             return (true, plans, None);
         }
         if traps_fired {
-            let (matched, plans) = self.check_tree(observed_skills, observed_venoms, n_skippable);
+            println!("Traps fired");
+            let (matched, trap_plans, _) = self.check_and_fix(
+                observed_skills,
+                observed_venoms,
+                n_skippable,
+                timeline_fixes,
+                time,
+            );
+            plans.extend(trap_plans.clone());
             if matched {
                 return (true, plans, None);
             }
@@ -324,17 +359,26 @@ impl MatchRunner {
             let mut fixed_timeline = self.timeline.branch();
             fixed_timeline.state.for_all_agents(fix);
             self.timeline = fixed_timeline;
-            let (matched, plans) = self.check_tree(observed_skills, observed_venoms, n_skippable);
+            let (matched, fix_plans) =
+                self.check_tree(observed_skills, observed_venoms, n_skippable);
+            plans.extend(fix_plans.clone());
             self.timeline = original_timeline;
             let traps_fired = self.fire_skill_traps(&plans, time);
             if matched {
-                return (true, plans, Some(label));
+                return (true, fix_plans, Some(label));
             }
             if traps_fired {
-                let (matched, plans) =
-                    self.check_tree(observed_skills, observed_venoms, n_skippable);
+                println!("Traps fired on fixed timeline");
+                let (matched, trap_fix_plans, _) = self.check_and_fix(
+                    observed_skills,
+                    observed_venoms,
+                    n_skippable,
+                    timeline_fixes,
+                    time,
+                );
+                plans.extend(trap_fix_plans.clone());
                 if matched {
-                    return (true, plans, Some(label));
+                    return (true, trap_fix_plans, Some(label));
                 }
             }
         }

@@ -55,7 +55,7 @@ impl TargetPredicate for SentinelPredicate {
                 SentinelPredicate::HotResinIs(resin) => {
                     target.resin_state.hot.as_ref() == Some(resin)
                 }
-                SentinelPredicate::IsBurning => target.resin_state.burning,
+                SentinelPredicate::IsBurning => target.resin_state.burning.is_active(),
                 SentinelPredicate::ResinTicksOver(n) => target.resin_state.ticks_left >= *n,
 
                 // ── Alacrity ─────────────────────────────────────────────
@@ -72,9 +72,13 @@ impl TargetPredicate for SentinelPredicate {
                     .unwrap_or(false),
 
                 // ── First strike window ─────────────────────────────────
-                SentinelPredicate::HasFirstStrike => target
-                    .check_if_sentinel(&|s| s.has_first_strike())
-                    .unwrap_or(false),
+                SentinelPredicate::HasFirstStrike => {
+                    let result = target.check_if_sentinel(&|s| {
+                        let active = s.has_first_strike(false) || s.has_first_strike(true);
+                        active
+                    });
+                    result.unwrap_or(false)
+                }
                 SentinelPredicate::FirstStrikeExpiring => target
                     .check_if_sentinel(&|s| {
                         s.first_strike_timer.is_active()

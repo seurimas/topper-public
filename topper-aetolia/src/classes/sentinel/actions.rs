@@ -4,8 +4,20 @@ use crate::timeline::*;
 use crate::types::*;
 use crate::untargetted_action;
 
-untargetted_action!(CallWisp, "call wisp", "fabricate lurker", "CallWisp", "CallWisp");
-untargetted_action!(CallWeasel, "call weasel", "fabricate wardpeeler", "CallWeasel", "CallWeasel");
+untargetted_action!(
+    CallWisp,
+    "call wisp",
+    "fabricate lurker",
+    "CallWisp",
+    "CallWisp"
+);
+untargetted_action!(
+    CallWeasel,
+    "call weasel",
+    "fabricate wardpeeler",
+    "CallWeasel",
+    "CallWeasel"
+);
 untargetted_action!(
     CallNightingale,
     "call nightingale",
@@ -13,15 +25,69 @@ untargetted_action!(
     "CallNightingale",
     "CallNightingale"
 );
-untargetted_action!(CallRook, "call rook", "fabricate murder", "CallRook", "CallRook");
-untargetted_action!(CallCoyote, "call coyote", "fabricate darkhound", "CallCoyote", "CallCoyote");
-untargetted_action!(CallRaccoon, "call raccoon", "fabricate pilferer", "CallRaccoon", "CallRaccoon");
-untargetted_action!(CallElk, "call elk", "fabricate monstrosity", "CallElk", "CallElk");
-untargetted_action!(CallGyrfalcon, "call gyrfalcon", "fabricate throatripper", "CallGyrfalcon", "CallGyrfalcon");
-untargetted_action!(CallRaloth, "call raloth", "fabricate brutaliser", "CallRaloth", "CallRaloth");
-untargetted_action!(CallCrocodile, "call crocodile", "fabricate eviscerator", "CallCrocodile", "CallCrocodile");
-untargetted_action!(CallIcewyrm, "call icewyrm", "fabricate rimestalker", "CallIcewyrm", "CallIcewyrm");
-untargetted_action!(CallCockatrice, "call cockatrice", "fabricate terrifier", "CallCockatrice", "CallCockatrice");
+untargetted_action!(
+    CallRook,
+    "call rook",
+    "fabricate murder",
+    "CallRook",
+    "CallRook"
+);
+untargetted_action!(
+    CallCoyote,
+    "call coyote",
+    "fabricate darkhound",
+    "CallCoyote",
+    "CallCoyote"
+);
+untargetted_action!(
+    CallRaccoon,
+    "call raccoon",
+    "fabricate pilferer",
+    "CallRaccoon",
+    "CallRaccoon"
+);
+untargetted_action!(
+    CallElk,
+    "call elk",
+    "fabricate monstrosity",
+    "CallElk",
+    "CallElk"
+);
+untargetted_action!(
+    CallGyrfalcon,
+    "call gyrfalcon",
+    "fabricate throatripper",
+    "CallGyrfalcon",
+    "CallGyrfalcon"
+);
+untargetted_action!(
+    CallRaloth,
+    "call raloth",
+    "fabricate brutaliser",
+    "CallRaloth",
+    "CallRaloth"
+);
+untargetted_action!(
+    CallCrocodile,
+    "call crocodile",
+    "fabricate eviscerator",
+    "CallCrocodile",
+    "CallCrocodile"
+);
+untargetted_action!(
+    CallIcewyrm,
+    "call icewyrm",
+    "fabricate rimestalker",
+    "CallIcewyrm",
+    "CallIcewyrm"
+);
+untargetted_action!(
+    CallCockatrice,
+    "call cockatrice",
+    "fabricate terrifier",
+    "CallCockatrice",
+    "CallCockatrice"
+);
 targetted_action!(
     Icebreath,
     "order icewyrm icebreath {}",
@@ -79,7 +145,13 @@ targetted_action!(
     "Hurl",
     "Splatter"
 );
-targetted_action!(Combust, "resin combust {}", "toxin kindle {}", "Combust", "Kindle");
+targetted_action!(
+    Combust,
+    "resin combust {}",
+    "toxin kindle {}",
+    "Combust",
+    "Kindle"
+);
 untargetted_action!(Alacrity, "alacrity", "efficiency", "Alacrity", "Alacrity");
 
 targetted_action!(
@@ -136,12 +208,56 @@ targetted_action!(
     "Terminate"
 );
 targetted_action!(
-    WhirlAction,
-    "dhuriv whirl {}",
-    "ringblade pirouette {}",
-    "Whirl",
-    "Pirouette"
+    ThroatcrushAction,
+    "dhuriv throatcrush {}",
+    "ringblade stifle {}",
+    "Throatcrush",
+    "Stifle"
 );
+
+pub struct WhirlAction {
+    pub caster: String,
+    pub target: String,
+    pub venom: String,
+    pub follow_up: bool,
+}
+
+impl WhirlAction {
+    pub fn new(caster: String, target: String, venom: String, follow_up: bool) -> Self {
+        WhirlAction {
+            caster,
+            target,
+            venom,
+            follow_up,
+        }
+    }
+}
+
+impl ActiveTransition for WhirlAction {
+    fn simulate(&self, _timeline: &AetTimeline) -> Vec<ProbableEvent> {
+        Vec::new()
+    }
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        let mirrored = timeline
+            .state
+            .borrow_agent(&self.caster)
+            .class_state
+            .is_mirrored();
+        if self.follow_up {
+            Ok(format!("envenom dhuriv with {}", self.venom))
+        } else if !mirrored {
+            Ok(format!("dhuriv whirl {} {}", self.target, self.venom))
+        } else {
+            Ok(format!(
+                "ringblade pirouette {} {}",
+                self.target, self.venom
+            ))
+        }
+    }
+    fn skill_names(&self) -> Vec<String> {
+        vec!["Whirl".to_string(), "Pirouette".to_string()]
+    }
+}
 
 pub struct FirstStrikeAction {
     pub caster: String,
@@ -187,8 +303,10 @@ impl ActiveTransition for FirstStrikeAction {
             FirstStrike::Reave => "Reave",
             FirstStrike::Trip => "Trip",
             FirstStrike::Slam => "Slam",
-            FirstStrike::DauntCoyote | FirstStrike::DauntRaloth
-            | FirstStrike::DauntCrocodile | FirstStrike::DauntCockatrice => "Daunt",
+            FirstStrike::DauntCoyote
+            | FirstStrike::DauntRaloth
+            | FirstStrike::DauntCrocodile
+            | FirstStrike::DauntCockatrice => "Daunt",
             FirstStrike::Icebreath => "Icebreath",
             FirstStrike::Combust => "Combust",
         };
@@ -203,8 +321,10 @@ impl ActiveTransition for FirstStrikeAction {
             FirstStrike::Reave => "Shave",
             FirstStrike::Trip => "Gambol",
             FirstStrike::Slam => "Perplex",
-            FirstStrike::DauntCoyote | FirstStrike::DauntRaloth
-            | FirstStrike::DauntCrocodile | FirstStrike::DauntCockatrice => "Accost",
+            FirstStrike::DauntCoyote
+            | FirstStrike::DauntRaloth
+            | FirstStrike::DauntCrocodile
+            | FirstStrike::DauntCockatrice => "Accost",
             FirstStrike::Icebreath => "Verglas",
             FirstStrike::Combust => "Kindle",
         };
@@ -323,8 +443,10 @@ impl ActiveTransition for ComboAction {
             FirstStrike::Reave => "Reave",
             FirstStrike::Trip => "Trip",
             FirstStrike::Slam => "Slam",
-            FirstStrike::DauntCoyote | FirstStrike::DauntRaloth
-            | FirstStrike::DauntCrocodile | FirstStrike::DauntCockatrice => "Daunt",
+            FirstStrike::DauntCoyote
+            | FirstStrike::DauntRaloth
+            | FirstStrike::DauntCrocodile
+            | FirstStrike::DauntCockatrice => "Daunt",
             FirstStrike::Icebreath => "Icebreath",
             FirstStrike::Combust => "Combust",
         };
@@ -340,8 +462,10 @@ impl ActiveTransition for ComboAction {
             FirstStrike::Reave => "Shave",
             FirstStrike::Trip => "Gambol",
             FirstStrike::Slam => "Perplex",
-            FirstStrike::DauntCoyote | FirstStrike::DauntRaloth
-            | FirstStrike::DauntCrocodile | FirstStrike::DauntCockatrice => "Accost",
+            FirstStrike::DauntCoyote
+            | FirstStrike::DauntRaloth
+            | FirstStrike::DauntCrocodile
+            | FirstStrike::DauntCockatrice => "Accost",
             FirstStrike::Icebreath => "Verglas",
             FirstStrike::Combust => "Kindle",
         };

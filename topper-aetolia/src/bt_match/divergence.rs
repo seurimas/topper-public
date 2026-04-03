@@ -66,6 +66,7 @@ impl fmt::Display for Divergence {
 
         // Per-branch plans
         for (i, branch) in self.branch_plans.iter().enumerate() {
+            writeln!(f, "  branch {} plan: {}", i + 1, branch.qeb_inputs);
             if branch.skills.is_empty() {
                 writeln!(f, "  branch {}: (no action)", i + 1)?;
                 continue;
@@ -117,7 +118,7 @@ impl fmt::Display for Divergence {
         write_agent_state(f, &self.player_name, &self.player_state)?;
         write_agent_state(f, &self.opponent_name, &self.opponent_state)?;
 
-        write!(
+        writeln!(
             f,
             "\n{} actions matched before first divergence.",
             self.matches_before

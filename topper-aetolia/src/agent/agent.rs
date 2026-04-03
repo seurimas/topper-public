@@ -753,6 +753,15 @@ impl AgentState {
             } else {
                 earliest_escape = earliest_escape.or(Some(Timer::count_down_seconds(15.)))
             }
+        } else if self.is(FType::Asthma)
+            && self.is(FType::Slickness)
+            && self.is(FType::DestroyedThroat)
+        {
+            if !self.is(FType::Paralysis) && !self.is(FType::Paresis) {
+                earliest_escape = Some(self.balances[BType::Tree as usize]);
+            } else {
+                earliest_escape = Some(Timer::count_down_seconds(15.));
+            }
         }
         earliest_escape.map(|escape| escape.get_time_left_seconds())
     }

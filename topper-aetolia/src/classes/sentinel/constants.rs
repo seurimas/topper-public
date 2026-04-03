@@ -1,7 +1,7 @@
 use crate::{affliction_plan_stacker, classes::AFFLICT_VENOMS, classes::*, types::*};
 use std::collections::HashMap;
 
-#[derive(PartialEq, Eq, Clone, Copy, Hash)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub enum FirstStrike {
     Slash(&'static str),
     Ambush(&'static str),
@@ -108,6 +108,21 @@ impl FirstStrike {
         }
     }
 
+    pub fn afflictions(&self) -> Vec<FType> {
+        match self {
+            FirstStrike::Blind => vec![FType::Blindness],
+            FirstStrike::Twirl => vec![FType::Confusion],
+            FirstStrike::Strike => vec![FType::Dazed],
+            FirstStrike::Crosscut => vec![FType::Impairment, FType::Addiction],
+            FirstStrike::WeakenArms => vec![FType::FeebleArms],
+            FirstStrike::WeakenLegs => vec![FType::FeebleLegs],
+            FirstStrike::Reave => vec![FType::Lethargy],
+            FirstStrike::Trip => vec![FType::Fallen],
+            FirstStrike::Slam => vec![FType::Epilepsy, FType::Laxity],
+            _ => vec![],
+        }
+    }
+
     pub fn flourish(&self) -> bool {
         match self {
             FirstStrike::DauntCoyote
@@ -128,7 +143,7 @@ impl FirstStrike {
     }
 }
 
-#[derive(PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum SecondStrike {
     Stab(&'static str),
     Slice(&'static str),
@@ -200,6 +215,19 @@ impl SecondStrike {
             | SecondStrike::Thrust(venom) => venom,
             _ => "",
         }
+    }
+
+    pub fn affliction(&self) -> Option<FType> {
+        match self {
+            SecondStrike::Gouge => Some(FType::Impatience),
+            SecondStrike::Heartbreaker => Some(FType::Arrhythmia),
+            SecondStrike::Slit => Some(FType::CrippledThroat),
+            _ => None,
+        }
+    }
+
+    pub fn is_flourish(&self) -> bool {
+        matches!(self, SecondStrike::Flourish(_venom))
     }
 }
 

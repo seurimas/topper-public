@@ -78,7 +78,6 @@ fn resin_state(resin: &ResinState) -> String {
         hot,
         cold,
         burning,
-        burning_time,
         ticks_left,
     } = resin;
     let hot_cold = if hot.is_none() && cold.is_none() {
@@ -95,13 +94,13 @@ fn resin_state(resin: &ResinState) -> String {
             ticks_left
         )
     };
-    if !*burning {
+    if !burning.is_active() {
         format!("{} <white>(not burning)", hot_cold)
     } else {
         format!(
             "{} <red>(TTH: {:02}s)",
             hot_cold,
-            (*burning_time as f32) / BALANCE_SCALE
+            burning.get_time_left_seconds()
         )
     }
 }

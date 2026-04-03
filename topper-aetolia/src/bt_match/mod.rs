@@ -17,13 +17,15 @@ use crate::{
     timeline::{AetObservation, AetTimeSlice, AetTimeline, CombatAction},
     types::{AgentState, BType, FType},
 };
+mod aff_stack;
 mod bt;
 mod config;
 mod display;
 mod divergence;
 mod runner;
+pub use aff_stack::set_aff_stack_dir;
 pub use bt::set_bt_dir;
 pub use config::BtMatchConfig;
-pub use display::{format_time, print_agent_state};
+pub use display::{format_time, parse_time, print_agent_state};
 pub use divergence::Divergence;
 pub use runner::{BranchPlan, MatchRunner};

@@ -47,6 +47,7 @@ pub fn handle_combat_action(
             );
         }
         "Slash" | "Ambush" => {
+            println!("Handling Slash/Ambush...");
             let observations = after.clone();
             let first_person = combat_action.caster.eq(&agent_states.me);
             let hints =
@@ -64,7 +65,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &move |me: &mut AgentState| {
                     apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
-                    me.assume_sentinel(&|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike(false));
                 },
             );
         }
@@ -169,7 +170,7 @@ pub fn handle_combat_action(
                 agent_states,
                 &combat_action.caster,
                 &|me: &mut AgentState| {
-                    me.assume_sentinel(&|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike(false));
                 },
             );
         }
@@ -184,7 +185,7 @@ pub fn handle_combat_action(
                 agent_states,
                 &combat_action.caster,
                 &|me: &mut AgentState| {
-                    me.assume_sentinel(&|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike(false));
                 },
             );
         }
@@ -226,6 +227,15 @@ pub fn handle_combat_action(
                     you.resin_state.hot_burn();
                 });
             }
+            "cold" => {
+                for_agent(
+                    agent_states,
+                    &combat_action.caster,
+                    &|you: &mut AgentState| {
+                        you.resin_state.cold_burn();
+                    },
+                );
+            }
             _ => {}
         },
         "Crosscut" => {
@@ -251,7 +261,7 @@ pub fn handle_combat_action(
                 agent_states,
                 &combat_action.caster,
                 &|me: &mut AgentState| {
-                    me.assume_sentinel(&|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike(false));
                 },
             );
         }
@@ -302,7 +312,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &move |me: &mut AgentState| {
                     apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
-                    me.assume_sentinel(&|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike(false));
                 },
             );
         }
@@ -312,7 +322,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &|me: &mut AgentState| {
                     me.set_balance(BType::Balance, 2.25);
-                    me.assume_sentinel(&|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike(false));
                 },
             );
             attack_afflictions(
@@ -328,7 +338,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &|me: &mut AgentState| {
                     me.set_balance(BType::Balance, 2.25);
-                    me.assume_sentinel(&|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike(false));
                 },
             );
             attack_afflictions(
@@ -407,8 +417,7 @@ pub fn handle_combat_action(
             _ => {}
         },
         // State tracking for remaining resins. Hot burns clear the resin state; cold burns
-        // advance the tick counter. Specific cold/hot effects (damage, allergy severity,
-        // coagulation, etc.) are not modelled here.
+        // advance the tick counter. Specific cold/hot effects are not modelled here yet.
         "Pyrolum" | "Corsin" | "Harimel" | "Glauxe" | "Badulem" => {
             match combat_action.annotation.as_ref() {
                 "hot" => {
@@ -431,6 +440,7 @@ pub fn handle_combat_action(
             // The second hit fires while off balance and requires no equilibrium.
             let observations = after.clone();
             let first_person = combat_action.caster.eq(&agent_states.me);
+            let follow_up = combat_action.annotation == "followup";
             let hints =
                 agent_states.get_player_hint(&combat_action.caster, &"CALLED_VENOMS".to_string());
             apply_weapon_hits(
@@ -445,7 +455,12 @@ pub fn handle_combat_action(
                 agent_states,
                 &combat_action.caster,
                 &move |me: &mut AgentState| {
-                    apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
+                    if !follow_up {
+                        me.assume_sentinel(&|s| s.start_whirl());
+                        apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
+                    } else {
+                        me.assume_sentinel(&|s| s.confirm_whirl());
+                    }
                 },
             );
         }
@@ -464,7 +479,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &move |me: &mut AgentState| {
                     apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
-                    me.assume_sentinel(&|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike(true));
                 },
             );
         }
@@ -516,7 +531,7 @@ pub fn handle_combat_action(
                     &combat_action.caster,
                     &|me: &mut AgentState| {
                         me.set_balance(BType::Equil, 2.25);
-                        me.assume_sentinel(&|s| s.start_first_strike());
+                        me.assume_sentinel(&|s| s.start_first_strike(true));
                     },
                 );
                 attack_afflictions(
@@ -532,7 +547,7 @@ pub fn handle_combat_action(
                     &combat_action.caster,
                     &|me: &mut AgentState| {
                         me.set_balance(BType::Equil, 2.25);
-                        me.assume_sentinel(&|s| s.start_first_strike());
+                        me.assume_sentinel(&|s| s.start_first_strike(true));
                     },
                 );
                 attack_afflictions(
@@ -548,7 +563,7 @@ pub fn handle_combat_action(
                     &combat_action.caster,
                     &|me: &mut AgentState| {
                         me.set_balance(BType::Equil, 2.25);
-                        me.assume_sentinel(&|s| s.start_first_strike());
+                        me.assume_sentinel(&|s| s.start_first_strike(true));
                     },
                 );
                 attack_afflictions(
@@ -564,7 +579,7 @@ pub fn handle_combat_action(
                     &combat_action.caster,
                     &|me: &mut AgentState| {
                         me.set_balance(BType::Equil, 2.25);
-                        me.assume_sentinel(&|s| s.start_first_strike());
+                        me.assume_sentinel(&|s| s.start_first_strike(true));
                     },
                 );
                 attack_afflictions(
@@ -582,7 +597,7 @@ pub fn handle_combat_action(
                 &combat_action.caster,
                 &|me: &mut AgentState| {
                     me.set_balance(BType::Equil, 2.25);
-                    me.assume_sentinel(&|s| s.start_first_strike());
+                    me.assume_sentinel(&|s| s.start_first_strike(true));
                 },
             );
             attack_strip_or_afflict(

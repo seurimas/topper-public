@@ -29,9 +29,11 @@ pub enum SentinelBehavior {
     // Special weapon attacks
     SentinelDualraze(AetTarget),
     Spinecut(AetTarget),
-    Whirl(AetTarget),
+    WhirlStart(AetTarget),
+    WhirlContinue(AetTarget),
     SentinelPierce(AetTarget, String),
     SentinelSever(AetTarget, String),
+    SentinelThroatcrush(AetTarget),
     // Raloth trample
     RalothTrample(AetTarget),
     // Self-buffs / class cures
@@ -83,20 +85,7 @@ fn resolve_first_strike(
         controller
             .aff_priorities
             .as_ref()
-            .and_then(|affs| {
-                get_first_strike_from_plan(
-                    affs,
-                    1,
-                    target,
-                    &vec![
-                        FType::LeftLegCrippled,
-                        FType::RightLegCrippled,
-                        FType::LeftArmCrippled,
-                        FType::RightArmCrippled,
-                    ],
-                )
-                .pop()
-            })
+            .and_then(|affs| get_first_strike_from_plan(affs, 1, target, &vec![]).pop())
             .and_then(|fs| {
                 let v = fs.venom();
                 if v.is_empty() { None } else { Some(v) }
@@ -133,20 +122,7 @@ fn resolve_second_strike(
         controller
             .aff_priorities
             .as_ref()
-            .and_then(|affs| {
-                get_second_strike_from_plan(
-                    affs,
-                    1,
-                    target,
-                    &vec![
-                        FType::LeftLegCrippled,
-                        FType::RightLegCrippled,
-                        FType::LeftArmCrippled,
-                        FType::RightArmCrippled,
-                    ],
-                )
-                .pop()
-            })
+            .and_then(|affs| get_second_strike_from_plan(affs, 1, target, &vec![]).pop())
             .and_then(|ss| {
                 let v = ss.venom();
                 if v.is_empty() { None } else { Some(v) }
@@ -253,6 +229,10 @@ impl UnpoweredFunction for SentinelBehavior {
             SentinelBehavior::SentinelFirstStrike(target, first_spec) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
                     let first_strike = resolve_first_strike(first_spec, controller, target_agent);
+                    let afflictions = first_strike.afflictions();
+                    if !afflictions.is_empty() && afflictions.iter().all(|a| target_agent.is(*a)) {
+                        return UnpoweredFunctionState::Failed;
+                    }
                     controller.plan.add_to_qeb(Box::new(FirstStrikeAction::new(
                         model.who_am_i(),
                         target.get_name(model, controller),
@@ -267,8 +247,20 @@ impl UnpoweredFunction for SentinelBehavior {
             // ── Standalone second strike ─────────────────────────────────
             SentinelBehavior::SentinelSecondStrike(target, second_spec) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
+                    let me = model.state.borrow_me();
                     let second_strike =
                         resolve_second_strike(second_spec, controller, target_agent);
+                    if second_strike.is_flourish()
+                        && !me
+                            .check_if_sentinel(&|s| s.has_first_strike(true))
+                            .unwrap_or(false)
+                    {
+                        return UnpoweredFunctionState::Failed;
+                    } else if let Some(affliction) = second_strike.affliction() {
+                        if target_agent.is(affliction) {
+                            return UnpoweredFunctionState::Failed;
+                        }
+                    }
                     controller.plan.add_to_qeb(Box::new(SecondStrikeAction::new(
                         model.who_am_i(),
                         target.get_name(model, controller),
@@ -284,18 +276,10 @@ impl UnpoweredFunction for SentinelBehavior {
             SentinelBehavior::SentinelCombo(target) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
                     let stack = controller.aff_priorities.clone();
-                    let limb_filter = vec![
-                        FType::LeftLegCrippled,
-                        FType::RightLegCrippled,
-                        FType::LeftArmCrippled,
-                        FType::RightArmCrippled,
-                    ];
                     // Pick first strike
                     let first_strike = stack
                         .as_ref()
-                        .and_then(|s| {
-                            get_first_strike_from_plan(s, 1, target_agent, &limb_filter).pop()
-                        })
+                        .and_then(|s| get_first_strike_from_plan(s, 1, target_agent, &vec![]).pop())
                         .unwrap_or(FirstStrike::Slash("curare"));
                     // If target has rebounding and first strike doesn't ignore it, use Reave
                     let first_strike = if target_agent.is(FType::Rebounding)
@@ -303,6 +287,11 @@ impl UnpoweredFunction for SentinelBehavior {
                     {
                         FirstStrike::Reave
                     } else {
+                        println!(
+                            "Chose first strike {:?} against target with rebounding {:?}",
+                            first_strike,
+                            target_agent.is(FType::Rebounding)
+                        );
                         first_strike
                     };
                     // Assume first strike hits for second-strike planning
@@ -318,7 +307,7 @@ impl UnpoweredFunction for SentinelBehavior {
                         stack
                             .as_ref()
                             .and_then(|s| {
-                                get_venoms_from_plan(s, 1, &assumed, &limb_filter)
+                                get_venoms_from_plan(s, 1, &assumed, &vec![])
                                     .first()
                                     .and_then(|v| Some(SecondStrike::Flourish(v)))
                             })
@@ -327,7 +316,7 @@ impl UnpoweredFunction for SentinelBehavior {
                         stack
                             .as_ref()
                             .and_then(|s| {
-                                get_second_strike_from_plan(s, 1, &assumed, &limb_filter).pop()
+                                get_second_strike_from_plan(s, 1, &assumed, &vec![]).pop()
                             })
                             .unwrap_or(SecondStrike::Stab("curare"))
                     };
@@ -349,6 +338,22 @@ impl UnpoweredFunction for SentinelBehavior {
                     let first_strike = resolve_first_strike(first_spec, controller, target_agent);
                     let second_strike =
                         resolve_second_strike(second_spec, controller, target_agent);
+
+                    let first_afflictions = first_strike.afflictions();
+                    if !first_afflictions.is_empty()
+                        && first_afflictions.iter().all(|a| target_agent.is(*a))
+                    {
+                        return UnpoweredFunctionState::Failed;
+                    }
+
+                    let second_affliction = second_strike.affliction();
+                    if let Some(affliction) = second_affliction {
+                        // If second strike has an affliction, check it against the target before the first strike hits
+                        if target_agent.is(affliction) {
+                            return UnpoweredFunctionState::Failed;
+                        }
+                    }
+
                     controller.plan.add_to_qeb(Box::new(ComboAction::new(
                         model.who_am_i(),
                         target.get_name(model, controller),
@@ -384,11 +389,40 @@ impl UnpoweredFunction for SentinelBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
-            SentinelBehavior::Whirl(target) => {
-                if let Some(_target_agent) = target.get_target(model, controller) {
+            SentinelBehavior::WhirlStart(target) => {
+                if let Some(you) = target.get_target(model, controller) {
+                    let venom = controller
+                        .get_venoms_from_plan(1, you, &vec![])
+                        .first()
+                        .copied()
+                        .unwrap_or("curare");
                     controller.plan.add_to_qeb(Box::new(WhirlAction::new(
                         model.who_am_i(),
                         target.get_name(model, controller),
+                        venom.to_string(),
+                        false,
+                    )));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            SentinelBehavior::WhirlContinue(target) => {
+                if let Some(you) = target.get_target(model, controller) {
+                    let me = model.state.borrow_me();
+                    if !me.check_if_sentinel(&|s| s.whirl_coming()).unwrap_or(false) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    let venom = controller
+                        .get_venoms_from_plan(1, you, &vec![])
+                        .first()
+                        .copied()
+                        .unwrap_or("curare");
+                    controller.plan.add_to_qeb(Box::new(WhirlAction::new(
+                        model.who_am_i(),
+                        target.get_name(model, controller),
+                        venom.to_string(),
+                        true,
                     )));
                     UnpoweredFunctionState::Complete
                 } else {
@@ -440,6 +474,23 @@ impl UnpoweredFunction for SentinelBehavior {
                         _ => return UnpoweredFunctionState::Failed,
                     };
                     controller.plan.add_to_qeb(action);
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            SentinelBehavior::SentinelThroatcrush(target) => {
+                if let Some(target_agent) = target.get_target(model, controller) {
+                    if target_agent.is(FType::Rebounding)
+                        || target_agent.is(FType::Shielded)
+                        || target_agent.is(FType::DestroyedThroat)
+                    {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    controller.plan.add_to_qeb(Box::new(ThroatcrushAction::new(
+                        model.who_am_i(),
+                        target.get_name(model, controller),
+                    )));
                     UnpoweredFunctionState::Complete
                 } else {
                     UnpoweredFunctionState::Failed
@@ -565,7 +616,11 @@ fn call_beasts_behavior(
     if available_slots == 0 && !needed.is_empty() {
         // No room — dismiss an unwanted beast
         if let Some(to_dismiss) = unwanted.first() {
-            println!("Dismissing {:?} to summon {:?}", to_dismiss, needed.first().unwrap());
+            println!(
+                "Dismissing {:?} to summon {:?}",
+                to_dismiss,
+                needed.first().unwrap()
+            );
             let name = beast_dismiss_name(to_dismiss, mirrored);
             controller
                 .plan

@@ -760,6 +760,7 @@ impl FType {
             })
             .collect::<String>();
         match pretty.as_ref() {
+            "Heartflutter" => Some(FType::Arrhythmia),
             "Inoculated" => Some(FType::Imbued),
             "FungalInvasion" => Some(FType::Impeded),
             "Preymark" => Some(FType::Shadowbrand),

@@ -1,12 +1,154 @@
 {
   "ignore": [
     "Passive Order",
-    "Focus"
+    "Focus",
+    "Tree"
   ],
   "skill_traps": {
     "CallCoyote": [
-      {"Proc": {"caster": "LOG_ME", "category": "Woodlore", "skill": "Calling", "annotation": "", "target": ""}},
-      {"Proc": {"caster": "", "category": "Woodlore", "skill": "Called", "annotation": "coyote", "target": ""}}
+      {
+        "Proc": {
+          "caster": "LOG_ME",
+          "category": "Woodlore",
+          "skill": "Calling",
+          "annotation": "",
+          "target": ""
+        }
+      },
+      {
+        "Proc": {
+          "caster": "",
+          "category": "Woodlore",
+          "skill": "Called",
+          "annotation": "coyote",
+          "target": ""
+        }
+      },
+      {
+        "Proc": {
+          "caster": "LOG_ME",
+          "category": "TimelineFix",
+          "skill": "Balance",
+          "annotation": "",
+          "target": ""
+        }
+      }
+    ],
+    "CallCrocodile": [
+      {
+        "Proc": {
+          "caster": "LOG_ME",
+          "category": "Woodlore",
+          "skill": "Calling",
+          "annotation": "",
+          "target": ""
+        }
+      },
+      {
+        "Proc": {
+          "caster": "",
+          "category": "Woodlore",
+          "skill": "Called",
+          "annotation": "crocodile",
+          "target": ""
+        }
+      },
+      {
+        "Proc": {
+          "caster": "LOG_ME",
+          "category": "TimelineFix",
+          "skill": "Balance",
+          "annotation": "",
+          "target": ""
+        }
+      }
+    ],
+    "CallGyrfalcon": [
+      {
+        "Proc": {
+          "caster": "LOG_ME",
+          "category": "Woodlore",
+          "skill": "Calling",
+          "annotation": "",
+          "target": ""
+        }
+      },
+      {
+        "Proc": {
+          "caster": "",
+          "category": "Woodlore",
+          "skill": "Called",
+          "annotation": "gyrfalcon",
+          "target": ""
+        }
+      },
+      {
+        "Proc": {
+          "caster": "LOG_ME",
+          "category": "TimelineFix",
+          "skill": "Balance",
+          "annotation": "",
+          "target": ""
+        }
+      }
+    ],
+    "CallWeasel": [
+      {
+        "Proc": {
+          "caster": "LOG_ME",
+          "category": "Woodlore",
+          "skill": "Calling",
+          "annotation": "",
+          "target": ""
+        }
+      },
+      {
+        "Proc": {
+          "caster": "",
+          "category": "Woodlore",
+          "skill": "Called",
+          "annotation": "weasel",
+          "target": ""
+        }
+      },
+      {
+        "Proc": {
+          "caster": "LOG_ME",
+          "category": "TimelineFix",
+          "skill": "Balance",
+          "annotation": "",
+          "target": ""
+        }
+      }
+    ],
+    "CallRook": [
+      {
+        "Proc": {
+          "caster": "LOG_ME",
+          "category": "Woodlore",
+          "skill": "Calling",
+          "annotation": "",
+          "target": ""
+        }
+      },
+      {
+        "Proc": {
+          "caster": "",
+          "category": "Woodlore",
+          "skill": "Called",
+          "annotation": "rook",
+          "target": ""
+        }
+      },
+      {
+        "Proc": {
+          "caster": "LOG_ME",
+          "category": "TimelineFix",
+          "skill": "Balance",
+          "annotation": "",
+          "target": ""
+        }
+      }
     ]
   }
 }

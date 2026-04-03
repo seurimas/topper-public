@@ -126,10 +126,12 @@ pub enum AetPredicate {
     CannotCure(AetTarget, FType),
     Buffered(AetTarget, FType),
     Locked(AetTarget, bool),
+    QuickLocked(AetTarget),
     NearLocked(AetTarget, LockType, usize),
     PipeEmpty(AetTarget, String),
     // Timing
     ReboundingWindow(AetTarget, CType),
+    ReboundingComing(AetTarget, CType),
     SalveBlocked(AetTarget, CType),
     Channeling(AetTarget, Option<ChannelType>),
     ChannelStoppedBy(AetTarget, FType),
@@ -642,6 +644,16 @@ impl UnpoweredFunction for AetPredicate {
                 }
                 UnpoweredFunctionState::Failed
             }
+            AetPredicate::QuickLocked(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if let Some(lock) = target.lock_duration() {
+                        if lock > 4.0 {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
             AetPredicate::NearLocked(target, lock_type, aff_count) => {
                 if let Some(target) = target.get_target(model, controller) {
                     let affs_to_lock = lock_type.affs_to_lock(target);
@@ -697,6 +709,17 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::ReboundingWindow(target, minimum) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.get_balance(BType::Rebounding) > (*minimum as f32 / BALANCE_SCALE) {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::ReboundingComing(target, maximum) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if !target.is(FType::Rebounding)
+                        && target.get_balance(BType::Rebounding)
+                            <= (*maximum as f32 / BALANCE_SCALE)
+                    {
                         return UnpoweredFunctionState::Complete;
                     }
                 }

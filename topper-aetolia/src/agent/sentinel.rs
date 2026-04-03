@@ -26,6 +26,8 @@ pub struct SentinelClassState {
     pub spike: Option<String>,
     pub beasts: HashSet<SentinelBeast>,
     pub first_strike_timer: Timer,
+    pub whirl_timer: Timer,
+    pub flourish: bool,
     pub calling: Timer,
 }
 
@@ -38,6 +40,7 @@ impl Hash for SentinelClassState {
         beasts.sort_by_key(|b| *b as u8);
         beasts.hash(state);
         self.first_strike_timer.hash(state);
+        self.whirl_timer.hash(state);
         self.calling.hash(state);
     }
 }
@@ -59,16 +62,30 @@ impl SentinelClassState {
         self.beasts.len()
     }
 
-    pub fn start_first_strike(&mut self) {
-        self.first_strike_timer = Timer::count_down_seconds(1.2);
+    pub fn start_whirl(&mut self) {
+        self.whirl_timer = Timer::count_down_seconds(1.6);
     }
 
-    pub fn has_first_strike(&self) -> bool {
-        self.first_strike_timer.is_active()
+    pub fn confirm_whirl(&mut self) {
+        self.whirl_timer.reset();
+    }
+
+    pub fn whirl_coming(&self) -> bool {
+        self.whirl_timer.is_active() && self.whirl_timer.get_time_left_seconds() < 0.25
+    }
+
+    pub fn start_first_strike(&mut self, flourish: bool) {
+        self.first_strike_timer = Timer::count_down_seconds(1.2);
+        self.flourish = flourish;
+    }
+
+    pub fn has_first_strike(&self, flourish: bool) -> bool {
+        self.first_strike_timer.is_active() && self.flourish == flourish
     }
 
     pub fn second_strike(&mut self) {
         self.first_strike_timer.reset();
+        self.flourish = false;
     }
 
     pub fn start_calling(&mut self) {
@@ -85,6 +102,7 @@ impl SentinelClassState {
 
     pub fn wait(&mut self, duration: CType) {
         self.first_strike_timer.wait(duration);
+        self.whirl_timer.wait(duration);
         self.calling.wait(duration);
     }
 }
@@ -104,24 +122,20 @@ pub enum Resin {
 pub struct ResinState {
     pub hot: Option<Resin>,
     pub cold: Option<Resin>,
-    pub burning: bool,
-    pub burning_time: CType,
+    pub burning: Timer,
     pub ticks_left: u8,
 }
 
 impl ResinState {
     pub fn wait(&mut self, duration: CType) {
-        if self.burning {
-            self.burning_time += duration;
-        }
-        if self.burning_time > 1500 {
+        self.burning.wait(duration);
+        if self.burning.get_time_left_seconds() > self.ticks_left as f32 * 6.0 {
             // Clear state.
             self.hot_burn();
         }
     }
     pub fn clear(&mut self) {
-        self.burning = false;
-        self.burning_time = 0;
+        self.burning.reset();
         self.ticks_left = 0;
         self.hot = None;
         self.cold = None;
@@ -129,13 +143,10 @@ impl ResinState {
     pub fn apply(&mut self, layer: Resin) {
         self.hot = self.cold.clone();
         self.cold = Some(layer);
-        self.burning = false;
-        self.burning_time = 0;
+        self.burning.reset();
         self.ticks_left = 0;
     }
     pub fn ignite(&mut self) {
-        self.burning = true;
-        self.burning_time = 0;
         self.ticks_left = match self.cold {
             Some(Resin::Pyrolum) => 12,
             Some(Resin::Corsin) => 8,
@@ -145,18 +156,35 @@ impl ResinState {
             Some(Resin::Badulem) => 8,
             Some(Resin::Lysirine) => 6,
             None => 0,
-        }
+        };
+        self.reset_burning_timer_for_ticks_left();
     }
+
+    fn reset_burning_timer_for_ticks_left(&mut self) {
+        self.burning = Timer::count_up_observe_seconds(
+            self.ticks_left as f32 * 6.0,
+            self.ticks_left as f32 * 6.0 + 3.,
+        );
+    }
+
     pub fn cold_burn(&mut self) {
-        self.burning_time = 0;
+        println!(
+            "Cold burn: hot={:?} cold={:?} burning_time={:?} ticks_left={}",
+            self.hot, self.cold, self.burning, self.ticks_left
+        );
         if (self.ticks_left > 0) {
             self.ticks_left -= 1;
         }
         if (self.ticks_left == 0) {
             self.cold = None;
         }
+        self.reset_burning_timer_for_ticks_left();
     }
     pub fn hot_burn(&mut self) {
+        println!(
+            "Hot burn: hot={:?} cold={:?} burning_time={:?} ticks_left={}",
+            self.hot, self.cold, self.burning, self.ticks_left
+        );
         self.clear();
     }
 }

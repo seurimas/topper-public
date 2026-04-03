@@ -15,12 +15,12 @@ extern crate lazy_static;
 use std::{env, fs};
 
 use topper_aetolia::{
-    bt_match::{BtMatchConfig, MatchRunner, set_bt_dir},
+    bt_match::{BtMatchConfig, MatchRunner, parse_time, set_aff_stack_dir, set_bt_dir},
     explainer::{ExplainerPage, observations::OBSERVER, parse_me_and_you},
 };
 
 fn main() {
-    let (log_path, player_name, tree_name, config_path, slice_dump, verbose) = parse_args();
+    let (log_path, player_name, tree_name, config_path, slice_dump, verbose, skips) = parse_args();
     let config = load_config(&config_path);
     let (page, opponent_name) = load_log(&log_path, &player_name, &tree_name);
 
@@ -29,7 +29,13 @@ fn main() {
         dir.push("behavior_trees");
         dir.to_string_lossy().to_string()
     };
+    let aff_stack_dir = {
+        let mut dir = env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
+        dir.push("aff_stacks");
+        dir.to_string_lossy().to_string()
+    };
     set_bt_dir(&bt_dir);
+    set_aff_stack_dir(aff_stack_dir);
 
     let time_slices = page.build_time_slices(&|slice| OBSERVER.observe(slice));
     if slice_dump {
@@ -40,7 +46,14 @@ fn main() {
     }
     println!("Processing {} time slices...\n", time_slices.len());
 
-    let mut runner = MatchRunner::new(player_name, opponent_name, tree_name, config, verbose);
+    let mut runner = MatchRunner::new(
+        player_name,
+        opponent_name,
+        tree_name,
+        config,
+        verbose,
+        skips,
+    );
     for slice in &time_slices {
         if let Err(div) = runner.process_slice(slice) {
             print!("{}", div);
@@ -50,7 +63,7 @@ fn main() {
     runner.finish();
 }
 
-fn parse_args() -> (String, String, String, String, bool, bool) {
+fn parse_args() -> (String, String, String, String, bool, bool, Vec<i32>) {
     let args: Vec<String> = env::args().collect();
     let mut log_path: Option<String> = None;
     let mut player_name: Option<String> = None;
@@ -58,6 +71,7 @@ fn parse_args() -> (String, String, String, String, bool, bool) {
     let mut config_path = "bt_match.json".to_string();
     let mut slice_dump = false;
     let mut verbose = false;
+    let mut skips: Vec<i32> = Vec::new();
 
     let mut i = 1;
     while i < args.len() {
@@ -76,6 +90,20 @@ fn parse_args() -> (String, String, String, String, bool, bool) {
             }
             "--config" => {
                 config_path = args.get(i + 1).cloned().unwrap_or(config_path);
+                i += 2;
+            }
+            "--skip" => {
+                if let Some(time_str) = args.get(i + 1) {
+                    if let Some(time) = parse_time(time_str) {
+                        skips.push(time);
+                    } else {
+                        eprintln!("Invalid time format for --skip: {}", time_str);
+                        std::process::exit(2);
+                    }
+                } else {
+                    eprintln!("Missing time argument for --skip");
+                    std::process::exit(2);
+                }
                 i += 2;
             }
             "--slice_dump" => {
@@ -105,7 +133,15 @@ fn parse_args() -> (String, String, String, String, bool, bool) {
         eprintln!("{}", USAGE);
         std::process::exit(2);
     });
-    (log_path, player_name, tree_name, config_path, slice_dump, verbose)
+    (
+        log_path,
+        player_name,
+        tree_name,
+        config_path,
+        slice_dump,
+        verbose,
+        skips,
+    )
 }
 
 fn load_config(path: &str) -> BtMatchConfig {

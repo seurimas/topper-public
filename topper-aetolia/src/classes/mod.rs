@@ -275,7 +275,7 @@ pub fn get_skill_class(category: &String) -> Option<Class> {
         "Malediction" | "Runecarving" | "Sporulation" => Some(Class::Runecarver),
         "Humourism" | "Esoterica" | "Hematurgy" => Some(Class::Bloodborn),
         "Enlightenment" | "Cultivation" | "Voidgazing" => Some(Class::Voidseer),
-        "Bladedancing" | "Artifice" | "Subversion" => Some(Class::Executor),
+        "Shadowdancing" | "Artifice" | "Subversion" => Some(Class::Executor),
         "Extirpation" | "Caprice" | "Glamours" => Some(Class::Sylvan),
         _ => None,
     }
@@ -930,6 +930,20 @@ pub fn handle_combat_action(
             }
             _ => Ok(()),
         },
+        "TimelineFix" => match combat_action.skill.as_ref() {
+            "Balance" => {
+                let observations = after.clone();
+                for_agent(
+                    agent_states,
+                    &combat_action.caster,
+                    &move |me: &mut AgentState| {
+                        apply_or_infer_balance(me, (BType::Balance, 0.0), &observations);
+                    },
+                );
+                Ok(())
+            }
+            _ => Ok(()),
+        },
         _ => Ok(()),
     }
 }
@@ -939,6 +953,8 @@ pub enum LockType {
     // Pipe is empty, only need paresis or perplexed/slickness/anorexia
     Pipelock,
     BardPipelock,
+    // Throat crush ftw
+    SentinelLock,
     // Just asthma/slickness/anorexia
     Soft,
     // Asthma, slickness, anorexia, paralysis, and stupidity
@@ -954,6 +970,7 @@ impl LockType {
         match self {
             LockType::Pipelock => vec![FType::Anorexia, FType::Slickness, FType::Paresis],
             LockType::BardPipelock => vec![FType::Anorexia, FType::Slickness],
+            LockType::SentinelLock => vec![FType::Asthma, FType::Slickness, FType::DestroyedThroat],
             LockType::Soft => vec![FType::Anorexia, FType::Slickness, FType::Asthma],
             LockType::Buffered => vec![
                 FType::Anorexia,
@@ -1004,14 +1021,14 @@ pub fn get_stack<'s>(
         strategy.clone()
     };
     let mut stack_name = format!("{}_{}", attack_class, strategy);
-    get_stack_from_file(&attack_class.to_string(), &stack).or_else(|| {
-        db.and_then(|db| {
-            db.get_venom_plan(&stack_name).or_else(|| {
-                get_stack_from_file(&attack_class.to_string(), &"aggro".to_string())
+    get_stack_from_file(&attack_class.to_string(), &stack)
+        .or_else(|| {
+            db.and_then(|db| {
+                db.get_venom_plan(&stack_name)
                     .or_else(|| db.get_venom_plan(&format!("{}_aggro", attack_class)))
             })
         })
-    })
+        .or_else(|| get_stack_from_file(&attack_class.to_string(), &"aggro".to_string()))
 }
 
 pub static mut LOAD_STACK_FUNC: Option<fn(&String, &String) -> String> = None;
@@ -1056,7 +1073,7 @@ pub fn get_stack_from_file(class: &String, stack_name: &String) -> Option<Vec<Ve
     }
 }
 
-fn get_controller(
+pub fn get_controller(
     attack_class: &'static str,
     me: &String,
     target: &String,
