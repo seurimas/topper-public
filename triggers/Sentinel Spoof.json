@@ -124,5 +124,131 @@
       }
     ],
     "observation_name": "Proc"
+  },
+  {
+    "regex": "^A pale gyrfalcon swoops in and lands near you\\.$",
+    "args": [
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": "Woodlore"
+      },
+      {
+        "Literal": "Called"
+      },
+      {
+        "Literal": "gyrfalcon"
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
+    "regex": "^A soft scuffle is heard before a sinuous weasel pops into view next to you\\.$",
+    "args": [
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": "Woodlore"
+      },
+      {
+        "Literal": "Called"
+      },
+      {
+        "Literal": "weasel"
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
+    "regex": "^A sharp-eyed rook swoops down from the skies to alight itself nearby\\.$",
+    "args": [
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": "Woodlore"
+      },
+      {
+        "Literal": "Called"
+      },
+      {
+        "Literal": "rook"
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
+    "regex": "^A snapjaw crocodile slinks in to place itself by (.*)'?'s side with a low, threatening hiss\\.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Woodlore"
+      },
+      {
+        "Literal": "Called"
+      },
+      {
+        "Literal": "crocodile"
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
+    "regex": "^(You) have no animal companions summoned.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Woodlore"
+      },
+      {
+        "Literal": "Called"
+      },
+      {
+        "Literal": "empty"
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
+    "regex": "^(You) already have a companion of that type\\.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Woodlore"
+      },
+      {
+        "Literal": "Called"
+      },
+      {
+        "Literal": "failed"
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
   }
 ]

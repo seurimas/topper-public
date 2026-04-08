@@ -1117,7 +1117,7 @@ pub fn get_balance_attack(
 ) -> String {
     if strategy == "damage" {
         let you = timeline.state.borrow_agent(target);
-        if you.parrying == Some(LType::HeadDamage) {
+        if you.get_parrying() == Some(LType::HeadDamage) {
             return format!("qeb flow {} clawtwist clawtwist", target);
         } else {
             return format!(

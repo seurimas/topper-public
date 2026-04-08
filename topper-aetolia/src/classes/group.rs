@@ -67,3 +67,66 @@ pub fn call_triple_venoms(
 pub fn should_call_venoms(timeline: &AetTimeline) -> bool {
     check_config(timeline, &"VENOM_CALLING".to_string())
 }
+
+pub fn with_call_venom_single(
+    timeline: &AetTimeline,
+    target: &String,
+    venom: impl ToString,
+    annotation: Option<&'static str>,
+    action: String,
+) -> String {
+    if should_call_venoms(timeline) {
+        format!(
+            "{};;{}",
+            call_venom(target, venom.to_string(), annotation),
+            action
+        )
+    } else {
+        action.clone()
+    }
+}
+
+pub fn with_call_venom_double(
+    timeline: &AetTimeline,
+    target: &String,
+    venom1: impl ToString,
+    venom2: impl ToString,
+    annotation: Option<&'static str>,
+    action: String,
+) -> String {
+    if should_call_venoms(timeline) {
+        format!(
+            "{};;{}",
+            call_venoms(target, venom1.to_string(), venom2.to_string(), annotation),
+            action
+        )
+    } else {
+        action.clone()
+    }
+}
+
+pub fn with_call_venom_triple(
+    timeline: &AetTimeline,
+    target: &String,
+    venom1: impl ToString,
+    venom2: impl ToString,
+    venom3: impl ToString,
+    annotation: Option<&'static str>,
+    action: String,
+) -> String {
+    if should_call_venoms(timeline) {
+        format!(
+            "{};;{}",
+            call_triple_venoms(
+                target,
+                venom1.to_string(),
+                venom2.to_string(),
+                venom3.to_string(),
+                annotation
+            ),
+            action
+        )
+    } else {
+        action.clone()
+    }
+}

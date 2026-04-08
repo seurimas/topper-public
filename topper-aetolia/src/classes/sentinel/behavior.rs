@@ -83,13 +83,9 @@ fn resolve_first_strike(
 ) -> FirstStrike {
     let get_venom = |target: &AgentState| -> &'static str {
         controller
-            .aff_priorities
-            .as_ref()
-            .and_then(|affs| get_first_strike_from_plan(affs, 1, target, &vec![]).pop())
-            .and_then(|fs| {
-                let v = fs.venom();
-                if v.is_empty() { None } else { Some(v) }
-            })
+            .get_venoms_from_plan(1, target, &vec![])
+            .first()
+            .copied()
             .unwrap_or("curare")
     };
     match spec {
@@ -120,13 +116,9 @@ fn resolve_second_strike(
 ) -> SecondStrike {
     let get_venom = |target: &AgentState| -> &'static str {
         controller
-            .aff_priorities
-            .as_ref()
-            .and_then(|affs| get_second_strike_from_plan(affs, 1, target, &vec![]).pop())
-            .and_then(|ss| {
-                let v = ss.venom();
-                if v.is_empty() { None } else { Some(v) }
-            })
+            .get_venoms_from_plan(1, target, &vec![])
+            .first()
+            .copied()
             .unwrap_or("curare")
     };
     match spec {
@@ -191,7 +183,13 @@ impl UnpoweredFunction for SentinelBehavior {
 
             // ── Resin ────────────────────────────────────────────────────
             SentinelBehavior::Hurl(target, resin) => {
-                if let Some(_target_agent) = target.get_target(model, controller) {
+                if let Some(you) = target.get_target(model, controller) {
+                    if you.resin_state.burning.is_active() {
+                        return UnpoweredFunctionState::Failed;
+                    } else if you.resin_state.hot.is_some() && you.resin_state.cold.is_some() {
+                        // Don't throw resin at targets already affected by both resins
+                        return UnpoweredFunctionState::Failed;
+                    }
                     controller.plan.add_to_qeb(hurl_action(
                         target.get_name(model, controller),
                         model.who_am_i(),
@@ -205,13 +203,9 @@ impl UnpoweredFunction for SentinelBehavior {
             SentinelBehavior::Combust(target) => {
                 if let Some(target_agent) = target.get_target(model, controller) {
                     let venom = controller
-                        .aff_priorities
-                        .as_ref()
-                        .and_then(|s| {
-                            get_venoms_from_plan(s, 1, target_agent, &vec![])
-                                .first()
-                                .copied()
-                        })
+                        .get_venoms_from_plan(1, target_agent, &vec![])
+                        .first()
+                        .copied()
                         .unwrap_or("curare");
                     controller.plan.add_to_qeb(Box::new(ComboAction::new(
                         model.who_am_i(),
@@ -261,11 +255,13 @@ impl UnpoweredFunction for SentinelBehavior {
                             return UnpoweredFunctionState::Failed;
                         }
                     }
-                    controller.plan.add_to_qeb(Box::new(SecondStrikeAction::new(
-                        model.who_am_i(),
-                        target.get_name(model, controller),
-                        second_strike,
-                    )));
+                    controller
+                        .plan
+                        .add_to_plain(Box::new(SecondStrikeAction::new(
+                            model.who_am_i(),
+                            target.get_name(model, controller),
+                            second_strike,
+                        )));
                     UnpoweredFunctionState::Complete
                 } else {
                     UnpoweredFunctionState::Failed
@@ -418,7 +414,7 @@ impl UnpoweredFunction for SentinelBehavior {
                         .first()
                         .copied()
                         .unwrap_or("curare");
-                    controller.plan.add_to_qeb(Box::new(WhirlAction::new(
+                    controller.plan.add_to_plain(Box::new(WhirlAction::new(
                         model.who_am_i(),
                         target.get_name(model, controller),
                         venom.to_string(),

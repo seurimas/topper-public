@@ -10,7 +10,6 @@ use super::{BehaviorController, BehaviorModel};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum LimbDescriptor {
-    Static(LType),
     NotRestoring(Vec<LType>),
     Highest(Vec<LType>),
     Lowest(Vec<LType>),
@@ -19,6 +18,9 @@ pub enum LimbDescriptor {
     Breakable(Vec<(LType, CType)>),
     Random(Vec<LType>),
     FromHint(String),
+    Static(LType),
+    #[serde(untagged)]
+    Untagged(LType),
 }
 
 impl LimbDescriptor {
@@ -30,7 +32,7 @@ impl LimbDescriptor {
     ) -> Option<LType> {
         if let Some(me) = target.get_target(model, controller) {
             match self {
-                LimbDescriptor::Static(limb) => Some(*limb),
+                LimbDescriptor::Static(limb) | LimbDescriptor::Untagged(limb) => Some(*limb),
                 LimbDescriptor::NotRestoring(limbs) => {
                     let mut found_restoring = false;
                     let mut not_restoring = None;
@@ -42,11 +44,7 @@ impl LimbDescriptor {
                             not_restoring = Some(*limb);
                         }
                     }
-                    if found_restoring {
-                        not_restoring
-                    } else {
-                        None
-                    }
+                    if found_restoring { not_restoring } else { None }
                 }
                 LimbDescriptor::Highest(limbs) => {
                     let mut highest = None;

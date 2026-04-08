@@ -448,7 +448,7 @@ pub fn apply_observation(
         }
         AetObservation::ParryStop(who) => {
             for_agent(timeline, who, &move |me: &mut AgentState| {
-                me.parrying = None;
+                me.clear_parrying();
             });
         }
         AetObservation::Envenom(venom) => {
@@ -1593,4 +1593,19 @@ pub fn attack_limb_damage(
     for_agent(agent_states, target, &move |you| {
         apply_limb_damage(you, expected, &observations);
     });
+}
+
+pub fn mark_if_unparried(
+    agent_states: &mut AetTimelineState,
+    target: &String,
+    after: &Vec<AetObservation>,
+    expected_parry: LType,
+) {
+    let observations = after.clone();
+    let parried = attack_parried(&observations);
+    if !parried {
+        agent_states.for_agent(target, &move |you| {
+            you.observe_unparried(expected_parry);
+        });
+    }
 }

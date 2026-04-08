@@ -8,7 +8,7 @@ pub fn get_needed_parry<DB: AetDatabaseModule + ?Sized>(
 ) -> Option<LType> {
     if let Ok(parry) = get_preferred_parry(timeline, me, target, db) {
         let me = timeline.state.borrow_agent(me);
-        if let Some(current) = me.parrying {
+        if let Some(current) = me.get_parrying() {
             if current == parry { None } else { Some(parry) }
         } else {
             Some(parry)

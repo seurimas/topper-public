@@ -3,7 +3,7 @@ use serde::*;
 
 use crate::{
     bt::*,
-    classes::{get_venoms_from_plan, group::*, VenomType, AFFLICT_VENOMS, VENOM_AFFLICTS},
+    classes::{AFFLICT_VENOMS, VENOM_AFFLICTS, VenomType, get_venoms_from_plan, group::*},
     items::{UnwieldAction, WieldAction},
     non_agent::AetTimelineRoomExt,
     observables::PlainAction,
@@ -156,7 +156,13 @@ impl UnpoweredFunction for PredatorBehavior {
             PredatorBehavior::GradedCombo(target, predicates, graders, preferred_limbs) => {
                 let start_parrying = target
                     .get_target(model, controller)
-                    .map(|you| if you.can_parry() { you.parrying } else { None })
+                    .map(|you| {
+                        if you.can_parry() {
+                            you.get_parrying()
+                        } else {
+                            None
+                        }
+                    })
                     .unwrap_or(Some(LType::TorsoDamage));
                 if let Some(target_state) = target.get_target(model, controller) {
                     let best_combo = controller.get_highest_scored_predator_combo(
@@ -730,7 +736,11 @@ fn use_combo(
     }
 
     if let (Some(you), Some(combo)) = (target.get_target(model, controller), &best_combo) {
-        let venom = controller.get_venoms_from_plan(1, you, &vec![]);
+        let venom = if combo.has_loki() {
+            vec!["loki"]
+        } else {
+            controller.get_venoms_from_plan(1, you, &vec![])
+        };
         controller
             .plan
             .add_to_qeb(Box::new(SeriesAttack::new_random_params(

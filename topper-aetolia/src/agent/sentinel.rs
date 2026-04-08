@@ -58,6 +58,10 @@ impl SentinelClassState {
         self.beasts.remove(&beast);
     }
 
+    pub fn dismiss_all_beasts(&mut self) {
+        self.beasts.clear();
+    }
+
     pub fn beast_count(&self) -> usize {
         self.beasts.len()
     }
@@ -135,15 +139,18 @@ impl ResinState {
         }
     }
     pub fn clear(&mut self) {
-        self.burning.reset();
+        self.burning.expire();
         self.ticks_left = 0;
         self.hot = None;
         self.cold = None;
     }
     pub fn apply(&mut self, layer: Resin) {
-        self.hot = self.cold.clone();
-        self.cold = Some(layer);
-        self.burning.reset();
+        if self.hot.is_some() {
+            self.cold = Some(layer);
+        } else {
+            self.hot = Some(layer);
+        }
+        self.burning.expire();
         self.ticks_left = 0;
     }
     pub fn ignite(&mut self) {
@@ -186,5 +193,9 @@ impl ResinState {
             self.hot, self.cold, self.burning, self.ticks_left
         );
         self.clear();
+    }
+
+    pub fn parry_known(&self) -> bool {
+        self.cold == Some(Resin::Harimel) && self.burning.is_active()
     }
 }

@@ -19,6 +19,7 @@ pub enum ComboAttack {
     Pinprick,
     Lateral,
     Vertical,
+    VerticalLoki,
     Crescentcut,
     Spinslash,
     Lowhook,
@@ -244,6 +245,7 @@ impl ComboAttack {
         match self {
             ComboAttack::Freefall
             | ComboAttack::Vertical
+            | ComboAttack::VerticalLoki
             | ComboAttack::Crescentcut
             | ComboAttack::Butterfly => true,
             _ => false,
@@ -284,7 +286,7 @@ impl ComboAttack {
             ComboAttack::Raze => 205,
             ComboAttack::Pheromones => 205,
             ComboAttack::Mindnumb => 251,
-            ComboAttack::Vertical => 251,
+            ComboAttack::Vertical | ComboAttack::VerticalLoki => 251,
             ComboAttack::Spinslash => 251,
             ComboAttack::Trip => 298,
             ComboAttack::Gouge => 298,
@@ -315,7 +317,7 @@ impl ComboAttack {
             ComboAttack::Pinprick => 80,
             ComboAttack::Lateral => 230,
             ComboAttack::Spinslash => 350,
-            ComboAttack::Vertical => 475,
+            ComboAttack::Vertical | ComboAttack::VerticalLoki => 300,
             ComboAttack::Gouge => 333,
             ComboAttack::Bleed => 133,
             // Gets bonuses elsewhere.
@@ -389,12 +391,22 @@ impl ComboAttack {
             (ComboAttack::Lateral, KnifeStance::EinFasit) => KnifeStance::Laesan,
             (ComboAttack::Lateral, KnifeStance::Laesan) => stance,
             // Vertical
-            (ComboAttack::Vertical, KnifeStance::None) => KnifeStance::Laesan,
-            (ComboAttack::Vertical, KnifeStance::Gyanis) => KnifeStance::Laesan,
-            (ComboAttack::Vertical, KnifeStance::VaeSant) => KnifeStance::Rizet,
-            (ComboAttack::Vertical, KnifeStance::Rizet) => KnifeStance::EinFasit,
-            (ComboAttack::Vertical, KnifeStance::EinFasit) => KnifeStance::VaeSant,
-            (ComboAttack::Vertical, KnifeStance::Laesan) => stance,
+            (ComboAttack::Vertical | ComboAttack::VerticalLoki, KnifeStance::None) => {
+                KnifeStance::Laesan
+            }
+            (ComboAttack::Vertical | ComboAttack::VerticalLoki, KnifeStance::Gyanis) => {
+                KnifeStance::Laesan
+            }
+            (ComboAttack::Vertical | ComboAttack::VerticalLoki, KnifeStance::VaeSant) => {
+                KnifeStance::Rizet
+            }
+            (ComboAttack::Vertical | ComboAttack::VerticalLoki, KnifeStance::Rizet) => {
+                KnifeStance::EinFasit
+            }
+            (ComboAttack::Vertical | ComboAttack::VerticalLoki, KnifeStance::EinFasit) => {
+                KnifeStance::VaeSant
+            }
+            (ComboAttack::Vertical | ComboAttack::VerticalLoki, KnifeStance::Laesan) => stance,
             // Crescentcut
             (ComboAttack::Crescentcut, KnifeStance::None) => KnifeStance::VaeSant,
             (ComboAttack::Crescentcut, KnifeStance::Gyanis) => KnifeStance::EinFasit,
@@ -519,6 +531,12 @@ impl PredatorCombo {
 
     pub fn has_venom(&self) -> bool {
         self.1.iter().any(|attack| attack.can_use_venom())
+    }
+
+    pub fn has_loki(&self) -> bool {
+        self.1
+            .iter()
+            .any(|attack| *attack == ComboAttack::VerticalLoki)
     }
 
     pub fn get_final_stance(&self) -> KnifeStance {
@@ -843,6 +861,14 @@ impl ComboGrader {
                 for attack in combo.get_attacks().iter() {
                     if seen_hits.contains(&attack) {
                         return *value;
+                    } else if attack == &ComboAttack::Vertical
+                        && seen_hits.contains(&&ComboAttack::VerticalLoki)
+                    {
+                        return *value;
+                    } else if attack == &ComboAttack::VerticalLoki
+                        && seen_hits.contains(&&ComboAttack::Vertical)
+                    {
+                        return *value;
                     } else {
                         seen_hits.push(attack);
                     }
@@ -875,7 +901,7 @@ impl ComboGrader {
                             combo.0,
                             0,
                             if target.can_parry() {
-                                target.parrying
+                                target.get_parrying()
                             } else {
                                 None
                             },
@@ -898,7 +924,7 @@ impl ComboGrader {
                             } else if parrying.is_some()
                                 && combo_attack == attack
                                 && !attack.parried_by(stance, parrying.unwrap())
-                                && target.parry_known
+                                && target.parry_known()
                             {
                                 (
                                     combo_attack.get_next_stance(stance),

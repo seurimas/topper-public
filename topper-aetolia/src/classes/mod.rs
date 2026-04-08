@@ -336,6 +336,7 @@ lazy_static! {
 }
 
 pub fn handle_sent(command: &String, agent_states: &mut AetTimelineState) {
+    sentinel::handle_sent(command, agent_states);
     infiltrator::handle_sent(command, agent_states);
     siderealist::handle_sent(command, agent_states);
     crate::non_agent::combat_action::handle_sent(command, agent_states);

@@ -1,4 +1,6 @@
 use super::constants::*;
+use crate::classes::group::with_call_venom_double;
+use crate::classes::group::with_call_venom_single;
 use crate::classes::*;
 use crate::timeline::*;
 use crate::types::*;
@@ -244,13 +246,28 @@ impl ActiveTransition for WhirlAction {
             .class_state
             .is_mirrored();
         if self.follow_up {
-            Ok(format!("envenom dhuriv with {}", self.venom))
+            Ok(with_call_venom_single(
+                timeline,
+                &self.target,
+                &self.venom,
+                None,
+                format!("envenom left with {}", self.venom),
+            ))
         } else if !mirrored {
-            Ok(format!("dhuriv whirl {} {}", self.target, self.venom))
+            Ok(with_call_venom_single(
+                timeline,
+                &self.target,
+                &self.venom,
+                None,
+                format!("dhuriv whirl {} {}", self.target, self.venom),
+            ))
         } else {
-            Ok(format!(
-                "ringblade pirouette {} {}",
-                self.target, self.venom
+            Ok(with_call_venom_single(
+                timeline,
+                &self.target,
+                &self.venom,
+                None,
+                format!("ringblade pirouette {} {}", self.target, self.venom),
             ))
         }
     }
@@ -285,11 +302,25 @@ impl ActiveTransition for FirstStrikeAction {
             .borrow_agent(&self.caster)
             .class_state
             .is_mirrored();
-        Ok(format!(
-            "order loyal attack {};;stand;;stand;;{}",
-            self.target,
-            self.first_strike.full_str(&self.target, mirrored)
-        ))
+        if !self.first_strike.venom().is_empty() {
+            Ok(with_call_venom_single(
+                timeline,
+                &self.target,
+                self.first_strike.venom(),
+                None,
+                format!(
+                    "order loyal attack {};;stand;;stand;;{}",
+                    self.target,
+                    self.first_strike.full_str(&self.target, mirrored),
+                ),
+            ))
+        } else {
+            Ok(format!(
+                "order loyal attack {};;stand;;stand;;{}",
+                self.target,
+                self.first_strike.full_str(&self.target, mirrored)
+            ))
+        }
     }
     fn skill_names(&self) -> Vec<String> {
         let spirit = match &self.first_strike {
@@ -362,7 +393,17 @@ impl ActiveTransition for SecondStrikeAction {
             .borrow_agent(&self.caster)
             .class_state
             .is_mirrored();
-        Ok(self.second_strike.full_str(&self.target, mirrored))
+        if !self.second_strike.venom().is_empty() {
+            Ok(with_call_venom_single(
+                timeline,
+                &self.target,
+                self.second_strike.venom(),
+                None,
+                self.second_strike.full_str(&self.target, mirrored),
+            ))
+        } else {
+            Ok(self.second_strike.full_str(&self.target, mirrored))
+        }
     }
     fn skill_names(&self) -> Vec<String> {
         let spirit = match &self.second_strike {
@@ -540,5 +581,16 @@ fn get_combo_action(
             second_strike.venom(),
         )
     };
-    format!("order loyal attack {};;stand;;stand;;{}", target, attack)
+    let with_loyals = format!("order loyal attack {};;stand;;{}", target, attack);
+    let v1 = first_strike.venom();
+    let v2 = second_strike.venom();
+    if !v1.is_empty() && !v2.is_empty() {
+        with_call_venom_double(timeline, target, v1, v2, None, with_loyals)
+    } else if !v1.is_empty() {
+        with_call_venom_single(timeline, target, v1, None, with_loyals)
+    } else if !v2.is_empty() {
+        with_call_venom_single(timeline, target, v2, None, with_loyals)
+    } else {
+        with_loyals
+    }
 }

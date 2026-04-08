@@ -149,6 +149,7 @@ All limb predicates use a **LimbDescriptor** (see Section 6).
 | `CanDodge` | `{"CanDodge": "Target"}` | Can dodge attacks |
 | `CanParry` | `{"CanParry": "Target"}` | Can parry |
 | `KnownParry` | `{"KnownParry": ["Target", {"Static": "HeadDamage"}]}` | Known parry location |
+| `KnownUnparry` | `{"KnownUnparry": ["Target", {"Static": "HeadDamage"}]}` | Known NOT to be parry location |
 | `ExpectedParry` | `{"ExpectedParry": ["Target", {"Static": "TorsoDamage"}]}` | Predicted parry location |
 
 ### 4.6 Miscellaneous

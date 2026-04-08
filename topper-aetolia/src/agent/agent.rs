@@ -23,8 +23,7 @@ pub struct AgentState {
     pub hypno_state: HypnoState,
     pub class_state: ClassState,
     pub relapses: RelapseState,
-    pub parrying: Option<LType>,
-    pub parry_known: bool,
+    pub parry_state: ParryState,
     pub wield_state: WieldState,
     pub dodge_state: DodgeState,
     pub channel_state: ChannelState,
@@ -58,6 +57,7 @@ impl BaseAgentState for AgentState {
         self.predator_board.wait(duration);
         self.siderealist_board.wait(duration);
         self.channel_state.wait(duration);
+        self.parry_state.wait(duration);
         self.flags.wait(duration);
         if let Some((cured_limb, heal_modifier, first_person)) = self.limb_damage.wait(duration) {
             if !first_person {
@@ -115,8 +115,11 @@ impl BaseAgentState for AgentState {
         } else if self.is(FType::Weakvoid) && self.balanced(BType::Void) {
             self.set_flag(FType::Weakvoid, false);
         }
-        if self.balanced(BType::Balance) && self.balanced(BType::Equil) {
-            self.parry_known = false;
+        if self.balanced(BType::Balance)
+            && self.balanced(BType::Equil)
+            && !self.resin_state.parry_known()
+        {
+            self.parry_state.clear_known();
         }
         // if self.is(FType::Manabarbs) && self.balanced(BType::Manabarbs) {
         //     self.set_flag(FType::Manabarbs, false);
@@ -478,8 +481,8 @@ impl AgentState {
 
     pub fn set_balance(&mut self, balance: BType, value: f32) {
         if balance == BType::Balance || balance == BType::Equil {
-            if value >= 0.0 {
-                self.parry_known = false;
+            if value >= 0.0 && !self.resin_state.parry_known() {
+                self.parry_state.clear_known();
             }
         }
         match balance {
@@ -622,7 +625,7 @@ impl AgentState {
         let welt = limb.welt;
         let is_restoring = self.limb_damage.restoring == Some(what);
         let fleshbaned_count = self.limb_damage.fleshbaned_count;
-        let is_parried = self.can_parry() && self.parrying == Some(what);
+        let is_parried = self.can_parry() && self.get_parrying() == Some(what);
         let is_dislocated = match what {
             LType::LeftArmDamage => self.is(FType::LeftArmDislocated),
             LType::RightArmDamage => self.is(FType::RightArmDislocated),
@@ -679,25 +682,31 @@ impl AgentState {
     }
 
     pub fn clear_parrying(&mut self) {
-        self.parrying = None;
+        self.parry_state.clear_parrying();
     }
 
     pub fn get_parrying(&self) -> Option<LType> {
-        self.parrying
+        self.parry_state.get_parrying()
     }
 
     pub fn set_parrying(&mut self, limb: LType) {
-        self.parrying = Some(limb);
+        self.parry_state.set_parrying(limb);
+    }
+
+    pub fn parry_known(&self) -> bool {
+        self.parry_state.is_known()
     }
 
     pub fn is_definitely_not_parrying(&self, limb: LType) -> bool {
-        if !self.parry_known {
-            return false;
-        }
-        match self.parrying {
-            Some(parrying_limb) => parrying_limb != limb,
-            None => true,
-        }
+        self.parry_state.is_definitely_not_parrying(limb)
+    }
+
+    pub fn observe_unparried(&mut self, limb: LType) {
+        self.parry_state.observe_unparried(limb);
+    }
+
+    pub fn is_recently_unparried(&self, limb: LType) -> bool {
+        self.parry_state.is_recently_unparried(limb)
     }
 
     /*

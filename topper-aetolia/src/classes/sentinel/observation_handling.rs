@@ -4,6 +4,12 @@ use crate::classes::*;
 use crate::observables::*;
 use crate::timeline::*;
 use crate::types::*;
+use lazy_static::lazy_static;
+use regex::Regex;
+
+lazy_static! {
+    static ref CALL_PATTERN: Regex = Regex::new(r"call (\w+)").unwrap();
+}
 
 fn resin_from_annotation(annotation: &str) -> Option<Resin> {
     match annotation {
@@ -15,6 +21,19 @@ fn resin_from_annotation(annotation: &str) -> Option<Resin> {
         "badulem" | "septic" => Some(Resin::Badulem),
         "lysirine" | "paralytic" => Some(Resin::Lysirine),
         _ => None,
+    }
+}
+
+pub fn handle_sent(command: &String, agent_states: &mut AetTimelineState) {
+    if let Some(caps) = CALL_PATTERN.captures(command) {
+        if let Some(animal) = caps.get(1) {
+            let me = agent_states.me.clone();
+            agent_states.add_player_hint(
+                &me,
+                &"CALLED_ANIMAL".to_string(),
+                animal.as_str().to_string(),
+            );
+        }
     }
 }
 
@@ -69,7 +88,7 @@ pub fn handle_combat_action(
                 },
             );
         }
-        "Stab" | "Slice" | "Thrust" | "Flourish" => {
+        "Stab" | "Thrust" | "Flourish" => {
             let observations = after.clone();
             let first_person = combat_action.caster.eq(&agent_states.me);
             let hints =
@@ -89,6 +108,34 @@ pub fn handle_combat_action(
                     apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
                     me.assume_sentinel(&|s| s.second_strike());
                 },
+            );
+        }
+        "Slice" => {
+            let observations = after.clone();
+            let first_person = combat_action.caster.eq(&agent_states.me);
+            let hints =
+                agent_states.get_player_hint(&combat_action.caster, &"CALLED_VENOMS".to_string());
+            apply_weapon_hits(
+                agent_states,
+                &combat_action.caster,
+                &combat_action.target,
+                after,
+                first_person,
+                &hints,
+            );
+            for_agent(
+                agent_states,
+                &combat_action.caster,
+                &move |me: &mut AgentState| {
+                    apply_or_infer_balance(me, (BType::Balance, 2.65), &observations);
+                    me.assume_sentinel(&|s| s.second_strike());
+                },
+            );
+            mark_if_unparried(
+                agent_states,
+                &combat_action.target,
+                after,
+                LType::TorsoDamage,
             );
         }
         "Pierce" | "Sever" => {
@@ -196,6 +243,12 @@ pub fn handle_combat_action(
                 vec![FType::DestroyedThroat],
                 after,
             );
+            mark_if_unparried(
+                agent_states,
+                &combat_action.target,
+                after,
+                LType::HeadDamage,
+            );
         }
         "Lysirine" => match combat_action.annotation.as_ref() {
             "hot" => {
@@ -263,6 +316,12 @@ pub fn handle_combat_action(
                 &|me: &mut AgentState| {
                     me.assume_sentinel(&|s| s.start_first_strike(false));
                 },
+            );
+            mark_if_unparried(
+                agent_states,
+                &combat_action.target,
+                after,
+                LType::TorsoDamage,
             );
         }
         "Weaken" => {
@@ -347,6 +406,12 @@ pub fn handle_combat_action(
                 vec![FType::Epilepsy, FType::Laxity],
                 after,
             );
+            mark_if_unparried(
+                agent_states,
+                &combat_action.target,
+                after,
+                LType::HeadDamage,
+            );
         }
         "Gouge" => {
             for_agent(
@@ -362,6 +427,12 @@ pub fn handle_combat_action(
                 &combat_action.target,
                 vec![FType::Impatience],
                 after,
+            );
+            mark_if_unparried(
+                agent_states,
+                &combat_action.target,
+                after,
+                LType::HeadDamage,
             );
         }
         "Heartbreaker" => {
@@ -379,6 +450,12 @@ pub fn handle_combat_action(
                 vec![FType::Arrhythmia],
                 after,
             );
+            mark_if_unparried(
+                agent_states,
+                &combat_action.target,
+                after,
+                LType::TorsoDamage,
+            );
         }
         "Slit" => {
             for_agent(
@@ -394,6 +471,12 @@ pub fn handle_combat_action(
                 &combat_action.target,
                 vec![FType::CrippledThroat],
                 after,
+            );
+            mark_if_unparried(
+                agent_states,
+                &combat_action.target,
+                after,
+                LType::HeadDamage,
             );
         }
         "Trientia" => match combat_action.annotation.as_ref() {
@@ -639,7 +722,30 @@ pub fn handle_combat_action(
             );
         }
         "Called" => {
-            let beast = match combat_action.annotation.to_lowercase().as_str() {
+            if combat_action.annotation.eq("empty") {
+                for_agent(
+                    agent_states,
+                    &combat_action.caster,
+                    &|me: &mut AgentState| {
+                        me.assume_sentinel(&|s| s.dismiss_all_beasts());
+                    },
+                );
+            }
+            let beast_name = if combat_action.annotation.eq("failed") {
+                for_agent(
+                    agent_states,
+                    &combat_action.caster,
+                    &|me: &mut AgentState| {
+                        me.assume_sentinel(&|s| s.start_calling());
+                    },
+                );
+                agent_states
+                    .get_player_hint(&combat_action.caster, &"CALLED_ANIMAL".to_string())
+                    .unwrap_or("unknown".to_string())
+            } else {
+                combat_action.annotation.clone()
+            };
+            let beast = match beast_name.to_lowercase().as_str() {
                 // Spirit (Sentinel)
                 "wisp" => Some(SentinelBeast::Wisp),
                 "weasel" => Some(SentinelBeast::Weasel),
