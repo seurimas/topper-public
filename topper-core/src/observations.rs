@@ -36,7 +36,13 @@ impl ArgumentCapture {
             ArgumentCapture::GroupAsTarget(idx) => match captures.get(*idx) {
                 Some(text) => match text.as_str() {
                     "You" | "you" | "yourself" | "your" | "Your" | "This" => slice.me.clone(),
-                    x => x.to_string(),
+                    x => {
+                        if x.starts_with("Dummy") {
+                            "Dummy".to_string()
+                        } else {
+                            x.to_string()
+                        }
+                    }
                 },
                 None => "".to_string(),
             },
