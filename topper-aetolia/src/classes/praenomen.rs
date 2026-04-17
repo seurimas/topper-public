@@ -14,11 +14,11 @@ pub fn handle_combat_action(
                 attack_afflictions(agent_states, &combat_action.target, vec![aff], after);
                 let observations = after.clone();
                 if before.iter().any(|o| o.is_category_action("Mentis")) {
-                    for_agent(agent_states, &combat_action.target, &|me| {
+                    for_agent(agent_states, &combat_action.caster, &|me| {
                         apply_or_infer_balance(me, (BType::Equil, 4.25), &observations);
                     });
                 } else {
-                    for_agent(agent_states, &combat_action.target, &|me| {
+                    for_agent(agent_states, &combat_action.caster, &|me| {
                         apply_or_infer_balance(me, (BType::Equil, 3.2), &observations);
                     });
                 }
