@@ -591,7 +591,7 @@
     "observation_name": "ParryStart"
   },
   {
-    "regex": "^Struggling to defend (you)rself, the final blow leaves you reeling.$",
+    "regex": "^Struggling to defend .*, the final blow leaves (\\w+) reeling.$",
     "args": [
       {
         "GroupAsTarget": 1

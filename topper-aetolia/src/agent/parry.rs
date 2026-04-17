@@ -20,6 +20,7 @@ impl ParryState {
 
     pub fn clear_parrying(&mut self) {
         self.parrying = None;
+        self.last_hit_timer = Timer::count_down_seconds(RECENT_UNPARRIED_WINDOW);
     }
 
     pub fn get_parrying(&self) -> Option<LType> {
@@ -54,7 +55,7 @@ impl ParryState {
     }
 
     pub fn is_recently_unparried(&self, limb: LType) -> bool {
-        self.last_hit == Some(limb) && self.last_hit_timer.is_active()
+        (self.last_hit.is_none() || self.last_hit == Some(limb)) && self.last_hit_timer.is_active()
     }
 }
 
