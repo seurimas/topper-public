@@ -29,6 +29,8 @@ pub enum PredatorPredicate {
     HasOrgyuk,
     HasSpider,
     HasOrel,
+    OrelWithMe,
+    OrelHoistingAny,
 }
 
 impl TargetPredicate for PredatorPredicate {
@@ -106,6 +108,12 @@ impl TargetPredicate for PredatorPredicate {
                     .unwrap_or(false),
                 PredatorPredicate::HasOrel => target
                     .check_if_predator(&|predator| predator.has_orel())
+                    .unwrap_or(false),
+                PredatorPredicate::OrelWithMe => target
+                    .check_if_predator(&|predator| predator.is_orel_with_me())
+                    .unwrap_or(false),
+                PredatorPredicate::OrelHoistingAny => target
+                    .check_if_predator(&|predator| predator.is_orel_hoisting_any())
                     .unwrap_or(false),
             }
         } else {

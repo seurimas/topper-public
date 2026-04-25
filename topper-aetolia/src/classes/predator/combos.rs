@@ -652,7 +652,11 @@ impl ComboSolver {
     }
 
     pub fn add_attacks<'a>(&mut self, attacks: impl Iterator<Item = &'a ComboAttack>) {
-        self.attacks.extend(attacks);
+        let new_attacks: Vec<ComboAttack> = attacks
+            .filter(|attack| !self.attacks.contains(attack))
+            .cloned()
+            .collect();
+        self.attacks.extend(new_attacks);
     }
 
     pub fn set_parry(&mut self, parry: bool) -> &mut Self {

@@ -508,6 +508,48 @@ impl ActiveTransition for SwoopAction {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct OrelTraverseAction {
+    pub target: String,
+}
+
+impl OrelTraverseAction {
+    pub fn new(target: String) -> Self {
+        Self { target }
+    }
+}
+
+impl ActiveTransition for OrelTraverseAction {
+    fn skill_name(&self) -> String {
+        "OrelTraverse".to_string()
+    }
+
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("orel traverse {}", self.target))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct OrelHoistAction {
+    pub target: String,
+}
+
+impl OrelHoistAction {
+    pub fn new(target: String) -> Self {
+        Self { target }
+    }
+}
+
+impl ActiveTransition for OrelHoistAction {
+    fn skill_name(&self) -> String {
+        "OrelHoist".to_string()
+    }
+
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("orel hoist {}", self.target))
+    }
+}
+
 // ==================
 // Orgyuk
 // ==================

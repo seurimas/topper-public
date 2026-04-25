@@ -261,6 +261,14 @@ impl AgentState {
         return false;
     }
 
+    pub fn can_speak(&self) -> bool {
+        !self.is(FType::RippedThroat) && !self.is(FType::CrippledThroat)
+    }
+
+    pub fn can_command(&self) -> bool {
+        self.can_speak() && !self.is(FType::Disfigurement)
+    }
+
     pub fn add_guess(&mut self, flag: FType) -> bool {
         self.hidden_state.add_guess(flag)
     }

@@ -5,6 +5,19 @@ use serde::*;
 
 pub const FEINT_COOLDOWN: CType = 10 * BALANCE_SCALE as CType;
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum TraversingState {
+    WithMe,
+    TransversedOver(String),
+    Unknown,
+}
+
+impl Default for TraversingState {
+    fn default() -> Self {
+        TraversingState::WithMe
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, EnumIter)]
 pub enum KnifeStance {
     None,
@@ -53,6 +66,8 @@ pub enum PredatorCompanionState {
     Orel {
         venoms: (String, String),
         swooping: Option<(String, Timer)>,
+        traversing: TraversingState,
+        hoisting: Option<String>,
     },
     Orgyuk {
         roaring: Option<Timer>,
@@ -68,7 +83,9 @@ pub enum PredatorCompanionState {
 impl PredatorCompanionState {
     pub fn wait(&mut self, time: CType, cooldown_effect: CooldownEffect) {
         match self {
-            PredatorCompanionState::Orel { swooping, venoms } => {
+            PredatorCompanionState::Orel {
+                swooping, venoms, ..
+            } => {
                 if let Some((_who, swooping_timer)) = swooping {
                     swooping_timer.wait(time);
                     if !swooping_timer.is_active() {
@@ -245,6 +262,8 @@ impl PredatorClassState {
             self.companion = Some(PredatorCompanionState::Orel {
                 venoms: (String::new(), String::new()),
                 swooping: None,
+                traversing: TraversingState::default(),
+                hoisting: None,
             });
         }
     }
@@ -265,7 +284,10 @@ impl PredatorClassState {
     }
 
     pub fn orel_swooped(&mut self) -> (String, String) {
-        if let Some(PredatorCompanionState::Orel { swooping, venoms }) = &mut self.companion {
+        if let Some(PredatorCompanionState::Orel {
+            swooping, venoms, ..
+        }) = &mut self.companion
+        {
             if let Some((_who, swooping)) = swooping {
                 swooping.expire();
             }
@@ -278,7 +300,10 @@ impl PredatorClassState {
     }
 
     pub fn get_swooping(&self) -> Option<(String, Timer, (String, String))> {
-        if let Some(PredatorCompanionState::Orel { swooping, venoms }) = &self.companion {
+        if let Some(PredatorCompanionState::Orel {
+            swooping, venoms, ..
+        }) = &self.companion
+        {
             if let Some((who, swooping)) = swooping {
                 Some((who.clone(), swooping.clone(), venoms.clone()))
             } else {
@@ -292,6 +317,80 @@ impl PredatorClassState {
     pub fn has_orel(&self) -> bool {
         if let Some(PredatorCompanionState::Orel { .. }) = self.companion {
             true
+        } else {
+            false
+        }
+    }
+
+    pub fn set_orel_with_me(&mut self) {
+        self.get_orel();
+        if let Some(PredatorCompanionState::Orel { traversing, .. }) = &mut self.companion {
+            *traversing = TraversingState::WithMe;
+        }
+    }
+
+    pub fn set_orel_traversing_specific(&mut self, target: String) {
+        self.get_orel();
+        if let Some(PredatorCompanionState::Orel { traversing, .. }) = &mut self.companion {
+            *traversing = TraversingState::TransversedOver(target);
+        }
+    }
+
+    pub fn set_orel_not_traversing_specific(&mut self) {
+        self.get_orel();
+        if let Some(PredatorCompanionState::Orel { traversing, .. }) = &mut self.companion {
+            *traversing = TraversingState::Unknown;
+        }
+    }
+
+    pub fn is_orel_traversing_specific(&self, target: &String) -> bool {
+        if let Some(PredatorCompanionState::Orel { traversing, .. }) = &self.companion {
+            if let TraversingState::TransversedOver(t) = traversing {
+                t.eq_ignore_ascii_case(target)
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    }
+
+    pub fn is_orel_with_me(&self) -> bool {
+        if let Some(PredatorCompanionState::Orel { traversing, .. }) = &self.companion {
+            *traversing == TraversingState::WithMe
+        } else {
+            false
+        }
+    }
+
+    pub fn orel_hoist(&mut self, target: String) {
+        self.get_orel();
+        if let Some(PredatorCompanionState::Orel { hoisting, .. }) = &mut self.companion {
+            *hoisting = Some(target);
+        }
+    }
+
+    pub fn orel_hoisted(&mut self) {
+        if let Some(PredatorCompanionState::Orel { hoisting, .. }) = &mut self.companion {
+            *hoisting = None;
+        }
+    }
+
+    pub fn is_orel_hoisting_any(&self) -> bool {
+        if let Some(PredatorCompanionState::Orel { hoisting, .. }) = &self.companion {
+            hoisting.is_some()
+        } else {
+            false
+        }
+    }
+
+    pub fn is_orel_hoisting(&self, target: &String) -> bool {
+        if let Some(PredatorCompanionState::Orel { hoisting, .. }) = &self.companion {
+            if let Some(hoisting) = hoisting {
+                hoisting.eq_ignore_ascii_case(target)
+            } else {
+                false
+            }
         } else {
             false
         }

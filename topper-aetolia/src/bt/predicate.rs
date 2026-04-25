@@ -163,6 +163,7 @@ pub enum AetPredicate {
     ExpectedParry(AetTarget, LimbDescriptor),
     CanParry(AetTarget),
     KnownUnparry(AetTarget, LimbDescriptor),
+    CannotSpeak(AetTarget),
     // Class-specific
     IsAffectedBy(AetTarget, FType),
     ClassIn(AetTarget, Vec<Class>),
@@ -858,6 +859,14 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::CanParry(target) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.can_parry() {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::CannotSpeak(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if !target.can_speak() {
                         return UnpoweredFunctionState::Complete;
                     }
                 }

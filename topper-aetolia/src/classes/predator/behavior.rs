@@ -44,6 +44,7 @@ pub enum PredatorBehavior {
     // Predation
     Quickassess(AetTarget),
     // Orel
+    OrelHoist(AetTarget),
     SwoopStack(AetTarget),
     Swoop(AetTarget, FType, FType),
     // Spider
@@ -268,13 +269,38 @@ impl UnpoweredFunction for PredatorBehavior {
                     UnpoweredFunctionState::Failed
                 }
             }
+            PredatorBehavior::OrelHoist(target) => {
+                if let Some(me) = AetTarget::Me.get_target(model, controller) {
+                    if !me.can_command() {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    let target_name = target.get_name(model, controller);
+                    let traversed = me
+                        .check_if_predator(&|predator| {
+                            predator.is_orel_traversing_specific(&target_name)
+                        })
+                        .unwrap_or(false);
+                    if traversed {
+                        controller
+                            .plan
+                            .add_to_qeb(Box::new(OrelHoistAction::new(target_name)));
+                    } else {
+                        controller
+                            .plan
+                            .add_to_qeb(Box::new(OrelTraverseAction::new(target_name)));
+                    }
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
             PredatorBehavior::SwoopStack(target) => {
                 if let Some(you) = target.get_target(model, controller) {
                     let me = model.state.borrow_me();
-                    if me.is(FType::Disfigurement)
-                        || me.is(FType::CrippledThroat)
-                        || me.is(FType::DestroyedThroat)
-                    {
+                    if !me.can_command() {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if !me.check_if_predator(&|predator| predator.is_orel_with_me()).unwrap_or(false) {
                         return UnpoweredFunctionState::Failed;
                     }
                     let venoms = controller.get_venoms_from_plan(
@@ -304,10 +330,10 @@ impl UnpoweredFunction for PredatorBehavior {
             PredatorBehavior::Swoop(target, venom_0, venom_1) => {
                 if let Some(you) = target.get_target(model, controller) {
                     let me = model.state.borrow_me();
-                    if me.is(FType::Disfigurement)
-                        || me.is(FType::CrippledThroat)
-                        || me.is(FType::DestroyedThroat)
-                    {
+                    if !me.can_command() {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                    if !me.check_if_predator(&|predator| predator.is_orel_with_me()).unwrap_or(false) {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(SwoopAction::new(
@@ -337,7 +363,7 @@ impl UnpoweredFunction for PredatorBehavior {
                         return UnpoweredFunctionState::Failed;
                     } else if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
-                    } else if me.is(FType::Disfigurement) {
+                    } else if !me.can_command() {
                         return UnpoweredFunctionState::Failed;
                     } else if you.is(FType::Shielded) {
                         return UnpoweredFunctionState::Failed;
@@ -363,7 +389,7 @@ impl UnpoweredFunction for PredatorBehavior {
                         return UnpoweredFunctionState::Failed;
                     } else if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
-                    } else if me.is(FType::Disfigurement) {
+                    } else if !me.can_command() {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(AcidAction::new(
@@ -388,7 +414,7 @@ impl UnpoweredFunction for PredatorBehavior {
                         return UnpoweredFunctionState::Failed;
                     } else if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
-                    } else if me.is(FType::Disfigurement) {
+                    } else if !me.can_command() {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(WebAction::new(
@@ -412,7 +438,7 @@ impl UnpoweredFunction for PredatorBehavior {
                         return UnpoweredFunctionState::Failed;
                     } else if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
-                    } else if me.is(FType::Disfigurement) {
+                    } else if !me.can_command() {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(NegateAction::new(
@@ -439,7 +465,7 @@ impl UnpoweredFunction for PredatorBehavior {
                         return UnpoweredFunctionState::Failed;
                     } else if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
-                    } else if me.is(FType::Disfigurement) {
+                    } else if !me.can_command() {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(StrandsAction::new(
@@ -591,7 +617,7 @@ impl UnpoweredFunction for PredatorBehavior {
                         return UnpoweredFunctionState::Failed;
                     } else if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
-                    } else if me.is(FType::Disfigurement) {
+                    } else if !me.can_command() {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(RakeAction::new(
@@ -610,7 +636,7 @@ impl UnpoweredFunction for PredatorBehavior {
                     let me = model.state.borrow_me();
                     if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
-                    } else if me.is(FType::Disfigurement) {
+                    } else if !me.can_command() {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(SwipeAction::new(
@@ -629,7 +655,7 @@ impl UnpoweredFunction for PredatorBehavior {
                     let me = model.state.borrow_me();
                     if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
-                    } else if me.is(FType::Disfigurement) {
+                    } else if !me.can_command() {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(ThrowAction::new(
@@ -648,7 +674,7 @@ impl UnpoweredFunction for PredatorBehavior {
                     let me = model.state.borrow_me();
                     if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
-                    } else if me.is(FType::Disfigurement) {
+                    } else if !me.can_command() {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(WeakenAction::new(
@@ -671,7 +697,7 @@ impl UnpoweredFunction for PredatorBehavior {
                     let me = model.state.borrow_me();
                     if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
-                    } else if me.is(FType::Disfigurement) {
+                    } else if !me.can_command() {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(PummelAction::new(
@@ -692,7 +718,7 @@ impl UnpoweredFunction for PredatorBehavior {
                     let me = model.state.borrow_me();
                     if !me.arm_free() || me.stuck_fallen() {
                         return UnpoweredFunctionState::Failed;
-                    } else if me.is(FType::Disfigurement) {
+                    } else if !me.can_command() {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(MawcrushAction::new(
