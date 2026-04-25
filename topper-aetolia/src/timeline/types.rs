@@ -348,7 +348,11 @@ impl AetTimelineStateTrait for AetTimelineState {
                     me.set_flag(aff_flag, val);
                 }
             } else {
-                me.unknown_flags.add_flag(&flag_name);
+                if val {
+                    me.unknown_flags.add_flag(&flag_name);
+                } else {
+                    me.unknown_flags.remove_flag(&flag_name);
+                }
             }
         });
         Ok(())
