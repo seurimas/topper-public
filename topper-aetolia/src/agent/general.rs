@@ -9,6 +9,49 @@ use std::fmt;
 use topper_core::timeline::BaseAgentState;
 use topper_persuasion::PersuasionAff;
 
+#[derive(Deserialize, Debug, Default, PartialEq, Eq, Hash, Clone, Copy)]
+pub enum AreaStatus {
+    #[default]
+    OutOfArea,
+    InArea,
+    InAreaOutside,
+    InAreaInside,
+}
+
+impl AreaStatus {
+    pub fn is_in_area(&self) -> bool {
+        matches!(
+            self,
+            AreaStatus::InArea | AreaStatus::InAreaOutside | AreaStatus::InAreaInside
+        )
+    }
+}
+
+#[derive(Debug, Default, PartialEq, Eq, Hash, Clone)]
+pub struct ObservationState {
+    pub time_since_seen: CType,
+    pub area_status: AreaStatus,
+    pub time_since_area_status: CType,
+}
+
+impl ObservationState {
+    pub fn wait(&mut self, duration: CType) {
+        self.time_since_seen = self.time_since_seen.saturating_add(duration);
+        self.time_since_area_status = self.time_since_area_status.saturating_add(duration);
+    }
+
+    pub fn observe_seen(&mut self) {
+        self.time_since_seen = 0;
+    }
+
+    pub fn observe_area_status(&mut self, status: AreaStatus) {
+        if self.area_status != status {
+            self.area_status = status;
+            self.time_since_area_status = 0;
+        }
+    }
+}
+
 #[derive(Deserialize, Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Timer {
     CountDown(CType),

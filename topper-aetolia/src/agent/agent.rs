@@ -38,6 +38,7 @@ pub struct AgentState {
     pub room_id: i64,
     pub elevation: Elevation,
     pub persuasion_state: PersuasionState,
+    pub observation: ObservationState,
 }
 
 // True = Aeon = Pause cooldowns.
@@ -58,6 +59,7 @@ impl BaseAgentState for AgentState {
         self.siderealist_board.wait(duration);
         self.channel_state.wait(duration);
         self.parry_state.wait(duration);
+        self.observation.wait(duration);
         self.flags.wait(duration);
         if let Some((cured_limb, heal_modifier, first_person)) = self.limb_damage.wait(duration) {
             if !first_person {

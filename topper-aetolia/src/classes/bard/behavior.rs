@@ -38,9 +38,9 @@ pub enum BardBehavior {
     TempoVenom(bool),
     Anelace,
     ColdRead,
-    PatchAggroedAlly,
+    Patch(AetTarget),
     AudienceTarget,
-    AudienceAggroedAlly,
+    Audience(AetTarget),
     SingSong(Song),
     PlaySong(Song),
     SingOrPlaySong(Song),
@@ -382,7 +382,7 @@ impl UnpoweredFunction for BardBehavior {
                     return UnpoweredFunctionState::Failed;
                 }
             }
-            BardBehavior::PatchAggroedAlly => {
+            BardBehavior::Patch(target) => {
                 let me = model.state.borrow_me();
                 if me
                     .check_if_bard(&|bard| bard.dithering > 0)
@@ -394,21 +394,19 @@ impl UnpoweredFunction for BardBehavior {
                 } else if !controller.has_qeb() {
                     return UnpoweredFunctionState::Failed;
                 }
-                let best_ally = get_aggroed_ally(controller);
-                if let Some((ally, _aggro)) = &best_ally {
-                    if !assure_unwielded(&me, model, controller, false) {
-                        return UnpoweredFunctionState::Failed;
-                    }
-                    controller
-                        .plan
-                        .add_to_qeb(Box::new(WeavingAttackAction::patchwork(
-                            model.who_am_i(),
-                            ally.clone(),
-                        )));
-                } else {
-                    // println!("NO ALLIES");
+                let target_name = target.get_name(model, controller);
+                if target_name.is_empty() {
                     return UnpoweredFunctionState::Failed;
                 }
+                if !assure_unwielded(&me, model, controller, false) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                controller
+                    .plan
+                    .add_to_qeb(Box::new(WeavingAttackAction::patchwork(
+                        model.who_am_i(),
+                        target_name,
+                    )));
             }
             BardBehavior::AudienceTarget => {
                 if let Some(target) = &controller.target {
@@ -420,19 +418,17 @@ impl UnpoweredFunction for BardBehavior {
                         ))));
                 }
             }
-            BardBehavior::AudienceAggroedAlly => {
-                let best_ally = get_aggroed_ally(controller);
-                if let Some((ally, _aggro)) = &best_ally {
-                    controller
-                        .plan
-                        .add_to_front_of_qeb(Box::new(PlainAction::new(format!(
-                            "audience {}",
-                            ally
-                        ))));
-                } else {
-                    // println!("NO ALLIES");
+            BardBehavior::Audience(target) => {
+                let target_name = target.get_name(model, controller);
+                if target_name.is_empty() {
                     return UnpoweredFunctionState::Failed;
                 }
+                controller
+                    .plan
+                    .add_to_front_of_qeb(Box::new(PlainAction::new(format!(
+                        "audience {}",
+                        target_name
+                    ))));
             }
             BardBehavior::ColdRead => {
                 if let Some(target) = &controller.target {
@@ -584,21 +580,6 @@ impl UnpoweredFunction for BardBehavior {
     fn reset(self: &mut Self, parameter: &Self::Model) {
         // Nothing to do.
     }
-}
-
-fn get_aggroed_ally(controller: &mut BehaviorController) -> Option<(String, i32)> {
-    let mut best_ally: Option<(String, i32)> = None;
-    for (ally, aggro) in controller.allies.iter() {
-        if *aggro
-            > best_ally
-                .as_ref()
-                .map(|(_, ally_aggro)| *ally_aggro)
-                .unwrap_or(-1)
-        {
-            best_ally = Some((ally.clone(), *aggro));
-        }
-    }
-    best_ally.filter(|(_ally, aggro)| *aggro > 0)
 }
 
 fn assure_unwielded(

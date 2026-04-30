@@ -7,6 +7,7 @@ use crate::classes::LockType;
 use crate::classes::VenomPlan;
 use crate::classes::ascendril::AscendrilPredicate;
 use crate::classes::bard::BardPredicate;
+use crate::classes::create_aggro_map;
 use crate::classes::get_affs_from_plan;
 use crate::classes::infiltrator::InfiltratorPredicate;
 use crate::classes::is_affected_by;
@@ -34,6 +35,9 @@ pub const QUEUE_TIME: f32 = 0.15;
 pub enum AetTarget {
     Me,
     Target,
+    MostAggroedFriend,
+    PriorityTarget,
+    LastTarget,
 }
 
 impl AetTarget {
@@ -53,20 +57,56 @@ impl AetTarget {
                 .and_then(|target| model.state.get_agent(&target))
                 .and_then(|branches| branches.get(0))
                 .or(Some(&model.default_agent)),
+            AetTarget::MostAggroedFriend | AetTarget::PriorityTarget | AetTarget::LastTarget => {
+                let name = self.get_name(model, controller);
+                if name.is_empty() {
+                    None
+                } else {
+                    model
+                        .state
+                        .get_agent(&name)
+                        .and_then(|branches| branches.get(0))
+                }
+            }
         }
     }
 
-    pub fn get_name<'a>(
-        &self,
-        model: &'a BehaviorModel,
-        controller: &BehaviorController,
-    ) -> String {
+    pub fn get_name(&self, model: &BehaviorModel, controller: &BehaviorController) -> String {
         match self {
             AetTarget::Me => model.who_am_i(),
             AetTarget::Target => controller
                 .target
                 .clone()
                 .unwrap_or_else(|| "enemy".to_string()),
+            AetTarget::MostAggroedFriend => {
+                let aggro_map = create_aggro_map(model, controller.players.allies.names());
+                aggro_map
+                    .into_iter()
+                    .filter(|(_, aggro)| *aggro > 0)
+                    .max_by_key(|(_, aggro)| *aggro)
+                    .map(|(name, _)| name)
+                    .unwrap_or_default()
+            }
+            AetTarget::PriorityTarget => controller
+                .players
+                .targets
+                .players
+                .iter()
+                .max_by_key(|(_, info)| info.priority)
+                .map(|(name, _)| name.clone())
+                .unwrap_or_default(),
+            AetTarget::LastTarget => {
+                let current = controller.target.as_deref().unwrap_or("");
+                controller
+                    .players
+                    .targets
+                    .players
+                    .iter()
+                    .filter(|(name, _)| name.as_str() != current)
+                    .min_by_key(|(_, info)| info.priority)
+                    .map(|(name, _)| name.clone())
+                    .unwrap_or_default()
+            }
         }
     }
 }

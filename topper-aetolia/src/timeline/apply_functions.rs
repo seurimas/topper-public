@@ -8,8 +8,8 @@ use crate::curatives::{
 };
 use crate::db::AetDatabaseModule;
 use crate::non_agent::{
-    AetNonAgent, AetTimelineDenizenExt, AetTimelineRoomExt, Appeals, PersuasionStatus,
-    get_persuasion_target,
+    AetNonAgent, AetTimelineDenizenExt, AetTimelinePlayersExt, AetTimelineRoomExt, Appeals,
+    PersuasionStatus, get_persuasion_target,
 };
 use crate::timeline::*;
 use crate::types::*;
@@ -326,10 +326,9 @@ pub fn apply_observation(
                         allies.push(strip_ansi(line));
                     }
                 }
-                timeline.non_agent_states.insert(
-                    format!("{}_allies", timeline.me),
-                    AetNonAgent::Players(allies),
-                );
+                for name in allies {
+                    timeline.add_player(&timeline.me.clone(), "allies", &name);
+                }
             }
             "Enemies" => {
                 let mut tta = -3;
@@ -346,10 +345,9 @@ pub fn apply_observation(
                         enemies.push(strip_ansi(line));
                     }
                 }
-                timeline.non_agent_states.insert(
-                    format!("{}_enemies", timeline.me),
-                    AetNonAgent::Players(enemies),
-                );
+                for name in enemies {
+                    timeline.add_player(&timeline.me.clone(), "enemies", &name);
+                }
             }
             "Vibes" => {
                 let me = timeline.borrow_me();

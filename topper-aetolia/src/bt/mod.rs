@@ -25,6 +25,7 @@ use crate::{
     },
     curatives::FirstAidSetting,
     defense::get_preferred_parry,
+    non_agent::Players,
     observables::ActionPlan,
     timeline::AetTimeline,
     types::{AgentState, FType, Hypnosis, KnifeStance, LType},
@@ -63,6 +64,14 @@ pub enum AetBehaviorTreeWrapper {
 pub type BehaviorModel = AetTimeline;
 
 #[derive(Default, Debug)]
+pub struct BehaviorPlayers {
+    pub allies: Players,
+    pub enemies: Players,
+    pub targets: Players,
+    pub friends: Players,
+}
+
+#[derive(Default, Debug)]
 pub struct BehaviorController {
     pub plan: ActionPlan,
     pub used_balance: bool,
@@ -75,7 +84,7 @@ pub struct BehaviorController {
     pub plan_tags: HashSet<String>,
     pub plan_hints: HashMap<String, String>,
     pub target: Option<String>,
-    pub allies: HashMap<String, i32>,
+    pub players: BehaviorPlayers,
     pub class_controller: ClassController,
     pub first_aid_settings: Vec<FirstAidSetting>,
     pub stripping_shield: bool,

@@ -1,10 +1,12 @@
 pub mod combat_action;
 pub mod denizen;
 pub mod persuasion;
+pub mod players;
 pub mod rooms;
 pub use combat_action::*;
 pub use denizen::*;
 pub use persuasion::*;
+pub use players::*;
 pub use rooms::*;
 use serde::Deserialize;
 use topper_core::timeline::NonAgentState;
@@ -14,7 +16,7 @@ pub use topper_persuasion::*;
 pub enum AetNonAgent {
     Room(Room),
     Denizen(Denizen),
-    Players(Vec<String>),
+    Players(Players),
 }
 
 impl AetNonAgent {
@@ -41,6 +43,20 @@ impl AetNonAgent {
     pub fn as_room_mut(&mut self) -> Option<&mut Room> {
         match self {
             AetNonAgent::Room(room) => Some(room),
+            _ => None,
+        }
+    }
+
+    pub fn as_players(&self) -> Option<&Players> {
+        match self {
+            AetNonAgent::Players(players) => Some(players),
+            _ => None,
+        }
+    }
+
+    pub fn as_players_mut(&mut self) -> Option<&mut Players> {
+        match self {
+            AetNonAgent::Players(players) => Some(players),
             _ => None,
         }
     }

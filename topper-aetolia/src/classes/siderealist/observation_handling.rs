@@ -118,43 +118,10 @@ pub fn handle_combat_action(
                 me.damage_stat(SType::Health, 5);
             });
         }
-        "Tones Tremors" => {
-            attack_afflictions(
-                agent_states,
-                &combat_action.target,
-                vec![FType::Fallen],
-                after,
-            );
-            for_agent(agent_states, &combat_action.caster, &move |me| {
-                apply_or_infer_balance(me, (BType::Secondary, 3.0), after);
-            });
-        }
         "creeps" => {
             if let Some(aff) = FType::from_name(&combat_action.annotation) {
                 attack_afflictions(agent_states, &combat_action.caster, vec![aff], after);
             }
-        }
-        "Tones Creeps" => {
-            attack_first_affliction(
-                agent_states,
-                &combat_action.target,
-                vec![FType::Loneliness, FType::Masochism],
-                after,
-            );
-            for_agent(agent_states, &combat_action.caster, &move |me| {
-                apply_or_infer_balance(me, (BType::Secondary, 3.5), after);
-            });
-        }
-        "Tones Oscillate" => {
-            attack_first_affliction(
-                agent_states,
-                &combat_action.target,
-                vec![FType::Muddled],
-                after,
-            );
-            for_agent(agent_states, &combat_action.caster, &move |me| {
-                apply_or_infer_balance(me, (BType::Secondary, 3.5), after);
-            });
         }
         "disorientation" => {
             attack_afflictions(
@@ -163,29 +130,6 @@ pub fn handle_combat_action(
                 vec![FType::Dizziness],
                 after,
             );
-        }
-        "Tones Disorientation" => {
-            attack_first_affliction(
-                agent_states,
-                &combat_action.target,
-                vec![FType::Epilepsy, FType::Mania],
-                after,
-            );
-            for_agent(agent_states, &combat_action.caster, &move |me| {
-                apply_or_infer_balance(me, (BType::Secondary, 3.5), after);
-            });
-        }
-        "Tones Stridulation" => {
-            for_agent(agent_states, &combat_action.target, &move |me| {
-                if me.is(FType::Courage) {
-                    me.toggle_flag(FType::Courage, false);
-                } else {
-                    me.toggle_flag(FType::RingingEars, true);
-                }
-            });
-            for_agent(agent_states, &combat_action.caster, &move |me| {
-                apply_or_infer_balance(me, (BType::Secondary, 3.5), after);
-            });
         }
         "cavitation" => {
             if let Some(limb) = LType::try_from_name(&combat_action.annotation) {
@@ -210,76 +154,54 @@ pub fn handle_combat_action(
                 after,
             );
         }
-        "Tones Dissension" => {
-            attack_first_affliction(
-                agent_states,
-                &combat_action.target,
-                vec![FType::Dissonance],
-                after,
-            );
-            for_agent(agent_states, &combat_action.caster, &move |me| {
-                apply_or_infer_balance(me, (BType::Secondary, 3.5), after);
-            });
-        }
         "plague" => {
             if let Some(aff) = FType::from_name(&combat_action.annotation) {
                 attack_afflictions(agent_states, &combat_action.caster, vec![aff], after);
             }
         }
-        "Tones Plague" => {
-            if let Some(aff) = FType::from_name(&combat_action.annotation) {
-                attack_afflictions(agent_states, &combat_action.target, vec![aff], after);
-                for_agent(agent_states, &combat_action.caster, &move |me| {
-                    apply_or_infer_balance(me, (BType::Secondary, 3.5), after);
-                });
-            } else {
-                let perspect = agent_states.get_perspective(combat_action);
-                let observations = after.clone();
-                for_agent_uncertain(
-                    agent_states,
-                    &combat_action.target,
-                    &move |me: &mut AgentState| {
-                        apply_or_infer_random_afflictions(
-                            me,
-                            &observations,
-                            perspect,
-                            Some((
-                                1,
-                                vec![
-                                    FType::Confusion,
-                                    FType::Weariness,
-                                    FType::Superstition,
-                                    FType::Vomiting,
-                                    FType::Recklessness,
-                                    FType::Epilepsy,
-                                    FType::Paresis,
-                                    FType::Anorexia,
-                                ],
-                            )),
-                        )
-                    },
-                );
-            }
+        "Murk" => {
+            attack_afflictions(
+                agent_states,
+                &combat_action.caster,
+                vec![FType::Loneliness, FType::Hopelessness],
+                after,
+            );
         }
-        "Tones Crystalforest" => {
-            if combat_action.target.eq_ignore_ascii_case("") {
-                return Ok(());
-            }
-            if let Some(defense) = FType::from_name(&combat_action.annotation) {
-                for_agent(agent_states, &combat_action.target, &move |me| {
-                    me.toggle_flag(defense, false);
-                });
-            } else {
-                for_agent(agent_states, &combat_action.target, &move |me| {
-                    me.toggle_flag(FType::Shielded, false);
-                });
-            }
-            for_agent(agent_states, &combat_action.caster, &move |me| {
-                apply_or_infer_balance(me, (BType::Secondary, 3.5), after);
-                me.assume_siderealist(&|me| {
-                    me.shatter_crystalforest();
-                });
-            });
+        "starlit" => {
+            attack_afflictions(
+                agent_states,
+                &combat_action.caster,
+                vec![FType::Paresis],
+                after,
+            );
+        }
+        "Hextouch" => {
+            let perspect = agent_states.get_perspective(combat_action);
+            let observations = after.clone();
+            for_agent_uncertain(
+                agent_states,
+                &combat_action.target,
+                &move |me: &mut AgentState| {
+                    apply_or_infer_random_afflictions(
+                        me,
+                        &observations,
+                        perspect,
+                        Some((
+                            2,
+                            vec![
+                                FType::Confusion,
+                                FType::Weariness,
+                                FType::Superstition,
+                                FType::Vomiting,
+                                FType::Recklessness,
+                                FType::Epilepsy,
+                                FType::Paresis,
+                                FType::Anorexia,
+                            ],
+                        )),
+                    )
+                },
+            );
         }
         "lullaby" => {
             for_agent(agent_states, &combat_action.caster, &move |me| {
@@ -290,17 +212,6 @@ pub fn handle_combat_action(
                 } else if me.is(FType::Instawake) {
                     me.toggle_flag(FType::Instawake, false);
                 }
-            });
-        }
-        "Tones Lullaby" => {
-            attack_first_affliction(
-                agent_states,
-                &combat_action.target,
-                vec![FType::Asleep, FType::Hypersomnia],
-                after,
-            );
-            for_agent(agent_states, &combat_action.caster, &move |me| {
-                apply_or_infer_balance(me, (BType::Secondary, 3.5), after);
             });
         }
         "Vayua Attack" => {

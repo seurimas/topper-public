@@ -1,10 +1,10 @@
-use crate::bt::{AetTarget, BehaviorController, BehaviorModel};
+use crate::bt::{AetTarget, BehaviorController, BehaviorModel, BehaviorPlayers};
 use crate::curatives::{
     FirstAidSetting, MENTAL_AFFLICTIONS, RANDOM_CURES, SafetyAlert,
     get_firstaid_settings_for_class, get_firstaid_settings_no_class,
 };
 use crate::db::AetDatabaseModule;
-use crate::non_agent::AetNonAgent;
+use crate::non_agent::{AetNonAgent, AetTimelinePlayersExt, Players};
 use crate::timeline::*;
 use crate::types::*;
 use crate::{observables::*, targetted_action};
@@ -1074,6 +1074,30 @@ pub fn get_stack_from_file(class: &String, stack_name: &String) -> Option<Vec<Ve
     }
 }
 
+pub fn create_aggro_map<'a>(
+    timeline: &AetTimeline,
+    players: impl Iterator<Item = &'a String>,
+) -> HashMap<String, i32> {
+    let my_room = timeline.state.borrow_me().room_id;
+    players
+        .filter_map(|name| {
+            let state = timeline.state.borrow_agent(name);
+            if state.room_id == my_room {
+                Some((name.clone(), state.get_aggro()))
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
+fn get_players_or_default(state: &AetTimelineState, me: &str, list: &str) -> Players {
+    state
+        .get_players(me, list)
+        .cloned()
+        .unwrap_or_default()
+}
+
 pub fn get_controller(
     attack_class: &'static str,
     me: &String,
@@ -1086,26 +1110,12 @@ pub fn get_controller(
         plan: ActionPlan::new(me),
         target: Some(target.clone()),
         aff_priorities: get_stack(timeline, attack_class, target, strategy, db),
-        allies: timeline
-            .state
-            .non_agent_states
-            .get(&format!("{}_allies", me))
-            .map(|ally_list| {
-                if let AetNonAgent::Players(ally_list) = ally_list {
-                    let mut ally_aggros = HashMap::new();
-                    let my_room = timeline.state.borrow_me().room_id;
-                    for ally in ally_list {
-                        let ally_state = timeline.state.borrow_agent(ally);
-                        if ally_state.room_id == my_room {
-                            ally_aggros.insert(ally.clone(), ally_state.get_aggro());
-                        }
-                    }
-                    ally_aggros
-                } else {
-                    panic!("Non-player list in allies spot!")
-                }
-            })
-            .unwrap_or_default(),
+        players: BehaviorPlayers {
+            allies: get_players_or_default(&timeline.state, me, "allies"),
+            enemies: get_players_or_default(&timeline.state, me, "enemies"),
+            targets: get_players_or_default(&timeline.state, me, "targets"),
+            friends: get_players_or_default(&timeline.state, me, "friends"),
+        },
         nonce: timeline.state.time / 100,
         ..Default::default()
     }
