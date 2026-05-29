@@ -504,6 +504,21 @@ pub fn apply_observation(
                     );
                 }
             });
+            let Some(combat_action) = before.iter().find_map(|obs| {
+                if let AetObservation::CombatAction(combat_action) = obs {
+                    Some(combat_action)
+                } else {
+                    None
+                }
+            }) else {
+                return Ok(());
+            };
+            let perspective = timeline.get_perspective(combat_action);
+            if perspective == Perspective::Attacker {
+                timeline.add_stat(GOT_PARRIED, 1);
+            } else if perspective == Perspective::Target {
+                timeline.add_stat(I_PARRIED, 1);
+            }
         }
         AetObservation::Wield { who, what, hand } => {
             let left = if hand.eq("left") {
@@ -624,6 +639,27 @@ pub fn apply_observation(
                 me.persuasion_state.int = Some(*intelligence);
             });
         }
+        AetObservation::StatChange {
+            stat,
+            amount,
+            details,
+        } => match stat {
+            SType::Health => {
+                if *amount > 0 {
+                    timeline.add_stat(HEALED, *amount);
+                } else {
+                    timeline.add_stat(DAMAGED, -*amount);
+                }
+            }
+            SType::Mana => {
+                if *amount > 0 {
+                    timeline.add_stat(MANA_HEALED, *amount);
+                } else {
+                    timeline.add_stat(MANA_DAMAGED, -*amount);
+                }
+            }
+            _ => {}
+        },
         AetObservation::PersuasionResult(who, result) => {
             if let Some(target) = get_persuasion_target(timeline) {
                 timeline.for_denizen(target, &|denizen| {

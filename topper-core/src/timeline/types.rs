@@ -45,11 +45,107 @@ pub trait NonAgentState {
 
 pub type AgentStates<A> = HashMap<String, Vec<A>>;
 
+#[derive(Clone, Debug)]
+pub enum StatisticHint {
+    TimeBuckets {
+        window_size: CType,
+        max_buckets: usize,
+        last_updated: CType,
+        values: Vec<CType>,
+    },
+}
+
+const DEFAULT_WINDOW_SIZE: CType = BALANCE_SCALE as i32;
+const DEFAULT_MAX_BUCKETS: usize = 20;
+
+impl StatisticHint {
+    pub fn set_now(&mut self, now: CType) {
+        match self {
+            StatisticHint::TimeBuckets {
+                window_size,
+                max_buckets,
+                last_updated,
+                values,
+            } => {
+                let current_bucket = now / *window_size;
+                let last_bucket = *last_updated / *window_size;
+                if current_bucket > last_bucket {
+                    let buckets_to_add = (current_bucket - last_bucket) as usize;
+                    if buckets_to_add >= *max_buckets {
+                        *values = vec![0; *max_buckets];
+                    } else {
+                        *values = values
+                            .iter()
+                            .skip(buckets_to_add)
+                            .cloned()
+                            .chain(std::iter::repeat(0).take(buckets_to_add))
+                            .collect();
+                    }
+                }
+                *last_updated = now;
+            }
+        }
+    }
+
+    pub fn mark_addition(&mut self, now: CType, value: CType) {
+        self.set_now(now);
+        match self {
+            StatisticHint::TimeBuckets {
+                window_size,
+                max_buckets,
+                last_updated,
+                values,
+            } => {
+                if let Some(last) = values.last_mut() {
+                    *last += value;
+                }
+            }
+        }
+    }
+
+    pub fn mark_high_water_mark(&mut self, now: CType, value: CType) {
+        self.set_now(now);
+        match self {
+            StatisticHint::TimeBuckets {
+                window_size,
+                max_buckets,
+                last_updated,
+                values,
+            } => {
+                if let Some(last) = values.last_mut() {
+                    if value > *last {
+                        *last = value;
+                    }
+                }
+            }
+        }
+    }
+
+    pub fn mark_low_water_mark(&mut self, now: CType, value: CType) {
+        self.set_now(now);
+        match self {
+            StatisticHint::TimeBuckets {
+                window_size,
+                max_buckets,
+                last_updated,
+                values,
+            } => {
+                if let Some(last) = values.last_mut() {
+                    if value < *last {
+                        *last = value;
+                    }
+                }
+            }
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct TimelineState<A, N> {
     pub agent_states: AgentStates<A>,
     pub non_agent_states: HashMap<String, N>,
     pub free_hints: HashMap<String, String>,
+    pub statistic_hints: HashMap<&'static str, StatisticHint>,
     pub time: CType,
     pub me: String,
 }
@@ -66,6 +162,7 @@ impl<A: BaseAgentState + Clone, N: NonAgentState + Clone> TimelineState<A, N> {
             agent_states: HashMap::new(),
             non_agent_states: HashMap::new(),
             free_hints: HashMap::new(),
+            statistic_hints: HashMap::new(),
             time: 0,
             me: "".to_string(),
         }
@@ -203,6 +300,152 @@ impl<A: BaseAgentState + Clone, N: NonAgentState + Clone> TimelineState<A, N> {
             self.time = when;
         }
         Ok(())
+    }
+
+    pub fn add_stat(&mut self, name: &'static str, amount: CType) {
+        if let Some(hint) = self.statistic_hints.get_mut(&name) {
+            hint.mark_addition(self.time, amount);
+        } else {
+            warn!(
+                "No hint found for stat '{}', creating new time bucket hint",
+                name
+            );
+            let mut hint = StatisticHint::TimeBuckets {
+                window_size: DEFAULT_WINDOW_SIZE,
+                max_buckets: DEFAULT_MAX_BUCKETS,
+                last_updated: self.time,
+                values: vec![0; DEFAULT_MAX_BUCKETS],
+            };
+            hint.mark_addition(self.time, amount);
+            self.statistic_hints.insert(name, hint);
+        }
+    }
+
+    pub fn high_water_mark_stat(&mut self, name: &'static str, amount: CType) {
+        if let Some(hint) = self.statistic_hints.get_mut(&name) {
+            hint.mark_high_water_mark(self.time, amount);
+        } else {
+            warn!(
+                "No hint found for stat '{}', creating new time bucket hint",
+                name
+            );
+            let mut hint = StatisticHint::TimeBuckets {
+                window_size: DEFAULT_WINDOW_SIZE,
+                max_buckets: DEFAULT_MAX_BUCKETS,
+                last_updated: self.time,
+                values: vec![0; DEFAULT_MAX_BUCKETS],
+            };
+            hint.mark_high_water_mark(self.time, amount);
+            self.statistic_hints.insert(name, hint);
+        }
+    }
+
+    pub fn low_water_mark_stat(&mut self, name: &'static str, amount: CType) {
+        if let Some(hint) = self.statistic_hints.get_mut(&name) {
+            hint.mark_low_water_mark(self.time, amount);
+        } else {
+            warn!(
+                "No hint found for stat '{}', creating new time bucket hint",
+                name
+            );
+            let mut hint = StatisticHint::TimeBuckets {
+                window_size: DEFAULT_WINDOW_SIZE,
+                max_buckets: DEFAULT_MAX_BUCKETS,
+                last_updated: self.time,
+                values: vec![0; DEFAULT_MAX_BUCKETS],
+            };
+            hint.mark_low_water_mark(self.time, amount);
+            self.statistic_hints.insert(name, hint);
+        }
+    }
+
+    pub fn average_stat_over_last(&self, name: &'static str, duration: CType) -> Option<f32> {
+        self.statistic_hints.get(name).and_then(|hint| {
+            if let StatisticHint::TimeBuckets {
+                window_size,
+                max_buckets,
+                last_updated,
+                values,
+            } = hint
+            {
+                let buckets_to_consider = (duration / *window_size) as usize;
+                if buckets_to_consider == 0 || buckets_to_consider > *max_buckets {
+                    return None;
+                }
+                let sum: CType = values.iter().rev().take(buckets_to_consider).sum();
+                Some(sum as f32 / buckets_to_consider as f32)
+            } else {
+                None
+            }
+        })
+    }
+
+    pub fn total_stat_over_last(&self, name: &'static str, duration: CType) -> Option<CType> {
+        self.statistic_hints.get(name).and_then(|hint| {
+            if let StatisticHint::TimeBuckets {
+                window_size,
+                max_buckets,
+                last_updated,
+                values,
+            } = hint
+            {
+                let buckets_to_consider = (duration / *window_size) as usize;
+                if buckets_to_consider == 0 || buckets_to_consider > *max_buckets {
+                    return None;
+                }
+                Some(values.iter().rev().take(buckets_to_consider).sum())
+            } else {
+                None
+            }
+        })
+    }
+
+    pub fn high_water_mark_stat_over_last(
+        &self,
+        name: &'static str,
+        duration: CType,
+    ) -> Option<CType> {
+        self.statistic_hints.get(name).and_then(|hint| {
+            if let StatisticHint::TimeBuckets {
+                window_size,
+                max_buckets,
+                last_updated,
+                values,
+            } = hint
+            {
+                let buckets_to_consider = (duration / *window_size) as usize;
+                if buckets_to_consider == 0 || buckets_to_consider > *max_buckets {
+                    return None;
+                }
+                values.iter().rev().take(buckets_to_consider).cloned().max()
+            } else {
+                None
+            }
+        })
+    }
+
+    pub fn low_water_mark_stat_over_last(
+        &self,
+        name: &'static str,
+        duration: CType,
+    ) -> Option<CType> {
+        self.statistic_hints.get(name).and_then(|hint| {
+            if let StatisticHint::TimeBuckets {
+                window_size,
+                max_buckets,
+                last_updated,
+                values,
+            } = hint
+            {
+                let buckets_to_consider = (duration / *window_size) as usize;
+                if buckets_to_consider == 0 || buckets_to_consider > *max_buckets {
+                    return None;
+                }
+                values.iter().rev().take(buckets_to_consider).cloned().min()
+            } else {
+                None
+            }
+        })
     }
 }
 

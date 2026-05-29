@@ -249,6 +249,12 @@ pub enum AetObservation {
     AcumenLost(String),
     Bleed(String),
     #[skip_args]
+    StatChange {
+        stat: SType,
+        amount: i32,
+        details: String,
+    },
+    #[skip_args]
     Scrutinise {
         who: String,
         personality: Personality,

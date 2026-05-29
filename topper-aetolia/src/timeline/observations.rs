@@ -1,3 +1,4 @@
+use crate::agent::SType;
 use crate::timeline::types::*;
 use crate::timeline::*;
 use regex::Regex;
@@ -159,6 +160,25 @@ pub fn aet_observation_creator(
             personality: arguments.get(1).unwrap().parse().unwrap_or_default(),
             resolve: arguments.get(2).unwrap().parse().unwrap_or_default(),
             max_resolve: arguments.get(3).unwrap().parse().unwrap_or_default(),
+        },
+        "StatChange" => AetObservation::StatChange {
+            stat: match arguments.get(0).unwrap().as_ref() {
+                "health" => SType::Health,
+                "mana" => SType::Mana,
+                _ => SType::SP,
+            },
+            amount: arguments.get(2).unwrap().parse::<i32>().unwrap_or_default()
+                * if arguments.get(1).unwrap() == "gained" {
+                    1
+                } else {
+                    -1
+                },
+            details: arguments
+                .iter()
+                .skip(2)
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>()
+                .join(" "),
         },
         _ => AetObservation::enum_from_args(observation_name, arguments),
     }

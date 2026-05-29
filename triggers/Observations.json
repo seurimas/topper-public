@@ -935,5 +935,89 @@
       }
     ],
     "observation_name": "Bleed"
+  },
+  {
+    "regex": "^Health Lost: (\\d+), ([^,]+), (.*)$",
+    "args": [
+      {
+        "Literal": "health"
+      },
+      {
+        "Literal": "lost"
+      },
+      {
+        "Group": 1
+      },
+      {
+        "Group": 2
+      },
+      {
+        "Group": 3
+      }
+    ],
+    "observation_name": "StatChange"
+  },
+  {
+    "regex": "^Mana (Lost|Drained): (\\d+)$",
+    "args": [
+      {
+        "Literal": "mana"
+      },
+      {
+        "Literal": "lost"
+      },
+      {
+        "Group": 2
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "StatChange"
+  },
+  {
+    "regex": "^Health Gain: (\\d+)$",
+    "args": [
+      {
+        "Literal": "health"
+      },
+      {
+        "Literal": "gained"
+      },
+      {
+        "Group": 1
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "StatChange"
+  },
+  {
+    "regex": "^Mana Gain: (\\d+)$",
+    "args": [
+      {
+        "Literal": "mana"
+      },
+      {
+        "Literal": "gained"
+      },
+      {
+        "Group": 1
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "StatChange"
   }
 ]
