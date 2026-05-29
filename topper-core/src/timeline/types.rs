@@ -56,7 +56,7 @@ pub enum StatisticHint {
 }
 
 const DEFAULT_WINDOW_SIZE: CType = BALANCE_SCALE as i32;
-const DEFAULT_MAX_BUCKETS: usize = 20;
+const DEFAULT_MAX_BUCKETS: usize = 60; // 1 minute of history at 1000ms buckets
 
 impl StatisticHint {
     pub fn set_now(&mut self, now: CType) {
@@ -294,10 +294,15 @@ impl<A: BaseAgentState + Clone, N: NonAgentState + Clone> TimelineState<A, N> {
         }
     }
 
-    pub fn update_time(&mut self, when: CType) -> Result<(), String> {
+    pub fn update_time(&mut self, when: CType, stats: &[&'static str]) -> Result<(), String> {
         if when > self.time {
             self.wait(when - self.time);
             self.time = when;
+            for stat in stats.iter() {
+                if let Some(hint) = self.statistic_hints.get_mut(stat) {
+                    hint.set_now(self.time);
+                }
+            }
         }
         Ok(())
     }
@@ -521,8 +526,8 @@ impl<O, P, A: BaseAgentState + Clone, N: NonAgentState + Clone> Timeline<O, P, A
         }
     }
 
-    pub fn update_time(&mut self, when: CType) -> Result<(), String> {
-        self.state.update_time(when)
+    pub fn update_time(&mut self, when: CType, stat_names: &[&'static str]) -> Result<(), String> {
+        self.state.update_time(when, stat_names)
     }
 
     pub fn who_am_i(&self) -> String {

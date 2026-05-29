@@ -94,18 +94,31 @@ fn expect_heals_per_second(timeline: &AetTimeline) -> f32 {
 }
 
 fn heal_row(timeline: &AetTimeline) -> String {
-    let stat_duration = (20.0 * BALANCE_SCALE) as CType;
+    let pressure_duration = (20.0 * BALANCE_SCALE) as CType;
+    let heal_duration = (30.0 * BALANCE_SCALE) as CType;
     let avg_damage = timeline
         .state
-        .average_stat_over_last(DAMAGED, stat_duration)
+        .average_stat_over_last(DAMAGED, pressure_duration)
         .unwrap_or(0.0);
     let avg_mana_damage = timeline
         .state
-        .average_stat_over_last(MANA_DAMAGED, stat_duration)
+        .average_stat_over_last(MANA_DAMAGED, pressure_duration)
         .unwrap_or(0.0);
     let avg_total_damage = avg_damage + avg_mana_damage;
-    let expected_hps = expect_heals_per_second(timeline);
-    let heal_color = if avg_total_damage > expected_hps * 1.2 {
+
+    let avg_heal = timeline
+        .state
+        .average_stat_over_last(HEALED, heal_duration)
+        .unwrap_or(0.0);
+    let avg_mana_heal = timeline
+        .state
+        .average_stat_over_last(MANA_HEALED, heal_duration)
+        .unwrap_or(0.0);
+    let expected_hps = expect_heals_per_second(timeline).max(avg_heal + avg_mana_heal);
+
+    let heal_color = if avg_total_damage > expected_hps * 1.5 {
+        "magenta"
+    } else if avg_total_damage > expected_hps * 1.2 {
         "red"
     } else if avg_total_damage >= expected_hps * 0.8 {
         "yellow"

@@ -4,15 +4,15 @@ use prediction::PredictionModule;
 use serde_json::from_str;
 use std::sync::mpsc::Sender;
 use std::sync::{Arc, RwLock};
-use topper_aetolia::bt::{clear_behavior_trees, DEBUG_TREES};
-use topper_aetolia::classes::{clear_aff_stacks, get_attack, VenomPlan};
+use topper_aetolia::bt::{DEBUG_TREES, clear_behavior_trees};
+use topper_aetolia::classes::{VenomPlan, clear_aff_stacks, get_attack};
 use topper_aetolia::db::AetDatabaseModule;
 use topper_aetolia::defense::DEFENSE_DATABASE;
 use topper_aetolia::non_agent::{AetNonAgent, AetTimelineDenizenExt, AetTimelineRoomExt};
 use topper_aetolia::timeline::*;
 use topper_aetolia::types::AgentState;
 use topper_core::observations;
-use topper_core::observations::{ObservationParser, BENCHMARKS};
+use topper_core::observations::{BENCHMARKS, ObservationParser};
 use topper_core_mudlet::topper::{
     TelnetModule, TimelineModule, Topper, TopperCore, TopperHandler, TopperMessage, TopperModule,
     TopperRequest, TopperResponse,
@@ -55,7 +55,7 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for AetTimelineModule {
             }
             TopperMessage::Request(request) => match request {
                 TopperRequest::BattleStats(when) => {
-                    self.timeline.update_time(*when)?;
+                    self.timeline.update_time(*when, &REALTIME_STAT_NAMES)?;
                     Ok(TopperResponse::silent())
                 }
                 TopperRequest::Hint(who, hint, value) => {

@@ -8,6 +8,10 @@ use crate::curatives::{
 use crate::db::AetDatabaseModule;
 use crate::non_agent::AetNonAgent;
 use crate::non_agent::Personality;
+use crate::timeline::DAMAGED;
+use crate::timeline::HEALED;
+use crate::timeline::MANA_DAMAGED;
+use crate::timeline::MANA_HEALED;
 use crate::types::*;
 use log::warn;
 use regex::Regex;
@@ -315,6 +319,7 @@ pub trait AetTimelineStateTrait {
         gmcp: &GMCP,
         db: Option<&DB>,
     ) -> Result<(), String>;
+    fn update_time_with_stats(&mut self, when: CType) -> Result<(), String>;
 
     fn apply_time_slice<DB: AetDatabaseModule>(
         &mut self,
@@ -419,13 +424,16 @@ impl AetTimelineStateTrait for AetTimelineState {
         apply_gmcp(self, gmcp, db)
     }
 
+    fn update_time_with_stats(&mut self, when: CType) -> Result<(), String> {
+        self.update_time(when, &[HEALED, MANA_HEALED, DAMAGED, MANA_DAMAGED])
+    }
+
     fn apply_time_slice<DB: AetDatabaseModule>(
         &mut self,
         slice: &TimeSlice<AetObservation, AetPrompt>,
         db: Option<&DB>,
     ) -> Result<(), String> {
         self.me = slice.me.clone();
-        self.update_time(slice.time);
         for gmcp in slice.gmcp.iter() {
             self.apply_gmcp(gmcp, db);
         }

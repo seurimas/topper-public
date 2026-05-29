@@ -150,7 +150,7 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for BattleStatsModule {
         match message {
             TopperMessage::Request(request) => match request {
                 TopperRequest::BattleStats(when) => {
-                    timeline.update_time(*when);
+                    timeline.update_time(*when, &REALTIME_STAT_NAMES);
                     if let Some(class) = target.as_ref().and_then(|target| db.get_class(target)) {
                         for_agent(&mut timeline.state, target.as_ref().unwrap(), &|you| {
                             if you.get_normalized_class().is_none() {
