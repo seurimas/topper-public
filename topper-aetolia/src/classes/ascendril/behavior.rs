@@ -56,7 +56,6 @@ pub enum AscendrilBehavior {
     EnrichFire,
     EnrichWater,
     EnrichAir,
-    Flare(AetTarget, bool),
     Emberbrand(AetTarget, bool),
     Frostbrand(AetTarget, bool),
     Thunderbrand(AetTarget, bool),
@@ -106,6 +105,11 @@ impl UnpoweredFunction for AscendrilBehavior {
                 if !me
                     .check_if_ascendril(&|me| me.fireburst_stacks() > 0)
                     .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
+                if me.get_balance(BType::LeftHandBalance) >= QUEUE_TIME
+                    && me.get_balance(BType::RightHandBalance) >= QUEUE_TIME
                 {
                     return UnpoweredFunctionState::Failed;
                 }
@@ -408,24 +412,6 @@ impl UnpoweredFunction for AscendrilBehavior {
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
-            AscendrilBehavior::Flare(target, plain) => {
-                let me = model.state.borrow_me();
-                if !me.balanced(BType::Secondary) {
-                    return UnpoweredFunctionState::Failed;
-                } else if !me
-                    .check_if_ascendril(&|me| me.is_glimpse_active(None))
-                    .unwrap_or(false)
-                {
-                    return UnpoweredFunctionState::Failed;
-                }
-                let action = Flare::from_target(target, model, controller);
-                if *plain {
-                    controller.plan.add_to_plain(Box::new(action));
-                    return UnpoweredFunctionState::Complete;
-                }
-                controller.plan.add_to_qeb(Box::new(action));
-                UnpoweredFunctionState::Complete
-            }
             AscendrilBehavior::Emberbrand(target, allow_enrich) => {
                 let me = model.state.borrow_me();
                 if !resonating_or_enrich(
@@ -511,8 +497,11 @@ impl UnpoweredFunction for AscendrilBehavior {
                     return UnpoweredFunctionState::Failed;
                 }
                 if let Some(target) = target.get_target(model, controller) {
-                    if !target.is(FType::Fallen) {
-                        // Check if target has the brand matching current glimpse element — skipped for now
+                    if !target.is(FType::Fallen)
+                        && !me
+                            .check_if_ascendril(&|me| me.enrapture_accelerated(target))
+                            .unwrap_or(false)
+                    {
                         return UnpoweredFunctionState::Failed;
                     }
                 }

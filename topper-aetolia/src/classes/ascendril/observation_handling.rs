@@ -74,13 +74,22 @@ pub fn handle_combat_action(
                     })
                 });
             } else {
-                for_agent(agent_states, &combat_action.caster, &|me| {
+                let observations = after.clone();
+                let arm_balance = match combat_action.annotation.as_str() {
+                    "left" => Some(BType::LeftHandBalance),
+                    "right" => Some(BType::RightHandBalance),
+                    _ => None,
+                };
+                for_agent(agent_states, &combat_action.caster, &move |me| {
                     me.assume_ascendril(&|ascendril| {
                         ascendril.fireburst_decrement();
                     });
+                    if let Some(arm_balance) = arm_balance {
+                        apply_or_infer_balance(me, (arm_balance, 2.5), &observations);
+                    }
                 });
                 for_agent(agent_states, &combat_action.target, &|me| {
-                    me.set_flag(FType::Ablaze, true);
+                    me.tick_flag_up(FType::Ablaze);
                 });
             }
         }
@@ -664,79 +673,31 @@ pub fn handle_combat_action(
                 me.set_flag(brand, true);
             });
         }
-        // Fire glimpse.
+        // Inferno still applies secondary balance on start.
         "Inferno" => {
             if combat_action.annotation.eq("start") {
                 let observations = after.clone();
                 for_agent(agent_states, &combat_action.caster, &move |me| {
                     apply_or_infer_balance(me, (BType::Secondary, 8.0), &observations);
                 });
-            } else {
-                for_agent(agent_states, &combat_action.caster, &|me| {
-                    me.assume_ascendril(&|ascendril| {
-                        ascendril.fulcrum_glimpse(Element::Fire);
-                    });
-                });
             }
         }
-        // Water glimpse.
+        // Maelstrom still applies secondary balance on start.
         "Maelstrom" => {
             if combat_action.annotation.eq("start") {
                 let observations = after.clone();
                 for_agent(agent_states, &combat_action.caster, &move |me| {
                     apply_or_infer_balance(me, (BType::Secondary, 8.0), &observations);
                 });
-            } else {
-                for_agent(agent_states, &combat_action.caster, &|me| {
-                    me.assume_ascendril(&|ascendril| {
-                        ascendril.fulcrum_glimpse(Element::Water);
-                    });
-                });
             }
         }
-        // Air glimpse.
+        // Typhoon still applies secondary balance on start.
         "Typhoon" => {
             if combat_action.annotation.eq("start") {
                 let observations = after.clone();
                 for_agent(agent_states, &combat_action.caster, &move |me| {
                     apply_or_infer_balance(me, (BType::Secondary, 8.0), &observations);
                 });
-            } else {
-                for_agent(agent_states, &combat_action.caster, &|me| {
-                    me.assume_ascendril(&|ascendril| {
-                        ascendril.fulcrum_glimpse(Element::Air);
-                    });
-                });
-            }
-        }
-        "Glimpsed" => {
-            match combat_action.annotation.as_str() {
-                "fire" => {
-                    for_agent(agent_states, &combat_action.target, &|me| {
-                        if me.is(FType::Blisters) {
-                            // More damage. Not tracked.
-                        }
-                    });
-                }
-                "water" => {
-                    for_agent(agent_states, &combat_action.target, &|me| {
-                        if me.is(FType::Hypothermia) {
-                            if me.is(FType::Shivering) {
-                                me.set_flag(FType::Frigid, true);
-                            } else if me.is(FType::Frigid) {
-                                me.set_flag(FType::Frozen, true);
-                            }
-                        }
-                    });
-                }
-                "air" => {
-                    for_agent(agent_states, &combat_action.target, &|me| {
-                        if me.is(FType::Vertigo) {
-                            me.set_flag(FType::Muddled, true);
-                        }
-                    });
-                }
-                _ => {}
             }
         }
         // Raises a conductive capacitance shield.

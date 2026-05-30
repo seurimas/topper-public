@@ -272,6 +272,12 @@ pub fn get_battle_stats(
                 Some(db),
             ),
         ),
+        "Ascendril" => topper_aetolia::classes::ascendril::get_class_state(
+            &timeline,
+            target.as_ref().unwrap_or(&"".to_string()),
+            plan.as_ref().unwrap_or(&"".to_string()),
+            Some(db),
+        ),
         "Bard" => topper_aetolia::classes::bard::get_class_state(
             &timeline,
             target.as_ref().unwrap_or(&"".to_string()),

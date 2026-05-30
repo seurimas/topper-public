@@ -44,7 +44,6 @@ untargetted_action!(Restore, "restore");
 untargetted_action!(EnrichFire, "fulcrum enrich fire");
 untargetted_action!(EnrichWater, "fulcrum enrich water");
 untargetted_action!(EnrichAir, "fulcrum enrich air");
-targetted_action!(Flare, "fulcrum flare {}");
 targetted_action!(Emberbrand, "fulcrum branding {} ember");
 targetted_action!(Frostbrand, "fulcrum branding {} frost");
 targetted_action!(Thunderbrand, "fulcrum branding {} thunder");

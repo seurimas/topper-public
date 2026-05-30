@@ -29,7 +29,6 @@ pub enum AscendrilPredicate {
     Afterburned,
     SchismOnHere,
     ImbalanceOnHere,
-    GlimpseOnHere(Option<Element>),
     IsResonantOrCanEnrich(Element),
     CapacitanceRaising,
     CapacitanceUp,
@@ -114,9 +113,6 @@ impl TargetPredicate for AscendrilPredicate {
                     .unwrap_or(false),
                 AscendrilPredicate::Afterburned => target
                     .check_if_ascendril(&|me| me.afterburn_active())
-                    .unwrap_or(false),
-                AscendrilPredicate::GlimpseOnHere(element) => target
-                    .check_if_ascendril(&|me| me.is_glimpse_active(*element))
                     .unwrap_or(false),
                 AscendrilPredicate::IsResonantOrCanEnrich(element) => target
                     .check_if_ascendril(&|me| {

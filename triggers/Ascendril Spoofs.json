@@ -420,27 +420,6 @@
         "observation_name": "Proc"
     },
     {
-        "regex": "^(You)r (fire|water|air) glimpse affects (\\w+).$",
-        "args": [
-            {
-                "GroupAsTarget": 1
-            },
-            {
-                "Literal": "Thaumaturgy"
-            },
-            {
-                "Literal": "Glimpsed"
-            },
-            {
-                "GroupAsTarget": 2
-            },
-            {
-                "GroupAsTarget": 3
-            }
-        ],
-        "observation_name": "Proc"
-    },
-    {
         "regex": "^Glowing a brilliant white, the direfrost upon (\\w+)'s skin begins to quickly spread across their body with the sound of snapping ice.$",
         "args": [
             {

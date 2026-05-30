@@ -3,7 +3,10 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 use topper_core::timeline::CType;
 
-use crate::types::Timer;
+use crate::{
+    agent::{AgentState, FType},
+    types::Timer,
+};
 
 use super::CooldownEffect;
 
@@ -186,7 +189,6 @@ pub enum FulcrumState {
 #[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct AscendrilClassState {
     fulcrum: FulcrumState,
-    fulcrum_glimpse: Option<(Timer, Element)>,
     enrich_timer: Timer,
     fireburst: Option<(Timer, i32)>,
     afterburn_raising: Timer,
@@ -208,9 +210,6 @@ impl AscendrilClassState {
         self.afterburn_up.wait(time);
         if !cooldown_effect {
             self.enrich_timer.wait(time);
-        }
-        if let Some((timer, _)) = &mut self.fulcrum_glimpse {
-            timer.wait(time);
         }
         if let Some((timer, _)) = &mut self.fireburst {
             timer.wait(time);
@@ -304,26 +303,6 @@ impl AscendrilClassState {
         match &self.fulcrum {
             FulcrumState::FulcrumExpanded { room_id: r, .. } => *r == room_id,
             _ => false,
-        }
-    }
-
-    pub fn fulcrum_glimpse(&mut self, element: Element) {
-        self.fulcrum_glimpse = Some((Timer::count_down_seconds(60.), element));
-    }
-
-    pub fn is_glimpse_active(&self, element: Option<Element>) -> bool {
-        if let Some((timer, glimpse)) = &self.fulcrum_glimpse {
-            if let Some(element) = element {
-                if *glimpse == element {
-                    timer.is_active()
-                } else {
-                    false
-                }
-            } else {
-                timer.is_active()
-            }
-        } else {
-            false
         }
     }
 
@@ -529,6 +508,12 @@ impl AscendrilClassState {
 
     pub fn fulcrum_destroy(&mut self) {
         self.fulcrum = FulcrumState::NoFulcrum;
+    }
+
+    pub fn enrapture_accelerated(&self, target: &AgentState) -> bool {
+        self.resonance_active(&Element::Fire) && target.is(FType::Emberbrand)
+            || self.resonance_active(&Element::Water) && target.is(FType::Frostbrand)
+            || self.resonance_active(&Element::Air) && target.is(FType::Thunderbrand)
     }
 }
 
