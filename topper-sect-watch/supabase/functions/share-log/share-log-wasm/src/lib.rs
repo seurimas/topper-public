@@ -39,6 +39,6 @@ pub fn cleanup_old_log(page_content: String) -> String {
             page.id = format!("{}_{}", page.id, page.get_duration().unwrap());
             serde_json::to_string(&page).unwrap_or("{}".to_string())
         }
-        Err(err) => "".to_string(),
+        Err(_err) => "".to_string(),
     }
 }

@@ -23,7 +23,7 @@ fn main() {
         .iter()
         .find(|event| matches!(event.event, PersuasionEvent::Scrutinised { .. }))
     {
-        let TimestampedEvent { time, event } = scrutinised;
+        let TimestampedEvent { time: _, event } = scrutinised;
         let PersuasionEvent::Scrutinised(_, personality, resolve, max_resolve) = event else {
             panic!("No scrutinised event found");
         };

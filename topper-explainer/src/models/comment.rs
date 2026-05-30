@@ -1,5 +1,4 @@
 use crate::{bindings::log, explainer::Comment};
-use serde::{Deserialize, Serialize};
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys::HtmlDivElement;
 use yew::prelude::*;

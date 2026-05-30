@@ -72,7 +72,7 @@ pub fn simple_strategy(
         ),
         (
             Appeals::Tradition,
-            Box::new(|me: &PersuasionState, denizen: &PersuasionStatus| {
+            Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.has_pathos_bonus() || me.analogizing() || me.is(PersuasionAff::Revelation) {
                     return EvaluatorResult::Add(2);
                 }
@@ -87,7 +87,7 @@ pub fn simple_strategy(
         ),
         (
             Appeals::Reason,
-            Box::new(|me: &PersuasionState, denizen: &PersuasionStatus| {
+            Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.reasoned() {
                     return EvaluatorResult::Add(-5);
                 } else if me
@@ -118,7 +118,7 @@ pub fn simple_strategy(
         ),
         (
             Appeals::Analogy,
-            Box::new(|me: &PersuasionState, denizen: &PersuasionStatus| {
+            Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.rhetoric_just_started() {
                     return EvaluatorResult::Add(-2);
                 } else if me.would_finish_rhetoric(Appeals::Analogy) {
@@ -140,7 +140,7 @@ pub fn simple_strategy(
         ),
         (
             Appeals::Causality,
-            Box::new(|me: &PersuasionState, denizen: &PersuasionStatus| {
+            Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.has_pathos_bonus() {
                     return EvaluatorResult::Add(2);
                 }
@@ -158,7 +158,7 @@ pub fn simple_strategy(
         ),
         (
             Appeals::Intimidation,
-            Box::new(|me: &PersuasionState, denizen: &PersuasionStatus| {
+            Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.acumen < 2000 {
                     return EvaluatorResult::Zero;
                 } else {
@@ -168,7 +168,7 @@ pub fn simple_strategy(
         ),
         (
             Appeals::Reassurance,
-            Box::new(|me: &PersuasionState, denizen: &PersuasionStatus| {
+            Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.cyclic == Some(Appeals::Reassurance) && me.acumen < 4000 {
                     return EvaluatorResult::Add(5);
                 } else if me.acumen < 2000 {
@@ -182,7 +182,7 @@ pub fn simple_strategy(
         ),
         (
             Appeals::Inspiration,
-            Box::new(|me: &PersuasionState, denizen: &PersuasionStatus| {
+            Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.reasoned() {
                     return EvaluatorResult::Add(3);
                 } else {
@@ -210,7 +210,7 @@ pub fn simple_strategy(
         // Affliction evals
         (
             Appeals::Provocation,
-            Box::new(|me: &PersuasionState, denizen: &PersuasionStatus| {
+            Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.is(PersuasionAff::Pressured) {
                     return EvaluatorResult::Add(-3);
                 } else if me.is(PersuasionAff::Confounded) {
@@ -222,7 +222,7 @@ pub fn simple_strategy(
         ),
         (
             Appeals::Tradition,
-            Box::new(|me: &PersuasionState, denizen: &PersuasionStatus| {
+            Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.is(PersuasionAff::Pressured) && !me.is(PersuasionAff::Conviction) {
                     return EvaluatorResult::Add(-3);
                 } else {
@@ -232,7 +232,7 @@ pub fn simple_strategy(
         ),
         (
             Appeals::Causality,
-            Box::new(|me: &PersuasionState, denizen: &PersuasionStatus| {
+            Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.is(PersuasionAff::Pressured) && !me.is(PersuasionAff::Conviction) {
                     return EvaluatorResult::Add(-3);
                 } else if me.is(PersuasionAff::Confounded) {
@@ -244,7 +244,7 @@ pub fn simple_strategy(
         ),
         (
             Appeals::Authority,
-            Box::new(|me: &PersuasionState, denizen: &PersuasionStatus| {
+            Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.is(PersuasionAff::Pressured) && !me.is(PersuasionAff::Conviction) {
                     return EvaluatorResult::Add(-2);
                 } else {
@@ -323,7 +323,7 @@ pub fn simple_strategy(
             best_dps_appeal = *appeal;
         }
     }
-    if let Some(mut v) = values.get_mut(&best_dps_appeal) {
+    if let Some(v) = values.get_mut(&best_dps_appeal) {
         *v += 1;
     }
     println!(

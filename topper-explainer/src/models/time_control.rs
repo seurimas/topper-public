@@ -1,10 +1,6 @@
 use crate::bindings::{
     autoscroll_once, remember_playback_cb, toggle_playback, update_playback_time,
 };
-use crate::sect_parser::parse_prompt_time;
-use serde::{Deserialize, Serialize};
-use topper_aetolia::explainer::ExplainerPage;
-use topper_core::colored_lines::get_content_of_raw_colored_text;
 use wasm_bindgen::closure::Closure;
 use web_sys::HtmlElement;
 use yew::prelude::*;
@@ -33,7 +29,7 @@ impl Component for TimeControl {
     type Properties = TimeControlProperties;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let link = ctx.link().clone();
+        let _link = ctx.link().clone();
         let on_time_change = ctx.props().on_time_change.clone();
         let handler: Box<dyn Fn(i32)> = Box::new(move |value| {
             on_time_change.emit(value);
@@ -46,7 +42,7 @@ impl Component for TimeControl {
         }
     }
 
-    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             TimeControlMessage::IncrementPlaybackSpeed => {
                 self.playback_speed_mod += 0.05;

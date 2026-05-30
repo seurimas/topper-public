@@ -1,5 +1,4 @@
-use regex::Regex;
-use yew::{prelude::*, virtual_dom::VNode};
+use yew::prelude::*;
 
 use crate::{bindings::log, colored_lines::render_line_with_color, sect_parser::is_prompt};
 
@@ -22,7 +21,7 @@ impl Component for PageLine {
     type Message = ExplainerPageMessage;
     type Properties = PageLineProperties;
 
-    fn create(ctx: &Context<Self>) -> Self {
+    fn create(_ctx: &Context<Self>) -> Self {
         Self
     }
     fn view(&self, ctx: &Context<Self>) -> Html {

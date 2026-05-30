@@ -1,7 +1,6 @@
 use js_sys::Promise;
 use wasm_bindgen::prelude::*;
 use web_sys::Node;
-use yew::Callback;
 
 #[wasm_bindgen]
 extern "C" {

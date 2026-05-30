@@ -1,4 +1,4 @@
-use crate::{bindings::*, explainer::ExplainerPage, msg::ExplainerMessage};
+use crate::{bindings::*, msg::ExplainerMessage};
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::window;

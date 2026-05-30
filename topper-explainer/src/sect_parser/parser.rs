@@ -1,5 +1,4 @@
 use crate::{bindings::*, explainer::ExplainerPage};
-use regex::Regex;
 use topper_aetolia::explainer::{PROMPT_REGEX, VS_REGEX, WHO_REGEX};
 use topper_core::colored_lines::get_content_of_raw_colored_text;
 use wasm_bindgen::JsCast;

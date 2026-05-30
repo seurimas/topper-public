@@ -82,7 +82,7 @@ impl PersuasionEvent {
                 my_state.wis = Some(*wisdom);
                 my_state.int = Some(*intelligence);
             }
-            PersuasionEvent::Scrutinised(name, personality, resolve, max_resolve) => {
+            PersuasionEvent::Scrutinised(_name, personality, resolve, max_resolve) => {
                 *their_status = PersuasionStatus::Scrutinised {
                     resolve: *resolve,
                     max_resolve: *max_resolve,
@@ -91,7 +91,7 @@ impl PersuasionEvent {
                     unique: false,
                 };
             }
-            PersuasionEvent::ResolveAffect(amount, appeal) => {
+            PersuasionEvent::ResolveAffect(amount, _appeal) => {
                 their_status.resolve_affect(*amount);
             }
             PersuasionEvent::AcumenGain(amount) => {
@@ -100,7 +100,7 @@ impl PersuasionEvent {
             PersuasionEvent::AcumenLost(amount) => {
                 my_state.acumen -= amount;
             }
-            PersuasionEvent::StartPersuasion(name) => {
+            PersuasionEvent::StartPersuasion(_name) => {
                 my_state.start_persuasion(0);
                 their_status.start_persuasion();
             }

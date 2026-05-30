@@ -2,10 +2,10 @@ use serde::{Deserialize, Serialize};
 use topper_aetolia::{curatives::MENTAL_AFFLICTIONS, timeline::AetTimeline, types::*};
 use yew::prelude::*;
 
-use crate::bindings::trace;
 
 use super::page::ExplainerPageMessage;
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Mutation {
     AddAffliction(String, FType),
@@ -31,7 +31,7 @@ impl Component for StateBlock {
     type Message = ExplainerPageMessage;
     type Properties = StateBlockProperties;
 
-    fn create(ctx: &Context<Self>) -> Self {
+    fn create(_ctx: &Context<Self>) -> Self {
         Self
     }
     fn view(&self, ctx: &Context<Self>) -> Html {
@@ -56,7 +56,7 @@ impl Component for PlayerState {
     type Message = ();
     type Properties = PlayerStateProperties;
 
-    fn create(ctx: &Context<Self>) -> Self {
+    fn create(_ctx: &Context<Self>) -> Self {
         Self
     }
     fn view(&self, ctx: &Context<Self>) -> Html {

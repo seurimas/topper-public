@@ -104,7 +104,7 @@ impl WasmTimeline {
         if time > timeline_current_time {
             for slice in slices.0.iter() {
                 if slice.time > timeline_current_time && slice.time <= time {
-                    timeline.apply_time_slice(slice, None as Option<&DummyDatabaseModule>);
+                    let _ = timeline.apply_time_slice(slice, None as Option<&DummyDatabaseModule>);
                     slice
                         .observations
                         .iter()
@@ -120,7 +120,7 @@ impl WasmTimeline {
             timeline.me = me;
             for slice in slices.0.iter() {
                 if slice.time <= time {
-                    timeline.apply_time_slice(slice, None as Option<&DummyDatabaseModule>);
+                    let _ = timeline.apply_time_slice(slice, None as Option<&DummyDatabaseModule>);
                     slice
                         .observations
                         .iter()

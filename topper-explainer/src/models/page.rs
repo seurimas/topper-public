@@ -1,5 +1,4 @@
-use serde::{Deserialize, Serialize};
-use topper_aetolia::timeline::{AetObservation, AetTimeSlice, AetTimeline, AetTimelineState};
+use topper_aetolia::timeline::{AetObservation, AetTimeSlice, AetTimeline};
 use topper_core::timeline::{BaseTimeline, db::DummyDatabaseModule};
 use yew::{prelude::*, virtual_dom::VNode};
 
@@ -10,9 +9,9 @@ use crate::{
     sect_parser::{observations::OBSERVER, parse_me_and_you},
 };
 
-use crate::explainer::{Comment, Mutation};
+use crate::explainer::Comment;
 
-use super::{ttsQueue, ttsSpeak};
+use super::ttsQueue;
 
 #[derive(Default, Debug)]
 pub struct ExplainerPageModel {
@@ -136,7 +135,7 @@ impl ExplainerPageModel {
                         .find(|(_line, idx)| *idx > *last_line_idx as u32)
                         .is_some()
                     {
-                        last_timeline
+                        let _ = last_timeline
                             .push_time_slice(slice.clone(), None as Option<&DummyDatabaseModule>);
                         new_time_slices.push(slice.clone());
                     }
@@ -156,7 +155,7 @@ impl ExplainerPageModel {
             {
                 break;
             }
-            timeline.push_time_slice(slice.clone(), None as Option<&DummyDatabaseModule>);
+            let _ = timeline.push_time_slice(slice.clone(), None as Option<&DummyDatabaseModule>);
         }
         self.viewing_state = Some((prompt_line_idx as usize, timeline.clone()));
         vec![]
@@ -315,7 +314,7 @@ impl Component for ExplainerPageModel {
         )
     }
 
-    fn update(&mut self, ctx: &Context<Self>, msg: ExplainerPageMessage) -> bool {
+    fn update(&mut self, _ctx: &Context<Self>, msg: ExplainerPageMessage) -> bool {
         match msg {
             ExplainerPageMessage::BeginNewComment(line) => {
                 self.page.comments.push(Comment::new(line, get_time()));

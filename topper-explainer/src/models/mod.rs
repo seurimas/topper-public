@@ -1,6 +1,5 @@
 use futures::FutureExt;
-use wasm_bindgen::{prelude::Closure, JsCast};
-use wasm_bindgen_futures::JsFuture;
+use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 mod comment;
@@ -18,7 +17,7 @@ use crate::{
     sect_parser::{load_sect_into_iframe, AetoliaSectParser},
 };
 
-use self::{page::ExplainerPageModel, time_control::_TimeControlProperties::end_time};
+use self::page::ExplainerPageModel;
 
 #[derive(Debug)]
 pub enum ExplainerModel {
@@ -141,7 +140,6 @@ impl Component for ExplainerModel {
                 </ul>
                 </span>
             </div>),
-            unrendered => html!(<div key="unknown">{ format!("No view: {:?}", unrendered) }</div>),
         }
     }
 
