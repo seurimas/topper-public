@@ -189,7 +189,7 @@
         "observation_name": "Proc"
     },
     {
-        "regex": "^(You)r fulcrum strips Gherond of the arcane defence.$",
+        "regex": "^(You)r fulcrum strips (\\w+) of the arcane defence.$",
         "args": [
             {
                 "GroupAsTarget": 1
@@ -204,7 +204,7 @@
                 "Literal": "hit"
             },
             {
-                "Literal": ""
+                "GroupAsTarget": 2
             }
         ],
         "observation_name": "Proc"
@@ -265,6 +265,48 @@
             },
             {
                 "Literal": "hit"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^Winds collide and spiral around (\\w+), their tumultuous energy releasing electricity that fills the air with a fierce static crackle.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Elemancy"
+            },
+            {
+                "Literal": "Aeroblast"
+            },
+            {
+                "Literal": "willstun"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^Frost forms upon (\\w+), plunging .* body temperature into a deep cold.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Elemancy"
+            },
+            {
+                "Literal": "Coldsnap"
+            },
+            {
+                "Literal": "proc"
             },
             {
                 "Literal": ""
@@ -538,5 +580,26 @@
             }
         ],
         "observation_name": "DiscernedCure"
+    },
+    {
+        "regex": "^With a thundering roar, (\\+) erupts into blinding white-hot plasma that wreathes itself around .*.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Elemancy"
+            },
+            {
+                "Literal": "Aeroblast"
+            },
+            {
+                "Literal": "stun"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
     }
 ]

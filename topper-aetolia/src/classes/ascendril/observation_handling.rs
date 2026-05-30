@@ -4,8 +4,21 @@ use crate::non_agent::AetTimelineDenizenExt;
 use crate::non_agent::AetTimelineRoomExt;
 use crate::timeline::*;
 use crate::types::*;
+use regex::Regex;
 
 use super::phenomenon_in_room;
+
+lazy_static! {
+    static ref AEROBLAST_FAST: Regex = Regex::new(r"(?i)^cast aeroblast \w+ (fast|slow)$").unwrap();
+}
+
+pub fn handle_sent(command: &String, agent_states: &mut AetTimelineState) {
+    if let Some(caps) = AEROBLAST_FAST.captures(command) {
+        let me = agent_states.me.clone();
+        let speed = caps.get(1).unwrap().as_str().to_ascii_lowercase();
+        agent_states.add_player_hint(&me, &"AEROBLAST_SPEED".to_string(), speed);
+    }
+}
 
 pub fn handle_combat_action(
     combat_action: &CombatAction,
@@ -176,25 +189,26 @@ pub fn handle_combat_action(
         }
         // Freezes twice
         "Coldsnap" => {
-            attack_first_affliction(
-                agent_states,
-                // &combat_action.target,
-                &"Gherond".to_string(),
-                vec![FType::Shivering, FType::Frigid, FType::Frozen],
-                after,
-            );
-            attack_first_affliction(
-                agent_states,
-                // &combat_action.target,
-                &"Gherond".to_string(),
-                vec![FType::Shivering, FType::Frigid, FType::Frozen],
-                after,
-            );
-            for_agent(agent_states, &combat_action.caster, &|me| {
-                me.assume_ascendril(&|ascendril| {
-                    ascendril.cast_spell(Element::Water);
+            if combat_action.annotation.eq("proc") {
+                attack_first_affliction(
+                    agent_states,
+                    &combat_action.caster,
+                    vec![FType::Shivering, FType::Frigid, FType::Frozen],
+                    after,
+                );
+                attack_first_affliction(
+                    agent_states,
+                    &combat_action.caster,
+                    vec![FType::Shivering, FType::Frigid, FType::Frozen],
+                    after,
+                );
+            } else {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.cast_spell(Element::Water);
+                    });
                 });
-            });
+            }
         }
         "Frostbrand" => {
             for_agent(agent_states, &combat_action.caster, &|me| {
@@ -252,6 +266,7 @@ pub fn handle_combat_action(
             if combat_action.annotation.eq("direfrosted") {
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.set_flag(FType::Direfrost, true);
+                    me.set_flag(FType::Mindfog, true);
                 });
             } else if combat_action.annotation.eq("frostbranded") {
                 for_agent(agent_states, &combat_action.target, &|me| {
@@ -434,6 +449,9 @@ pub fn handle_combat_action(
                 for_agent(agent_states, &combat_action.target, &|me| {
                     me.set_flag(FType::Dizziness, true);
                     me.set_flag(FType::Stupidity, true);
+                    if !me.is(FType::Courage) {
+                        me.set_flag(FType::Confusion, true);
+                    }
                 });
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.assume_ascendril(&|ascendril| {
@@ -455,22 +473,36 @@ pub fn handle_combat_action(
                 });
             });
         }
-        // Gives vomiting and fallen. Aeroblasts.
         "Aeroblast" => {
             if combat_action.annotation.eq("hit") {
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.set_flag(FType::Fallen, true);
-                    if me.is(FType::Dizziness) && me.is(FType::Vertigo) {
-                        me.set_flag(FType::Disrupted, true);
+                    if me.is(FType::Stupidity) && me.is(FType::Confusion) {
+                        me.set_flag(FType::Dazed, true);
                     }
                     if me.is(FType::TorsoBroken) {
                         me.set_flag(FType::Speed, false);
                     }
                     me.ascendril_board.aeroblast_hit();
                 });
+            } else if combat_action.annotation.eq("stun") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.set_flag(FType::Stun, true);
+                    me.ascendril_board.aeroblast_stun_hit();
+                });
+            } else if combat_action.annotation.eq("willstun") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.observe_flag(FType::Dizziness, true);
+                    me.observe_flag(FType::Vertigo, true);
+                    me.ascendril_board.aeroblast_stun();
+                });
             } else {
-                for_agent(agent_states, &combat_action.target, &|me| {
-                    me.ascendril_board.aeroblast();
+                let fast = agent_states
+                    .get_player_hint(&combat_action.caster, &"AEROBLAST_SPEED".to_string())
+                    .map(|s| s == "fast")
+                    .unwrap_or(false);
+                for_agent(agent_states, &combat_action.target, &move |me| {
+                    me.ascendril_board.aeroblast(fast);
                 });
                 for_agent(agent_states, &combat_action.caster, &move |me| {
                     me.assume_ascendril(&|ascendril| {
@@ -720,6 +752,80 @@ pub fn handle_combat_action(
             for_agent(agent_states, &combat_action.caster, &move |me| {
                 apply_or_infer_balance(me, (BType::Secondary, 5.0), &observations);
             });
+        }
+        // Consumes brand on target; if target has Etherflux, enrich the caster.
+        "Catalyst" => {
+            let element = match combat_action.annotation.as_str() {
+                "ember" => Element::Fire,
+                "frost" => Element::Water,
+                "thunder" => Element::Air,
+                _ => return Ok(()),
+            };
+            let brand = match element {
+                Element::Fire => FType::Emberbrand,
+                Element::Water => FType::Frostbrand,
+                Element::Air => FType::Thunderbrand,
+                _ => return Ok(()),
+            };
+            let has_etherflux = agent_states
+                .borrow_agent(&combat_action.target)
+                .is(FType::Etherflux);
+            for_agent(agent_states, &combat_action.target, &move |me| {
+                me.set_flag(brand, false);
+            });
+            if has_etherflux {
+                for_agent(agent_states, &combat_action.caster, &move |me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.enrich(element);
+                    });
+                });
+            }
+        }
+        // Records that the caster used shift.
+        "Shift" => {
+            if combat_action.annotation.eq("on") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.use_shift();
+                    });
+                });
+            }
+        }
+        // Records that the caster toggled degradation on.
+        "Degradation" => {
+            if combat_action.annotation.eq("on") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.degradation_on();
+                    });
+                });
+            }
+        }
+        // Records that the caster toggled spiritrift on.
+        "Spiritrift" => {
+            if combat_action.annotation.eq("on") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.spiritrift_on();
+                    });
+                });
+            }
+        }
+        // Enrapture: destroy fulcrum on success, consume resonance on failure.
+        "Enrapture" => {
+            if combat_action.annotation.eq("success") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.fulcrum_destroy();
+                    });
+                });
+            } else if combat_action.annotation.eq("failure") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.use_up_resonance();
+                    });
+                });
+            }
         }
         _ => {}
     }

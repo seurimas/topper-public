@@ -34,6 +34,12 @@ pub enum AscendrilPredicate {
     CapacitanceRaising,
     CapacitanceUp,
     CapacitanceWillDisrupt,
+    DegradationOnHere,
+    SpiritriftOnHere,
+    ShiftAvailable,
+    HasEmberbrand,
+    HasFrostbrand,
+    HasThunderbrand,
 }
 
 impl TargetPredicate for AscendrilPredicate {
@@ -126,6 +132,22 @@ impl TargetPredicate for AscendrilPredicate {
                 AscendrilPredicate::CapacitanceWillDisrupt => me
                     .check_if_ascendril(&|me| me.capacitance_will_disrupt())
                     .unwrap_or(false),
+                AscendrilPredicate::DegradationOnHere => {
+                    let room = me.room_id;
+                    me.check_if_ascendril(&|me| me.degradation_active(room))
+                        .unwrap_or(false)
+                }
+                AscendrilPredicate::SpiritriftOnHere => {
+                    let room = me.room_id;
+                    me.check_if_ascendril(&|me| me.spiritrift_active(room))
+                        .unwrap_or(false)
+                }
+                AscendrilPredicate::ShiftAvailable => me
+                    .check_if_ascendril(&|me| me.can_shift())
+                    .unwrap_or(false),
+                AscendrilPredicate::HasEmberbrand => target.is(FType::Emberbrand),
+                AscendrilPredicate::HasFrostbrand => target.is(FType::Frostbrand),
+                AscendrilPredicate::HasThunderbrand => target.is(FType::Thunderbrand),
             }
         } else {
             false

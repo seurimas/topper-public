@@ -43,7 +43,8 @@ pub enum AscendrilBehavior {
     Electrosphere(AetTarget),
     Thunderclap(AetTarget),
     Feedback(AetTarget),
-    Aeroblast(AetTarget, bool),
+    AeroblastFast(AetTarget, bool),
+    AeroblastSlow(AetTarget, bool),
     Stormwrath(bool),
     Capacitance,
     // Thaumaturgy spells
@@ -62,6 +63,13 @@ pub enum AscendrilBehavior {
     Emberbrand(AetTarget, bool),
     Frostbrand(AetTarget, bool),
     Thunderbrand(AetTarget, bool),
+    CatalystEmber(AetTarget),
+    CatalystFrost(AetTarget),
+    CatalystThunder(AetTarget),
+    Enrapture(AetTarget),
+    Shift,
+    Degradation,
+    Spiritrift,
 }
 
 impl UnpoweredFunction for AscendrilBehavior {
@@ -285,7 +293,7 @@ impl UnpoweredFunction for AscendrilBehavior {
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
-            AscendrilBehavior::Aeroblast(target, allow_enrich) => {
+            AscendrilBehavior::AeroblastFast(target, allow_enrich) => {
                 let me = model.state.borrow_me();
                 if !resonating_or_enrich(
                     &me,
@@ -296,7 +304,22 @@ impl UnpoweredFunction for AscendrilBehavior {
                 ) {
                     return UnpoweredFunctionState::Failed;
                 }
-                let action = Aeroblast::from_target(target, model, controller);
+                let action = AeroblastFast::from_target(target, model, controller);
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::AeroblastSlow(target, allow_enrich) => {
+                let me = model.state.borrow_me();
+                if !resonating_or_enrich(
+                    &me,
+                    model.who_am_i(),
+                    controller,
+                    Element::Air,
+                    *allow_enrich,
+                ) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let action = AeroblastSlow::from_target(target, model, controller);
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
@@ -490,6 +513,97 @@ impl UnpoweredFunction for AscendrilBehavior {
                     return UnpoweredFunctionState::Failed;
                 }
                 let action = Thunderbrand::from_target(target, model, controller);
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::CatalystEmber(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if !target.is(FType::Emberbrand) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                }
+                let action = CatalystEmber::from_target(target, model, controller);
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::CatalystFrost(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if !target.is(FType::Frostbrand) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                }
+                let action = CatalystFrost::from_target(target, model, controller);
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::CatalystThunder(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if !target.is(FType::Thunderbrand) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                }
+                let action = CatalystThunder::from_target(target, model, controller);
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::Enrapture(target) => {
+                let me = model.state.borrow_me();
+                let room = me.room_id;
+                if !me
+                    .check_if_ascendril(&|me| me.fulcrum_expanded(room))
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
+                if let Some(target) = target.get_target(model, controller) {
+                    if !target.is(FType::Fallen) {
+                        // Check if target has the brand matching current glimpse element — skipped for now
+                        return UnpoweredFunctionState::Failed;
+                    }
+                }
+                let action = Enrapture::from_target(target, model, controller);
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::Shift => {
+                let me = model.state.borrow_me();
+                if !me.check_if_ascendril(&|me| me.can_shift()).unwrap_or(false) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let room = me.room_id;
+                if !me
+                    .check_if_ascendril(&|me| me.fulcrum_expanded(room))
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let action = Shift::new(model.who_am_i());
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::Degradation => {
+                let me = model.state.borrow_me();
+                let room = me.room_id;
+                if !me
+                    .check_if_ascendril(&|me| me.fulcrum_expanded(room))
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let action = Degradation::new(model.who_am_i());
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::Spiritrift => {
+                let me = model.state.borrow_me();
+                let room = me.room_id;
+                if !me
+                    .check_if_ascendril(&|me| me.fulcrum_expanded(room))
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let action = Spiritrift::new(model.who_am_i());
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }

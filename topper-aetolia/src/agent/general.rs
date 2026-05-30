@@ -340,6 +340,9 @@ pub enum FType {
     // General
     Reflection,
 
+    // Ascendril defences
+    FulcrumShift,
+
     // Infiltrator defences
     Shroud,
     Ghosted,
