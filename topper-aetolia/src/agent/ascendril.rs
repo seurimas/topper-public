@@ -151,14 +151,27 @@ impl CapacitanceState {
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum Fulcrum {
+    #[default]
+    NoFulcrum,
+    FulcrumOnMe {
+        schism: bool,
+        imbalance: bool,
+        resonance: Option<(Element, i32)>,
+    },
+    FulcrumExpanded {
+        room_id: i64,
+        schism: bool,
+        imbalance: bool,
+        resonance: Option<(Element, i32)>,
+    },
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct AscendrilClassState {
-    fulcrum_up: bool,
-    fulcrum_expanded: Option<i64>,
+    fulcrum: Fulcrum,
     fulcrum_glimpse: Option<(Timer, Element)>,
-    schism: bool,
-    imbalance: bool,
     enrich_timer: Timer,
-    resonance: Option<(Element, i32)>,
     fireburst: Option<(Timer, i32)>,
     afterburn_raising: Timer,
     afterburn_up: Timer,
@@ -204,37 +217,56 @@ impl AscendrilClassState {
     }
 
     pub fn cast_spell(&mut self, element: Element) {
-        if let Some((resonance, stacks)) = &mut self.resonance {
-            if *resonance == element {
+        let resonance = match &mut self.fulcrum {
+            Fulcrum::FulcrumOnMe { resonance, .. }
+            | Fulcrum::FulcrumExpanded { resonance, .. } => resonance,
+            Fulcrum::NoFulcrum => return,
+        };
+        if let Some((res, stacks)) = resonance {
+            if *res == element {
                 *stacks += 1;
             } else {
-                *resonance = element;
+                *res = element;
                 *stacks = 1;
             }
         } else {
-            self.resonance = Some((element, 1));
+            *resonance = Some((element, 1));
         }
     }
 
     pub fn fulcrum_construct(&mut self) {
-        self.fulcrum_up = true;
+        self.fulcrum = Fulcrum::FulcrumOnMe {
+            schism: false,
+            imbalance: false,
+            resonance: None,
+        };
     }
 
     pub fn fulcrum_expand(&mut self, room_id: i64) {
-        self.fulcrum_expanded = Some(room_id);
+        let (schism, imbalance, resonance) = match &self.fulcrum {
+            Fulcrum::FulcrumOnMe { schism, imbalance, resonance } => (*schism, *imbalance, resonance.clone()),
+            _ => (false, false, None),
+        };
+        self.fulcrum = Fulcrum::FulcrumExpanded { room_id, schism, imbalance, resonance };
     }
 
     pub fn fulcrum_contract(&mut self) {
-        self.fulcrum_up = true;
-        self.fulcrum_expanded = None;
+        let (schism, imbalance, resonance) = match &self.fulcrum {
+            Fulcrum::FulcrumExpanded { schism, imbalance, resonance, .. } => (*schism, *imbalance, resonance.clone()),
+            _ => (false, false, None),
+        };
+        self.fulcrum = Fulcrum::FulcrumOnMe { schism, imbalance, resonance };
     }
 
     pub fn fulcrum_active(&self) -> bool {
-        self.fulcrum_up
+        !matches!(self.fulcrum, Fulcrum::NoFulcrum)
     }
 
     pub fn fulcrum_expanded(&self, room_id: i64) -> bool {
-        self.fulcrum_expanded == Some(room_id)
+        match &self.fulcrum {
+            Fulcrum::FulcrumExpanded { room_id: r, .. } => *r == room_id,
+            _ => false,
+        }
     }
 
     pub fn fulcrum_glimpse(&mut self, element: Element) {
@@ -258,40 +290,61 @@ impl AscendrilClassState {
     }
 
     pub fn schism_on(&mut self) {
-        self.schism = true;
+        match &mut self.fulcrum {
+            Fulcrum::FulcrumOnMe { schism, .. }
+            | Fulcrum::FulcrumExpanded { schism, .. } => *schism = true,
+            Fulcrum::NoFulcrum => {}
+        }
     }
 
     pub fn imbalance_on(&mut self) {
-        self.imbalance = true;
+        match &mut self.fulcrum {
+            Fulcrum::FulcrumOnMe { imbalance, .. }
+            | Fulcrum::FulcrumExpanded { imbalance, .. } => *imbalance = true,
+            Fulcrum::NoFulcrum => {}
+        }
     }
 
     pub fn schism_active(&self, room_id: i64) -> bool {
-        self.schism && (self.fulcrum_expanded.is_none() || self.fulcrum_expanded == Some(room_id))
+        match &self.fulcrum {
+            Fulcrum::FulcrumOnMe { schism, .. } => *schism,
+            Fulcrum::FulcrumExpanded { room_id: r, schism, .. } => *schism && *r == room_id,
+            Fulcrum::NoFulcrum => false,
+        }
     }
 
     pub fn imbalance_active(&self, room_id: i64) -> bool {
-        self.imbalance
-            && (self.fulcrum_expanded.is_none() || self.fulcrum_expanded == Some(room_id))
+        match &self.fulcrum {
+            Fulcrum::FulcrumOnMe { imbalance, .. } => *imbalance,
+            Fulcrum::FulcrumExpanded { room_id: r, imbalance, .. } => *imbalance && *r == room_id,
+            Fulcrum::NoFulcrum => false,
+        }
     }
 
     pub fn resonance_active(&self, element: &Element) -> bool {
-        if let Some((resonance, stacks)) = &self.resonance {
-            resonance == element && *stacks >= 2
-        } else {
-            false
-        }
+        let resonance = match &self.fulcrum {
+            Fulcrum::FulcrumOnMe { resonance, .. }
+            | Fulcrum::FulcrumExpanded { resonance, .. } => resonance,
+            Fulcrum::NoFulcrum => return false,
+        };
+        matches!(resonance, Some((res, stacks)) if res == element && *stacks >= 2)
     }
 
     pub fn half_resonance_active(&self, element: &Element) -> bool {
-        if let Some((resonance, stacks)) = &self.resonance {
-            resonance == element && *stacks == 1
-        } else {
-            false
-        }
+        let resonance = match &self.fulcrum {
+            Fulcrum::FulcrumOnMe { resonance, .. }
+            | Fulcrum::FulcrumExpanded { resonance, .. } => resonance,
+            Fulcrum::NoFulcrum => return false,
+        };
+        matches!(resonance, Some((res, stacks)) if res == element && *stacks == 1)
     }
 
     pub fn use_up_resonance(&mut self) {
-        self.resonance = None;
+        match &mut self.fulcrum {
+            Fulcrum::FulcrumOnMe { resonance, .. }
+            | Fulcrum::FulcrumExpanded { resonance, .. } => *resonance = None,
+            Fulcrum::NoFulcrum => {}
+        }
     }
 
     pub fn fireburst_fill(&mut self) {
@@ -373,19 +426,23 @@ impl AscendrilClassState {
 
     pub fn enrich(&mut self, element: Element) {
         self.enrich_timer = Timer::count_down_seconds(30.);
-        self.resonance = Some((element, 2));
+        match &mut self.fulcrum {
+            Fulcrum::FulcrumOnMe { resonance, .. }
+            | Fulcrum::FulcrumExpanded { resonance, .. } => *resonance = Some((element, 2)),
+            Fulcrum::NoFulcrum => {}
+        }
     }
 
     pub fn can_enrich(&self, element: &Element) -> bool {
-        if let Some((resonance, stacks)) = &self.resonance {
-            if resonance == element && *stacks >= 2 {
-                false
-            } else {
-                !self.enrich_timer.is_active()
-            }
-        } else {
-            !self.enrich_timer.is_active()
+        if self.enrich_timer.is_active() {
+            return false;
         }
+        let resonance = match &self.fulcrum {
+            Fulcrum::FulcrumOnMe { resonance, .. }
+            | Fulcrum::FulcrumExpanded { resonance, .. } => resonance,
+            Fulcrum::NoFulcrum => return true,
+        };
+        !matches!(resonance, Some((res, stacks)) if res == element && *stacks >= 2)
     }
 }
 
