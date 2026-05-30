@@ -1,9 +1,9 @@
-use serde::*;
 use behavior_bark::unpowered::*;
+use serde::*;
 
 use crate::{
     bt::*,
-    classes::{get_venoms_from_plan, group::*, ActiveTransition, Contemplate},
+    classes::{ActiveTransition, Contemplate, get_venoms_from_plan, group::*},
     curatives::get_cure_depth,
     items::{UnwieldAction, WieldAction},
     non_agent::AetTimelineRoomExt,
@@ -31,7 +31,7 @@ pub enum AscendrilBehavior {
     Drench(AetTarget, bool),
     Iceray(AetTarget),
     Glazeflow(AetTarget),
-    // Direfrost(AetTarget),
+    Direfrost(AetTarget),
     Icicle(AetTarget),
     Shatter(AetTarget),
     Crystalise(AetTarget, bool, bool),
@@ -45,6 +45,7 @@ pub enum AscendrilBehavior {
     Feedback(AetTarget),
     Aeroblast(AetTarget, bool),
     Stormwrath(bool),
+    Capacitance,
     // Thaumaturgy spells
     Fulcrum,
     FulcrumExpand,
@@ -183,11 +184,11 @@ impl UnpoweredFunction for AscendrilBehavior {
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
-            // AscendrilBehavior::Direfrost(target) => {
-            //     let action = Direfrost::from_target(target, model, controller);
-            //     controller.plan.add_to_qeb(Box::new(action));
-            //     UnpoweredFunctionState::Complete
-            // }
+            AscendrilBehavior::Direfrost(target) => {
+                let action = Direfrost::from_target(target, model, controller);
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
             AscendrilBehavior::Drench(target, contemplate) => {
                 let action = Drench::from_target(target, model, controller);
                 if *contemplate {
@@ -311,6 +312,18 @@ impl UnpoweredFunction for AscendrilBehavior {
                     return UnpoweredFunctionState::Failed;
                 }
                 let action = Stormwrath::new(model.who_am_i());
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::Capacitance => {
+                let me = model.state.borrow_me();
+                if me
+                    .check_if_ascendril(&|me| me.capacitance_active() || me.capacitance_coming_up())
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let action = Capacitance::new(model.who_am_i());
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }

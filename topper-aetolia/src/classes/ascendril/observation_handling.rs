@@ -353,7 +353,7 @@ pub fn handle_combat_action(
                 });
             });
         }
-        // Destroys shield or gives fallen.
+        // Gives fallen or strips shield.
         "Windlance" => {
             for_agent(agent_states, &combat_action.target, &|me| {
                 if me.is(FType::Shielded) {
@@ -365,6 +365,7 @@ pub fn handle_combat_action(
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
                     ascendril.cast_spell(Element::Air);
+                    ascendril.count_air_cast();
                 });
             });
         }
@@ -389,6 +390,7 @@ pub fn handle_combat_action(
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.assume_ascendril(&|ascendril| {
                         ascendril.cast_spell(Element::Air);
+                        ascendril.count_air_cast();
                         if laxity {
                             ascendril.cast_spell(Element::Air);
                         }
@@ -408,6 +410,7 @@ pub fn handle_combat_action(
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
                     ascendril.cast_spell(Element::Air);
+                    ascendril.count_air_cast();
                 });
             });
         }
@@ -416,6 +419,7 @@ pub fn handle_combat_action(
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
                     ascendril.cast_spell(Element::Air);
+                    ascendril.count_air_cast();
                     ascendril.try_claim(PhenomenaState::Electrosphere);
                 });
             });
@@ -434,6 +438,7 @@ pub fn handle_combat_action(
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.assume_ascendril(&|ascendril| {
                         ascendril.cast_spell(Element::Air);
+                        ascendril.count_air_cast();
                     });
                 });
             }
@@ -446,6 +451,7 @@ pub fn handle_combat_action(
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
                     ascendril.cast_spell(Element::Air);
+                    ascendril.count_air_cast();
                 });
             });
         }
@@ -469,6 +475,7 @@ pub fn handle_combat_action(
                 for_agent(agent_states, &combat_action.caster, &move |me| {
                     me.assume_ascendril(&|ascendril| {
                         ascendril.use_up_resonance();
+                        ascendril.count_air_cast();
                     });
                 });
             }
@@ -699,6 +706,14 @@ pub fn handle_combat_action(
                 }
                 _ => {}
             }
+        }
+        // Raises a conductive capacitance shield.
+        "Capacitance" => {
+            for_agent(agent_states, &combat_action.caster, &|me| {
+                me.assume_ascendril(&|ascendril| {
+                    ascendril.raise_capacitance();
+                });
+            });
         }
         "Flare" => {
             let observations = after.clone();

@@ -115,6 +115,42 @@ pub enum Element {
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum CapacitanceState {
+    #[default]
+    NoCapacitance,
+    CapacitanceComing {
+        timer: Timer,
+    },
+    CapacitanceUp {
+        timer: Timer,
+        count: i32,
+    },
+}
+
+impl CapacitanceState {
+    pub fn wait(&mut self, time: CType) {
+        match self {
+            CapacitanceState::CapacitanceComing { timer } => {
+                timer.wait(time);
+                if !timer.is_active() {
+                    *self = CapacitanceState::CapacitanceUp {
+                        timer: Timer::count_down_seconds(80.),
+                        count: 0,
+                    };
+                }
+            }
+            CapacitanceState::CapacitanceUp { timer, .. } => {
+                timer.wait(time);
+                if !timer.is_active() {
+                    *self = CapacitanceState::NoCapacitance;
+                }
+            }
+            CapacitanceState::NoCapacitance => {}
+        }
+    }
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct AscendrilClassState {
     fulcrum_up: bool,
     fulcrum_expanded: Option<i64>,
@@ -126,6 +162,7 @@ pub struct AscendrilClassState {
     fireburst: Option<(Timer, i32)>,
     afterburn_raising: Timer,
     afterburn_up: Timer,
+    capacitance: CapacitanceState,
     my_phenomenon: Option<Phenomena>,
     freshest_phenomenon: Option<(i64, i64, PhenomenaState)>,
 }
@@ -148,6 +185,7 @@ impl AscendrilClassState {
         if let Some((timer, _)) = &mut self.fireburst {
             timer.wait(time);
         }
+        self.capacitance.wait(time);
     }
 
     pub fn try_claim(&mut self, phenomenon: PhenomenaState) {
@@ -278,6 +316,37 @@ impl AscendrilClassState {
             }
         } else {
             0
+        }
+    }
+
+    pub fn raise_capacitance(&mut self) {
+        self.capacitance = CapacitanceState::CapacitanceComing {
+            timer: Timer::count_down_seconds(5.),
+        };
+    }
+
+    pub fn lose_capacitance(&mut self) {
+        self.capacitance = CapacitanceState::NoCapacitance;
+    }
+
+    pub fn capacitance_coming_up(&self) -> bool {
+        matches!(self.capacitance, CapacitanceState::CapacitanceComing { .. })
+    }
+
+    pub fn capacitance_active(&self) -> bool {
+        matches!(self.capacitance, CapacitanceState::CapacitanceUp { .. })
+    }
+
+    pub fn capacitance_will_disrupt(&self) -> bool {
+        matches!(self.capacitance, CapacitanceState::CapacitanceUp { count, .. } if count >= 4)
+    }
+
+    pub fn count_air_cast(&mut self) {
+        if let CapacitanceState::CapacitanceUp { count, .. } = &mut self.capacitance {
+            *count += 1;
+            if *count >= 5 {
+                self.capacitance = CapacitanceState::NoCapacitance;
+            }
         }
     }
 

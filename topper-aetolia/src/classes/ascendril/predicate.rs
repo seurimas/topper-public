@@ -31,6 +31,9 @@ pub enum AscendrilPredicate {
     ImbalanceOnHere,
     GlimpseOnHere(Option<Element>),
     IsResonantOrCanEnrich(Element),
+    CapacitanceRaising,
+    CapacitanceUp,
+    CapacitanceWillDisrupt,
 }
 
 impl TargetPredicate for AscendrilPredicate {
@@ -113,6 +116,15 @@ impl TargetPredicate for AscendrilPredicate {
                     .check_if_ascendril(&|me| {
                         me.resonance_active(element) || me.can_enrich(element)
                     })
+                    .unwrap_or(false),
+                AscendrilPredicate::CapacitanceRaising => me
+                    .check_if_ascendril(&|me| me.capacitance_coming_up())
+                    .unwrap_or(false),
+                AscendrilPredicate::CapacitanceUp => me
+                    .check_if_ascendril(&|me| me.capacitance_active())
+                    .unwrap_or(false),
+                AscendrilPredicate::CapacitanceWillDisrupt => me
+                    .check_if_ascendril(&|me| me.capacitance_will_disrupt())
                     .unwrap_or(false),
             }
         } else {

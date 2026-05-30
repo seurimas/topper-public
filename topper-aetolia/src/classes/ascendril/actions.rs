@@ -1,6 +1,6 @@
 use crate::bt::*;
-use serde::*;
 use behavior_bark::unpowered::*;
+use serde::*;
 
 use crate::{
     classes::group::*, observables::*, targetted_action, timeline::*, types::*, untargetted_action,
@@ -20,7 +20,7 @@ untargetted_action!(Coldsnap, "cast coldsnap");
 targetted_action!(Drench, "cast drench {}");
 targetted_action!(Iceray, "cast iceray {}");
 targetted_action!(Glazeflow, "cast glazeflow {}");
-// targetted_action!(Direfrost, "cast direfrost {}");
+targetted_action!(Direfrost, "cast direfrost {}");
 targetted_action!(Icicle, "cast icicle {}");
 untargetted_action!(Shatter, "cast shatter");
 targetted_action!(Crystalise, "cast crystalise {}");
@@ -33,6 +33,7 @@ targetted_action!(Thunderclap, "cast thunderclap {}");
 targetted_action!(Feedback, "cast feedback {}");
 targetted_action!(Aeroblast, "cast aeroblast {}");
 untargetted_action!(Stormwrath, "cast stormwrath");
+untargetted_action!(Capacitance, "cast capacitance");
 
 untargetted_action!(Fulcrum, "fulcrum construct");
 untargetted_action!(FulcrumExpand, "fulcrum expand");
