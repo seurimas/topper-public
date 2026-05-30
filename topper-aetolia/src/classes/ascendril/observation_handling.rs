@@ -648,9 +648,9 @@ pub fn handle_combat_action(
         }
         "Branding" => {
             let brand = match combat_action.annotation.as_str() {
-                "fire" => FType::Emberbrand,
-                "water" => FType::Frostbrand,
-                "air" => FType::Thunderbrand,
+                "ember" => FType::Emberbrand,
+                "frost" => FType::Frostbrand,
+                "thunder" => FType::Thunderbrand,
                 _ => {
                     return Ok(());
                 }

@@ -1446,7 +1446,7 @@ pub fn apply_or_infer_cure(
                     SALVE_CURE_ORDERS.get(&(salve_name.to_string(), salve_loc.to_string()))
                 {
                     if let Ok(limb) = get_limb_damage(salve_loc) {
-                        if !who.limb_damage.broken(limb) {
+                        if !salve_name.eq("mending") || !who.limb_damage.broken(limb) {
                             if !first_person {
                                 remove_in_order(order.to_vec(), who);
                             }

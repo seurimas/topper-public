@@ -210,7 +210,7 @@
         "observation_name": "Proc"
     },
     {
-        "regex": "^(You)r fulcrum is already resonating with a dissonant effect.$",
+        "regex": "^(You)r fulcrum already exudes divise magic.$",
         "args": [
             {
                 "GroupAsTarget": 1
@@ -220,6 +220,27 @@
             },
             {
                 "Literal": "Schism"
+            },
+            {
+                "Literal": "on"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You)r fulcrum already exudes imbalancing magic.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Imbalance"
             },
             {
                 "Literal": "on"

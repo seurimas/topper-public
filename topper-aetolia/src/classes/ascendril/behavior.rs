@@ -56,9 +56,6 @@ pub enum AscendrilBehavior {
     EnrichFire,
     EnrichWater,
     EnrichAir,
-    GlimpseFire,
-    GlimpseWater,
-    GlimpseAir,
     Flare(AetTarget, bool),
     Emberbrand(AetTarget, bool),
     Frostbrand(AetTarget, bool),
@@ -408,48 +405,6 @@ impl UnpoweredFunction for AscendrilBehavior {
                     return UnpoweredFunctionState::Failed;
                 }
                 let action = EnrichAir::new(model.who_am_i());
-                controller.plan.add_to_qeb(Box::new(action));
-                UnpoweredFunctionState::Complete
-            }
-            AscendrilBehavior::GlimpseFire => {
-                let me = model.state.borrow_me();
-                if !me.balanced(BType::Secondary) {
-                    return UnpoweredFunctionState::Failed;
-                } else if me
-                    .check_if_ascendril(&|me| me.is_glimpse_active(None))
-                    .unwrap_or(false)
-                {
-                    return UnpoweredFunctionState::Failed;
-                }
-                let action = GlimpseFire::new(model.who_am_i());
-                controller.plan.add_to_qeb(Box::new(action));
-                UnpoweredFunctionState::Complete
-            }
-            AscendrilBehavior::GlimpseWater => {
-                let me = model.state.borrow_me();
-                if !me.balanced(BType::Secondary) {
-                    return UnpoweredFunctionState::Failed;
-                } else if me
-                    .check_if_ascendril(&|me| me.is_glimpse_active(None))
-                    .unwrap_or(false)
-                {
-                    return UnpoweredFunctionState::Failed;
-                }
-                let action = GlimpseWater::new(model.who_am_i());
-                controller.plan.add_to_qeb(Box::new(action));
-                UnpoweredFunctionState::Complete
-            }
-            AscendrilBehavior::GlimpseAir => {
-                let me = model.state.borrow_me();
-                if !me.balanced(BType::Secondary) {
-                    return UnpoweredFunctionState::Failed;
-                } else if me
-                    .check_if_ascendril(&|me| me.is_glimpse_active(None))
-                    .unwrap_or(false)
-                {
-                    return UnpoweredFunctionState::Failed;
-                }
-                let action = GlimpseAir::new(model.who_am_i());
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }

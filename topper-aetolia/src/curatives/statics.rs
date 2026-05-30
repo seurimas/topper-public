@@ -377,7 +377,6 @@ lazy_static! {
 
 lazy_static! {
     pub static ref EPIDERMAL_HEAD_ORDER: Vec<FType> = vec![
-        FType::Indifference,
         FType::Stuttering,
         FType::WateryEyes,
         FType::BlurryVision,
@@ -407,7 +406,6 @@ lazy_static! {
 
 lazy_static! {
     pub static ref EPIDERMAL_SKIN_ORDER: Vec<FType> = vec![
-        FType::Indifference,
         FType::Stuttering,
         FType::WateryEyes,
         FType::BlurryVision,
@@ -421,11 +419,22 @@ lazy_static! {
 }
 
 lazy_static! {
-    pub static ref CALORIC_HEAD_ORDER: Vec<FType> = vec![FType::Mindfog];
+    pub static ref CALORIC_HEAD_ORDER: Vec<FType> = vec![FType::Mindfog, FType::Indifference,];
 }
 
 lazy_static! {
     pub static ref CALORIC_TORSO_ORDER: Vec<FType> = vec![
+        FType::Hypothermia,
+        FType::Frozen,
+        FType::Frigid,
+        FType::Shivering
+    ];
+}
+
+lazy_static! {
+    pub static ref CALORIC_SKIN_ORDER: Vec<FType> = vec![
+        FType::Mindfog,
+        FType::Indifference,
         FType::Hypothermia,
         FType::Frozen,
         FType::Frigid,
@@ -688,8 +697,12 @@ lazy_static! {
             CALORIC_TORSO_ORDER.to_vec(),
         );
         val.insert(
+            ("caloric".into(), "head".into()),
+            CALORIC_HEAD_ORDER.to_vec(),
+        );
+        val.insert(
             ("caloric".into(), "skin".into()),
-            CALORIC_TORSO_ORDER.to_vec(),
+            CALORIC_SKIN_ORDER.to_vec(),
         );
 
         val.insert(
