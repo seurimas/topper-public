@@ -241,18 +241,12 @@ pub fn handle_combat_action(
             }
         }
         /**
-        If shivering, knock of balance. If frigid, strip levitation. If frozen, give disrupted.
+        If shivering, knock of balance.
         */
         "Iceray" => {
             for_agent(agent_states, &combat_action.target, &|me| {
                 if me.is(FType::Shivering) {
                     me.set_balance(BType::Balance, 0.5);
-                }
-                if me.is(FType::Frigid) {
-                    me.set_flag(FType::Levitation, false);
-                }
-                if me.is(FType::Frozen) {
-                    me.set_flag(FType::Disrupted, true);
                 }
             });
             for_agent(agent_states, &combat_action.caster, &|me| {
