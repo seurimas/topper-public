@@ -66,3 +66,17 @@ pub fn get_tree(
         }
     }
 }
+
+pub fn tree_exists(tree_name: &String) -> bool {
+    {
+        let trees = LOADED_TREES.read().unwrap();
+        if trees.contains_key(tree_name) {
+            return true;
+        }
+    }
+    if let Some(load_func) = unsafe { LOAD_TREE_FUNC } {
+        let tree_json = load_func(tree_name);
+        return serde_json::from_str::<AetBehaviorTreeDef>(&tree_json).is_ok();
+    }
+    false
+}

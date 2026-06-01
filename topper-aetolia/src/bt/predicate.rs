@@ -178,6 +178,7 @@ pub enum AetPredicate {
     // Hints
     LimbHintIs(String, LType),
     HintSet(String, String),
+    HintMissing(String),
     // Stats
     StatUnderPercent(SType, AetTarget, f32),
     // Balances
@@ -1039,6 +1040,13 @@ impl UnpoweredFunction for AetPredicate {
                     } else {
                         UnpoweredFunctionState::Failed
                     }
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetPredicate::HintMissing(hint) => {
+                if controller.get_hint(hint).is_none() {
+                    UnpoweredFunctionState::Complete
                 } else {
                     UnpoweredFunctionState::Failed
                 }

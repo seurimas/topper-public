@@ -26,12 +26,12 @@ pub fn get_action_plan(
     first_aid_settings: &mut Vec<FirstAidSetting>,
 ) -> ActionPlan {
     let mut controller = get_controller("ascendril", me, target, timeline, strategy, db);
-    add_hints(db, &mut controller);
-    let tree_name = if strategy.eq("class") {
+    let tree_name = if strategy.eq("class") || !tree_exists(&format!("ascendril/{}", strategy)) {
         format!("ascendril/base")
     } else {
         format!("ascendril/{}", strategy)
     };
+    add_hints(db, &mut controller, strategy);
     let tree = get_tree(&tree_name);
     if let Ok(mut tree) = tree.lock() {
         unsafe {
@@ -47,12 +47,17 @@ pub fn get_action_plan(
     controller.plan
 }
 
-fn add_hints(db: Option<&impl AetDatabaseModule>, controller: &mut BehaviorController) {
+fn add_hints(
+    db: Option<&impl AetDatabaseModule>,
+    controller: &mut BehaviorController,
+    strategy: &String,
+) {
     if let Some(db) = db {
         if let Some(element) = db.get_hint(&"PRIMARY_ELEMENT".to_string()) {
             controller.hint_plan("PRIMARY_ELEMENT".to_string(), element);
         }
     }
+    controller.hint_plan("STRATEGY".to_string(), strategy.to_uppercase());
 }
 
 pub fn get_attack(

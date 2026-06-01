@@ -1,7 +1,12 @@
+use std::collections::HashMap;
+
 use behavior_bark::unpowered::*;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::classes::Class;
+use crate::classes::LockType;
+use crate::classes::VenomPlan;
 use crate::classes::ascendril::AscendrilBehavior;
 use crate::classes::bard::BardBehavior;
 use crate::classes::enchants::EnchantmentBehavior;
@@ -10,8 +15,6 @@ use crate::classes::predator::PredatorBehavior;
 use crate::classes::sentinel::SentinelBehavior;
 use crate::classes::siderealist::SiderealistBehavior;
 use crate::classes::zealot::ZealotBehavior;
-use crate::classes::LockType;
-use crate::classes::VenomPlan;
 use crate::curatives::FirstAidSetting;
 use crate::defense::DefenseBehavior;
 use crate::observables::PlainAction;
@@ -30,6 +33,12 @@ pub enum AetBehavior {
     TagPlan(String),
     HintPlan(String, String),
     CopyHint(String, String),
+    HintByClass {
+        target: AetTarget,
+        hint_name: String,
+        default: String,
+        map: HashMap<Class, String>,
+    },
     SetLimbHint(AetTarget, LimbDescriptor, String),
     TouchHammer(AetTarget),
     PlainQebBehavior(String),
@@ -82,6 +91,26 @@ impl UnpoweredFunction for AetBehavior {
             AetBehavior::CopyHint(source_name, target_name) => {
                 if let Some(hint) = controller.get_hint(source_name) {
                     controller.hint_plan(target_name.clone(), hint.clone());
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetBehavior::HintByClass {
+                target,
+                hint_name,
+                default,
+                map,
+            } => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if let Some(class_hint) = target
+                        .get_normalized_class()
+                        .and_then(|class| map.get(&class))
+                    {
+                        controller.hint_plan(hint_name.clone(), class_hint.clone());
+                    } else {
+                        controller.hint_plan(hint_name.clone(), default.clone());
+                    }
                     UnpoweredFunctionState::Complete
                 } else {
                     UnpoweredFunctionState::Failed

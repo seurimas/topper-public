@@ -14,6 +14,7 @@ pub use sub_trees::*;
 
 use crate::{
     classes::{
+        VenomPlan,
         bard::BardWrapper,
         get_venoms_from_plan,
         monk::{self, MonkComboGenerator, MonkComboSet},
@@ -21,7 +22,6 @@ use crate::{
             ComboAttack, ComboGrader, ComboPredicate, ComboSet, ComboSolver, PredatorCombo,
         },
         zealot::ZealotComboAction,
-        VenomPlan,
     },
     curatives::FirstAidSetting,
     defense::get_preferred_parry,
