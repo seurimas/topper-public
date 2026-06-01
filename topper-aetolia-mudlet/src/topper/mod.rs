@@ -292,7 +292,7 @@ impl TopperHandler<BattleStats> for AetTopper {
         self.database_module
             .write()
             .unwrap()
-            .handle_message(&topper_msg, (self.timeline_module.timeline.who_am_i()))?;
+            .handle_message(&topper_msg, (&self.timeline_module.timeline))?;
         let mut database_module = self.database_module.read().unwrap();
         Ok(self
             .core_module

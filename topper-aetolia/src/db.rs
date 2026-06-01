@@ -34,8 +34,14 @@ pub trait AetDatabaseModule {
     );
 
     fn insert_hint(&self, key: &String, value: &String);
-
     fn get_hint(&self, key: &String) -> Option<String>;
+
+    fn insert_my_hint(&self, who: &String, key: &String, value: &String) {
+        self.insert_hint(&format!("{}_{}", who, key), value);
+    }
+    fn get_my_hint(&self, who: &String, key: &String) -> Option<String> {
+        self.get_hint(&format!("{}_{}", who, key))
+    }
 
     fn set_defense_order(&self, class_who: &String, order: Vec<String>);
     fn get_defense_order(&self, class_who: &String) -> Option<Vec<String>>;

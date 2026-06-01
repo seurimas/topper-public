@@ -281,6 +281,7 @@ fn update_stack<T: Serialize + Clone>(
 lazy_static! {
     static ref INSPECT: Regex = Regex::new(r"^inspect (\w+) (\w+)$").unwrap();
     static ref SET_HINT: Regex = Regex::new(r"^hint (\w+) (.*)$").unwrap();
+    static ref SET_MY_HINT: Regex = Regex::new(r"^myhint (\w+) (.*)$").unwrap();
     static ref SET_HYPNOSIS: Regex = Regex::new(r"^hypnosis (\w+) (\d+) (.*)$").unwrap();
     static ref SET_PRIORITY: Regex = Regex::new(r"^priority (\w+) (\d+) (.*)$").unwrap();
 }
@@ -297,10 +298,16 @@ fn parse_inspect(message: &String) -> Option<(String, String)> {
     }
 }
 
-fn parse_set_hint(message: &String) -> Option<(String, String)> {
+fn parse_set_hint(message: &String) -> Option<(bool, String, String)> {
     if let Some(captures) = SET_HINT.captures(message) {
         if let (Some(key), Some(value)) = (captures.get(1), captures.get(2)) {
-            Some((key.as_str().to_string(), value.as_str().to_string()))
+            Some((false, key.as_str().to_string(), value.as_str().to_string()))
+        } else {
+            None
+        }
+    } else if let Some(captures) = SET_MY_HINT.captures(message) {
+        if let (Some(key), Some(value)) = (captures.get(1), captures.get(2)) {
+            Some((true, key.as_str().to_string(), value.as_str().to_string()))
         } else {
             None
         }
@@ -348,7 +355,7 @@ fn parse_set_priority(message: &String) -> Option<(String, usize, Option<VenomPl
 }
 
 impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for AetMudletDatabaseModule {
-    type Siblings = (String);
+    type Siblings = (&'s AetTimeline);
     fn handle_message(
         &mut self,
         message: &TopperMessage<AetTimeSlice>,
@@ -363,9 +370,22 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for AetMudletDatabaseModule
             TopperMessage::Request(TopperRequest::ModuleMsg(module, message)) => {
                 match module.as_ref() {
                     "db" => {
-                        if let Some((key, value)) = parse_set_hint(message) {
-                            self.insert_hint(&key, &value);
-                            println!("Hint set!");
+                        if let Some((is_my_hint, key, value)) = parse_set_hint(message) {
+                            if is_my_hint {
+                                self.insert_my_hint(&siblings.who_am_i(), &key, &value);
+                            } else {
+                                self.insert_hint(&key, &value);
+                            }
+                            println!(
+                                "Hint set: {} = {} ({})",
+                                key,
+                                value,
+                                if is_my_hint {
+                                    siblings.who_am_i()
+                                } else {
+                                    "global hint".to_string()
+                                }
+                            );
                             Ok(TopperResponse::silent())
                         } else if let Some((stack, index, hypno)) = parse_set_hypnosis(message) {
                             let mut old_stack = self.get_hypno_plan(&stack).unwrap_or_default();
@@ -442,7 +462,7 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for AetMudletDatabaseModule
                     }
                 }
                 if let Some((name, priorities)) = parse_priority_set(&event.lines) {
-                    self.set_first_aid_priorities(&siblings, &name, priorities);
+                    self.set_first_aid_priorities(&siblings.who_am_i(), &name, priorities);
                 }
                 Ok(TopperResponse::silent())
             }

@@ -31,7 +31,7 @@ pub fn get_action_plan(
     } else {
         format!("ascendril/{}", strategy)
     };
-    add_hints(db, &mut controller, strategy);
+    add_hints(timeline, db, &mut controller, strategy);
     let tree = get_tree(&tree_name);
     if let Ok(mut tree) = tree.lock() {
         unsafe {
@@ -48,16 +48,18 @@ pub fn get_action_plan(
 }
 
 fn add_hints(
+    timeline: &AetTimeline,
     db: Option<&impl AetDatabaseModule>,
     controller: &mut BehaviorController,
     strategy: &String,
 ) {
     if let Some(db) = db {
-        if let Some(element) = db.get_hint(&"PRIMARY_ELEMENT".to_string()) {
-            controller.hint_plan("PRIMARY_ELEMENT".to_string(), element);
+        if let Some(mobility) = db.get_my_hint(&timeline.who_am_i(), &"MOBILITY".to_string()) {
+            controller.hint_plan("MOBILITY".to_string(), mobility.to_uppercase());
         }
     }
     controller.hint_plan("STRATEGY".to_string(), strategy.to_uppercase());
+    controller.hint_plan("CLASS".to_string(), "ASCENDRIL".to_string());
 }
 
 pub fn get_attack(

@@ -191,6 +191,7 @@ pub struct BattleStats {
     pub target_stats: Option<PlayerStats>,
     pub plan: String,
     pub class_state: String,
+    pub mobility_hint: String,
 }
 
 fn format_self_limbs(state: &AgentState) -> String {
@@ -344,6 +345,9 @@ pub fn get_battle_stats(
         }
     }
     BattleStats {
+        mobility_hint: db
+            .get_my_hint(&my_stats.name, &"MOBILITY".to_string())
+            .unwrap_or_else(|| "none".to_string()),
         feed: lines,
         my_stats,
         target_stats,
