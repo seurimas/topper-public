@@ -412,6 +412,15 @@ impl AscendrilClassState {
         }
     }
 
+    pub fn has_no_resonance(&self) -> bool {
+        let resonance = match &self.fulcrum {
+            FulcrumState::FulcrumOnMe { resonance, .. }
+            | FulcrumState::FulcrumExpanded { resonance, .. } => resonance,
+            FulcrumState::NoFulcrum => return true,
+        };
+        resonance.is_none()
+    }
+
     pub fn resonance_active(&self, element: &Element) -> bool {
         let resonance = match &self.fulcrum {
             FulcrumState::FulcrumOnMe { resonance, .. }

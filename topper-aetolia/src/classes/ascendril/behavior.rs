@@ -93,6 +93,11 @@ impl UnpoweredFunction for AscendrilBehavior {
                 UnpoweredFunctionState::Complete
             }
             AscendrilBehavior::AshenFeet(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.is(FType::AshenFeet) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                }
                 let action = AshenFeet::from_target(target, model, controller);
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
@@ -206,7 +211,7 @@ impl UnpoweredFunction for AscendrilBehavior {
                 if *contemplate {
                     controller
                         .plan
-                        .add_to_plain(Box::new(Contemplate::from_target(
+                        .add_to_front_of_qeb(Box::new(Contemplate::from_target(
                             target, model, controller,
                         )));
                 }
@@ -214,6 +219,13 @@ impl UnpoweredFunction for AscendrilBehavior {
                 UnpoweredFunctionState::Complete
             }
             AscendrilBehavior::Icicle(target) => {
+                let me = model.state.borrow_me();
+                if me
+                    .check_if_ascendril(&|me| me.icicles_active())
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
                 let action = Icicle::from_target(target, model, controller);
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
@@ -507,6 +519,11 @@ impl UnpoweredFunction for AscendrilBehavior {
             }
             AscendrilBehavior::Emberbrand(target, allow_enrich) => {
                 let me = model.state.borrow_me();
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.is(FType::Emberbrand) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                }
                 if !resonating_or_enrich(
                     &me,
                     model.who_am_i(),
@@ -528,6 +545,11 @@ impl UnpoweredFunction for AscendrilBehavior {
             }
             AscendrilBehavior::Frostbrand(target, allow_enrich) => {
                 let me = model.state.borrow_me();
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.is(FType::Frostbrand) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                }
                 if !resonating_or_enrich(
                     &me,
                     model.who_am_i(),
@@ -549,6 +571,11 @@ impl UnpoweredFunction for AscendrilBehavior {
             }
             AscendrilBehavior::Thunderbrand(target, allow_enrich) => {
                 let me = model.state.borrow_me();
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.is(FType::Thunderbrand) {
+                        return UnpoweredFunctionState::Failed;
+                    }
+                }
                 if !resonating_or_enrich(
                     &me,
                     model.who_am_i(),

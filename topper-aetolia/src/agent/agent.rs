@@ -417,6 +417,13 @@ impl AgentState {
             | FType::Tradition => self
                 .persuasion_state
                 .set(flag.to_persuasion_aff().unwrap(), value),
+            FType::Fleeing => {
+                if value {
+                    self.set_fleeing();
+                } else {
+                    self.fleeing.reset();
+                }
+            }
             _ => self.flags.set_flag(flag, value),
         }
         if flag == FType::Rebounding {

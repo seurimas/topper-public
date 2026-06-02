@@ -20,6 +20,7 @@ pub enum AscendrilPredicate {
     FulcrumUp,
     FulcrumUpHere,
     FulcrumExpandedHere,
+    NoResonance(Option<Element>),
     AnyResonance(Element),
     Resonance(Element),
     HalfResonance(Element),
@@ -96,6 +97,15 @@ impl TargetPredicate for AscendrilPredicate {
                         .check_if_ascendril(&|me| me.imbalance_active(Some(room)))
                         .unwrap_or(false)
                 }
+                AscendrilPredicate::NoResonance(element) => target
+                    .check_if_ascendril(&|me| {
+                        if let Some(element) = element {
+                            !me.resonance_active(element) && !me.half_resonance_active(element)
+                        } else {
+                            me.has_no_resonance()
+                        }
+                    })
+                    .unwrap_or(false),
                 AscendrilPredicate::AnyResonance(element) => target
                     .check_if_ascendril(&|me| {
                         me.resonance_active(element) || me.half_resonance_active(element)

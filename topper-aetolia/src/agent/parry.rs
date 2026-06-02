@@ -1,6 +1,7 @@
 use super::*;
 
 pub const RECENT_UNPARRIED_WINDOW: f32 = 2.0;
+pub const RECENT_PARRIED_WINDOW: f32 = 1.25;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 pub struct ParryState {
@@ -8,11 +9,13 @@ pub struct ParryState {
     parry_known: bool,
     last_hit: Option<LType>,
     last_hit_timer: Timer,
+    last_parry_timer: Timer,
 }
 
 impl ParryState {
     pub fn wait(&mut self, duration: i32) {
         self.last_hit_timer.wait(duration);
+        self.last_parry_timer.wait(duration);
         if !self.last_hit_timer.is_active() {
             self.last_hit = None;
         }
@@ -29,6 +32,7 @@ impl ParryState {
 
     pub fn set_parrying(&mut self, limb: LType) {
         self.parrying = Some(limb);
+        self.last_parry_timer = Timer::count_down_seconds(RECENT_PARRIED_WINDOW);
     }
 
     pub fn is_known(&self) -> bool {
@@ -55,7 +59,10 @@ impl ParryState {
     }
 
     pub fn is_recently_unparried(&self, limb: LType) -> bool {
-        (self.last_hit.is_none() || self.last_hit == Some(limb)) && self.last_hit_timer.is_active()
+        ((self.last_hit.is_none() || self.last_hit == Some(limb))
+            && self.last_hit_timer.is_active())
+            || (self.parrying != Some(limb)
+                && (self.last_parry_timer.is_active() || self.parry_known))
     }
 }
 

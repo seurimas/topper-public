@@ -578,7 +578,7 @@ Set a hint early, then read it in downstream subtrees. Ascendril uses this for e
     "Sequence": [
         {"HintSet": ["PRIMARY_ELEMENT", "FIRE"]},
         {"Selector": [
-            {"SubTree": "ascendril/brands/fire_air"},
+            {"SubTree": "ascendril/brand_pairs/fire_air"},
             {"SubTree": "ascendril/fire/big_pyroclast"},
             {"SubTree": "ascendril/gated_attacks/spark"}
         ]}
