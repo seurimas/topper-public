@@ -347,7 +347,7 @@ pub fn get_battle_stats(
     BattleStats {
         mobility_hint: db
             .get_my_hint(&my_stats.name, &"MOBILITY".to_string())
-            .unwrap_or_else(|| "none".to_string()),
+            .unwrap_or_else(|| "mid".to_string()),
         feed: lines,
         my_stats,
         target_stats,

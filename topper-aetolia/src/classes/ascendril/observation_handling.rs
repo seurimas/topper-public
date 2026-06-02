@@ -1,3 +1,4 @@
+use crate::classes::Class;
 use crate::curatives::MENTAL_AFFLICTIONS;
 use crate::curatives::RANDOM_CURES;
 use crate::non_agent::AetTimelineDenizenExt;
@@ -98,7 +99,7 @@ pub fn handle_combat_action(
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
                     ascendril.cast_spell(Element::Fire);
-                    ascendril.try_claim(PhenomenaState::Blazewhirl);
+                    ascendril.try_claim(PhenomenaKind::Blazewhirl);
                 });
             });
         }
@@ -119,9 +120,6 @@ pub fn handle_combat_action(
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.assume_ascendril(&|ascendril| {
                         ascendril.cast_spell(Element::Fire);
-                        if ablaze {
-                            ascendril.cast_spell(Element::Fire);
-                        }
                     });
                 });
             }
@@ -157,11 +155,7 @@ pub fn handle_combat_action(
         }
         // Conditional attack, dealing head trauma and more
         "Pyroclast" => {
-            let blazewhirl = phenomenon_in_room(
-                agent_states,
-                agent_states.get_room_id(),
-                PhenomenaState::Blazewhirl,
-            );
+            let blazewhirl = phenomenon_in_room(agent_states, PhenomenaKind::Blazewhirl);
             if attack_hit(after) {
                 attack_limb_damage(
                     agent_states,
@@ -181,6 +175,7 @@ pub fn handle_combat_action(
 
             for_agent(agent_states, &combat_action.caster, &move |me| {
                 me.assume_ascendril(&|ascendril| {
+                    ascendril.cast_spell(Element::Fire);
                     ascendril.use_up_resonance();
                 });
             });
@@ -192,9 +187,15 @@ pub fn handle_combat_action(
             });
             for_agent(agent_states, &combat_action.caster, &move |me| {
                 me.assume_ascendril(&|ascendril| {
+                    ascendril.cast_spell(Element::Fire);
                     ascendril.use_up_resonance();
                 });
             });
+            if combat_action.annotation.eq("charge") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.set_channel(ChannelType::Disintegrate, 4.);
+                });
+            }
         }
         // Freezes twice
         "Coldsnap" => {
@@ -260,7 +261,7 @@ pub fn handle_combat_action(
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
                     ascendril.cast_spell(Element::Water);
-                    ascendril.try_claim(PhenomenaState::Glazeflow);
+                    ascendril.try_claim(PhenomenaKind::Glazeflow);
                 });
             });
         }
@@ -338,11 +339,7 @@ pub fn handle_combat_action(
         }
         // If no leivitation, give ice_encased. If shivering, give hobbled. If glazeflow in room, give frozen_feet.
         "Crystalise" => {
-            let glazeflow_in_room = phenomenon_in_room(
-                agent_states,
-                agent_states.get_room_id(),
-                PhenomenaState::Glazeflow,
-            );
+            let glazeflow_in_room = phenomenon_in_room(agent_states, PhenomenaKind::Glazeflow);
             for_agent(agent_states, &combat_action.target, &|me| {
                 if !me.is(FType::Speed) {
                     me.set_flag(FType::IceEncased, true);
@@ -356,6 +353,7 @@ pub fn handle_combat_action(
             });
             for_agent(agent_states, &combat_action.caster, &move |me| {
                 me.assume_ascendril(&|ascendril| {
+                    ascendril.cast_spell(Element::Water);
                     ascendril.use_up_resonance();
                 });
             });
@@ -367,9 +365,15 @@ pub fn handle_combat_action(
             });
             for_agent(agent_states, &combat_action.caster, &move |me| {
                 me.assume_ascendril(&|ascendril| {
+                    ascendril.cast_spell(Element::Water);
                     ascendril.use_up_resonance();
                 });
             });
+            if combat_action.annotation.eq("charge") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.set_channel(ChannelType::Winterheart, 4.);
+                });
+            }
         }
         // Gives fallen or strips shield.
         "Windlance" => {
@@ -383,7 +387,6 @@ pub fn handle_combat_action(
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
                     ascendril.cast_spell(Element::Air);
-                    ascendril.count_air_cast();
                 });
             });
         }
@@ -408,7 +411,6 @@ pub fn handle_combat_action(
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.assume_ascendril(&|ascendril| {
                         ascendril.cast_spell(Element::Air);
-                        ascendril.count_air_cast();
                         if laxity {
                             ascendril.cast_spell(Element::Air);
                         }
@@ -428,7 +430,6 @@ pub fn handle_combat_action(
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
                     ascendril.cast_spell(Element::Air);
-                    ascendril.count_air_cast();
                 });
             });
         }
@@ -437,8 +438,7 @@ pub fn handle_combat_action(
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
                     ascendril.cast_spell(Element::Air);
-                    ascendril.count_air_cast();
-                    ascendril.try_claim(PhenomenaState::Electrosphere);
+                    ascendril.try_claim(PhenomenaKind::Electrosphere);
                 });
             });
         }
@@ -459,7 +459,6 @@ pub fn handle_combat_action(
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.assume_ascendril(&|ascendril| {
                         ascendril.cast_spell(Element::Air);
-                        ascendril.count_air_cast();
                     });
                 });
             }
@@ -472,7 +471,6 @@ pub fn handle_combat_action(
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
                     ascendril.cast_spell(Element::Air);
-                    ascendril.count_air_cast();
                 });
             });
         }
@@ -509,8 +507,8 @@ pub fn handle_combat_action(
                 });
                 for_agent(agent_states, &combat_action.caster, &move |me| {
                     me.assume_ascendril(&|ascendril| {
+                        ascendril.cast_spell(Element::Air);
                         ascendril.use_up_resonance();
-                        ascendril.count_air_cast();
                     });
                 });
             }
@@ -522,12 +520,18 @@ pub fn handle_combat_action(
             });
             for_agent(agent_states, &combat_action.caster, &move |me| {
                 me.assume_ascendril(&|ascendril| {
+                    ascendril.cast_spell(Element::Air);
                     ascendril.use_up_resonance();
                 });
             });
+            if combat_action.annotation.eq("charge") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.set_channel(ChannelType::Stormwrath, 4.);
+                });
+            }
         }
         // Constructs a fulcrum.
-        "Fulcrum" => {
+        "Construct" => {
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
                     ascendril.fulcrum_construct();
@@ -550,6 +554,34 @@ pub fn handle_combat_action(
                     ascendril.fulcrum_contract();
                 });
             });
+        }
+        "Push" => {
+            if combat_action.annotation.eq("") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.fulcrum_push_start(combat_action.target.clone());
+                    });
+                });
+            } else {
+                agent_states.for_all_agents(&|me| {
+                    if me.get_normalized_class() == Some(Class::Ascendril) {
+                        me.assume_ascendril(&|ascendril| {
+                            ascendril.fulcrum_push_end();
+                        });
+                    }
+                });
+            }
+        }
+        "Echoes" => {
+            if combat_action.annotation.eq("off") {
+                return Ok(());
+            } else if combat_action.annotation.eq("on") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.echoes_on();
+                    });
+                });
+            }
         }
         // Gives an affliction based on annotation.
         "Schism" => {
@@ -781,6 +813,22 @@ pub fn handle_combat_action(
                     });
                 });
             }
+        }
+        "NoResonance" => {
+            let element = match combat_action.annotation.as_str() {
+                "fire" => Element::Fire,
+                "water" => Element::Water,
+                "air" => Element::Air,
+                "spirit" => Element::Spirit,
+                _ => return Ok(()),
+            };
+            for_agent(agent_states, &combat_action.caster, &|me| {
+                me.assume_ascendril(&|ascendril| {
+                    if ascendril.resonance_active(&element) {
+                        ascendril.use_up_resonance();
+                    }
+                });
+            });
         }
         _ => {}
     }

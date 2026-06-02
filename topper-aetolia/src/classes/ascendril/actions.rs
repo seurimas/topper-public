@@ -38,6 +38,9 @@ untargetted_action!(Capacitance, "cast capacitance");
 
 untargetted_action!(Fulcrum, "fulcrum construct");
 untargetted_action!(FulcrumExpand, "fulcrum expand");
+untargetted_action!(FulcrumCallback, "fulcrum callback");
+untargetted_action!(FulcrumInterfuse, "fulcrum interfuse");
+untargetted_action!(FulcrumPush, "fulcrum push");
 untargetted_action!(Schism, "fulcrum schism on");
 untargetted_action!(Imbalance, "fulcrum imbalance on");
 untargetted_action!(Restore, "restore");

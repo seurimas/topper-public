@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
-use topper_core::timeline::CType;
+use topper_core::timeline::{BALANCE_SCALE, CType};
 
 use crate::{
     agent::{AgentState, FType},
@@ -10,19 +10,21 @@ use crate::{
 
 use super::CooldownEffect;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
-pub enum PhenomenaState {
+const ECHOES_TIME: f32 = 60.0 * 10.0 * BALANCE_SCALE;
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Copy, Serialize, Deserialize)]
+pub enum PhenomenaKind {
     Blazewhirl,
     Glazeflow,
     Electrosphere,
 }
 
-impl PhenomenaState {
+impl PhenomenaKind {
     pub fn name(&self) -> &str {
         match self {
-            PhenomenaState::Blazewhirl => BLAZEWHIRL_NAME,
-            PhenomenaState::Glazeflow => GLAZEFLOW_NAME,
-            PhenomenaState::Electrosphere => ELECTROSPHERE_NAME,
+            PhenomenaKind::Blazewhirl => BLAZEWHIRL_NAME,
+            PhenomenaKind::Glazeflow => GLAZEFLOW_NAME,
+            PhenomenaKind::Electrosphere => ELECTROSPHERE_NAME,
         }
     }
 }
@@ -32,7 +34,7 @@ pub struct Phenomena {
     pub room_id: i64,
     pub id: i64,
     pub stacks: i32,
-    pub state: PhenomenaState,
+    pub state: PhenomenaKind,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
@@ -172,17 +174,37 @@ pub enum FulcrumState {
     #[default]
     NoFulcrum,
     FulcrumOnMe {
+        echoes: Timer,
         schism: bool,
         imbalance: bool,
         resonance: Option<(Element, i32)>,
     },
     FulcrumExpanded {
         room_id: i64,
+        echoes: Timer,
         schism: bool,
         imbalance: bool,
         degradation: bool,
         spiritrift: bool,
         resonance: Option<(Element, i32)>,
+        pushing: Option<(String, Timer)>,
+    },
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum PhenomenaState {
+    #[default]
+    NoPhenomena,
+    Unclaimed {
+        kind: PhenomenaKind,
+        target: String,
+    },
+    Claimed {
+        id: i64,
+        room_id: i64,
+        stacks: i32,
+        state: PhenomenaKind,
+        target: String,
     },
 }
 
@@ -194,8 +216,8 @@ pub struct AscendrilClassState {
     afterburn_raising: Timer,
     afterburn_up: Timer,
     capacitance: CapacitanceState,
-    my_phenomenon: Option<Phenomena>,
-    freshest_phenomenon: Option<(i64, i64, PhenomenaState)>,
+    my_phenomenon: PhenomenaState,
+    freshest_phenomenon: Option<(i64, i64, PhenomenaKind)>,
     shift_cooldown: Timer,
 }
 
@@ -218,22 +240,28 @@ impl AscendrilClassState {
         self.shift_cooldown.wait(time);
     }
 
-    pub fn try_claim(&mut self, phenomenon: PhenomenaState) {
-        if self.my_phenomenon.is_none() {
+    pub fn try_claim(&mut self, phenomenon: PhenomenaKind) {
+        if let PhenomenaState::Unclaimed { kind, target } = self.my_phenomenon.clone() {
             if let Some((id, room_id, seen_state)) = self.freshest_phenomenon {
                 if seen_state == phenomenon {
-                    self.my_phenomenon = Some(Phenomena {
+                    self.my_phenomenon = PhenomenaState::Claimed {
                         id,
                         room_id,
                         state: seen_state,
                         stacks: 0,
-                    });
+                        target,
+                    };
                 }
             }
         }
     }
 
     pub fn cast_spell(&mut self, element: Element) {
+        if element == Element::Air {
+            self.count_air_cast();
+        } else if element == Element::Fire {
+            self.lose_afterburn();
+        }
         let resonance = match &mut self.fulcrum {
             FulcrumState::FulcrumOnMe { resonance, .. }
             | FulcrumState::FulcrumExpanded { resonance, .. } => resonance,
@@ -253,6 +281,7 @@ impl AscendrilClassState {
 
     pub fn fulcrum_construct(&mut self) {
         self.fulcrum = FulcrumState::FulcrumOnMe {
+            echoes: Timer::count_down_seconds(0.),
             schism: false,
             imbalance: false,
             resonance: None,
@@ -260,13 +289,14 @@ impl AscendrilClassState {
     }
 
     pub fn fulcrum_expand(&mut self, room_id: i64) {
-        let (schism, imbalance, resonance) = match &self.fulcrum {
+        let (schism, imbalance, resonance, echoes) = match &self.fulcrum {
             FulcrumState::FulcrumOnMe {
+                echoes,
                 schism,
                 imbalance,
                 resonance,
-            } => (*schism, *imbalance, resonance.clone()),
-            _ => (false, false, None),
+            } => (*schism, *imbalance, resonance.clone(), echoes.clone()),
+            _ => (false, false, None, Timer::count_down_seconds(0.)),
         };
         self.fulcrum = FulcrumState::FulcrumExpanded {
             room_id,
@@ -275,23 +305,39 @@ impl AscendrilClassState {
             degradation: false,
             spiritrift: false,
             resonance,
+            echoes,
+            pushing: None,
         };
     }
 
+    pub fn fulcrum_push_start(&mut self, target_name: String) {
+        if let FulcrumState::FulcrumExpanded { pushing, .. } = &mut self.fulcrum {
+            *pushing = Some((target_name, Timer::count_down_seconds(3.)));
+        }
+    }
+
+    pub fn fulcrum_push_end(&mut self) {
+        if let FulcrumState::FulcrumExpanded { pushing, .. } = &mut self.fulcrum {
+            *pushing = None;
+        }
+    }
+
     pub fn fulcrum_contract(&mut self) {
-        let (schism, imbalance, resonance) = match &self.fulcrum {
+        let (schism, imbalance, resonance, echoes) = match &self.fulcrum {
             FulcrumState::FulcrumExpanded {
                 schism,
                 imbalance,
                 resonance,
+                echoes,
                 ..
-            } => (*schism, *imbalance, resonance.clone()),
-            _ => (false, false, None),
+            } => (*schism, *imbalance, resonance.clone(), echoes.clone()),
+            _ => (false, false, None, Timer::count_down_seconds(0.)),
         };
         self.fulcrum = FulcrumState::FulcrumOnMe {
             schism,
             imbalance,
             resonance,
+            echoes,
         };
     }
 
@@ -299,10 +345,32 @@ impl AscendrilClassState {
         !matches!(self.fulcrum, FulcrumState::NoFulcrum)
     }
 
+    pub fn fulcrum_active_here(&self, room_id: i64) -> bool {
+        match &self.fulcrum {
+            FulcrumState::FulcrumOnMe { .. } => true,
+            FulcrumState::FulcrumExpanded { room_id: r, .. } => *r == room_id,
+            FulcrumState::NoFulcrum => false,
+        }
+    }
+
     pub fn fulcrum_expanded(&self, room_id: i64) -> bool {
         match &self.fulcrum {
             FulcrumState::FulcrumExpanded { room_id: r, .. } => *r == room_id,
             _ => false,
+        }
+    }
+
+    pub fn fulcrum_interfused(&self) -> bool {
+        matches!(self.fulcrum, FulcrumState::FulcrumOnMe { .. })
+    }
+
+    pub fn echoes_on(&mut self) {
+        match &mut self.fulcrum {
+            FulcrumState::FulcrumOnMe { echoes, .. }
+            | FulcrumState::FulcrumExpanded { echoes, .. } => {
+                *echoes = Timer::count_down_seconds(ECHOES_TIME);
+            }
+            FulcrumState::NoFulcrum => {}
         }
     }
 
@@ -322,24 +390,24 @@ impl AscendrilClassState {
         }
     }
 
-    pub fn schism_active(&self, room_id: i64) -> bool {
+    pub fn schism_active(&self, room_id: Option<i64>) -> bool {
         match &self.fulcrum {
             FulcrumState::FulcrumOnMe { schism, .. } => *schism,
             FulcrumState::FulcrumExpanded {
                 room_id: r, schism, ..
-            } => *schism && *r == room_id,
+            } => *schism && room_id.map_or(true, |id| *r == id),
             FulcrumState::NoFulcrum => false,
         }
     }
 
-    pub fn imbalance_active(&self, room_id: i64) -> bool {
+    pub fn imbalance_active(&self, room_id: Option<i64>) -> bool {
         match &self.fulcrum {
             FulcrumState::FulcrumOnMe { imbalance, .. } => *imbalance,
             FulcrumState::FulcrumExpanded {
                 room_id: r,
                 imbalance,
                 ..
-            } => *imbalance && *r == room_id,
+            } => *imbalance && room_id.map_or(true, |id| *r == id),
             FulcrumState::NoFulcrum => false,
         }
     }
@@ -413,7 +481,7 @@ impl AscendrilClassState {
         matches!(self.capacitance, CapacitanceState::CapacitanceUp { count, .. } if count >= 4)
     }
 
-    pub fn count_air_cast(&mut self) {
+    fn count_air_cast(&mut self) {
         if let CapacitanceState::CapacitanceUp { count, .. } = &mut self.capacitance {
             *count += 1;
             if *count >= 5 {
@@ -452,16 +520,29 @@ impl AscendrilClassState {
         }
     }
 
-    pub fn can_enrich(&self, element: &Element) -> bool {
+    pub fn can_enrich(&self, room_id: i64, element: &Element) -> bool {
         if self.enrich_timer.is_active() {
             return false;
         }
         let resonance = match &self.fulcrum {
-            FulcrumState::FulcrumOnMe { resonance, .. }
-            | FulcrumState::FulcrumExpanded { resonance, .. } => resonance,
-            FulcrumState::NoFulcrum => return true,
+            FulcrumState::FulcrumOnMe { resonance, .. } => resonance,
+            FulcrumState::FulcrumExpanded {
+                resonance,
+                room_id: r,
+                ..
+            } if *r == room_id => resonance,
+            FulcrumState::NoFulcrum => return false,
+            _ => return false,
         };
         !matches!(resonance, Some((res, stacks)) if res == element && *stacks >= 2)
+    }
+
+    pub fn can_catalyze(&self, room_id: i64, target: &AgentState, element: &Element) -> bool {
+        target.is(FType::Etherflux)
+            && ((*element == Element::Fire && target.is(FType::Emberbrand))
+                || (*element == Element::Water && target.is(FType::Frostbrand))
+                || (*element == Element::Air && target.is(FType::Thunderbrand)))
+            && self.fulcrum_active_here(room_id)
     }
 
     pub fn degradation_on(&mut self) {
@@ -470,13 +551,13 @@ impl AscendrilClassState {
         }
     }
 
-    pub fn degradation_active(&self, room_id: i64) -> bool {
+    pub fn degradation_active(&self, room_id: Option<i64>) -> bool {
         match &self.fulcrum {
             FulcrumState::FulcrumExpanded {
                 room_id: r,
                 degradation,
                 ..
-            } => *degradation && *r == room_id,
+            } => *degradation && room_id.map_or(true, |id| *r == id),
             _ => false,
         }
     }
@@ -487,13 +568,13 @@ impl AscendrilClassState {
         }
     }
 
-    pub fn spiritrift_active(&self, room_id: i64) -> bool {
+    pub fn spiritrift_active(&self, room_id: Option<i64>) -> bool {
         match &self.fulcrum {
             FulcrumState::FulcrumExpanded {
                 room_id: r,
                 spiritrift,
                 ..
-            } => *spiritrift && *r == room_id,
+            } => *spiritrift && room_id.map_or(true, |id| *r == id),
             _ => false,
         }
     }
@@ -508,6 +589,58 @@ impl AscendrilClassState {
 
     pub fn fulcrum_destroy(&mut self) {
         self.fulcrum = FulcrumState::NoFulcrum;
+    }
+
+    pub fn phenomenon_active(&self, phenomenon: Option<PhenomenaKind>) -> bool {
+        if let PhenomenaState::Claimed { state, .. } = &self.my_phenomenon {
+            if let Some(p) = phenomenon {
+                return *state == p;
+            } else {
+                return true;
+            }
+        }
+        false
+    }
+
+    pub fn phenomenon_in_room(&self, room_id: i64, phenomenon: Option<PhenomenaKind>) -> bool {
+        if let PhenomenaState::Claimed {
+            state, room_id: r, ..
+        } = &self.my_phenomenon
+        {
+            if let Some(p) = phenomenon {
+                return *r == room_id && *state == p;
+            } else {
+                return *r == room_id;
+            }
+        }
+        false
+    }
+
+    pub fn phenomenon_chasing(
+        &self,
+        room_id: Option<i64>,
+        target_name: &String,
+        phenomenon: Option<PhenomenaKind>,
+    ) -> bool {
+        if let PhenomenaState::Claimed {
+            state,
+            room_id: r,
+            target,
+            ..
+        } = &self.my_phenomenon
+        {
+            if let Some(room_id) = room_id {
+                if *r != room_id {
+                    return false;
+                }
+            }
+            if let Some(p) = phenomenon {
+                return *state == p && target_name.eq(target);
+            } else {
+                return target_name.eq(target);
+            }
+        }
+        false
     }
 
     pub fn enrapture_accelerated(&self, target: &AgentState) -> bool {
@@ -533,9 +666,9 @@ pub fn ascendril_add_item(
         || name.contains(ELECTROSPHERE_NAME)
     {
         let state = match name {
-            x if x.contains(GLAZEFLOW_NAME) => PhenomenaState::Glazeflow,
-            x if x.contains(BLAZEWHIRL_NAME) => PhenomenaState::Blazewhirl,
-            x if x.contains(ELECTROSPHERE_NAME) => PhenomenaState::Electrosphere,
+            x if x.contains(GLAZEFLOW_NAME) => PhenomenaKind::Glazeflow,
+            x if x.contains(BLAZEWHIRL_NAME) => PhenomenaKind::Blazewhirl,
+            x if x.contains(ELECTROSPHERE_NAME) => PhenomenaKind::Electrosphere,
             _ => unreachable!(),
         };
         Box::new(move |me| {

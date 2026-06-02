@@ -294,6 +294,69 @@
         "observation_name": "Proc"
     },
     {
+        "regex": "^(You)r fulcrum does not resonate with elemental (\\w+).$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "NoResonance"
+            },
+            {
+                "Group": 2
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^The air twists as a fulcrum contracts and disappears with a brief puff of frosty light.$",
+        "args": [
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Push"
+            },
+            {
+                "Literal": "end"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You)r fulcrum's echo has alerted you to the (entrance|exit) of (\\w+).$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Echoes"
+            },
+            {
+                "Group": 2
+            },
+            {
+                "GroupAsTarget": 3
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
         "regex": "^Winds collide and spiral around (\\w+), their tumultuous energy releasing electricity that fills the air with a fierce static crackle.$",
         "args": [
             {

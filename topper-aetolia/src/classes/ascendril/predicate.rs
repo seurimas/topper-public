@@ -1,5 +1,5 @@
-use serde::*;
 use behavior_bark::unpowered::*;
+use serde::*;
 use topper_core::timeline::CType;
 
 use crate::{
@@ -11,15 +11,14 @@ use super::{actions::*, phenomenon_in_room};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum AscendrilPredicate {
-    BlazewhirlOn,
-    GlazeflowOn,
-    ElectrosphereOn,
-    PhenomenaOn,
+    PhenomenaOn(Option<PhenomenaKind>),
+    PhenomenaChasing(Option<PhenomenaKind>),
     SunspotOn,
     IciclesOn,
     ShatteringOn,
     AeroblastOn,
     FulcrumUp,
+    FulcrumUpHere,
     FulcrumExpandedHere,
     AnyResonance(Element),
     Resonance(Element),
@@ -34,6 +33,7 @@ pub enum AscendrilPredicate {
     CapacitanceUp,
     CapacitanceWillDisrupt,
     DegradationOnHere,
+    DegradationOn,
     SpiritriftOnHere,
     ShiftAvailable,
     HasEmberbrand,
@@ -49,26 +49,22 @@ impl TargetPredicate for AscendrilPredicate {
         controller: &BehaviorController,
     ) -> bool {
         let me = model.state.borrow_me();
-        if let Some(target) = aet_target.get_target(model, controller) {
+        if let (target_name, Some(target)) = (
+            aet_target.get_name(model, controller),
+            aet_target.get_target(model, controller),
+        ) {
             match self {
-                AscendrilPredicate::BlazewhirlOn => {
-                    phenomenon_in_room(&model.state, me.room_id, PhenomenaState::Blazewhirl)
-                }
-                AscendrilPredicate::GlazeflowOn => {
-                    phenomenon_in_room(&model.state, me.room_id, PhenomenaState::Glazeflow)
-                }
-                AscendrilPredicate::ElectrosphereOn => {
-                    phenomenon_in_room(&model.state, me.room_id, PhenomenaState::Electrosphere)
-                }
-                AscendrilPredicate::PhenomenaOn => {
-                    phenomenon_in_room(&model.state, me.room_id, PhenomenaState::Blazewhirl)
-                        || phenomenon_in_room(&model.state, me.room_id, PhenomenaState::Glazeflow)
-                        || phenomenon_in_room(
-                            &model.state,
-                            me.room_id,
-                            PhenomenaState::Electrosphere,
-                        )
-                }
+                AscendrilPredicate::PhenomenaOn(kind) => match kind {
+                    Some(kind) => phenomenon_in_room(&model.state, *kind),
+                    None => {
+                        phenomenon_in_room(&model.state, PhenomenaKind::Blazewhirl)
+                            || phenomenon_in_room(&model.state, PhenomenaKind::Glazeflow)
+                            || phenomenon_in_room(&model.state, PhenomenaKind::Electrosphere)
+                    }
+                },
+                AscendrilPredicate::PhenomenaChasing(kind) => me
+                    .check_if_ascendril(&|me| me.phenomenon_chasing(None, &target_name, *kind))
+                    .unwrap_or(false),
                 AscendrilPredicate::SunspotOn => target.ascendril_board.sunspot_active(),
                 AscendrilPredicate::IciclesOn => target.ascendril_board.icicles_active(),
                 AscendrilPredicate::ShatteringOn => target.ascendril_board.shattering_active(),
@@ -76,6 +72,12 @@ impl TargetPredicate for AscendrilPredicate {
                 AscendrilPredicate::FulcrumUp => target
                     .check_if_ascendril(&|me| me.fulcrum_active())
                     .unwrap_or(false),
+                AscendrilPredicate::FulcrumUpHere => {
+                    let room = target.room_id;
+                    target
+                        .check_if_ascendril(&|me| me.fulcrum_active_here(room))
+                        .unwrap_or(false)
+                }
                 AscendrilPredicate::FulcrumExpandedHere => {
                     let room = target.room_id;
                     target
@@ -85,13 +87,13 @@ impl TargetPredicate for AscendrilPredicate {
                 AscendrilPredicate::SchismOnHere => {
                     let room = target.room_id;
                     target
-                        .check_if_ascendril(&|me| me.schism_active(room))
+                        .check_if_ascendril(&|me| me.schism_active(Some(room)))
                         .unwrap_or(false)
                 }
                 AscendrilPredicate::ImbalanceOnHere => {
                     let room = target.room_id;
                     target
-                        .check_if_ascendril(&|me| me.imbalance_active(room))
+                        .check_if_ascendril(&|me| me.imbalance_active(Some(room)))
                         .unwrap_or(false)
                 }
                 AscendrilPredicate::AnyResonance(element) => target
@@ -115,8 +117,8 @@ impl TargetPredicate for AscendrilPredicate {
                     .check_if_ascendril(&|me| me.afterburn_active())
                     .unwrap_or(false),
                 AscendrilPredicate::IsResonantOrCanEnrich(element) => target
-                    .check_if_ascendril(&|me| {
-                        me.resonance_active(element) || me.can_enrich(element)
+                    .check_if_ascendril(&|asc| {
+                        asc.resonance_active(element) || asc.can_enrich(me.room_id, element)
                     })
                     .unwrap_or(false),
                 AscendrilPredicate::CapacitanceRaising => me
@@ -130,17 +132,20 @@ impl TargetPredicate for AscendrilPredicate {
                     .unwrap_or(false),
                 AscendrilPredicate::DegradationOnHere => {
                     let room = me.room_id;
-                    me.check_if_ascendril(&|me| me.degradation_active(room))
+                    me.check_if_ascendril(&|me| me.degradation_active(Some(room)))
                         .unwrap_or(false)
                 }
+                AscendrilPredicate::DegradationOn => me
+                    .check_if_ascendril(&|me| me.degradation_active(None))
+                    .unwrap_or(false),
                 AscendrilPredicate::SpiritriftOnHere => {
                     let room = me.room_id;
-                    me.check_if_ascendril(&|me| me.spiritrift_active(room))
+                    me.check_if_ascendril(&|me| me.spiritrift_active(Some(room)))
                         .unwrap_or(false)
                 }
-                AscendrilPredicate::ShiftAvailable => me
-                    .check_if_ascendril(&|me| me.can_shift())
-                    .unwrap_or(false),
+                AscendrilPredicate::ShiftAvailable => {
+                    me.check_if_ascendril(&|me| me.can_shift()).unwrap_or(false)
+                }
                 AscendrilPredicate::HasEmberbrand => target.is(FType::Emberbrand),
                 AscendrilPredicate::HasFrostbrand => target.is(FType::Frostbrand),
                 AscendrilPredicate::HasThunderbrand => target.is(FType::Thunderbrand),

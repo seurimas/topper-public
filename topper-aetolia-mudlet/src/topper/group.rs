@@ -1,11 +1,11 @@
 use regex::Regex;
 use std::collections::HashMap;
 use topper_aetolia::timeline::{
-    for_agent, AetObservation, AetTimeSlice, AetTimeline, CombatAction,
+    AetObservation, AetTimeSlice, AetTimeline, CombatAction, for_agent,
 };
 use topper_core::observations::strip_ansi;
-use topper_core::timeline::db::DatabaseModule;
 use topper_core::timeline::CType;
+use topper_core::timeline::db::DatabaseModule;
 use topper_core_mudlet::topper::{TopperMessage, TopperModule, TopperRequest, TopperResponse};
 
 use super::battle_stats::BattleStats;
@@ -232,12 +232,20 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for GroupModule {
                             .or_default();
                         target.in_room = false;
                     } else if let Some(captures) = NO_SUCH_TARGET.captures(&line) {
+                        let me = timeline.state.borrow_me();
                         let target_name = capitalize(captures.get(1).unwrap().as_str().to_string());
+                        let you = timeline.state.borrow_agent(&target_name);
                         let target = self.aggro.entry(target_name.clone()).or_default();
                         target.in_room = false;
-                        for_agent(&mut timeline.state, &target_name, &|me| {
-                            me.room_id = 0;
-                        });
+                        let fleeing = target.last_hit > self.now - 1000;
+                        if me.room_id == you.room_id {
+                            for_agent(&mut timeline.state, &target_name, &|you| {
+                                you.room_id = 0;
+                                if fleeing {
+                                    you.set_fleeing();
+                                }
+                            });
+                        }
                     } else if let Some(captures) = WHO_LINE.captures(&line) {
                         let target = self
                             .aggro

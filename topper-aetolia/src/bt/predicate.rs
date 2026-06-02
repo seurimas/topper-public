@@ -198,6 +198,7 @@ pub enum AetPredicate {
     IsFlying(AetTarget),
     IsClimbing(AetTarget),
     // Room tags
+    InRoom(AetTarget),
     RoomIsTagged(String),
     // Parries
     KnownParry(AetTarget, LimbDescriptor),
@@ -1076,6 +1077,20 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::IsClimbing(target) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.elevation == Elevation::Trees || target.elevation == Elevation::Roof {
+                        UnpoweredFunctionState::Complete
+                    } else {
+                        UnpoweredFunctionState::Failed
+                    }
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetPredicate::InRoom(target) => {
+                if let (Some(room), Some(target)) = (
+                    model.state.get_my_room(),
+                    target.get_target(model, controller),
+                ) {
+                    if room.id == target.room_id {
                         UnpoweredFunctionState::Complete
                     } else {
                         UnpoweredFunctionState::Failed

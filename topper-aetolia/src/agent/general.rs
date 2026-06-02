@@ -733,6 +733,9 @@ pub enum FType {
     Influence,
     Conviction,
     Tradition,
+
+    // Fleeing
+    Fleeing,
 }
 
 lazy_static! {
@@ -1538,6 +1541,9 @@ pub enum ChannelType {
     Death,
     Moonlet,
     Tumbling,
+    Disintegrate,
+    Winterheart,
+    Stormwrath,
 }
 
 impl ChannelType {
@@ -1546,6 +1552,9 @@ impl ChannelType {
             (_, FType::Asleep) => true,
             (ChannelType::Heelrush, FType::Paresis) => true,
             (ChannelType::Direblow, FType::Paresis) => true,
+            (ChannelType::Disintegrate, FType::Paresis) => true,
+            (ChannelType::Winterheart, FType::Paresis) => true,
+            (ChannelType::Stormwrath, FType::Paresis) => true,
             (ChannelType::Moonlet, FType::LeftArmCrippled) => true,
             (ChannelType::Moonlet, FType::RightArmCrippled) => true,
             (ChannelType::Moonlet, FType::Paresis) => true,

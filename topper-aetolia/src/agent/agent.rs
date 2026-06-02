@@ -39,6 +39,7 @@ pub struct AgentState {
     pub elevation: Elevation,
     pub persuasion_state: PersuasionState,
     pub observation: ObservationState,
+    pub fleeing: Timer,
 }
 
 // True = Aeon = Pause cooldowns.
@@ -61,6 +62,7 @@ impl BaseAgentState for AgentState {
         self.parry_state.wait(duration);
         self.observation.wait(duration);
         self.flags.wait(duration);
+        self.fleeing.wait(duration);
         if let Some((cured_limb, heal_modifier, first_person)) = self.limb_damage.wait(duration) {
             if !first_person {
                 match self.get_restore_cure(cured_limb) {
@@ -236,6 +238,7 @@ impl AgentState {
             | FType::Influence
             | FType::Conviction
             | FType::Tradition => self.persuasion_state.is(flag.to_persuasion_aff().unwrap()),
+            FType::Fleeing => self.fleeing.is_active(),
             _ => {
                 if flag.is_mirror() {
                     self.flags.is_flag_set(flag.normalize())
@@ -244,6 +247,10 @@ impl AgentState {
                 }
             }
         }
+    }
+
+    pub fn set_fleeing(&mut self) {
+        self.fleeing.start_count_down_seconds(10.0);
     }
 
     pub fn get_count(&self, flag: FType) -> u8 {

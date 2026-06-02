@@ -11,13 +11,9 @@ pub use predicate::*;
 
 use crate::non_agent::{AetTimelineDenizenExt, AetTimelineRoomExt};
 
-use super::{AetTimelineState, PhenomenaState};
+use super::{AetTimelineState, PhenomenaKind};
 
-pub fn phenomenon_in_room(
-    agent_states: &AetTimelineState,
-    room_id: i64,
-    phenomenon: PhenomenaState,
-) -> bool {
+pub fn phenomenon_in_room(agent_states: &AetTimelineState, phenomenon: PhenomenaKind) -> bool {
     if let Some(room) = agent_states.get_my_room() {
         for denizen_id in room.denizens.iter() {
             if let Some(denizen) = agent_states.borrow_denizen(*denizen_id) {

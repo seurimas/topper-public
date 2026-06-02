@@ -93,7 +93,7 @@ pub fn get_class_state(
     let brands = format!(
         "{} {} {}",
         if you.is(FType::Emberbrand) {
-            "<red>EMBER"
+            "<orange>EMBER"
         } else {
             "<gray>ember"
         },
@@ -113,17 +113,17 @@ pub fn get_class_state(
         .check_if_ascendril(&|asc| {
             if asc.fulcrum_expanded(room) {
                 "<magenta>FULCRUM*"
-            } else if asc.fulcrum_active() {
+            } else if asc.fulcrum_active_here(room) {
                 "<green>FULCRUM"
             } else {
-                "<gray>fulcrum"
+                "<red>fulcrum"
             }
         })
         .unwrap_or("<gray>fulcrum");
     let schism = me
         .check_if_ascendril(&|asc| {
-            if asc.schism_active(room) {
-                "<red>SCH"
+            if asc.schism_active(None) {
+                "<green>SCH"
             } else {
                 "<gray>sch"
             }
@@ -131,8 +131,8 @@ pub fn get_class_state(
         .unwrap_or("<gray>sch");
     let imbalance = me
         .check_if_ascendril(&|asc| {
-            if asc.imbalance_active(room) {
-                "<yellow>IMB"
+            if asc.imbalance_active(None) {
+                "<green>IMB"
             } else {
                 "<gray>imb"
             }
@@ -140,7 +140,7 @@ pub fn get_class_state(
         .unwrap_or("<gray>imb");
     let degradation = me
         .check_if_ascendril(&|asc| {
-            if asc.degradation_active(room) {
+            if asc.degradation_active(None) {
                 "<magenta>DEG"
             } else {
                 "<gray>deg"
@@ -149,7 +149,7 @@ pub fn get_class_state(
         .unwrap_or("<gray>deg");
     let spiritrift = me
         .check_if_ascendril(&|asc| {
-            if asc.spiritrift_active(room) {
+            if asc.spiritrift_active(None) {
                 "<blue>RIFT"
             } else {
                 "<gray>rift"
@@ -160,9 +160,9 @@ pub fn get_class_state(
     let resonance = me
         .check_if_ascendril(&|asc| {
             if asc.resonance_active(&Element::Fire) {
-                "<red>RF2"
+                "<orange>RF2"
             } else if asc.half_resonance_active(&Element::Fire) {
-                "<red>RF1"
+                "<orange>RF1"
             } else if asc.resonance_active(&Element::Water) {
                 "<cyan>RW2"
             } else if asc.half_resonance_active(&Element::Water) {
@@ -181,7 +181,7 @@ pub fn get_class_state(
         .check_if_ascendril(&|asc| asc.fireburst_stacks())
         .map(|stacks| {
             if stacks > 0 {
-                format!("<red>FB{}", stacks)
+                format!("<orange>FB{}", stacks)
             } else {
                 "<gray>fb0".to_string()
             }
@@ -190,7 +190,7 @@ pub fn get_class_state(
     let afterburn = me
         .check_if_ascendril(&|asc| {
             if asc.afterburn_active() {
-                "<red>AB"
+                "<orange>AB"
             } else if asc.afterburn_coming_up() {
                 "<yellow>AB+"
             } else {
@@ -201,7 +201,7 @@ pub fn get_class_state(
     let capacitance = me
         .check_if_ascendril(&|asc| {
             if asc.capacitance_active() && asc.capacitance_will_disrupt() {
-                "<red>CAP!"
+                "<magenta>CAP!"
             } else if asc.capacitance_active() {
                 "<green>CAP"
             } else if asc.capacitance_coming_up() {
@@ -217,7 +217,7 @@ pub fn get_class_state(
         situational_effects.push("<yellow>SUN");
     }
     if you.ascendril_board.shattering_active() {
-        situational_effects.push("<red>SHAT");
+        situational_effects.push("<cyan>SHAT");
     } else if you.ascendril_board.icicles_active() {
         situational_effects.push("<cyan>ICE");
     }
@@ -228,11 +228,11 @@ pub fn get_class_state(
         situational_effects.push("<magenta>STUN");
     }
 
-    let phenomenon = if phenomenon_in_room(&timeline.state, room, PhenomenaState::Blazewhirl) {
-        "<red>PH:FIRE"
-    } else if phenomenon_in_room(&timeline.state, room, PhenomenaState::Glazeflow) {
+    let phenomenon = if phenomenon_in_room(&timeline.state, PhenomenaKind::Blazewhirl) {
+        "<orange>PH:FIRE"
+    } else if phenomenon_in_room(&timeline.state, PhenomenaKind::Glazeflow) {
         "<cyan>PH:WATER"
-    } else if phenomenon_in_room(&timeline.state, room, PhenomenaState::Electrosphere) {
+    } else if phenomenon_in_room(&timeline.state, PhenomenaKind::Electrosphere) {
         "<yellow>PH:AIR"
     } else {
         "<gray>ph:none"
