@@ -61,6 +61,9 @@ pub fn handle_combat_action(
                 vec![FType::Blisters, FType::Impairment],
                 after,
             );
+            for_agent(agent_states, &combat_action.target, &|me| {
+                me.damage_stat_percent(SType::Health, SPARK_DAMAGE_PERCENT);
+            });
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
                     ascendril.cast_spell(Element::Fire);
@@ -116,6 +119,7 @@ pub fn handle_combat_action(
                 });
                 for_agent(agent_states, &combat_action.target, &|me| {
                     me.tick_flag_up(FType::Ablaze);
+                    me.damage_stat_percent(SType::Health, FIREBURST_DAMAGE_PERCENT);
                 });
             }
         }
@@ -141,6 +145,7 @@ pub fn handle_combat_action(
             } else {
                 for_agent(agent_states, &combat_action.target, &|me| {
                     me.set_flag(FType::Courage, false);
+                    me.damage_stat_percent(SType::Health, CONFLAGRATE_DAMAGE_PERCENT);
                 });
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.assume_ascendril(&|ascendril| {
@@ -171,6 +176,7 @@ pub fn handle_combat_action(
         "Sunspot" => {
             for_agent(agent_states, &combat_action.target, &|me| {
                 me.ascendril_board.sunspot();
+                me.damage_stat_percent(SType::Health, SUNPOT_DAMAGE_PERCENT);
             });
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
@@ -196,6 +202,9 @@ pub fn handle_combat_action(
                         after,
                     );
                 }
+                for_agent(agent_states, &combat_action.target, &|me| {
+                    me.damage_stat_percent(SType::Health, PYROCLAST_DAMAGE_PERCENT);
+                });
             }
 
             for_agent(agent_states, &combat_action.caster, &move |me| {
@@ -209,6 +218,7 @@ pub fn handle_combat_action(
         "Disintegrate" => {
             for_agent(agent_states, &combat_action.target, &|me| {
                 me.set_flag(FType::Arcane, false);
+                me.damage_stat_percent(SType::Health, DISINTEGRATE_DAMAGE_PERCENT);
             });
             for_agent(agent_states, &combat_action.caster, &move |me| {
                 me.assume_ascendril(&|ascendril| {
@@ -274,6 +284,7 @@ pub fn handle_combat_action(
                 if me.is(FType::Shivering) {
                     me.set_balance(BType::Balance, 0.5);
                 }
+                me.damage_stat_percent(SType::Health, ICERAY_DAMAGE_PERCENT);
             });
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
@@ -290,12 +301,33 @@ pub fn handle_combat_action(
                 });
             });
         }
+        // Drains mana based on freeze tier.
+        "Drench" => {
+            for_agent(agent_states, &combat_action.target, &|me| {
+                let drain = if me.is(FType::Frozen) {
+                    DRENCH_FROZEN_PERCENT
+                } else if me.is(FType::Frigid) {
+                    DRENCH_FRIGID_PERCENT
+                } else if me.is(FType::Shivering) {
+                    DRENCH_SHIVERING_PERCENT
+                } else {
+                    DRENCH_BASE_PERCENT
+                };
+                me.damage_stat_percent(SType::Mana, drain);
+            });
+            for_agent(agent_states, &combat_action.caster, &|me| {
+                me.assume_ascendril(&|ascendril| {
+                    ascendril.cast_spell(Element::Water);
+                });
+            });
+        }
         // With shivering, gives direfrost.
         "Direfrost" => {
             if combat_action.annotation.eq("direfrosted") {
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.set_flag(FType::Direfrost, true);
                     me.set_flag(FType::Mindfog, true);
+                    me.damage_stat_percent(SType::Health, DIREFROST_PROC_DAMAGE_PERCENT);
                 });
             } else if combat_action.annotation.eq("frostbranded") {
                 for_agent(agent_states, &combat_action.target, &|me| {
@@ -303,6 +335,9 @@ pub fn handle_combat_action(
                     me.set_flag(FType::Direfrost, false);
                 });
             } else {
+                for_agent(agent_states, &combat_action.target, &|me| {
+                    me.damage_stat_percent(SType::Health, DIREFROST_DAMAGE_PERCENT);
+                });
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.assume_ascendril(&|ascendril| {
                         ascendril.cast_spell(Element::Water);
@@ -323,6 +358,7 @@ pub fn handle_combat_action(
                     );
                     for_agent(agent_states, &combat_action.caster, &|me| {
                         me.ascendril_board.icicles_hit();
+                        me.damage_stat_percent(SType::Health, ICICLE_DAMAGE_PERCENT);
                     });
                 }
             } else {
@@ -350,6 +386,9 @@ pub fn handle_combat_action(
                         (limb, 4.0, true),
                         after,
                     );
+                    for_agent(agent_states, &combat_action.caster, &|me| {
+                        me.damage_stat_percent(SType::Health, ICE_SHARD_DAMAGE_PERCENT);
+                    });
                 }
             } else {
                 agent_states.for_all_agents(&|me| {
@@ -365,16 +404,26 @@ pub fn handle_combat_action(
         // If no leivitation, give ice_encased. If shivering, give hobbled. If glazeflow in room, give frozen_feet.
         "Crystalise" => {
             let glazeflow_in_room = phenomenon_in_room(agent_states, PhenomenaKind::Glazeflow);
-            for_agent(agent_states, &combat_action.target, &|me| {
+            for_agent(agent_states, &combat_action.target, &move |me| {
+                let mut conditions: usize = 0;
                 if !me.is(FType::Speed) {
                     me.set_flag(FType::IceEncased, true);
+                    conditions += 1;
                 }
-                if me.is(FType::Shivering) {
+                if me.is(FType::Fallen) {
+                    conditions += 1;
+                }
+                if me.is(FType::Frigid) {
+                    me.set_flag(FType::Hobbled, true);
+                    conditions += 1;
+                } else if me.is(FType::Shivering) {
                     me.set_flag(FType::Hobbled, true);
                 }
                 if glazeflow_in_room {
                     me.set_flag(FType::FrozenFeet, true);
+                    conditions += 1;
                 }
+                me.damage_stat_percent(SType::Mana, CRYSTALISE_DAMAGE_PERCENTS[conditions]);
             });
             for_agent(agent_states, &combat_action.caster, &move |me| {
                 me.assume_ascendril(&|ascendril| {
@@ -408,6 +457,7 @@ pub fn handle_combat_action(
                 } else {
                     me.set_flag(FType::Fallen, true);
                 }
+                me.damage_stat_percent(SType::Health, WINDLANCE_DAMAGE_PERCENT);
             });
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
@@ -451,6 +501,7 @@ pub fn handle_combat_action(
                 } else {
                     me.set_flag(FType::Paresis, true);
                 }
+                me.damage_stat_percent(SType::Health, ARCBOLT_DAMAGE_PERCENT);
             });
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
@@ -480,6 +531,7 @@ pub fn handle_combat_action(
                     if !me.is(FType::Courage) {
                         me.set_flag(FType::Confusion, true);
                     }
+                    me.damage_stat_percent(SType::Health, THUNDERCLAP_DAMAGE_PERCENT);
                 });
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.assume_ascendril(&|ascendril| {
@@ -510,11 +562,13 @@ pub fn handle_combat_action(
                         me.set_flag(FType::Speed, false);
                     }
                     me.ascendril_board.aeroblast_hit();
+                    me.damage_stat_percent(SType::Health, AEROBLAST_DAMAGE_PERCENT);
                 });
             } else if combat_action.annotation.eq("stun") {
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.set_flag(FType::Stun, true);
                     me.ascendril_board.aeroblast_stun_hit();
+                    me.damage_stat_percent(SType::Health, AEROBLAST_STUN_DAMAGE_PERCENT);
                 });
             } else if combat_action.annotation.eq("willstun") {
                 for_agent(agent_states, &combat_action.caster, &|me| {
