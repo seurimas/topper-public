@@ -204,6 +204,9 @@ pub fn handle_combat_action(
                 }
                 for_agent(agent_states, &combat_action.target, &|me| {
                     me.damage_stat_percent(SType::Health, PYROCLAST_DAMAGE_PERCENT);
+                    if !me.is(FType::Arcane) {
+                        me.damage_stat_percent(SType::Health, PYROCLAST_DAMAGE_PERCENT);
+                    }
                 });
             }
 

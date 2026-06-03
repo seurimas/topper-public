@@ -537,6 +537,18 @@
     "observation_name": "Proc"
   },
   {
+    "regex": "^(\\w+)'s eyes dim, .* mind swelling with fatigue.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "burnout"
+      }
+    ],
+    "observation_name": "OtherAfflicted"
+  },
+  {
     "regex": "^(You) will now attempt to parry attacks to your (.*)\\.$",
     "args": [
       {

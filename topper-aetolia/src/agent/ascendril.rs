@@ -42,7 +42,8 @@ pub struct AscendrilBoard {
     sunspot: Timer,
     icicles: i32,
     icicle_timer: Timer,
-    shattering: bool,
+    shattered: i32,
+    shattered_timer: Timer,
     aeroblast: Timer,
     aeroblast_stun: Timer,
 }
@@ -51,6 +52,7 @@ impl AscendrilBoard {
     pub fn wait(&mut self, time: CType) {
         self.sunspot.wait(time);
         self.icicle_timer.wait(time);
+        self.shattered_timer.wait(time);
         self.aeroblast.wait(time);
         self.aeroblast_stun.wait(time);
     }
@@ -82,18 +84,20 @@ impl AscendrilBoard {
 
     pub fn shatter(&mut self) {
         if self.icicles > 0 {
-            self.shattering = true;
+            self.shattered = self.icicles * 3;
+            self.shattered_timer = self.icicle_timer.clone();
+            self.icicles = 0;
+            self.icicle_timer.expire();
         }
     }
 
     pub fn shatter_down(&mut self) {
-        self.shattering = false;
-        self.icicles = 0;
-        self.icicle_timer.expire();
+        self.shattered = 0;
+        self.shattered_timer.expire();
     }
 
     pub fn shattering_active(&self) -> bool {
-        self.shattering && self.icicles > 0
+        self.shattered > 0
     }
 
     pub fn aeroblast(&mut self, fast: bool) {
@@ -177,6 +181,8 @@ pub enum FulcrumState {
         echoes: Timer,
         schism: bool,
         imbalance: bool,
+        inactive_degradation: bool,
+        inactive_spiritrift: bool,
         resonance: Option<(Element, i32)>,
     },
     FulcrumExpanded {
@@ -284,30 +290,66 @@ impl AscendrilClassState {
             echoes: Timer::count_down_seconds(0.),
             schism: false,
             imbalance: false,
+            inactive_degradation: false,
+            inactive_spiritrift: false,
             resonance: None,
         };
     }
 
     pub fn fulcrum_expand(&mut self, room_id: i64) {
-        let (schism, imbalance, resonance, echoes) = match &self.fulcrum {
+        match self.fulcrum.clone() {
             FulcrumState::FulcrumOnMe {
                 echoes,
                 schism,
                 imbalance,
+                inactive_degradation,
+                inactive_spiritrift,
                 resonance,
-            } => (*schism, *imbalance, resonance.clone(), echoes.clone()),
-            _ => (false, false, None, Timer::count_down_seconds(0.)),
-        };
-        self.fulcrum = FulcrumState::FulcrumExpanded {
-            room_id,
-            schism,
-            imbalance,
-            degradation: false,
-            spiritrift: false,
-            resonance,
-            echoes,
-            pushing: None,
-        };
+            } => {
+                self.fulcrum = FulcrumState::FulcrumExpanded {
+                    room_id,
+                    echoes,
+                    schism,
+                    imbalance,
+                    degradation: inactive_degradation,
+                    spiritrift: inactive_spiritrift,
+                    resonance,
+                    pushing: None,
+                };
+            }
+            FulcrumState::FulcrumExpanded {
+                echoes,
+                schism,
+                imbalance,
+                degradation,
+                spiritrift,
+                resonance,
+                ..
+            } => {
+                self.fulcrum = FulcrumState::FulcrumExpanded {
+                    room_id,
+                    echoes,
+                    schism,
+                    imbalance,
+                    degradation,
+                    spiritrift,
+                    resonance,
+                    pushing: None,
+                };
+            }
+            FulcrumState::NoFulcrum => {
+                self.fulcrum = FulcrumState::FulcrumExpanded {
+                    room_id,
+                    echoes: Timer::count_down_seconds(0.),
+                    schism: false,
+                    imbalance: false,
+                    degradation: false,
+                    spiritrift: false,
+                    resonance: None,
+                    pushing: None,
+                };
+            }
+        }
     }
 
     pub fn fulcrum_push_start(&mut self, target_name: String) {
@@ -323,22 +365,28 @@ impl AscendrilClassState {
     }
 
     pub fn fulcrum_contract(&mut self) {
-        let (schism, imbalance, resonance, echoes) = match &self.fulcrum {
+        match self.fulcrum.clone() {
+            FulcrumState::FulcrumOnMe { .. } => {}
             FulcrumState::FulcrumExpanded {
+                echoes,
                 schism,
                 imbalance,
+                degradation,
+                spiritrift,
                 resonance,
-                echoes,
                 ..
-            } => (*schism, *imbalance, resonance.clone(), echoes.clone()),
-            _ => (false, false, None, Timer::count_down_seconds(0.)),
-        };
-        self.fulcrum = FulcrumState::FulcrumOnMe {
-            schism,
-            imbalance,
-            resonance,
-            echoes,
-        };
+            } => {
+                self.fulcrum = FulcrumState::FulcrumOnMe {
+                    echoes,
+                    schism,
+                    imbalance,
+                    inactive_degradation: degradation,
+                    inactive_spiritrift: spiritrift,
+                    resonance,
+                };
+            }
+            FulcrumState::NoFulcrum => {}
+        }
     }
 
     pub fn fulcrum_active(&self) -> bool {

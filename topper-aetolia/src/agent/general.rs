@@ -871,8 +871,8 @@ impl FType {
         match self {
             FType::Blackout => 3.0,
             FType::Stun => 1.0,
-            FType::Shock => 20.0,
-            FType::Burnout => 20.0,
+            FType::Shock => SHOCK_TIME,
+            FType::Burnout => BURNOUT_TIME,
             FType::Muddled => 8.0,
             FType::Disrupted => 1.8,
             FType::Dazed => 2.8,
