@@ -1413,7 +1413,10 @@ pub fn apply_or_infer_cure(
                 if pill_name == "anabiotic" {
                     if !first_person {
                         who.restore_stat_percent(SType::Health, 9);
-                        who.restore_stat_percent(SType::Mana, 9);
+                        who.restore_stat_percent(
+                            SType::Mana,
+                            if who.is(FType::Burnout) { 5 } else { 9 },
+                        );
                     }
                 } else if let Some(order) = PILL_CURE_ORDERS.get(pill_name) {
                     if first_person {
@@ -1508,7 +1511,8 @@ pub fn apply_or_infer_cure(
                     if !first_person {
                         who.restore_stat(SType::Mana, 100);
                         // Assume we have good artifacts.
-                        who.restore_stat_percent(SType::Mana, 18);
+                        let percent = if who.is(FType::Burnout) { 9 } else { 18 };
+                        who.restore_stat_percent(SType::Mana, percent);
                     }
                 }
             }

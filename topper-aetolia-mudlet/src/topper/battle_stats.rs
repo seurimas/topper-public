@@ -19,6 +19,8 @@ pub struct PlayerStats {
     unknowns: isize,
     limbs: HashMap<String, LimbState>,
     balances: HashMap<String, f32>,
+    health_percent: i32,
+    mana_percent: i32,
     warnings: Vec<String>,
     lock_duration: Option<f32>,
     class: String,
@@ -65,6 +67,8 @@ impl PlayerStats {
             warnings: Vec::new(),
             balances: HashMap::new(),
             lock_duration: None,
+            health_percent: 100,
+            mana_percent: 100,
             class: "".to_string(),
         }
     }
@@ -120,6 +124,8 @@ impl PlayerStats {
             warnings,
             balances,
             lock_duration,
+            health_percent: state.get_health_percent(),
+            mana_percent: state.get_mana_percent(),
             class: class.map_or_else(|| "Unknown".to_string(), |class| format!("{}", class)),
         }
     }
