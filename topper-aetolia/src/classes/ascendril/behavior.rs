@@ -220,10 +220,7 @@ impl UnpoweredFunction for AscendrilBehavior {
             }
             AscendrilBehavior::Icicle(target) => {
                 let me = model.state.borrow_me();
-                if me
-                    .check_if_ascendril(&|me| me.icicles_active())
-                    .unwrap_or(false)
-                {
+                if me.ascendril_board.icicles_active() {
                     return UnpoweredFunctionState::Failed;
                 }
                 let action = Icicle::from_target(target, model, controller);

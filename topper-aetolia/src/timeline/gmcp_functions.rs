@@ -114,16 +114,15 @@ fn handle_char_vitals(
         get_stat(gmcp, "maxmp"),
         get_stat(gmcp, "maxacu"),
     ) {
+        let current_time = timeline.time;
         for_agent(
             timeline,
             &timeline.me.clone(),
             &move |me: &mut AgentState| {
                 if !me.is(FType::Recklessness) {
-                    me.set_stat(SType::Health, hp);
-                    me.set_stat(SType::Mana, mp);
+                    me.set_known_stat(SType::Health, hp, max_hp, current_time);
+                    me.set_known_stat(SType::Mana, mp, max_mp, current_time);
                     me.persuasion_state.acumen = acu;
-                    me.set_max_stat(SType::Health, max_hp);
-                    me.set_max_stat(SType::Mana, max_mp);
                     me.persuasion_state.max_acumen = max_acu;
                 } else if max_mp != mp || max_hp != hp {
                     me.observe_flag(FType::Recklessness, false);

@@ -471,8 +471,8 @@ pub fn apply_observation(
                     me.hidden_state.add_unknown();
                     if me.hidden_state.unknown() > 0
                         && !me.is(FType::Recklessness)
-                        && me.get_health_percent() == 1.
-                        && me.get_mana_percent() == 1.
+                        && me.get_health_percent() == 100
+                        && me.get_mana_percent() == 100
                     {
                         println!("Guessing recklessness!");
                         me.hidden_state.add_guess(FType::Recklessness);
@@ -601,6 +601,7 @@ pub fn apply_observation(
         }
         AetObservation::Assess(who, current, max) => {
             let percent = *current as f32 / *max as f32;
+            let current_time = timeline.time;
             for_agent(timeline, who, &move |me: &mut AgentState| {
                 if !me.is(FType::Shock) {
                     if me.is(FType::Deadening) && percent <= 0.4 {
@@ -610,15 +611,14 @@ pub fn apply_observation(
                     }
                 }
                 let percent_value = (percent * 100.) as CType;
-                if (percent_value - me.get_stat(SType::Health)).abs() > 10 {
+                if (percent_value - me.get_stat_percent(SType::Health)).abs() > 10 {
                     println!(
                         "Assess: {} -> {}",
-                        me.get_stat(SType::Health),
+                        me.get_stat_percent(SType::Health),
                         percent_value
                     );
                 }
-                me.set_stat(SType::Health, percent_value);
-                me.set_max_stat(SType::Health, 100);
+                me.set_known_stat(SType::Health, percent_value, 100, current_time);
             });
         }
         AetObservation::StatsOne {
@@ -771,7 +771,7 @@ pub fn apply_venom(who: &mut AgentState, venom: &String, relapse: bool) -> Resul
     } else if venom == "asp" || venom == "loki" {
         who.hidden_state.add_unknown();
     } else if venom == "camus" {
-        who.set_stat(SType::Health, who.get_stat(SType::Health) - 1000);
+        who.damage_stat(SType::Health, 1000);
     } else if venom == "delphinium" && who.is(FType::Insomnia) {
         who.set_flag(FType::Insomnia, false);
     } else if venom == "araceae" && who.is(FType::Density) {
@@ -1411,8 +1411,8 @@ pub fn apply_or_infer_cure(
                 who.observe_flag(FType::Anorexia, false);
                 if pill_name == "anabiotic" {
                     if !first_person {
-                        who.restore_stat(SType::Health, 9);
-                        who.restore_stat(SType::Mana, 9);
+                        who.restore_stat_percent(SType::Health, 9);
+                        who.restore_stat_percent(SType::Mana, 9);
                     }
                 } else if let Some(order) = PILL_CURE_ORDERS.get(pill_name) {
                     if first_person {
@@ -1499,11 +1499,15 @@ pub fn apply_or_infer_cure(
                     who.set_flag(*order, true);
                 } else if elixir_name.eq_ignore_ascii_case("health") {
                     if !first_person {
-                        who.restore_stat(SType::Health, 22);
+                        who.restore_stat(SType::Health, 100);
+                        // Assume we have good artifacts.
+                        who.restore_stat_percent(SType::Health, 18);
                     }
                 } else if elixir_name.eq_ignore_ascii_case("mana") {
                     if !first_person {
-                        who.restore_stat(SType::Mana, 22);
+                        who.restore_stat(SType::Mana, 100);
+                        // Assume we have good artifacts.
+                        who.restore_stat_percent(SType::Mana, 18);
                     }
                 }
             }

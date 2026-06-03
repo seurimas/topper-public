@@ -14,8 +14,7 @@ pub const BURNOUT_TIME: f32 = 20.0;
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 pub struct AgentState {
     pub balances: [Timer; BType::SIZE as usize],
-    pub stats: [CType; SType::SIZE as usize],
-    pub max_stats: [CType; SType::SIZE as usize],
+    pub vitals: VitalsState,
     pub aggro: AggroState,
     pub flags: FlagSet,
     pub unknown_flags: UnknownFlagSet,
@@ -138,8 +137,8 @@ impl BaseAgentState for AgentState {
             self.set_flag(FType::Marked, false);
         }
         // TODO: Add a myself/other player flag?
-        if !self.balanced(BType::Boar) && self.get_max_stat(SType::Health) == 100 {
-            self.restore_stat(SType::Health, 6);
+        if !self.balanced(BType::Boar) && self.is_estimated(SType::Health) == 100 {
+            self.restore_stat_percent(SType::Health, 6);
             self.set_balance(BType::Boar, 10.);
         }
         if self.is(FType::SelfLoathing) {
@@ -160,8 +159,8 @@ impl BaseAgentState for AgentState {
     }
     fn get_base_state() -> Self {
         let mut val = AgentState::default();
-        val.initialize_stat(SType::Health, 100);
-        val.initialize_stat(SType::Mana, 100);
+        val.initialize_stat(SType::Health, 4000);
+        val.initialize_stat(SType::Mana, 4000);
         val.set_flag(FType::Player, true);
         val.set_flag(FType::Courage, true);
         val.set_flag(FType::Arcane, true);
@@ -578,46 +577,59 @@ impl AgentState {
         earliest.cloned()
     }
 
-    pub fn set_stat(&mut self, stat: SType, value: CType) {
-        self.stats[stat as usize] = value;
+    pub fn set_stat_percent(&mut self, stat: SType, percent: CType) {
+        self.vitals.set_current_percent(stat, percent);
     }
 
     pub fn get_stat(&self, stat: SType) -> CType {
-        self.stats[stat as usize]
+        self.vitals.get_current(stat)
+    }
+
+    pub fn is_estimated(&self, stat: SType) -> bool {
+        self.vitals.is_estimated(stat)
     }
 
     pub fn restore_stat(&mut self, stat: SType, value: CType) {
-        self.stats[stat as usize] += value;
-        if self.stats[stat as usize] > self.max_stats[stat as usize] {
-            self.stats[stat as usize] = self.max_stats[stat as usize];
-        }
+        self.vitals.restore(stat, value);
+    }
+
+    pub fn restore_stat_percent(&mut self, stat: SType, percent: CType) {
+        self.vitals.restore_percent(stat, percent);
     }
 
     pub fn damage_stat(&mut self, stat: SType, value: CType) {
-        self.stats[stat as usize] -= value;
-        if self.stats[stat as usize] < 0 {
-            self.stats[stat as usize] = 0;
-        }
+        self.vitals.damage(stat, value);
+    }
+
+    pub fn damage_stat_percent(&mut self, stat: SType, percent: CType) {
+        self.vitals.damage_percent(stat, percent);
     }
 
     pub fn get_max_stat(&self, stat: SType) -> CType {
-        self.max_stats[stat as usize]
+        self.vitals.get_max(stat)
     }
 
     pub fn set_max_stat(&mut self, stat: SType, value: CType) {
-        self.max_stats[stat as usize] = value;
+        self.vitals.set_max(stat, value);
     }
 
-    pub fn get_health_percent(&self) -> f32 {
-        self.stats[SType::Health as usize] as f32 / self.max_stats[SType::Health as usize] as f32
+    /// Sets a fully-known reading with the current timeline timestamp.
+    /// Prefer this over separate `set_stat` / `set_max_stat` calls when the
+    /// timeline time is available, so that `last_check` is properly stamped.
+    pub fn set_known_stat(&mut self, stat: SType, current: CType, max: CType, last_check: CType) {
+        self.vitals.set_known(stat, current, max, last_check);
     }
 
-    pub fn get_mana_percent(&self) -> f32 {
-        self.stats[SType::Mana as usize] as f32 / self.max_stats[SType::Mana as usize] as f32
+    pub fn get_health_percent(&self) -> CType {
+        self.vitals.get_percent(SType::Health)
     }
 
-    pub fn get_stat_percent(&self, stat: SType) -> f32 {
-        self.stats[stat as usize] as f32 / self.max_stats[stat as usize] as f32
+    pub fn get_mana_percent(&self) -> CType {
+        self.vitals.get_percent(SType::Mana)
+    }
+
+    pub fn get_stat_percent(&self, stat: SType) -> CType {
+        self.vitals.get_percent(stat)
     }
 
     pub fn set_limb_damage(&mut self, limb: LType, value: CType, assume_break: bool) {
@@ -740,8 +752,7 @@ impl AgentState {
     */
 
     pub fn initialize_stat(&mut self, stat: SType, value: CType) {
-        self.max_stats[stat as usize] = value;
-        self.stats[stat as usize] = value;
+        self.vitals.initialize(stat, value);
     }
 
     pub fn can_wield(&self, left: bool, right: bool) -> bool {

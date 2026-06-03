@@ -553,6 +553,7 @@ pub fn handle_combat_action(
                                 &observations,
                                 first_person,
                             );
+                            me.damage_stat(SType::Mana, 500);
                         } else {
                             apply_or_infer_cures(
                                 me,
@@ -560,6 +561,7 @@ pub fn handle_combat_action(
                                 &observations,
                                 first_person,
                             );
+                            me.damage_stat(SType::Mana, 250);
                         }
                         apply_or_infer_balance(me, (BType::Focus, duration), &observations);
                     },
@@ -710,9 +712,9 @@ pub fn handle_combat_action(
                     Ok(current) => current,
                     Err(_) => 0,
                 };
+                let time = agent_states.time;
                 for_agent(agent_states, &combat_action.caster, &|me| {
-                    me.set_stat(SType::Mana, current);
-                    me.set_max_stat(SType::Mana, max);
+                    me.set_known_stat(SType::Mana, current, max, time);
                 });
                 Ok(())
             }
@@ -1093,10 +1095,7 @@ pub fn create_aggro_map<'a>(
 }
 
 fn get_players_or_default(state: &AetTimelineState, me: &str, list: &str) -> Players {
-    state
-        .get_players(me, list)
-        .cloned()
-        .unwrap_or_default()
+    state.get_players(me, list).cloned().unwrap_or_default()
 }
 
 pub fn get_controller(

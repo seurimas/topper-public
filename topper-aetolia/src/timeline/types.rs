@@ -464,8 +464,9 @@ impl AetTimelineStateTrait for AetTimelineState {
         }
         if let AetPrompt::Stats(stats) = &slice.prompt {
             let sp = stats.sp;
+            let time = slice.time;
             for_agent(self, &slice.me, &move |you: &mut AgentState| {
-                you.set_stat(SType::SP, sp);
+                you.set_known_stat(SType::SP, sp, sp, time);
             });
         }
         self.strikeout();
@@ -528,8 +529,8 @@ impl AetTimelineTrait for AetTimeline {
                 agent.set_flag(FType::Fangbarrier, true);
                 agent.set_flag(FType::Instawake, true);
                 agent.set_flag(FType::Insulation, true);
-                agent.set_stat(SType::Health, 100);
-                agent.set_stat(SType::Mana, 100);
+                agent.set_stat_percent(SType::Health, 100);
+                agent.set_stat_percent(SType::Mana, 100);
                 agent.set_max_stat(SType::Health, 100);
                 agent.set_max_stat(SType::Mana, 100);
                 agent.limb_damage = LimbSet::default();

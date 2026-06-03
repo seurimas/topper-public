@@ -6,7 +6,7 @@ use super::*;
 
 use crate::{
     bt::*,
-    classes::{get_controller, get_stack, VenomPlan},
+    classes::{VenomPlan, get_controller, get_stack},
     curatives::FirstAidSetting,
     db::*,
     defense::*,
@@ -181,12 +181,12 @@ pub fn get_class_state(
             }
         })
         .unwrap_or("<white>-------".to_string());
-    let health = if you.get_stat(SType::Health) > 100 {
-        format!("<green>{}", you.get_stat(SType::Health))
-    } else if you.get_stat(SType::Health) > 50 {
-        format!("<yellow>{}", you.get_stat(SType::Health))
+    let health = if you.get_stat_percent(SType::Health) > 100 {
+        format!("<green>{}", you.get_stat_percent(SType::Health))
+    } else if you.get_stat_percent(SType::Health) > 50 {
+        format!("<yellow>{}", you.get_stat_percent(SType::Health))
     } else {
-        format!("<red>{}", you.get_stat(SType::Health))
+        format!("<red>{}", you.get_stat_percent(SType::Health))
     };
 
     format!(

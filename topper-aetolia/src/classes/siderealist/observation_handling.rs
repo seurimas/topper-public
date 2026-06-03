@@ -115,7 +115,7 @@ pub fn handle_combat_action(
         }
         "palpitation" => {
             for_agent(agent_states, &combat_action.caster, &move |me| {
-                me.damage_stat(SType::Health, 5);
+                me.damage_stat_percent(SType::Health, 5);
             });
         }
         "creeps" => {
@@ -143,7 +143,7 @@ pub fn handle_combat_action(
         }
         "dissension" => {
             for_agent(agent_states, &combat_action.caster, &move |me| {
-                me.damage_stat(SType::Health, 4);
+                me.damage_stat_percent(SType::Health, 4);
             });
         }
         "Dissension Hit" => {
@@ -228,7 +228,7 @@ pub fn handle_combat_action(
             );
             if attack_hit(after) {
                 for_agent(agent_states, &combat_action.target, &move |me| {
-                    me.damage_stat(SType::Health, 7);
+                    me.damage_stat_percent(SType::Health, 7);
                 });
             }
         }
@@ -296,7 +296,7 @@ pub fn handle_combat_action(
             for_agent(agent_states, &combat_action.target, &move |me| {
                 me.siderealist_board.ray();
                 if perspective != Perspective::Target {
-                    me.damage_stat(SType::Health, damage);
+                    me.damage_stat_percent(SType::Health, damage);
                 }
             });
         }
@@ -334,12 +334,12 @@ pub fn handle_combat_action(
             if combat_action.annotation.eq_ignore_ascii_case("failure") {
                 if agent_states.get_perspective(combat_action) != Perspective::Target {
                     for_agent(agent_states, &combat_action.target, &move |me| {
-                        if me.get_stat(SType::Health) < 60 {
+                        if me.get_stat_percent(SType::Health) < 60 {
                             println!(
                                 "Dustring failed, but we thought the health was: {}",
-                                me.get_stat(SType::Health)
+                                me.get_stat_percent(SType::Health)
                             );
-                            me.set_stat(SType::Health, 65);
+                            me.set_stat_percent(SType::Health, 65);
                         }
                     });
                 }
@@ -436,7 +436,7 @@ pub fn handle_combat_action(
         }
         "Chromaflare Hit" => {
             for_agent(agent_states, &combat_action.caster, &move |me| {
-                me.damage_stat(SType::Health, 5);
+                me.damage_stat_percent(SType::Health, 5);
             });
         }
         "Parallax" => {
@@ -526,7 +526,7 @@ pub fn handle_combat_action(
                 let damage = get_damage(before, STILLNESS_DAMAGE);
                 for_agent(agent_states, &combat_action.caster, &move |me| {
                     me.observe_flag(FType::Echoes, true);
-                    me.damage_stat(SType::Health, damage);
+                    me.damage_stat_percent(SType::Health, damage);
                 });
                 if agent_states.get_perspective(&combat_action) != Perspective::Attacker {
                     for_agent(agent_states, &combat_action.caster, &move |me| {

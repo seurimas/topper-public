@@ -180,7 +180,7 @@ pub enum AetPredicate {
     HintSet(String, String),
     HintMissing(String),
     // Stats
-    StatUnderPercent(SType, AetTarget, f32),
+    StatUnderPercent(SType, AetTarget, CType),
     // Balances
     HasBalanceEquilibrium(AetTarget),
     HasBalance(AetTarget),
