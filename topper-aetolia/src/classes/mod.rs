@@ -714,7 +714,8 @@ pub fn handle_combat_action(
                 };
                 let time = agent_states.time;
                 for_agent(agent_states, &combat_action.caster, &|me| {
-                    me.set_known_stat(SType::Mana, current, max, time);
+                    me.set_max_stat(SType::Mana, max);
+                    me.set_seen_stat(SType::Mana, current, time);
                 });
                 Ok(())
             }

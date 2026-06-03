@@ -9,6 +9,31 @@ use regex::Regex;
 
 use super::phenomenon_in_room;
 
+const SPARK_DAMAGE_PERCENT: CType = 5;
+const FIREBURST_DAMAGE_PERCENT: CType = 6;
+const CONFLAGRATE_DAMAGE_PERCENT: CType = 7;
+const SUNPOT_DAMAGE_PERCENT: CType = 18;
+const PYROCLAST_DAMAGE_PERCENT: CType = 20;
+const DISINTEGRATE_DAMAGE_PERCENT: CType = 40;
+
+const ICERAY_DAMAGE_PERCENT: CType = 10;
+const ICICLE_DAMAGE_PERCENT: CType = 15;
+const ICE_SHARD_DAMAGE_PERCENT: CType = 1;
+const DIREFROST_DAMAGE_PERCENT: CType = 7;
+const DIREFROST_PROC_DAMAGE_PERCENT: CType = 10;
+// Mana drains
+const DRENCH_BASE_PERCENT: CType = 7;
+const DRENCH_SHIVERING_PERCENT: CType = 14;
+const DRENCH_FRIGID_PERCENT: CType = 28;
+const DRENCH_FROZEN_PERCENT: CType = 40;
+const CRYSTALISE_DAMAGE_PERCENTS: [CType; 5] = [19, 43, 67, 91, 115];
+
+const WINDLANCE_DAMAGE_PERCENT: CType = 4;
+const ARCBOLT_DAMAGE_PERCENT: CType = 14;
+const THUNDERCLAP_DAMAGE_PERCENT: CType = 7;
+const AEROBLAST_DAMAGE_PERCENT: CType = 10;
+const AEROBLAST_STUN_DAMAGE_PERCENT: CType = 18;
+
 lazy_static! {
     static ref AEROBLAST_FAST: Regex = Regex::new(r"(?i)^cast aeroblast \w+ (fast|slow)$").unwrap();
 }

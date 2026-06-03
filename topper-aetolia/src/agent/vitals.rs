@@ -257,6 +257,15 @@ impl VitalsState {
         matches!(self.vitals[stat as usize], VitalState::Estimated { .. })
     }
 
+    pub fn is_estimate_good(&self, stat: SType, current_time: CType) -> bool {
+        if let VitalState::Estimated { last_check, .. } = self.vitals[stat as usize] {
+            // If the last check was within the last 10 seconds, consider the estimate good.
+            current_time - last_check <= (10 * BALANCE_SCALE as CType)
+        } else {
+            false
+        }
+    }
+
     // ── Forwarding helpers ───────────────────────────────────────────────────
 
     pub fn get_current(&self, stat: SType) -> CType {
@@ -281,6 +290,26 @@ impl VitalsState {
 
     pub fn set_max(&mut self, stat: SType, value: CType) {
         self.vitals[stat as usize].set_max(value);
+    }
+
+    pub fn set_seen(&mut self, stat: SType, current: CType, last_check: CType) {
+        if let VitalState::Estimated { max, .. } = self.vitals[stat as usize] {
+            self.vitals[stat as usize] = VitalState::Estimated {
+                current_percent: if max > 0 {
+                    (current * 100 / max) as CType
+                } else {
+                    0
+                },
+                max,
+                last_check,
+            };
+        } else {
+            self.vitals[stat as usize] = VitalState::KnownAt {
+                current,
+                max: self.vitals[stat as usize].get_max(),
+                last_check,
+            };
+        }
     }
 
     /// Sets a fully-known reading with the current timeline timestamp.

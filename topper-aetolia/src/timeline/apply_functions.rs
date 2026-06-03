@@ -618,7 +618,8 @@ pub fn apply_observation(
                         percent_value
                     );
                 }
-                me.set_known_stat(SType::Health, percent_value, 100, current_time);
+                me.set_max_stat(SType::Health, *max);
+                me.set_seen_stat(SType::Health, *current, current_time);
             });
         }
         AetObservation::StatsOne {

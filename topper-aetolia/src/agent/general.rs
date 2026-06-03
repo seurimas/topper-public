@@ -236,6 +236,7 @@ pub enum BType {
     // Manabarbs,
     Pacifism,
     Boar,
+    Moon,
 
     // Writhe
     WritheDartpinned,

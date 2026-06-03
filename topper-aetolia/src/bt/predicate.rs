@@ -180,6 +180,7 @@ pub enum AetPredicate {
     HintSet(String, String),
     HintMissing(String),
     // Stats
+    StatEstimateGood(SType, AetTarget),
     StatUnderPercent(SType, AetTarget, CType),
     // Balances
     HasBalanceEquilibrium(AetTarget),
@@ -1102,6 +1103,17 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::RoomIsTagged(tag) => {
                 if let Some(room) = model.state.get_my_room() {
                     if room.has_tag(tag) {
+                        UnpoweredFunctionState::Complete
+                    } else {
+                        UnpoweredFunctionState::Failed
+                    }
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
+            }
+            AetPredicate::StatEstimateGood(stat, target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.is_stat_estimate_good(*stat, model.state.time) {
                         UnpoweredFunctionState::Complete
                     } else {
                         UnpoweredFunctionState::Failed

@@ -136,10 +136,13 @@ impl BaseAgentState for AgentState {
         if self.is(FType::Marked) && self.balanced(BType::Marked) {
             self.set_flag(FType::Marked, false);
         }
-        // TODO: Add a myself/other player flag?
-        if !self.balanced(BType::Boar) && self.is_estimated(SType::Health) == 100 {
-            self.restore_stat_percent(SType::Health, 6);
+        if !self.balanced(BType::Boar) && self.is_estimated(SType::Health) {
+            self.restore_stat_percent(SType::Health, 5);
             self.set_balance(BType::Boar, 10.);
+        }
+        if !self.balanced(BType::Moon) && self.is_estimated(SType::Mana) {
+            self.restore_stat_percent(SType::Mana, 5);
+            self.set_balance(BType::Moon, 10.);
         }
         if self.is(FType::SelfLoathing) {
             let observed = self.get_count(FType::SelfLoathing);
@@ -159,8 +162,8 @@ impl BaseAgentState for AgentState {
     }
     fn get_base_state() -> Self {
         let mut val = AgentState::default();
-        val.initialize_stat(SType::Health, 4000);
-        val.initialize_stat(SType::Mana, 4000);
+        val.initialize_stat(SType::Health, 5000);
+        val.initialize_stat(SType::Mana, 5000);
         val.set_flag(FType::Player, true);
         val.set_flag(FType::Courage, true);
         val.set_flag(FType::Arcane, true);
@@ -589,6 +592,10 @@ impl AgentState {
         self.vitals.is_estimated(stat)
     }
 
+    pub fn is_stat_estimate_good(&self, stat: SType, current_time: CType) -> bool {
+        self.vitals.is_estimate_good(stat, current_time)
+    }
+
     pub fn restore_stat(&mut self, stat: SType, value: CType) {
         self.vitals.restore(stat, value);
     }
@@ -613,9 +620,11 @@ impl AgentState {
         self.vitals.set_max(stat, value);
     }
 
-    /// Sets a fully-known reading with the current timeline timestamp.
-    /// Prefer this over separate `set_stat` / `set_max_stat` calls when the
-    /// timeline time is available, so that `last_check` is properly stamped.
+    pub fn set_seen_stat(&mut self, stat: SType, current: CType, time: CType) {
+        self.vitals.set_seen(stat, current, time);
+    }
+
+    // Use only for first-person observations, as it will set the stat to known and update the last check time.
     pub fn set_known_stat(&mut self, stat: SType, current: CType, max: CType, last_check: CType) {
         self.vitals.set_known(stat, current, max, last_check);
     }
