@@ -165,6 +165,7 @@ pub enum AetPredicate {
     // Buffer/locks
     CannotCure(AetTarget, FType),
     Buffered(AetTarget, FType),
+    StuckAtLeast(AetTarget, FType, CType),
     Locked(AetTarget, bool),
     QuickLocked(AetTarget),
     NearLocked(AetTarget, LockType, usize),
@@ -746,6 +747,14 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::Buffered(target, aff) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.is(*aff) && get_cure_depth(target, *aff).cures > 1 {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::StuckAtLeast(target, aff, time) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if target.is(*aff) && get_cure_depth(target, *aff).time > *time {
                         return UnpoweredFunctionState::Complete;
                     }
                 }

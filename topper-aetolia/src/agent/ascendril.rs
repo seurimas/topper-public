@@ -225,6 +225,7 @@ pub struct AscendrilClassState {
     my_phenomenon: PhenomenaState,
     freshest_phenomenon: Option<(i64, i64, PhenomenaKind)>,
     shift_cooldown: Timer,
+    feedback_cooldown: Timer,
 }
 
 impl AscendrilClassState {
@@ -244,6 +245,7 @@ impl AscendrilClassState {
         }
         self.capacitance.wait(time);
         self.shift_cooldown.wait(time);
+        self.feedback_cooldown.wait(time);
     }
 
     pub fn try_claim(&mut self, phenomenon: PhenomenaKind) {
@@ -536,6 +538,14 @@ impl AscendrilClassState {
 
     pub fn capacitance_will_disrupt(&self) -> bool {
         matches!(self.capacitance, CapacitanceState::CapacitanceUp { count, .. } if count >= 4)
+    }
+
+    pub fn feedback_used(&mut self) {
+        self.feedback_cooldown = Timer::count_down_seconds(20.);
+    }
+
+    pub fn feedback_available(&self) -> bool {
+        !self.feedback_cooldown.is_active()
     }
 
     fn count_air_cast(&mut self) {

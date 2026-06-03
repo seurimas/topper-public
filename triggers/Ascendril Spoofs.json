@@ -252,6 +252,27 @@
         "observation_name": "Proc"
     },
     {
+        "regex": "^(You)r fulcrum already exudes dangerous degradation.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Degradation"
+            },
+            {
+                "Literal": "on"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
         "regex": "^(You)r fulcrum is already resonating with an imbalancing effect.$",
         "args": [
             {

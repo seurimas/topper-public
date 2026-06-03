@@ -154,7 +154,7 @@ fn get_cure_depth_locked(me: &AgentState, target_aff: FType, checked: u32) -> Cu
             if *aff == target_aff {
                 if !salve.0.eq("restoration") {
                     val.time = val.time - SALVE_TIME;
-                    if !me.balanced(BType::Salve) {
+                    if !me.balanced(BType::Salve) && me.get_curing() != Some(target_aff) {
                         val.time = val.time + me.get_raw_balance(BType::Salve);
                     }
                 }
@@ -203,6 +203,12 @@ fn get_cure_depth_locked(me: &AgentState, target_aff: FType, checked: u32) -> Cu
                 }
                 break;
             }
+        }
+        val
+    } else if target_aff == FType::Fallen {
+        // TODO: Fix all of this up. We need better fallen estimations.
+        if me.is(FType::Frozen) && checked < 2 {
+            val = get_cure_depth_locked(me, FType::Frozen, checked + 1);
         }
         val
     } else {

@@ -301,6 +301,13 @@ impl UnpoweredFunction for AscendrilBehavior {
                 UnpoweredFunctionState::Complete
             }
             AscendrilBehavior::Feedback(target) => {
+                let me = model.state.borrow_me();
+                if me
+                    .check_if_ascendril(&|asc| !asc.feedback_available())
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
                 let action = Feedback::from_target(target, model, controller);
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete

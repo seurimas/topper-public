@@ -547,10 +547,12 @@ pub fn handle_combat_action(
         "Feedback" => {
             for_agent(agent_states, &combat_action.target, &|me| {
                 me.set_flag(FType::Unconscious, true);
+                me.set_stat_percent(SType::Mana, 100);
             });
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
                     ascendril.cast_spell(Element::Air);
+                    ascendril.feedback_used();
                 });
             });
         }
