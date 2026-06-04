@@ -549,6 +549,48 @@
     "observation_name": "OtherAfflicted"
   },
   {
+    "regex": "^Being unconscious, (you) collapse upon the floor.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Aff"
+      },
+      {
+        "Literal": "unconsciousness"
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
+    "regex": "^Being unconscious, (\\w+) falls over.$",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Aff"
+      },
+      {
+        "Literal": "unconsciousness"
+      },
+      {
+        "Literal": ""
+      },
+      {
+        "Literal": ""
+      }
+    ],
+    "observation_name": "Proc"
+  },
+  {
     "regex": "^(You) will now attempt to parry attacks to your (.*)\\.$",
     "args": [
       {

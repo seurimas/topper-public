@@ -854,7 +854,7 @@ impl AgentState {
         self.affs_count(&vec![
             // Fallen counts for prone, but not parrying.
             FType::Asleep,
-            FType::Unconscious,
+            FType::Unconsciousness,
             FType::Stun,
             FType::Paralysis,
             FType::WritheImpaled,

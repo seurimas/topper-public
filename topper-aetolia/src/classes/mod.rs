@@ -897,6 +897,13 @@ pub fn handle_combat_action(
                 });
                 Ok(())
             }
+            "unconsciousness" => {
+                for_agent(agent_states, &combat_action.caster, &|you| {
+                    you.observe_flag(FType::Unconsciousness, true);
+                    you.toggle_flag(FType::Fallen, true);
+                });
+                Ok(())
+            }
             "self_loathing" => {
                 let flings = combat_action.annotation.eq("flings");
                 let count = if combat_action.annotation.eq("first") {

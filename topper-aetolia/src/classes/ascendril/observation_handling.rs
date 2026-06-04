@@ -546,7 +546,7 @@ pub fn handle_combat_action(
         // Knocks unconcious.
         "Feedback" => {
             for_agent(agent_states, &combat_action.target, &|me| {
-                me.set_flag(FType::Unconscious, true);
+                me.set_flag(FType::Unconsciousness, true);
                 me.set_stat_percent(SType::Mana, 100);
             });
             for_agent(agent_states, &combat_action.caster, &|me| {

@@ -628,7 +628,7 @@ pub enum FType {
 
     // Special
     Asleep,
-    Unconscious,
+    Unconsciousness,
     Fear,
     Fallen,
     Itchy,

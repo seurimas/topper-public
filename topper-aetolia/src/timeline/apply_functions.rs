@@ -422,7 +422,7 @@ pub fn apply_observation(
                 you.observe_flag(FType::RightLegCrippled, false);
                 you.set_flag(FType::Dazed, false);
                 you.set_flag(FType::Disrupted, false);
-                you.set_flag(FType::Unconscious, false);
+                you.set_flag(FType::Unconsciousness, false);
             });
             if timeline.borrow_agent(who).is(FType::Backstrain) {
                 let after = after.clone();
