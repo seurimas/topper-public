@@ -300,12 +300,13 @@ impl VitalsState {
                 } else {
                     0
                 },
-                max,
+                max: max.max(current), // Update max if the observed current exceeds it
                 last_check,
             };
         } else {
             self.vitals[stat as usize] = VitalState::KnownAt {
                 current,
+                // For KnownAt, we trust the observed current and max as they are.
                 max: self.vitals[stat as usize].get_max(),
                 last_check,
             };

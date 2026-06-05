@@ -71,6 +71,7 @@ pub enum AscendrilBehavior {
     CatalystFrost(AetTarget),
     CatalystThunder(AetTarget),
     Enrapture(AetTarget),
+    FulcrumDetect(AetTarget),
     Shift,
     Degradation,
     Spiritrift,
@@ -473,15 +474,16 @@ impl UnpoweredFunction for AscendrilBehavior {
             }
             AscendrilBehavior::Restore => {
                 let me = model.state.borrow_me();
-                if !me
+                if !me.balanced(BType::ClassCure1) {
+                    return UnpoweredFunctionState::Failed;
+                } else if !me
                     .check_if_ascendril(&|asc| asc.fulcrum_active_here(me.room_id))
                     .unwrap_or(false)
                 {
-                    return UnpoweredFunctionState::Failed;
-                } else if !me.balanced(BType::ClassCure1) {
+                    println!("Restore failed because fulcrum not active");
                     return UnpoweredFunctionState::Failed;
                 }
-                let action = Restore::new(model.who_am_i());
+                let action = FulcrumRestore::new(model.who_am_i());
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
@@ -648,6 +650,21 @@ impl UnpoweredFunction for AscendrilBehavior {
                     }
                 }
                 let action = Enrapture::from_target(target, model, controller);
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::FulcrumDetect(target) => {
+                let me = model.state.borrow_me();
+                let room = me.room_id;
+                if !me
+                    .check_if_ascendril(&|me| me.fulcrum_expanded(room))
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                } else if !(me.get_mana() > 1000) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let action = FulcrumDetect::from_target(target, model, controller);
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }

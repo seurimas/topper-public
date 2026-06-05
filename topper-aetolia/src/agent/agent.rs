@@ -629,8 +629,16 @@ impl AgentState {
         self.vitals.set_known(stat, current, max, last_check);
     }
 
+    pub fn get_health(&self) -> CType {
+        self.vitals.get_current(SType::Health)
+    }
+
     pub fn get_health_percent(&self) -> CType {
         self.vitals.get_percent(SType::Health)
+    }
+
+    pub fn get_mana(&self) -> CType {
+        self.vitals.get_current(SType::Mana)
     }
 
     pub fn get_mana_percent(&self) -> CType {
@@ -1160,6 +1168,16 @@ impl AgentState {
             timer: Timer::count_down_seconds(time),
             limb,
         };
+    }
+
+    pub fn set_channel_with_target(
+        &mut self,
+        channel_type: ChannelType,
+        time: f32,
+        target: String,
+    ) {
+        self.channel_state
+            .channel_with_target_seconds(channel_type, time, target);
     }
 
     pub fn assume_ascendril(&mut self, action: &impl Fn(&mut AscendrilClassState)) {

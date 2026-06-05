@@ -36,6 +36,7 @@ const AEROBLAST_STUN_DAMAGE_PERCENT: CType = 18;
 
 lazy_static! {
     static ref AEROBLAST_FAST: Regex = Regex::new(r"(?i)^cast aeroblast \w+ (fast|slow)$").unwrap();
+    static ref ICICLE_SENT: Regex = Regex::new(r"(?i)^cast icicle (\w+)$").unwrap();
 }
 
 pub fn handle_sent(command: &String, agent_states: &mut AetTimelineState) {
@@ -43,6 +44,10 @@ pub fn handle_sent(command: &String, agent_states: &mut AetTimelineState) {
         let me = agent_states.me.clone();
         let speed = caps.get(1).unwrap().as_str().to_ascii_lowercase();
         agent_states.add_player_hint(&me, &"AEROBLAST_SPEED".to_string(), speed);
+    } else if let Some(caps) = ICICLE_SENT.captures(command) {
+        let me = agent_states.me.clone();
+        let limb = caps.get(1).unwrap().as_str().to_ascii_lowercase();
+        agent_states.add_player_hint(&me, &"ICICLE_TARGET".to_string(), limb);
     }
 }
 
@@ -364,6 +369,14 @@ pub fn handle_combat_action(
                         me.damage_stat_percent(SType::Health, ICICLE_DAMAGE_PERCENT);
                     });
                 }
+            } else if combat_action.annotation.eq("already_icicles") {
+                let target = agent_states
+                    .get_player_hint(&combat_action.caster, &"ICICLE_TARGET".to_string());
+                if let Some(target) = target {
+                    for_agent(agent_states, &target, &|me| {
+                        me.ascendril_board.an_icicle();
+                    });
+                }
             } else {
                 for_agent(agent_states, &combat_action.target, &|me| {
                     me.ascendril_board.icicles_spawn();
@@ -391,6 +404,14 @@ pub fn handle_combat_action(
                     );
                     for_agent(agent_states, &combat_action.caster, &|me| {
                         me.damage_stat_percent(SType::Health, ICE_SHARD_DAMAGE_PERCENT);
+                    });
+                }
+            } else if combat_action.annotation.eq("no_icicles") {
+                let target = agent_states
+                    .get_player_hint(&combat_action.caster, &"ICICLE_TARGET".to_string());
+                if let Some(target) = target {
+                    for_agent(agent_states, &target, &|me| {
+                        me.ascendril_board.clear_icicles();
                     });
                 }
             } else {
@@ -895,6 +916,23 @@ pub fn handle_combat_action(
                     me.assume_ascendril(&|ascendril| {
                         ascendril.use_up_resonance();
                     });
+                });
+            } else {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.channel_state
+                        .channel_seconds(ChannelType::Enrapture, 10.);
+                });
+            }
+        }
+        // Annotation is health, target is mana.
+        "Detect" => {
+            let health = combat_action.annotation.parse::<i32>().ok();
+            let mana = combat_action.target.parse::<i32>().ok();
+            let time = agent_states.time;
+            if let (Some(health), Some(mana)) = (health, mana) {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.set_seen_stat(SType::Health, health, time);
+                    me.set_seen_stat(SType::Mana, mana, time);
                 });
             }
         }

@@ -1537,6 +1537,7 @@ impl Default for ClassState {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ChannelType {
     Heelrush,
+    Zeal, // Battlefury
     Direblow,
     Shatter,
     Death,
@@ -1545,6 +1546,7 @@ pub enum ChannelType {
     Disintegrate,
     Winterheart,
     Stormwrath,
+    Enrapture,
 }
 
 impl ChannelType {
@@ -1577,6 +1579,11 @@ pub enum ChannelState {
         channel_type: ChannelType,
         timer: Timer,
     },
+    ChannelWithTarget {
+        channel_type: ChannelType,
+        target: String,
+        timer: Timer,
+    },
 }
 
 impl ChannelState {
@@ -1606,6 +1613,19 @@ impl ChannelState {
         };
     }
 
+    pub fn channel_with_limb_seconds(
+        &mut self,
+        channel_type: ChannelType,
+        limb: LType,
+        duration: f32,
+    ) {
+        *self = ChannelState::ChannelWithLimb {
+            channel_type,
+            limb,
+            timer: Timer::count_up_seconds(duration),
+        };
+    }
+
     pub fn channel(&mut self, channel_type: ChannelType, duration: CType) {
         *self = ChannelState::Channeling {
             channel_type,
@@ -1616,6 +1636,32 @@ impl ChannelState {
     pub fn channel_seconds(&mut self, channel_type: ChannelType, duration: f32) {
         *self = ChannelState::Channeling {
             channel_type,
+            timer: Timer::count_up_seconds(duration),
+        };
+    }
+
+    pub fn channel_with_target(
+        &mut self,
+        channel_type: ChannelType,
+        duration: CType,
+        target: String,
+    ) {
+        *self = ChannelState::ChannelWithTarget {
+            channel_type,
+            target,
+            timer: Timer::count_up_observe(duration, duration),
+        };
+    }
+
+    pub fn channel_with_target_seconds(
+        &mut self,
+        channel_type: ChannelType,
+        duration: f32,
+        target: String,
+    ) {
+        *self = ChannelState::ChannelWithTarget {
+            channel_type,
+            target,
             timer: Timer::count_up_seconds(duration),
         };
     }

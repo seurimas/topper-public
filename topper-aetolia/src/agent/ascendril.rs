@@ -67,24 +67,34 @@ impl AscendrilBoard {
 
     pub fn icicles_spawn(&mut self) {
         self.icicles = 3;
-        self.icicle_timer = Timer::count_down_seconds(3.5);
+        self.icicle_timer = Timer::count_up_observe_seconds(3.5, 5.5);
     }
 
     pub fn icicles_hit(&mut self) {
         self.icicles -= 1;
-        self.icicle_timer = Timer::count_down_seconds(3.5);
+        self.icicle_timer = Timer::count_up_observe_seconds(3.5, 5.5);
         if self.icicles < 0 {
             self.icicles = 0;
         }
     }
 
     pub fn icicles_active(&self) -> bool {
-        self.icicles > 0
+        self.icicles > 0 && self.icicle_timer.is_active()
+    }
+
+    pub fn an_icicle(&mut self) {
+        self.icicles = 1;
+        self.icicle_timer = Timer::count_up_observe_seconds(3.5, 5.5);
+    }
+
+    pub fn clear_icicles(&mut self) {
+        self.icicles = 0;
+        self.icicle_timer.expire();
     }
 
     pub fn shatter(&mut self) {
         if self.icicles > 0 {
-            self.shattered = self.icicles * 3;
+            self.shattered += self.icicles * 3;
             self.shattered_timer = self.icicle_timer.clone();
             self.icicles = 0;
             self.icicle_timer.expire();

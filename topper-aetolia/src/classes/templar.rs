@@ -1,5 +1,5 @@
-use crate::curatives::remove_in_order;
 use crate::curatives::STEROID_ORDER;
+use crate::curatives::remove_in_order;
 use crate::timeline::*;
 use crate::types::*;
 
@@ -71,6 +71,15 @@ pub fn handle_combat_action(
         "Rage" => {
             for_agent(agent_states, &combat_action.caster, &|me| {
                 remove_in_order(STEROID_ORDER.to_vec(), me);
+            });
+        }
+        "Zeal" => {
+            let target = combat_action.target.clone();
+            if target.is_empty() {
+                return Ok(());
+            }
+            for_agent(agent_states, &combat_action.caster, &|me| {
+                me.set_channel_with_target(ChannelType::Zeal, 4., target.clone());
             });
         }
         _ => {}

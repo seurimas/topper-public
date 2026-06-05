@@ -5,6 +5,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::classes::Class;
+use crate::classes::Contemplate;
 use crate::classes::LockType;
 use crate::classes::VenomPlan;
 use crate::classes::ascendril::AscendrilBehavior;
@@ -41,6 +42,7 @@ pub enum AetBehavior {
     },
     SetLimbHint(AetTarget, LimbDescriptor, String),
     TouchHammer(AetTarget),
+    Contemplate(AetTarget),
     PlainQebBehavior(String),
     #[serde(untagged)]
     EnchantmentBehavior(EnchantmentBehavior),
@@ -161,6 +163,14 @@ impl UnpoweredFunction for AetBehavior {
                         "touch hammer {}",
                         aet_target.get_name(model, controller),
                     ))));
+                UnpoweredFunctionState::Complete
+            }
+            AetBehavior::Contemplate(aet_target) => {
+                controller
+                    .plan
+                    .add_to_qeb(Box::new(Contemplate::from_target(
+                        aet_target, model, controller,
+                    )));
                 UnpoweredFunctionState::Complete
             }
             AetBehavior::PlainQebBehavior(action) => {

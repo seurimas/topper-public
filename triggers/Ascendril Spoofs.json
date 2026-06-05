@@ -273,6 +273,48 @@
         "observation_name": "Proc"
     },
     {
+        "regex": "^(You) haven't conjured an icicle barrage.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Elemancy"
+            },
+            {
+                "Literal": "Shatter"
+            },
+            {
+                "Literal": "no_icicles"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You) have already conjured an icicle barrage.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Elemancy"
+            },
+            {
+                "Literal": "Icicle"
+            },
+            {
+                "Literal": "already_icicles"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
         "regex": "^(You)r fulcrum is already resonating with an imbalancing effect.$",
         "args": [
             {
@@ -310,6 +352,27 @@
             },
             {
                 "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^Your fulcrum detects (\\w+) to have a health of (\\d+) and a mana of (\\d+).$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Detect"
+            },
+            {
+                "Group": 2
+            },
+            {
+                "Group": 3
             }
         ],
         "observation_name": "Proc"
