@@ -76,6 +76,9 @@ pub enum AscendrilBehavior {
     Degradation,
     Spiritrift,
     PhenomenonAt(PhenomenaKind, AetTarget),
+    TraceGlyph(Glyph),
+    TraceGlyphAegis(Glyph),
+    TraceTargettedGlyph(Glyph, AetTarget),
 }
 
 impl UnpoweredFunction for AscendrilBehavior {
@@ -743,6 +746,39 @@ impl UnpoweredFunction for AscendrilBehavior {
                             )))
                     }
                 }
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::TraceGlyph(glyph) => {
+                let me = model.state.borrow_me();
+                if !model.state.has_room_for_more_glyphs(me.room_id)
+                    || model.state.has_glyph_in_room(me.room_id, *glyph)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let action = GlyphTraceAction::new(model.who_am_i(), *glyph);
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::TraceGlyphAegis(glyph) => {
+                let me = model.state.borrow_me();
+                // TODO Aegis handling
+                // if false {
+                //     return UnpoweredFunctionState::Failed;
+                // }
+                let action = GlyphTraceAction::new(model.who_am_i(), *glyph).with_aegis();
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::TraceTargettedGlyph(glyph, aet_target) => {
+                let me = model.state.borrow_me();
+                if !model.state.has_room_for_more_glyphs(me.room_id)
+                    || model.state.has_glyph_in_room(me.room_id, *glyph)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let action = GlyphTraceAction::new(model.who_am_i(), *glyph)
+                    .with_target(aet_target.get_name(model, controller));
+                controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
         }

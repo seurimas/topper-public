@@ -5,6 +5,7 @@ use topper_core::timeline::CType;
 
 use crate::{
     agent::{Timer, Vibration, VibrationState},
+    classes::ascendril::Glyph,
     timeline::*,
 };
 
@@ -53,12 +54,19 @@ pub struct RoomVibrationState {
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
+pub struct GlyphState {
+    pub owner: String,
+    pub glyph: Glyph,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct Room {
     pub id: i64,
     pub players: HashSet<String>,
     pub denizens: HashSet<i64>,
     pub exits: HashMap<Direction, i64>,
     pub vibrations: HashMap<Vibration, RoomVibrationState>,
+    pub glyphs: Vec<GlyphState>,
     tags: HashSet<String>,
 }
 
@@ -71,6 +79,7 @@ impl Default for Room {
             exits: HashMap::new(),
             tags: HashSet::new(),
             vibrations: HashMap::new(),
+            glyphs: Vec::new(),
         }
     }
 }
@@ -84,6 +93,7 @@ impl Room {
             exits: HashMap::new(),
             tags: HashSet::new(),
             vibrations: HashMap::new(),
+            glyphs: Vec::new(),
         })
     }
 
@@ -134,6 +144,21 @@ impl Room {
             })
             .unwrap_or(false)
     }
+
+    pub fn has_glyph(&self, glyph: Glyph) -> bool {
+        self.glyphs.iter().any(|g| g.glyph == glyph)
+    }
+
+    pub fn add_glyph(&mut self, owner: String, glyph: Glyph) {
+        self.glyphs.push(GlyphState { owner, glyph });
+        if self.glyphs.len() > 2 {
+            println!(
+                "Warning: More than 2 glyphs in room {}, this is unexpected.",
+                self.id
+            );
+            self.glyphs.remove(0);
+        }
+    }
 }
 
 pub fn format_room_id(room_id: i64) -> String {
@@ -168,6 +193,24 @@ pub trait AetTimelineRoomExt {
     fn observe_vibration_not_in_room(&mut self, room_id: i64, vibration: Vibration, owner: &str);
 
     fn begin_vibrations_list(&mut self, room_id: i64);
+
+    fn observe_glyph_in_room(&mut self, room_id: i64, owner: String, glyph: Glyph) {
+        self.for_room(room_id, &|room| {
+            room.add_glyph(owner.clone(), glyph);
+        });
+    }
+
+    fn has_glyph_in_room(&self, room_id: i64, glyph: Glyph) -> bool {
+        self.get_room(room_id)
+            .map(|room| room.has_glyph(glyph))
+            .unwrap_or(false)
+    }
+
+    fn has_room_for_more_glyphs(&self, room_id: i64) -> bool {
+        self.get_room(room_id)
+            .map(|room| room.glyphs.len() < 2)
+            .unwrap_or(true)
+    }
 }
 
 impl AetTimelineRoomExt for AetTimelineState {

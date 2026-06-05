@@ -58,3 +58,104 @@ targetted_action!(FulcrumDetect, "fulcrum detect {}");
 untargetted_action!(Shift, "fulcrum shift");
 untargetted_action!(Degradation, "fulcrum degradation on");
 untargetted_action!(Spiritrift, "fulcrum spiritrift on");
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Copy)]
+pub enum Glyph {
+    Portal,
+    Destruction,
+    Vainglory,
+    Addling,
+    Entrapment,
+    Slumber,
+    Arrogance,
+    Leaching,
+    Gravity,
+    Clarity,
+}
+
+impl Glyph {
+    pub fn to_skill(&self) -> String {
+        match self {
+            Glyph::Portal => "Portal Glyph",
+            Glyph::Destruction => "Destruction Glyph",
+            Glyph::Vainglory => "Vainglory Glyph",
+            Glyph::Addling => "Addling Glyph",
+            Glyph::Entrapment => "Entrapment Glyph",
+            Glyph::Slumber => "Slumber Glyph",
+            Glyph::Arrogance => "Arrogance Glyph",
+            Glyph::Leaching => "Leaching Glyph",
+            Glyph::Gravity => "Gravity Glyph",
+            Glyph::Clarity => "Clarity Glyph",
+        }
+        .to_string()
+    }
+
+    pub fn name(&self) -> String {
+        match self {
+            Glyph::Portal => "PORTAL",
+            Glyph::Destruction => "DESTRUCTION",
+            Glyph::Vainglory => "VAINGLORY",
+            Glyph::Addling => "ADDLING",
+            Glyph::Entrapment => "ENTRAPMENT",
+            Glyph::Slumber => "SLUMBER",
+            Glyph::Arrogance => "ARROGANCE",
+            Glyph::Leaching => "LEACHING",
+            Glyph::Gravity => "GRAVITY",
+            Glyph::Clarity => "CLARITY",
+        }
+        .to_string()
+    }
+}
+
+pub struct GlyphTraceAction {
+    pub caster: String,
+    pub traced: Glyph,
+    pub aegis: bool,
+    pub target: Option<String>,
+}
+
+impl GlyphTraceAction {
+    pub fn new(caster: String, traced: Glyph) -> Self {
+        GlyphTraceAction {
+            caster,
+            traced,
+            aegis: false,
+            target: None,
+        }
+    }
+
+    pub fn with_aegis(mut self) -> Self {
+        self.aegis = true;
+        self
+    }
+
+    pub fn with_target(mut self, target: String) -> Self {
+        self.target = Some(target);
+        self
+    }
+}
+
+impl ActiveTransition for GlyphTraceAction {
+    fn simulate(&self, timeline: &AetTimeline) -> Vec<ProbableEvent> {
+        let mut observations = vec![CombatAction::observation(
+            &self.caster,
+            &"Arcanism",
+            &self.traced.to_skill(),
+            &"",
+            &self.target.clone().unwrap_or("".to_string()),
+        )];
+        ProbableEvent::certain(observations)
+    }
+
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        let root = match &self.target {
+            Some(target) => format!("trace {} {}", self.traced.name(), target),
+            None => format!("trace {}", self.traced.name()),
+        };
+        if self.aegis {
+            Ok(format!("{} onto aegis", root))
+        } else {
+            Ok(root)
+        }
+    }
+}
