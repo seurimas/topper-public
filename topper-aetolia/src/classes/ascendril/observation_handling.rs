@@ -333,14 +333,10 @@ pub fn handle_combat_action(
         "Direfrost" => {
             if combat_action.annotation.eq("direfrosted") {
                 for_agent(agent_states, &combat_action.caster, &|me| {
-                    me.set_flag(FType::Direfrost, true);
-                    me.set_flag(FType::Mindfog, true);
-                    me.damage_stat_percent(SType::Health, DIREFROST_PROC_DAMAGE_PERCENT);
-                });
-            } else if combat_action.annotation.eq("frostbranded") {
-                for_agent(agent_states, &combat_action.target, &|me| {
-                    me.set_flag(FType::Frostbrand, true);
                     me.set_flag(FType::Direfrost, false);
+                    me.set_flag(FType::Mindfog, true);
+                    me.set_flag(FType::Whiplash, true);
+                    me.damage_stat_percent(SType::Health, DIREFROST_PROC_DAMAGE_PERCENT);
                 });
             } else {
                 for_agent(agent_states, &combat_action.target, &|me| {

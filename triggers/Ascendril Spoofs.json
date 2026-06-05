@@ -567,7 +567,7 @@
         "observation_name": "Proc"
     },
     {
-        "regex": "^Glowing a brilliant white, the direfrost upon (\\w+)'s skin begins to quickly spread across their body with the sound of snapping ice.$",
+        "regex": "^The gleaming fractals of direfrost unite upon (\\w+)'s body, solidifying into a biting frost that aches.$",
         "args": [
             {
                 "GroupAsTarget": 1
@@ -580,27 +580,6 @@
             },
             {
                 "Literal": "direfrosted"
-            },
-            {
-                "Literal": ""
-            }
-        ],
-        "observation_name": "Proc"
-    },
-    {
-        "regex": "^The gleaming fractals of direfrost unite upon (\\w+)'s body, solidifying into the biting Brand of the Frost.$",
-        "args": [
-            {
-                "GroupAsTarget": 1
-            },
-            {
-                "Literal": "Elemancy"
-            },
-            {
-                "Literal": "Direfrost"
-            },
-            {
-                "Literal": "frostbranded"
             },
             {
                 "Literal": ""
