@@ -726,7 +726,7 @@ pub fn handle_performance_action(
             );
             for_agent(
                 agent_states,
-                &combat_action.target,
+                &combat_action.caster,
                 &move |me: &mut AgentState| {
                     apply_or_infer_balance(me, (BType::Balance, 2.8), &observations);
                 },

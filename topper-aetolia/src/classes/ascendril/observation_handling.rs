@@ -835,12 +835,6 @@ pub fn handle_combat_action(
                 });
             });
         }
-        "Flare" => {
-            let observations = after.clone();
-            for_agent(agent_states, &combat_action.caster, &move |me| {
-                apply_or_infer_balance(me, (BType::Secondary, 5.0), &observations);
-            });
-        }
         // Consumes brand on target; if target has Etherflux, enrich the caster.
         "Catalyst" => {
             let element = match combat_action.annotation.as_str() {

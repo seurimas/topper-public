@@ -77,7 +77,7 @@ pub enum AscendrilBehavior {
     Spiritrift,
     PhenomenonAt(PhenomenaKind, AetTarget),
     TraceGlyph(Glyph),
-    TraceGlyphAegis(Glyph),
+    TraceGlyphAegis(Glyph, String),
     TraceTargettedGlyph(Glyph, AetTarget),
 }
 
@@ -759,7 +759,7 @@ impl UnpoweredFunction for AscendrilBehavior {
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
-            AscendrilBehavior::TraceGlyphAegis(glyph) => {
+            AscendrilBehavior::TraceGlyphAegis(glyph, aegis_name) => {
                 let me = model.state.borrow_me();
                 // TODO Aegis handling
                 // if false {
