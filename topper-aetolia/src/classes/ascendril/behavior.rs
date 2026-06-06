@@ -817,13 +817,14 @@ pub fn resonating_or_enrich(
     target: Option<&AgentState>,
     target_name: String,
 ) -> bool {
+    let target_in_room = target.map_or(false, |t| t.room_id == me.room_id);
     if me
         .check_if_ascendril(&|me| me.resonance_active(&element))
         .unwrap_or(false)
     {
         return true;
-    } else if (allow_enrich == EnrichOption::Enrich
-        || allow_enrich == EnrichOption::EnrichOrCatalyze)
+    } else if target_in_room
+        && (allow_enrich == EnrichOption::Enrich || allow_enrich == EnrichOption::EnrichOrCatalyze)
         && me
             .check_if_ascendril(&|asc| asc.can_enrich(me.room_id, &element))
             .unwrap_or(false)
@@ -836,8 +837,9 @@ pub fn resonating_or_enrich(
         };
         controller.plan.add_to_qeb(action);
         return true;
-    } else if (allow_enrich == EnrichOption::Catalyze
-        || allow_enrich == EnrichOption::EnrichOrCatalyze)
+    } else if target_in_room
+        && (allow_enrich == EnrichOption::Catalyze
+            || allow_enrich == EnrichOption::EnrichOrCatalyze)
         && me
             .check_if_ascendril(&|asc| {
                 target.map_or(false, |t| asc.can_catalyze(me.room_id, t, &element))

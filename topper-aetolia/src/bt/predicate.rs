@@ -109,6 +109,15 @@ impl AetTarget {
             }
         }
     }
+
+    pub fn in_room(&self, model: &BehaviorModel, controller: &BehaviorController) -> bool {
+        let me = model.state.borrow_me();
+        if let Some(target) = self.get_target(model, controller) {
+            target.room_id == me.room_id
+        } else {
+            false
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
@@ -1096,15 +1105,8 @@ impl UnpoweredFunction for AetPredicate {
                 }
             }
             AetPredicate::InRoom(target) => {
-                if let (Some(room), Some(target)) = (
-                    model.state.get_my_room(),
-                    target.get_target(model, controller),
-                ) {
-                    if room.id == target.room_id {
-                        UnpoweredFunctionState::Complete
-                    } else {
-                        UnpoweredFunctionState::Failed
-                    }
+                if target.in_room(model, controller) {
+                    UnpoweredFunctionState::Complete
                 } else {
                     UnpoweredFunctionState::Failed
                 }
