@@ -159,3 +159,41 @@ impl ActiveTransition for GlyphTraceAction {
         }
     }
 }
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+pub struct TwinnedArcbolt {
+    pub caster: String,
+    pub targets: (String, String),
+}
+
+impl TwinnedArcbolt {
+    pub fn from_target_and_phenomenon(
+        target: &crate::classes::AetTarget,
+        model: &crate::classes::BehaviorModel,
+        controller: &crate::classes::BehaviorController,
+        id: i64,
+    ) -> Self {
+        let target_name = target.get_name(model, controller);
+        TwinnedArcbolt {
+            caster: model.who_am_i(),
+            targets: (target_name, id.to_string()),
+        }
+    }
+}
+
+impl ActiveTransition for TwinnedArcbolt {
+    fn simulate(&self, timeline: &AetTimeline) -> Vec<ProbableEvent> {
+        let mut observations = vec![
+            CombatAction::observation(&self.caster, &"Elemancy", &"Arcbolt", &"", &self.targets.0),
+            CombatAction::observation(&self.caster, &"Elemancy", &"Arcbolt", &"", &self.targets.1),
+        ];
+        ProbableEvent::certain(observations)
+    }
+
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!(
+            "cast arcbolt {} {}",
+            self.targets.0, self.targets.1
+        ))
+    }
+}

@@ -356,6 +356,15 @@ impl AetTimelineStateTrait for AetTimelineState {
                 }
                 if aff_flag == FType::Insomnia && val && me.is(FType::Hypersomnia) {
                 } else {
+                    if aff_flag == FType::Shock
+                        && me.get_health_percent() > me.get_burnout_percent()
+                    {
+                        me.set_stat_percent(SType::Health, me.get_burnout_percent() - 1);
+                    } else if aff_flag == FType::Burnout
+                        && me.get_mana_percent() > me.get_burnout_percent()
+                    {
+                        me.set_stat_percent(SType::Mana, me.get_burnout_percent() - 1);
+                    }
                     me.set_flag(aff_flag, val);
                 }
             } else {

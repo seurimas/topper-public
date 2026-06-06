@@ -46,6 +46,7 @@ pub enum AscendrilBehavior {
     Windlance(AetTarget),
     Pressurize(AetTarget),
     Arcbolt(AetTarget),
+    ArcboltForElectrosphere(AetTarget),
     Thunderclap(AetTarget),
     Feedback(AetTarget),
     AeroblastFast(AetTarget, EnrichOption),
@@ -296,6 +297,26 @@ impl UnpoweredFunction for AscendrilBehavior {
             }
             AscendrilBehavior::Arcbolt(target) => {
                 let action = Arcbolt::from_target(target, model, controller);
+                controller.plan.add_to_qeb(Box::new(action));
+                UnpoweredFunctionState::Complete
+            }
+            AscendrilBehavior::ArcboltForElectrosphere(target) => {
+                let me = model.state.borrow_me();
+                let room_id = me.room_id;
+                if me
+                    .check_if_ascendril(&|asc| {
+                        asc.phenomenon_active(Some(PhenomenaKind::Electrosphere))
+                            || !asc.phenomenon_in_room(room_id, None)
+                    })
+                    .unwrap_or(false)
+                {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let Some(id) = me.check_if_ascendril(&|asc| asc.phenomenon_id()).flatten() else {
+                    return UnpoweredFunctionState::Failed;
+                };
+                let action =
+                    TwinnedArcbolt::from_target_and_phenomenon(target, model, controller, id);
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }

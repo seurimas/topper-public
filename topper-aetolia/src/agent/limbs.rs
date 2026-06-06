@@ -164,6 +164,7 @@ pub struct LimbState {
     pub amputated: bool,
     pub is_restoring: bool,
     pub is_parried: bool,
+    pub is_unparried: bool,
     pub is_dislocated: bool,
     pub welt: bool,
     pub bruise_level: usize,

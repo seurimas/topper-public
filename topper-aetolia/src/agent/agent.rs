@@ -645,6 +645,13 @@ impl AgentState {
         self.vitals.get_percent(SType::Mana)
     }
 
+    pub fn get_burnout_percent(&self) -> CType {
+        if self.is(FType::Deadening) {
+            return 40;
+        }
+        25
+    }
+
     pub fn get_stat_percent(&self, stat: SType) -> CType {
         self.vitals.get_percent(stat)
     }
@@ -679,6 +686,7 @@ impl AgentState {
         let is_restoring = self.limb_damage.restoring == Some(what);
         let fleshbaned_count = self.limb_damage.fleshbaned_count;
         let is_parried = self.can_parry() && self.get_parrying() == Some(what);
+        let is_unparried = self.can_parry() && self.is_recently_unparried(what);
         let is_dislocated = match what {
             LType::LeftArmDamage => self.is(FType::LeftArmDislocated),
             LType::RightArmDamage => self.is(FType::RightArmDislocated),
@@ -727,6 +735,7 @@ impl AgentState {
             amputated,
             is_restoring,
             is_parried,
+            is_unparried,
             is_dislocated,
             welt,
             bruise_level,

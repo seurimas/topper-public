@@ -720,6 +720,14 @@ impl AscendrilClassState {
         false
     }
 
+    pub fn phenomenon_id(&self) -> Option<i64> {
+        if let PhenomenaState::Claimed { id, .. } = &self.my_phenomenon {
+            Some(*id)
+        } else {
+            None
+        }
+    }
+
     pub fn enrapture_accelerated(&self, target: &AgentState) -> bool {
         self.resonance_active(&Element::Fire) && target.is(FType::Emberbrand)
             || self.resonance_active(&Element::Water) && target.is(FType::Frostbrand)
