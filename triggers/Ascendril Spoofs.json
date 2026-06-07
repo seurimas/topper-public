@@ -588,6 +588,27 @@
         "observation_name": "Proc"
     },
     {
+        "regex": "^There is already a glyph of (\\w+) in this location.$",
+        "args": [
+            {
+                "Group": 1
+            },
+            {
+                "Literal": "Arcanism"
+            },
+            {
+                "Literal": "Glyph"
+            },
+            {
+                "Literal": "failed_present"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
         "regex": "^The Brand of the Frost pulses with blue-black light, (\\w+)'s face contorting against the excruciating, bone-deep ache of cold.$",
         "args": [
             {

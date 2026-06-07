@@ -105,6 +105,22 @@ impl Glyph {
         }
         .to_string()
     }
+
+    pub fn from_name(name: impl ToString) -> Self {
+        match name.to_string().to_uppercase().as_str() {
+            "PORTAL" => Glyph::Portal,
+            "DESTRUCTION" => Glyph::Destruction,
+            "VAINGLORY" => Glyph::Vainglory,
+            "ADDLING" => Glyph::Addling,
+            "ENTRAPMENT" => Glyph::Entrapment,
+            "SLUMBER" => Glyph::Slumber,
+            "ARROGANCE" => Glyph::Arrogance,
+            "LEACHING" => Glyph::Leaching,
+            "GRAVITY" => Glyph::Gravity,
+            "CLARITY" => Glyph::Clarity,
+            _ => Glyph::Portal, // Default to Portal if unknown, though ideally this should be handled more robustly
+        }
+    }
 }
 
 pub struct GlyphTraceAction {

@@ -1,4 +1,5 @@
 use crate::classes::Class;
+use crate::classes::ascendril::Glyph;
 use crate::curatives::MENTAL_AFFLICTIONS;
 use crate::curatives::RANDOM_CURES;
 use crate::non_agent::AetTimelineDenizenExt;
@@ -341,6 +342,7 @@ pub fn handle_combat_action(
             } else {
                 for_agent(agent_states, &combat_action.target, &|me| {
                     me.damage_stat_percent(SType::Health, DIREFROST_DAMAGE_PERCENT);
+                    me.set_flag(FType::Direfrost, true);
                 });
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.assume_ascendril(&|ascendril| {
@@ -941,6 +943,188 @@ pub fn handle_combat_action(
                     }
                 });
             });
+        }
+        "Glyph" => {
+            if combat_action.annotation.eq("failed_present") {
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.add_glyph("".to_string(), Glyph::from_name(&combat_action.caster));
+            } else if combat_action.annotation.eq("end") {
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.no_glyph(Glyph::from_name(&combat_action.caster));
+            }
+        }
+        "Entrapment Glyph" => {
+            if combat_action.annotation.eq("hit") {
+                // Target is WritheRopes
+                attack_afflictions(
+                    agent_states,
+                    &combat_action.caster,
+                    vec![FType::WritheRopes],
+                    after,
+                );
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.no_glyph(Glyph::Entrapment);
+            } else {
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.add_glyph(combat_action.caster.clone(), Glyph::Entrapment);
+            }
+        }
+        // Deals health damage to the target.
+        "Destruction Glyph" => {
+            if combat_action.annotation.eq("hit") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.damage_stat_percent(SType::Health, 10);
+                });
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.no_glyph(Glyph::Destruction);
+            } else {
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.add_glyph(combat_action.caster.clone(), Glyph::Destruction);
+            }
+        }
+        // Afflicts the target with hubris.
+        "Vainglory Glyph" => {
+            if combat_action.annotation.eq("hit") {
+                attack_afflictions(
+                    agent_states,
+                    &combat_action.caster,
+                    vec![FType::Hubris],
+                    after,
+                );
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.no_glyph(Glyph::Vainglory);
+            } else {
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.add_glyph(combat_action.caster.clone(), Glyph::Vainglory);
+            }
+        }
+        // Strips clarity and afflicts the target with dementia.
+        "Addling Glyph" => {
+            if combat_action.annotation.eq("hit") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.set_flag(FType::Clarity, false);
+                });
+                attack_afflictions(
+                    agent_states,
+                    &combat_action.caster,
+                    vec![FType::Dementia],
+                    after,
+                );
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.no_glyph(Glyph::Addling);
+            } else {
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.add_glyph(combat_action.caster.clone(), Glyph::Addling);
+            }
+        }
+        // Puts the target to sleep.
+        "Slumber Glyph" => {
+            if combat_action.annotation.eq("hit") {
+                attack_afflictions(
+                    agent_states,
+                    &combat_action.caster,
+                    vec![FType::Asleep],
+                    after,
+                );
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.no_glyph(Glyph::Slumber);
+            } else {
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.add_glyph(combat_action.caster.clone(), Glyph::Slumber);
+            }
+        }
+        // Afflicts the caster with egocentrism.
+        "Arrogance Glyph" => {
+            if combat_action.annotation.eq("hit") {
+                attack_afflictions(
+                    agent_states,
+                    &combat_action.caster,
+                    vec![FType::Egocentrism],
+                    after,
+                );
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.no_glyph(Glyph::Arrogance);
+            } else {
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.add_glyph(combat_action.caster.clone(), Glyph::Arrogance);
+            }
+        }
+        // Drains mana from the target.
+        "Leaching Glyph" => {
+            if combat_action.annotation.eq("hit") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.damage_stat_percent(SType::Mana, 10);
+                });
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.no_glyph(Glyph::Leaching);
+            } else {
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.add_glyph(combat_action.caster.clone(), Glyph::Leaching);
+            }
+        }
+        // Pulls levitating targets to the ground.
+        "Gravity Glyph" => {
+            if combat_action.annotation.eq("hit") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.set_flag(FType::Levitation, false);
+                    me.set_flag(FType::Fallen, true);
+                });
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.no_glyph(Glyph::Gravity);
+            } else {
+                let Some(room) = agent_states.get_my_room_mut() else {
+                    return Ok(());
+                };
+                room.add_glyph(combat_action.caster.clone(), Glyph::Gravity);
+            }
+        }
+        // Persistent glyph; add to room on trace.
+        "Clarity Glyph" => {
+            let Some(room) = agent_states.get_my_room_mut() else {
+                return Ok(());
+            };
+            room.add_glyph(combat_action.caster.clone(), Glyph::Clarity);
+        }
+        // Persistent glyph; add to room on trace.
+        "Portal Glyph" => {
+            let Some(room) = agent_states.get_my_room_mut() else {
+                return Ok(());
+            };
+            room.add_glyph(combat_action.caster.clone(), Glyph::Portal);
         }
         _ => {}
     }

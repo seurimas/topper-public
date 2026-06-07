@@ -159,6 +159,10 @@ impl Room {
             self.glyphs.remove(0);
         }
     }
+
+    pub fn no_glyph(&mut self, glyph: Glyph) {
+        self.glyphs.retain(|g| g.glyph != glyph);
+    }
 }
 
 pub fn format_room_id(room_id: i64) -> String {

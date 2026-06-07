@@ -340,6 +340,7 @@ pub enum FType {
     Cloak,
     // General
     Reflection,
+    Clarity,
 
     // Ascendril defences
     FulcrumShift,
