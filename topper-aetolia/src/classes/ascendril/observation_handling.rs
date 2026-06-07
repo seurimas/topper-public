@@ -908,6 +908,7 @@ pub fn handle_combat_action(
                     me.assume_ascendril(&|ascendril| {
                         ascendril.use_up_resonance();
                     });
+                    me.channel_state.reset();
                 });
             } else {
                 for_agent(agent_states, &combat_action.caster, &|me| {

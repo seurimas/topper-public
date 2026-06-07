@@ -609,6 +609,48 @@
         "observation_name": "Proc"
     },
     {
+        "regex": "^The last wisps of magic fade from the (\\w+) glyph as it expires.$",
+        "args": [
+            {
+                "Group": 1
+            },
+            {
+                "Literal": "Arcanism"
+            },
+            {
+                "Literal": "Glyph"
+            },
+            {
+                "Literal": "end"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
+        "regex": "^(You)r woven matrix of elements shatters along with your concentration.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Enrapture"
+            },
+            {
+                "Literal": "failure"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
         "regex": "^The Brand of the Frost pulses with blue-black light, (\\w+)'s face contorting against the excruciating, bone-deep ache of cold.$",
         "args": [
             {

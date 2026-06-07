@@ -1606,6 +1606,10 @@ impl ChannelState {
         }
     }
 
+    pub fn reset(&mut self) {
+        *self = ChannelState::Inactive;
+    }
+
     pub fn channel_with_limb(&mut self, channel_type: ChannelType, limb: LType, duration: CType) {
         *self = ChannelState::ChannelWithLimb {
             channel_type,
