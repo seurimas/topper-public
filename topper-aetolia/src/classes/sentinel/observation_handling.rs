@@ -686,7 +686,7 @@ pub fn handle_combat_action(
             attack_strip_or_afflict(
                 agent_states,
                 &combat_action.target,
-                vec![FType::Insulation, FType::Shivering, FType::Frozen],
+                vec![FType::Shivering, FType::Frigid, FType::Frozen],
                 after,
             );
         }
@@ -694,7 +694,7 @@ pub fn handle_combat_action(
             attack_strip_or_afflict(
                 agent_states,
                 &combat_action.caster,
-                vec![FType::Insulation, FType::Shivering, FType::Frozen],
+                vec![FType::Shivering, FType::Frigid, FType::Frozen],
                 after,
             );
         }

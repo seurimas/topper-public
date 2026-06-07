@@ -29,7 +29,10 @@ pub enum AscendrilPredicate {
     Afterburned,
     SchismOnHere,
     ImbalanceOnHere,
+    CanEnrich(Element),
     IsResonantOrCanEnrich(Element),
+    CanCatalyze(AetTarget, Element),
+    CanEnrichOrCatalyze(AetTarget, Element),
     CapacitanceRaising,
     CapacitanceUp,
     CapacitanceWillDisrupt,
@@ -126,11 +129,39 @@ impl TargetPredicate for AscendrilPredicate {
                 AscendrilPredicate::Afterburned => target
                     .check_if_ascendril(&|me| me.afterburn_active())
                     .unwrap_or(false),
+                AscendrilPredicate::CanEnrich(element) => target
+                    .check_if_ascendril(&|asc| asc.can_enrich(me.room_id, element))
+                    .unwrap_or(false),
                 AscendrilPredicate::IsResonantOrCanEnrich(element) => target
                     .check_if_ascendril(&|asc| {
                         asc.resonance_active(element) || asc.can_enrich(me.room_id, element)
                     })
                     .unwrap_or(false),
+                AscendrilPredicate::CanCatalyze(other_target, element) => {
+                    let other_target = other_target.get_target(model, controller);
+                    if let Some(other_target) = other_target {
+                        target
+                            .check_if_ascendril(&|asc| {
+                                asc.can_catalyze(me.room_id, &other_target, element)
+                            })
+                            .unwrap_or(false)
+                    } else {
+                        false
+                    }
+                }
+                AscendrilPredicate::CanEnrichOrCatalyze(other_target, element) => {
+                    let other_target = other_target.get_target(model, controller);
+                    if let Some(other_target) = other_target {
+                        target
+                            .check_if_ascendril(&|asc| {
+                                asc.can_enrich(me.room_id, element)
+                                    || asc.can_catalyze(me.room_id, &other_target, element)
+                            })
+                            .unwrap_or(false)
+                    } else {
+                        false
+                    }
+                }
                 AscendrilPredicate::CapacitanceRaising => me
                     .check_if_ascendril(&|me| me.capacitance_coming_up())
                     .unwrap_or(false),

@@ -267,7 +267,6 @@ pub fn handle_combat_action(
         "Frostbrand" => {
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.observe_flag(FType::Frostbrand, true);
-                me.observe_flag(FType::Direfrost, false);
             });
             if combat_action.annotation.eq("hypothermia") {
                 for_agent(agent_states, &combat_action.caster, &|me| {
@@ -1041,10 +1040,10 @@ pub fn handle_combat_action(
         // Puts the target to sleep.
         "Slumber Glyph" => {
             if combat_action.annotation.eq("hit") {
-                attack_afflictions(
+                attack_strip_or_afflict(
                     agent_states,
                     &combat_action.caster,
-                    vec![FType::Asleep],
+                    vec![FType::Insomnia, FType::Asleep, FType::Instawake],
                     after,
                 );
                 let Some(room) = agent_states.get_my_room_mut() else {
