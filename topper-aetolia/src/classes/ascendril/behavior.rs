@@ -206,8 +206,14 @@ impl UnpoweredFunction for AscendrilBehavior {
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
-            AscendrilBehavior::Direfrost(target) => {
-                let action = Direfrost::from_target(target, model, controller);
+            AscendrilBehavior::Direfrost(aet_target) => {
+                let Some(target) = aet_target.get_target(model, controller) else {
+                    return UnpoweredFunctionState::Failed;
+                };
+                if target.is(FType::Direfrost) {
+                    return UnpoweredFunctionState::Failed;
+                }
+                let action = Direfrost::from_target(aet_target, model, controller);
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
