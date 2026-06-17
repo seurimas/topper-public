@@ -367,8 +367,7 @@ pub fn handle_combat_action(
                     });
                 }
             } else if combat_action.annotation.eq("already_icicles") {
-                let target = agent_states
-                    .get_player_hint(&combat_action.caster, &"ICICLE_TARGET".to_string());
+                let target = agent_states.get_my_hint(&"ICICLE_TARGET".to_string());
                 if let Some(target) = target {
                     for_agent(agent_states, &target, &|me| {
                         me.ascendril_board.an_icicle();
