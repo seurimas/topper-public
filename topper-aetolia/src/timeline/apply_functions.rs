@@ -326,6 +326,7 @@ pub fn apply_observation(
                         allies.push(strip_ansi(line));
                     }
                 }
+                timeline.clear_players(&timeline.me.clone(), "allies");
                 for name in allies {
                     timeline.add_player(&timeline.me.clone(), "allies", &name);
                 }
@@ -345,6 +346,7 @@ pub fn apply_observation(
                         enemies.push(strip_ansi(line));
                     }
                 }
+                timeline.clear_players(&timeline.me.clone(), "enemies");
                 for name in enemies {
                     timeline.add_player(&timeline.me.clone(), "enemies", &name);
                 }
@@ -741,6 +743,33 @@ pub fn apply_observation(
                 println!("No target found for scrutinise!");
             }
         }
+        AetObservation::FeelingsToward(who, how) => match how.as_str() {
+            "enemy" => {
+                if who.eq_ignore_ascii_case("all") {
+                    timeline.for_players(&timeline.me.clone(), "enemies", &|players| {
+                        players.players.clear();
+                    });
+                } else {
+                    timeline.add_player(&timeline.me.clone(), "enemies", who);
+                }
+            }
+            "ally" => {
+                if who.eq_ignore_ascii_case("all") {
+                    timeline.for_players(&timeline.me.clone(), "allies", &|players| {
+                        players.players.clear();
+                    });
+                } else {
+                    timeline.add_player(&timeline.me.clone(), "allies", who);
+                }
+            }
+            "neutral" => {
+                timeline.remove_player(&timeline.me.clone(), "enemies", who);
+                timeline.remove_player(&timeline.me.clone(), "allies", who);
+            }
+            _ => {
+                println!("Unknown feelings toward: {}", how);
+            }
+        },
         _ => {}
     }
     Ok(())

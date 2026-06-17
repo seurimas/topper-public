@@ -37,6 +37,7 @@ pub enum AetTarget {
     Target,
     MostAggroedFriend,
     PriorityTarget,
+    NthOtherTarget(usize),
     LastTarget,
 }
 
@@ -57,7 +58,10 @@ impl AetTarget {
                 .and_then(|target| model.state.get_agent(&target))
                 .and_then(|branches| branches.get(0))
                 .or(Some(&model.default_agent)),
-            AetTarget::MostAggroedFriend | AetTarget::PriorityTarget | AetTarget::LastTarget => {
+            AetTarget::MostAggroedFriend
+            | AetTarget::PriorityTarget
+            | AetTarget::LastTarget
+            | AetTarget::NthOtherTarget(_) => {
                 let name = self.get_name(model, controller);
                 if name.is_empty() {
                     None
@@ -93,6 +97,21 @@ impl AetTarget {
                 .players
                 .iter()
                 .max_by_key(|(_, info)| info.priority)
+                .map(|(name, _)| name.clone())
+                .unwrap_or_default(),
+            AetTarget::NthOtherTarget(offset) => controller
+                .players
+                .targets
+                .players
+                .iter()
+                .filter(|(name, _)| {
+                    if let Some(current_target) = controller.target.as_ref() {
+                        name.as_str() != current_target
+                    } else {
+                        true
+                    }
+                })
+                .nth(*offset)
                 .map(|(name, _)| name.clone())
                 .unwrap_or_default(),
             AetTarget::LastTarget => {

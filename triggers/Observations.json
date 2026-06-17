@@ -973,6 +973,90 @@
     "observation_name": "AcumenLost"
   },
   {
+    "regex": "^(\\w+) is (already|currently) an enemy",
+    "args": [
+      {
+        "Group": 1
+      },
+      {
+        "Literal": "enemy"
+      }
+    ],
+    "observation_name": "FeelingsToward"
+  },
+  {
+    "regex": "^(\\w+) is (already|currently) an ally$",
+    "args": [
+      {
+        "Group": 1
+      },
+      {
+        "Literal": "ally"
+      }
+    ],
+    "observation_name": "FeelingsToward"
+  },
+  {
+    "regex": "^(\\w+) is now one of your enemies.$",
+    "args": [
+      {
+        "Group": 1
+      },
+      {
+        "Literal": "enemy"
+      }
+    ],
+    "observation_name": "FeelingsToward"
+  },
+  {
+    "regex": "^(\\w+) is now one of your allies.$",
+    "args": [
+      {
+        "Group": 1
+      },
+      {
+        "Literal": "ally"
+      }
+    ],
+    "observation_name": "FeelingsToward"
+  },
+  {
+    "regex": "^In a moment of forgiveness, you declare that you have no enemies.$",
+    "args": [
+      {
+        "Literal": "all"
+      },
+      {
+        "Literal": "enemy"
+      }
+    ],
+    "observation_name": "FeelingsToward"
+  },
+  {
+    "regex": "^With an indignant grunt, you declare that you have no allies.$",
+    "args": [
+      {
+        "Literal": "all"
+      },
+      {
+        "Literal": "ally"
+      }
+    ],
+    "observation_name": "FeelingsToward"
+  },
+  {
+    "regex": "^You declare that (\\w+) will no longer be one of your (enemies|allies).$",
+    "args": [
+      {
+        "Group": 1
+      },
+      {
+        "Literal": "neutral"
+      }
+    ],
+    "observation_name": "FeelingsToward"
+  },
+  {
     "regex": "^You bleed (\\d+) health.$",
     "args": [
       {

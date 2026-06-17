@@ -39,6 +39,7 @@ pub struct AgentState {
     pub persuasion_state: PersuasionState,
     pub observation: ObservationState,
     pub fleeing: Timer,
+    pub bleeding: Option<CType>,
 }
 
 // True = Aeon = Pause cooldowns.
@@ -1365,6 +1366,14 @@ impl AgentState {
 
     pub fn get_normalized_class(&self) -> Option<Class> {
         self.class_state.get_normalized_class()
+    }
+
+    pub fn get_bleeding(&self) -> Option<CType> {
+        self.bleeding
+    }
+
+    pub fn set_bleeding(&mut self, bleeding: CType) {
+        self.bleeding = Some(bleeding);
     }
 }
 

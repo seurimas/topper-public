@@ -89,6 +89,9 @@ pub fn get_preferred_parry<DB: AetDatabaseModule + ?Sized>(
             Class::Shapeshifter => {
                 let myself = timeline.state.borrow_agent(me);
                 let limbs_state = myself.get_limbs_state();
+                let Some(bleeding) = myself.get_bleeding() else {
+                    return Ok(get_worst_damage(timeline, me).unwrap_or(LType::HeadDamage));
+                };
                 if limbs_state.left_leg.crippled && !limbs_state.left_leg.broken {
                     Ok(LType::LeftLegDamage)
                 } else if limbs_state.right_leg.crippled && !limbs_state.right_leg.broken {
@@ -97,6 +100,15 @@ pub fn get_preferred_parry<DB: AetDatabaseModule + ?Sized>(
                     Ok(LType::LeftArmDamage)
                 } else if limbs_state.right_arm.crippled && !limbs_state.right_arm.broken {
                     Ok(LType::RightArmDamage)
+                } else if bleeding > 300 {
+                    if limbs_state.head.damage > limbs_state.torso.damage {
+                        Ok(LType::HeadDamage)
+                    } else {
+                        Ok(LType::TorsoDamage)
+                    }
+                } else if get_worst_damage(timeline, me) == Some(LType::HeadDamage) {
+                    // Probably getting bodypunched.
+                    Ok(LType::TorsoDamage)
                 } else if let Some(parry) = get_restore_parry(timeline, me) {
                     Ok(parry)
                 } else {
@@ -171,6 +183,17 @@ pub fn get_preferred_parry<DB: AetDatabaseModule + ?Sized>(
                     } else {
                         Ok(get_worst_damage(timeline, me).unwrap_or(LType::HeadDamage))
                     }
+                } else if let Some(parry) = get_restore_parry(timeline, me) {
+                    Ok(parry)
+                } else {
+                    Ok(get_worst_damage(timeline, me).unwrap_or(LType::HeadDamage))
+                }
+            }
+            Class::Predator => {
+                let myself = timeline.state.borrow_agent(me);
+                let limbs_state = myself.get_limbs_state();
+                if limbs_state.torso.broken {
+                    Ok(LType::TorsoDamage)
                 } else if let Some(parry) = get_restore_parry(timeline, me) {
                     Ok(parry)
                 } else {

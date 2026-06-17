@@ -18,6 +18,7 @@ use crate::classes::siderealist::SiderealistBehavior;
 use crate::classes::zealot::ZealotBehavior;
 use crate::curatives::FirstAidSetting;
 use crate::defense::DefenseBehavior;
+use crate::non_agent::AetTimelinePlayersExt;
 use crate::observables::PlainAction;
 use crate::timeline::*;
 use crate::types::*;
@@ -44,6 +45,7 @@ pub enum AetBehavior {
     TouchHammer(AetTarget),
     Contemplate(AetTarget),
     PlainQebBehavior(String),
+    ManageEnemy(AetTarget),
     #[serde(untagged)]
     EnchantmentBehavior(EnchantmentBehavior),
     #[serde(untagged)]
@@ -178,6 +180,28 @@ impl UnpoweredFunction for AetBehavior {
                     .plan
                     .add_to_qeb(Box::new(PlainAction::new(action.clone())));
                 UnpoweredFunctionState::Complete
+            }
+            AetBehavior::ManageEnemy(target) => {
+                let name = target.get_name(model, controller);
+                if model
+                    .state
+                    .is_player_list_missing(&model.who_am_i(), "enemies")
+                {
+                    controller
+                        .plan
+                        .add_to_plain(Box::new(PlainAction::new("enemies".to_string())));
+                    UnpoweredFunctionState::Failed
+                } else if !model
+                    .state
+                    .is_player_in_list(&model.who_am_i(), "enemies", &name)
+                {
+                    controller
+                        .plan
+                        .add_to_plain(Box::new(PlainAction::new(format!("enemy {}", name))));
+                    UnpoweredFunctionState::Complete
+                } else {
+                    UnpoweredFunctionState::Failed
+                }
             }
             AetBehavior::EnchantmentBehavior(enchantment_behavior) => {
                 enchantment_behavior.resume_with(model, controller)

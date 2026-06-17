@@ -238,6 +238,12 @@ impl TopperHandler<BattleStats> for AetTopper {
                         println!("Debug mode on!");
                         println!("{:?}", self.timeline_module.timeline.state.borrow_me());
                         println!("{:?}", self.timeline_module.timeline.state.get_my_room());
+                        if let Some(target) = &self.core_module.target {
+                            let target = self.timeline_module.timeline.state.borrow_agent(target);
+                            println!("{:?}", target);
+                        } else {
+                            println!("No target.");
+                        }
                     } else {
                         println!("Debug mode off!");
                     }

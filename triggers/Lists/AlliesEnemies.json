@@ -6,7 +6,7 @@
                 "Literal": "Allies"
             },
             {
-                "GroupAsTarget": 1
+                "Literal": ""
             },
             {
                 "Literal": ""
@@ -24,7 +24,7 @@
                 "Literal": "Enemies"
             },
             {
-                "GroupAsTarget": 1
+                "Literal": ""
             },
             {
                 "Literal": ""

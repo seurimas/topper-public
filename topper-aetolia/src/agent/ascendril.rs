@@ -67,7 +67,7 @@ impl AscendrilBoard {
 
     pub fn icicles_spawn(&mut self) {
         self.icicles = 3;
-        self.icicle_timer = Timer::count_up_observe_seconds(3.5, 5.5);
+        self.icicle_timer = Timer::count_up_observe_seconds(3.5, 7.);
     }
 
     pub fn icicles_hit(&mut self) {

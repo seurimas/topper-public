@@ -15,7 +15,7 @@ use crate::{
 #[macro_use]
 use crate::with_defense_db;
 use super::{
-    get_needed_parry, get_needed_refills, get_wanted_dodge, DodgeAction, DEFENSE_DATABASE,
+    DEFENSE_DATABASE, DodgeAction, get_needed_parry, get_needed_refills, get_wanted_dodge,
 };
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
@@ -24,6 +24,7 @@ pub enum DefenseBehavior {
     Repipe,
     Fitness,
     Dodge,
+    Regenerate,
 }
 
 impl UnpoweredFunction for DefenseBehavior {
@@ -133,6 +134,17 @@ impl UnpoweredFunction for DefenseBehavior {
                             )));
                     }
                 })
+            }
+            DefenseBehavior::Regenerate => {
+                let me = model.state.borrow_me();
+                if let Some((limb, damage, already_regenerating)) = me.get_restoring() {
+                    if damage > 40 && !already_regenerating && me.get_limb_state(limb).broken {
+                        controller.plan.add_to_qeb(Box::new(Action::new(format!(
+                            "regenerate {}",
+                            limb.to_string()
+                        ))));
+                    }
+                }
             }
         }
         UnpoweredFunctionState::Complete

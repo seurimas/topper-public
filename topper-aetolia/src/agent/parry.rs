@@ -36,7 +36,7 @@ impl ParryState {
     }
 
     pub fn is_known(&self) -> bool {
-        self.parry_known
+        self.parry_known || self.last_parry_timer.is_active()
     }
 
     pub fn clear_known(&mut self) {
@@ -61,8 +61,7 @@ impl ParryState {
     pub fn is_recently_unparried(&self, limb: LType) -> bool {
         ((self.last_hit.is_none() || self.last_hit == Some(limb))
             && self.last_hit_timer.is_active())
-            || (self.parrying != Some(limb)
-                && (self.last_parry_timer.is_active() || self.parry_known))
+            || (self.parrying != Some(limb) && self.is_known())
     }
 }
 

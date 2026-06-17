@@ -252,6 +252,7 @@ pub enum AetObservation {
     ResolveAffect(String, String),
     AcumenLost(String),
     Bleed(String),
+    FeelingsToward(String, String),
     #[skip_args]
     StatChange {
         stat: SType,

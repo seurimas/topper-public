@@ -133,7 +133,10 @@ impl UnpoweredFunction for AscendrilBehavior {
                     return UnpoweredFunctionState::Failed;
                 }
                 let action = Fireburst::from_target(target, model, controller);
-                if *plain {
+                if *plain
+                    && (!me.balanced(BType::LeftHandBalance)
+                        || !me.balanced(BType::RightHandBalance))
+                {
                     controller.plan.add_to_plain(Box::new(action));
                     return UnpoweredFunctionState::Complete;
                 }
@@ -229,12 +232,14 @@ impl UnpoweredFunction for AscendrilBehavior {
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }
-            AscendrilBehavior::Icicle(target) => {
-                let me = model.state.borrow_me();
-                if me.ascendril_board.icicles_active() {
+            AscendrilBehavior::Icicle(aet_target) => {
+                let Some(target) = aet_target.get_target(model, controller) else {
+                    return UnpoweredFunctionState::Failed;
+                };
+                if target.ascendril_board.icicles_active() {
                     return UnpoweredFunctionState::Failed;
                 }
-                let action = Icicle::from_target(target, model, controller);
+                let action = Icicle::from_target(aet_target, model, controller);
                 controller.plan.add_to_qeb(Box::new(action));
                 UnpoweredFunctionState::Complete
             }

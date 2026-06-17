@@ -57,6 +57,21 @@
     "observation_name": "SimpleCure"
   },
   {
+    "regex": "^(\\w+) empties out an elixir of (the |)(\\w+) into",
+    "args": [
+      {
+        "GroupAsTarget": 1
+      },
+      {
+        "Literal": "Elixir"
+      },
+      {
+        "GroupAsTarget": 3
+      }
+    ],
+    "observation_name": "SimpleCure"
+  },
+  {
     "regex": "^(\\w+) takes? a long drag off (\\w+) pipe filled with (\\w+).$",
     "args": [
       {

@@ -130,6 +130,16 @@ fn handle_char_vitals(
             },
         );
     }
+
+    if let Some(bleeding) = get_stat(gmcp, "bleeding") {
+        for_agent(
+            timeline,
+            &timeline.me.clone(),
+            &move |me: &mut AgentState| {
+                me.set_bleeding(bleeding);
+            },
+        );
+    }
 }
 
 fn handle_char_status(

@@ -295,7 +295,9 @@ impl VitalsState {
     pub fn set_seen(&mut self, stat: SType, current: CType, last_check: CType) {
         if let VitalState::Estimated { max, .. } = self.vitals[stat as usize] {
             self.vitals[stat as usize] = VitalState::Estimated {
-                current_percent: if max > 0 {
+                current_percent: if current > max {
+                    100
+                } else if max > 0 {
                     (current * 100 / max) as CType
                 } else {
                     0

@@ -546,7 +546,7 @@
         "observation_name": "Proc"
     },
     {
-        "regex": "^The Brand of Ember seared upon (\\w+) glows, rippling outward as swelting heat eminates from it.$",
+        "regex": "^The Brand of Ember seared upon (\\w+) glows, rippling outward as sweltering heat emanates from it.$",
         "args": [
             {
                 "GroupAsTarget": 1
