@@ -14,6 +14,7 @@ use crate::classes::is_affected_by;
 use crate::classes::predator::PredatorPredicate;
 use crate::classes::sentinel::SentinelPredicate;
 use crate::classes::siderealist::SiderealistPredicate;
+use crate::classes::threat::ClassThreat;
 use crate::classes::zealot::ZealotPredicate;
 use crate::curatives::MENTAL_AFFLICTIONS;
 use crate::curatives::RANDOM_CURES;
@@ -157,6 +158,7 @@ pub enum AetPredicate {
     MentalAffsOver(AetTarget, usize),
     AffStacksOver(AetTarget, usize, FType),
     IsProne(AetTarget),
+    HiddenAffsOver(AetTarget, usize),
     // Limbs
     LimbsEqual(AetTarget, LimbDescriptor, LimbDescriptor),
     IsRestoringAny(AetTarget),
@@ -240,6 +242,7 @@ pub enum AetPredicate {
     // Class-specific
     IsAffectedBy(AetTarget, FType),
     ClassIn(AetTarget, Vec<Class>),
+    ClassThreatens(AetTarget, ClassThreat),
     // Class predicates
     BardPredicate(AetTarget, BardPredicate),
     PredatorPredicate(AetTarget, PredatorPredicate),
@@ -449,6 +452,16 @@ impl UnpoweredFunction for AetPredicate {
             AetPredicate::IsProne(target) => {
                 if let Some(target) = target.get_target(model, controller) {
                     if target.is_prone() {
+                        return UnpoweredFunctionState::Complete;
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::HiddenAffsOver(target, min_count) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    let hidden_count =
+                        target.hidden_state.unknown() + target.hidden_state.guesses() as isize;
+                    if hidden_count >= (*min_count as isize) {
                         return UnpoweredFunctionState::Complete;
                     }
                 }
@@ -1199,6 +1212,16 @@ impl UnpoweredFunction for AetPredicate {
                 if let Some(target) = target.get_target(model, controller) {
                     if let Some(class) = target.class_state.get_normalized_class() {
                         if classes.contains(&class) {
+                            return UnpoweredFunctionState::Complete;
+                        }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::ClassThreatens(target, threat) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    if let Some(class) = target.class_state.get_normalized_class() {
+                        if class.threatens(*threat) {
                             return UnpoweredFunctionState::Complete;
                         }
                     }

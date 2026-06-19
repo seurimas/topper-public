@@ -25,6 +25,7 @@ pub enum DefenseBehavior {
     Fitness,
     Dodge,
     Regenerate,
+    Diagnose,
 }
 
 impl UnpoweredFunction for DefenseBehavior {
@@ -144,6 +145,14 @@ impl UnpoweredFunction for DefenseBehavior {
                             limb.to_string()
                         ))));
                     }
+                }
+            }
+            DefenseBehavior::Diagnose => {
+                let me = model.state.borrow_me();
+                if !me.is(FType::Hypochondria) {
+                    controller
+                        .plan
+                        .add_to_qeb(Box::new(Action::new("diagnose".to_string())));
                 }
             }
         }

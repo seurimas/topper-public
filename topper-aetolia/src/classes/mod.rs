@@ -33,6 +33,7 @@ pub mod shapeshifter;
 pub mod siderealist;
 pub mod templar;
 pub mod teradrim;
+pub mod threat;
 pub mod wayfarer;
 pub mod zealot;
 use serde::{Deserialize, Serialize};
