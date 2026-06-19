@@ -641,6 +641,11 @@ pub fn handle_combat_action(
         }
         // Expands a fulcrum.
         "Expand" => {
+            if combat_action.annotation.eq("etherfluxed") {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    me.set_flag(FType::Etherflux, true);
+                });
+            }
             for_agent(agent_states, &combat_action.caster, &|me| {
                 let room = me.room_id;
                 me.assume_ascendril(&|ascendril| {
@@ -734,7 +739,7 @@ pub fn handle_combat_action(
                 });
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.assume_ascendril(&|ascendril| {
-                        ascendril.imbalance_on();
+                        ascendril.imbalance_hit();
                     });
                 });
             } else if combat_action.annotation.eq("on") {

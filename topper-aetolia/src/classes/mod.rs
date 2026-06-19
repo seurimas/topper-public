@@ -320,6 +320,9 @@ pub fn is_affected_by(class: Class, affliction: FType) -> bool {
         (FType::Lethargy, Class::Sentinel) => true,
         (FType::Lethargy, Class::Carnifex) => true,
         (FType::Lethargy, Class::Templar) => true,
+        // They have cures that make this proc
+        (FType::AshenFeet, Class::Praenomen) => true,
+        (FType::AshenFeet, Class::Sentinel) => true,
         // Class cures get blocked!
         (FType::Paresis, Class::Indorani) => true,
         (FType::Paresis, Class::Sciomancer) => true,

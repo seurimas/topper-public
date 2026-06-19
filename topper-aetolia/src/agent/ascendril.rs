@@ -191,6 +191,7 @@ pub enum FulcrumState {
         echoes: Timer,
         schism: bool,
         imbalance: bool,
+        imbalance_timer: Timer,
         inactive_degradation: bool,
         inactive_spiritrift: bool,
         resonance: Option<(Element, i32)>,
@@ -200,6 +201,8 @@ pub enum FulcrumState {
         echoes: Timer,
         schism: bool,
         imbalance: bool,
+        imbalance_timer: Timer,
+        etherflux_timer: Timer,
         degradation: bool,
         spiritrift: bool,
         resonance: Option<(Element, i32)>,
@@ -256,6 +259,33 @@ impl AscendrilClassState {
         self.capacitance.wait(time);
         self.shift_cooldown.wait(time);
         self.feedback_cooldown.wait(time);
+        match &mut self.fulcrum {
+            FulcrumState::FulcrumOnMe {
+                echoes,
+                imbalance_timer,
+                ..
+            }
+            | FulcrumState::FulcrumExpanded {
+                echoes,
+                imbalance_timer,
+                ..
+            } => {
+                echoes.wait(time);
+                imbalance_timer.wait(time);
+                if !imbalance_timer.is_active() {
+                    *imbalance_timer = Timer::count_up_observe_seconds(10.5, 11.5);
+                }
+            }
+            FulcrumState::NoFulcrum => {}
+        }
+        match &mut self.fulcrum {
+            FulcrumState::FulcrumExpanded {
+                etherflux_timer, ..
+            } => {
+                etherflux_timer.wait(time);
+            }
+            _ => {}
+        }
     }
 
     pub fn try_claim(&mut self, phenomenon: PhenomenaKind) {
@@ -302,6 +332,7 @@ impl AscendrilClassState {
             echoes: Timer::count_down_seconds(0.),
             schism: false,
             imbalance: false,
+            imbalance_timer: Timer::count_down_seconds(0.),
             inactive_degradation: false,
             inactive_spiritrift: false,
             resonance: None,
@@ -314,6 +345,7 @@ impl AscendrilClassState {
                 echoes,
                 schism,
                 imbalance,
+                imbalance_timer,
                 inactive_degradation,
                 inactive_spiritrift,
                 resonance,
@@ -323,6 +355,8 @@ impl AscendrilClassState {
                     echoes,
                     schism,
                     imbalance,
+                    imbalance_timer,
+                    etherflux_timer: Timer::count_down_seconds(4.),
                     degradation: inactive_degradation,
                     spiritrift: inactive_spiritrift,
                     resonance,
@@ -333,6 +367,7 @@ impl AscendrilClassState {
                 echoes,
                 schism,
                 imbalance,
+                imbalance_timer,
                 degradation,
                 spiritrift,
                 resonance,
@@ -343,6 +378,8 @@ impl AscendrilClassState {
                     echoes,
                     schism,
                     imbalance,
+                    imbalance_timer,
+                    etherflux_timer: Timer::count_down_seconds(4.),
                     degradation,
                     spiritrift,
                     resonance,
@@ -355,6 +392,8 @@ impl AscendrilClassState {
                     echoes: Timer::count_down_seconds(0.),
                     schism: false,
                     imbalance: false,
+                    imbalance_timer: Timer::count_down_seconds(0.),
+                    etherflux_timer: Timer::count_down_seconds(4.),
                     degradation: false,
                     spiritrift: false,
                     resonance: None,
@@ -383,6 +422,7 @@ impl AscendrilClassState {
                 echoes,
                 schism,
                 imbalance,
+                imbalance_timer,
                 degradation,
                 spiritrift,
                 resonance,
@@ -392,6 +432,7 @@ impl AscendrilClassState {
                     echoes,
                     schism,
                     imbalance,
+                    imbalance_timer,
                     inactive_degradation: degradation,
                     inactive_spiritrift: spiritrift,
                     resonance,
@@ -447,6 +488,32 @@ impl AscendrilClassState {
             FulcrumState::FulcrumOnMe { imbalance, .. }
             | FulcrumState::FulcrumExpanded { imbalance, .. } => *imbalance = true,
             FulcrumState::NoFulcrum => {}
+        }
+    }
+
+    pub fn imbalance_hit(&mut self) {
+        self.imbalance_on();
+        match &mut self.fulcrum {
+            FulcrumState::FulcrumOnMe {
+                imbalance_timer, ..
+            }
+            | FulcrumState::FulcrumExpanded {
+                imbalance_timer, ..
+            } => {
+                *imbalance_timer = Timer::count_up_observe_seconds(10.5, 11.5);
+            }
+            FulcrumState::NoFulcrum => {}
+        }
+    }
+
+    pub fn is_etherflex_pending(&self, room_id: Option<i64>) -> bool {
+        match &self.fulcrum {
+            FulcrumState::FulcrumExpanded {
+                room_id: r,
+                etherflux_timer,
+                ..
+            } => room_id.map_or(true, |id| *r == id) && etherflux_timer.is_active(),
+            _ => false,
         }
     }
 

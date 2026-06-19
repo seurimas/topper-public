@@ -42,6 +42,27 @@
         "observation_name": "Proc"
     },
     {
+        "regex": "^Planar radiation ripples across (\\w+), irritating .* flesh with elemental energy.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Expand"
+            },
+            {
+                "Literal": "etherfluxed"
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
         "regex": "^Drawing on the essence of hearth, forge, and the deep veins of the world, (you) align your fulcrum's resonance with fire.$",
         "args": [
             {

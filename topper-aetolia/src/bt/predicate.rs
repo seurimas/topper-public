@@ -163,6 +163,7 @@ pub enum AetPredicate {
     IsRestoring(AetTarget, LimbDescriptor),
     IsOverRestoring(AetTarget, LimbDescriptor),
     CanBreak(AetTarget, LimbDescriptor, f32),
+    ArmsFree(AetTarget),
     RestoredBreak(AetTarget, LimbDescriptor, f32),
     CanMangled(AetTarget, LimbDescriptor, f32),
     RestoredMangle(AetTarget, LimbDescriptor, f32),
@@ -490,6 +491,20 @@ impl UnpoweredFunction for AetPredicate {
                         if limb_state.is_restoring && limb_state.damage <= 33. {
                             return UnpoweredFunctionState::Complete;
                         }
+                    }
+                }
+                UnpoweredFunctionState::Failed
+            }
+            AetPredicate::ArmsFree(target) => {
+                if let Some(target) = target.get_target(model, controller) {
+                    let left_arm = target.get_limb_state(LType::LeftArmDamage);
+                    let right_arm = target.get_limb_state(LType::RightArmDamage);
+                    if !left_arm.crippled
+                        && !left_arm.broken
+                        && !right_arm.crippled
+                        && !right_arm.broken
+                    {
+                        return UnpoweredFunctionState::Complete;
                     }
                 }
                 UnpoweredFunctionState::Failed
