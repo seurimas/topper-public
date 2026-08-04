@@ -6,58 +6,58 @@ use crate::{
     classes::group::*, observables::*, targetted_action, timeline::*, types::*, untargetted_action,
 };
 
-targetted_action!(Spark, "cast spark {}");
-targetted_action!(AshenFeet, "cast ashenfeet {}");
-untargetted_action!(FireburstCast, "cast fireburst");
-targetted_action!(Fireburst, "fireburst {}");
-targetted_action!(Blazewhirl, "cast blazewhirl {}");
-targetted_action!(Conflagrate, "cast conflagrate {}");
-untargetted_action!(Afterburn, "cast afterburn");
-targetted_action!(Sunspot, "cast sunspot {}");
-targetted_action!(Pyroclast, "cast pyroclast {}");
-targetted_action!(Disintegrate, "cast disintegrate {}");
-untargetted_action!(Coldsnap, "cast coldsnap");
-targetted_action!(Drench, "cast drench {}");
-targetted_action!(Iceray, "cast iceray {}");
-targetted_action!(Glazeflow, "cast glazeflow {}");
-targetted_action!(Direfrost, "cast direfrost {}");
-targetted_action!(Icicle, "cast icicle {}");
-untargetted_action!(Shatter, "cast shatter");
-targetted_action!(Crystalise, "cast crystalise {}");
-untargetted_action!(Winterheart, "cast winterheart");
-targetted_action!(Windlance, "cast windlance {}");
-targetted_action!(Pressurize, "cast pressurize {}");
-targetted_action!(Arcbolt, "cast arcbolt {}");
-targetted_action!(Electrosphere, "cast electrosphere {}");
-targetted_action!(Thunderclap, "cast thunderclap {}");
-targetted_action!(Feedback, "cast feedback {}");
-targetted_action!(AeroblastFast, "cast aeroblast {} fast");
-targetted_action!(AeroblastSlow, "cast aeroblast {} slow");
-untargetted_action!(Stormwrath, "cast stormwrath");
-untargetted_action!(Capacitance, "cast capacitance");
+targetted_action!(Spark, "cast spark {}", categories: ("Elemancy", "Humourism"));
+targetted_action!(AshenFeet, "cast ashenfeet {}", categories: ("Elemancy", "Humourism"));
+untargetted_action!(FireburstCast, "cast fireburst", categories: ("Elemancy", "Humourism"));
+targetted_action!(Fireburst, "fireburst {}", categories: ("Elemancy", "Humourism"));
+targetted_action!(Blazewhirl, "cast blazewhirl {}", categories: ("Elemancy", "Humourism"));
+targetted_action!(Conflagrate, "cast conflagrate {}", categories: ("Elemancy", "Humourism"));
+untargetted_action!(Afterburn, "cast afterburn", categories: ("Elemancy", "Humourism"));
+targetted_action!(Sunspot, "cast sunspot {}", categories: ("Elemancy", "Humourism"));
+targetted_action!(Pyroclast, "cast pyroclast {}", categories: ("Elemancy", "Humourism"));
+targetted_action!(Disintegrate, "cast disintegrate {}", categories: ("Elemancy", "Humourism"));
+untargetted_action!(Coldsnap, "cast coldsnap", categories: ("Elemancy", "Humourism"));
+targetted_action!(Drench, "cast drench {}", categories: ("Elemancy", "Humourism"));
+targetted_action!(Iceray, "cast iceray {}", categories: ("Elemancy", "Humourism"));
+targetted_action!(Glazeflow, "cast glazeflow {}", categories: ("Elemancy", "Humourism"));
+targetted_action!(Direfrost, "cast direfrost {}", categories: ("Elemancy", "Humourism"));
+targetted_action!(Icicle, "cast icicle {}", categories: ("Elemancy", "Humourism"));
+untargetted_action!(Shatter, "cast shatter", categories: ("Elemancy", "Humourism"));
+targetted_action!(Crystalise, "cast crystalise {}", categories: ("Elemancy", "Humourism"));
+untargetted_action!(Winterheart, "cast winterheart", categories: ("Elemancy", "Humourism"));
+targetted_action!(Windlance, "cast windlance {}", categories: ("Elemancy", "Humourism"));
+targetted_action!(Pressurize, "cast pressurize {}", categories: ("Elemancy", "Humourism"));
+targetted_action!(Arcbolt, "cast arcbolt {}", categories: ("Elemancy", "Humourism"));
+targetted_action!(Electrosphere, "cast electrosphere {}", categories: ("Elemancy", "Humourism"));
+targetted_action!(Thunderclap, "cast thunderclap {}", categories: ("Elemancy", "Humourism"));
+targetted_action!(Feedback, "cast feedback {}", categories: ("Elemancy", "Humourism"));
+targetted_action!(AeroblastFast, "cast aeroblast {} fast", categories: ("Elemancy", "Humourism"));
+targetted_action!(AeroblastSlow, "cast aeroblast {} slow", categories: ("Elemancy", "Humourism"));
+untargetted_action!(Stormwrath, "cast stormwrath", categories: ("Elemancy", "Humourism"));
+untargetted_action!(Capacitance, "cast capacitance", categories: ("Elemancy", "Humourism"));
 
-untargetted_action!(Fulcrum, "fulcrum construct");
-untargetted_action!(FulcrumExpand, "fulcrum expand");
-untargetted_action!(FulcrumCallback, "fulcrum callback");
-untargetted_action!(FulcrumInterfuse, "fulcrum interfuse");
-untargetted_action!(FulcrumPush, "fulcrum push");
-untargetted_action!(Schism, "fulcrum schism on");
-untargetted_action!(Imbalance, "fulcrum imbalance on");
-untargetted_action!(FulcrumRestore, "fulcrum restore");
-untargetted_action!(EnrichFire, "fulcrum enrich fire");
-untargetted_action!(EnrichWater, "fulcrum enrich water");
-untargetted_action!(EnrichAir, "fulcrum enrich air");
-targetted_action!(Emberbrand, "fulcrum branding {} ember");
-targetted_action!(Frostbrand, "fulcrum branding {} frost");
-targetted_action!(Thunderbrand, "fulcrum branding {} thunder");
-targetted_action!(CatalystEmber, "fulcrum catalyst {} ember");
-targetted_action!(CatalystFrost, "fulcrum catalyst {} frost");
-targetted_action!(CatalystThunder, "fulcrum catalyst {} thunder");
-targetted_action!(Enrapture, "fulcrum enrapture {}");
-targetted_action!(FulcrumDetect, "fulcrum detect {}");
-untargetted_action!(Shift, "fulcrum shift");
-untargetted_action!(Degradation, "fulcrum degradation on");
-untargetted_action!(Spiritrift, "fulcrum spiritrift on");
+untargetted_action!(Fulcrum, "fulcrum construct", categories: ("Thaumaturgy", "Hematurgy"));
+untargetted_action!(FulcrumExpand, "fulcrum expand", categories: ("Thaumaturgy", "Hematurgy"));
+untargetted_action!(FulcrumCallback, "fulcrum callback", categories: ("Thaumaturgy", "Hematurgy"));
+untargetted_action!(FulcrumInterfuse, "fulcrum interfuse", categories: ("Thaumaturgy", "Hematurgy"));
+untargetted_action!(FulcrumPush, "fulcrum push", categories: ("Thaumaturgy", "Hematurgy"));
+untargetted_action!(Schism, "fulcrum schism on", categories: ("Thaumaturgy", "Hematurgy"));
+untargetted_action!(Imbalance, "fulcrum imbalance on", categories: ("Thaumaturgy", "Hematurgy"));
+untargetted_action!(FulcrumRestore, "fulcrum restore", categories: ("Thaumaturgy", "Hematurgy"));
+untargetted_action!(EnrichFire, "fulcrum enrich fire", categories: ("Thaumaturgy", "Hematurgy"));
+untargetted_action!(EnrichWater, "fulcrum enrich water", categories: ("Thaumaturgy", "Hematurgy"));
+untargetted_action!(EnrichAir, "fulcrum enrich air", categories: ("Thaumaturgy", "Hematurgy"));
+targetted_action!(Emberbrand, "fulcrum branding {} ember", categories: ("Thaumaturgy", "Hematurgy"));
+targetted_action!(Frostbrand, "fulcrum branding {} frost", categories: ("Thaumaturgy", "Hematurgy"));
+targetted_action!(Thunderbrand, "fulcrum branding {} thunder", categories: ("Thaumaturgy", "Hematurgy"));
+targetted_action!(CatalystEmber, "fulcrum catalyst {} ember", categories: ("Thaumaturgy", "Hematurgy"));
+targetted_action!(CatalystFrost, "fulcrum catalyst {} frost", categories: ("Thaumaturgy", "Hematurgy"));
+targetted_action!(CatalystThunder, "fulcrum catalyst {} thunder", categories: ("Thaumaturgy", "Hematurgy"));
+targetted_action!(Enrapture, "fulcrum enrapture {}", categories: ("Thaumaturgy", "Hematurgy"));
+targetted_action!(FulcrumDetect, "fulcrum detect {}", categories: ("Thaumaturgy", "Hematurgy"));
+untargetted_action!(Shift, "fulcrum shift", categories: ("Thaumaturgy", "Hematurgy"));
+untargetted_action!(Degradation, "fulcrum degradation on", categories: ("Thaumaturgy", "Hematurgy"));
+untargetted_action!(Spiritrift, "fulcrum spiritrift on", categories: ("Thaumaturgy", "Hematurgy"));
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Copy)]
 pub enum Glyph {
@@ -153,9 +153,19 @@ impl GlyphTraceAction {
 
 impl ActiveTransition for GlyphTraceAction {
     fn simulate(&self, timeline: &AetTimeline) -> Vec<ProbableEvent> {
+        let category = if timeline
+            .state
+            .borrow_agent(&self.caster)
+            .class_state
+            .is_mirrored()
+        {
+            "Esoterica"
+        } else {
+            "Arcanism"
+        };
         let mut observations = vec![CombatAction::observation(
             &self.caster,
-            &"Arcanism",
+            category,
             &self.traced.to_skill(),
             &"",
             &self.target.clone().unwrap_or("".to_string()),
@@ -199,9 +209,19 @@ impl TwinnedArcbolt {
 
 impl ActiveTransition for TwinnedArcbolt {
     fn simulate(&self, timeline: &AetTimeline) -> Vec<ProbableEvent> {
+        let category = if timeline
+            .state
+            .borrow_agent(&self.caster)
+            .class_state
+            .is_mirrored()
+        {
+            "Humourism"
+        } else {
+            "Elemancy"
+        };
         let mut observations = vec![
-            CombatAction::observation(&self.caster, &"Elemancy", &"Arcbolt", &"", &self.targets.0),
-            CombatAction::observation(&self.caster, &"Elemancy", &"Arcbolt", &"", &self.targets.1),
+            CombatAction::observation(&self.caster, category, &"Arcbolt", &"", &self.targets.0),
+            CombatAction::observation(&self.caster, category, &"Arcbolt", &"", &self.targets.1),
         ];
         ProbableEvent::certain(observations)
     }

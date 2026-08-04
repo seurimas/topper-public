@@ -52,6 +52,18 @@ pub fn handle_sent(command: &String, agent_states: &mut AetTimelineState) {
     }
 }
 
+fn infer_equil(
+    agent_states: &mut AetTimelineState,
+    caster: &String,
+    after: &Vec<AetObservation>,
+    duration: f32,
+) {
+    let observations = after.clone();
+    for_agent(agent_states, caster, &move |me| {
+        apply_or_infer_balance(me, (BType::Equil, duration), &observations);
+    });
+}
+
 pub fn handle_combat_action(
     combat_action: &CombatAction,
     agent_states: &mut AetTimelineState,
@@ -75,6 +87,7 @@ pub fn handle_combat_action(
                     ascendril.cast_spell(Element::Fire);
                 });
             });
+            infer_equil(agent_states, &combat_action.caster, after, 2.0);
         }
         // Afflicts with ashenfeet
         "Ashenfeet" => {
@@ -97,6 +110,7 @@ pub fn handle_combat_action(
                         ascendril.cast_spell(Element::Fire);
                     });
                 });
+                infer_equil(agent_states, &combat_action.caster, after, 3.0);
             }
         }
         // Gives me 4 stacks of fireburst, or hits for ablaze
@@ -108,8 +122,9 @@ pub fn handle_combat_action(
                         ascendril.cast_spell(Element::Fire);
                     })
                 });
+                infer_equil(agent_states, &combat_action.caster, after, 3.0);
             } else {
-                let observations = after.clone();
+                let arm_observations = after.clone();
                 let arm_balance = match combat_action.annotation.as_str() {
                     "left" => Some(BType::LeftHandBalance),
                     "right" => Some(BType::RightHandBalance),
@@ -120,13 +135,19 @@ pub fn handle_combat_action(
                         ascendril.fireburst_decrement();
                     });
                     if let Some(arm_balance) = arm_balance {
-                        apply_or_infer_balance(me, (arm_balance, 2.5), &observations);
+                        apply_or_infer_balance(me, (arm_balance, 2.5), &arm_observations);
                     }
                 });
                 for_agent(agent_states, &combat_action.target, &|me| {
                     me.tick_flag_up(FType::Ablaze);
                     me.damage_stat_percent(SType::Health, FIREBURST_DAMAGE_PERCENT);
                 });
+                if let Some(arm_balance) = arm_balance {
+                    let arm_observations = after.clone();
+                    for_agent(agent_states, &combat_action.caster, &|me| {
+                        apply_or_infer_balance(me, (arm_balance, 2.0), &arm_observations);
+                    });
+                }
             }
         }
         // Gives the target a Blazwhirl phenomenon
@@ -137,6 +158,7 @@ pub fn handle_combat_action(
                     ascendril.try_claim(PhenomenaKind::Blazewhirl);
                 });
             });
+            infer_equil(agent_states, &combat_action.caster, after, 4.5);
         }
         // With ablaze, gives emberbrand.
         "Conflagrate" => {
@@ -158,6 +180,7 @@ pub fn handle_combat_action(
                         ascendril.cast_spell(Element::Fire);
                     });
                 });
+                infer_equil(agent_states, &combat_action.caster, after, 2.5);
             }
         }
         "Emberbranded" => {
@@ -177,6 +200,7 @@ pub fn handle_combat_action(
                     ascendril.cast_spell(Element::Fire);
                 });
             });
+            infer_equil(agent_states, &combat_action.caster, after, 3.0);
         }
         // Gives sunspot after a short wait.
         "Sunspot" => {
@@ -189,6 +213,7 @@ pub fn handle_combat_action(
                     ascendril.cast_spell(Element::Fire);
                 });
             });
+            infer_equil(agent_states, &combat_action.caster, after, 3.0);
         }
         // Conditional attack, dealing head trauma and more
         "Pyroclast" => {
@@ -222,6 +247,7 @@ pub fn handle_combat_action(
                     ascendril.use_up_resonance();
                 });
             });
+            infer_equil(agent_states, &combat_action.caster, after, 6.0);
         }
         // Strip audit defenses
         "Disintegrate" => {
@@ -240,6 +266,7 @@ pub fn handle_combat_action(
                     me.set_channel(ChannelType::Disintegrate, 4.);
                 });
             }
+            infer_equil(agent_states, &combat_action.caster, after, 6.0);
         }
         // Freezes twice
         "Coldsnap" => {
@@ -262,6 +289,7 @@ pub fn handle_combat_action(
                         ascendril.cast_spell(Element::Water);
                     });
                 });
+                infer_equil(agent_states, &combat_action.caster, after, 2.0);
             }
         }
         "Frostbrand" => {
@@ -299,6 +327,7 @@ pub fn handle_combat_action(
                     ascendril.cast_spell(Element::Water);
                 });
             });
+            infer_equil(agent_states, &combat_action.caster, after, 3.0);
         }
         // Creates glazeflow.
         "Glazeflow" => {
@@ -308,6 +337,7 @@ pub fn handle_combat_action(
                     ascendril.try_claim(PhenomenaKind::Glazeflow);
                 });
             });
+            infer_equil(agent_states, &combat_action.caster, after, 6.0);
         }
         // Drains mana based on freeze tier.
         "Drench" => {
@@ -328,6 +358,7 @@ pub fn handle_combat_action(
                     ascendril.cast_spell(Element::Water);
                 });
             });
+            infer_equil(agent_states, &combat_action.caster, after, 3.0);
         }
         // With shivering, gives direfrost.
         "Direfrost" => {
@@ -348,6 +379,7 @@ pub fn handle_combat_action(
                         ascendril.cast_spell(Element::Water);
                     });
                 });
+                infer_equil(agent_states, &combat_action.caster, after, 2.5);
             }
         }
         // Gives 3 icicles.
@@ -382,6 +414,7 @@ pub fn handle_combat_action(
                         ascendril.cast_spell(Element::Water);
                     });
                 });
+                infer_equil(agent_states, &combat_action.caster, after, 4.0);
             }
         }
         // Shatters icicles.
@@ -419,6 +452,7 @@ pub fn handle_combat_action(
                         ascendril.cast_spell(Element::Water);
                     });
                 });
+                infer_equil(agent_states, &combat_action.caster, after, 1.0);
             }
         }
         // If no leivitation, give ice_encased. If shivering, give hobbled. If glazeflow in room, give frozen_feet.
@@ -451,6 +485,7 @@ pub fn handle_combat_action(
                     ascendril.use_up_resonance();
                 });
             });
+            infer_equil(agent_states, &combat_action.caster, after, 5.0);
         }
         // Summons a winterheart, uses up resonance.
         "Winterheart" => {
@@ -468,6 +503,7 @@ pub fn handle_combat_action(
                     me.set_channel(ChannelType::Winterheart, 4.);
                 });
             }
+            infer_equil(agent_states, &combat_action.caster, after, 6.0);
         }
         // Gives fallen or strips shield.
         "Windlance" => {
@@ -484,6 +520,7 @@ pub fn handle_combat_action(
                     ascendril.cast_spell(Element::Air);
                 });
             });
+            infer_equil(agent_states, &combat_action.caster, after, 2.0);
         }
         // Gives vertigo and confusion.
         "Pressurize" => {
@@ -511,6 +548,7 @@ pub fn handle_combat_action(
                         }
                     });
                 });
+                infer_equil(agent_states, &combat_action.caster, after, 2.5);
             }
         }
         // Gives paresis or turns into paralysis.
@@ -528,6 +566,7 @@ pub fn handle_combat_action(
                     ascendril.cast_spell(Element::Air);
                 });
             });
+            infer_equil(agent_states, &combat_action.caster, after, 4.0);
         }
         // Spawns electrosphere.
         "Electrosphere" => {
@@ -537,6 +576,7 @@ pub fn handle_combat_action(
                     ascendril.try_claim(PhenomenaKind::Electrosphere);
                 });
             });
+            infer_equil(agent_states, &combat_action.caster, after, 6.0);
         }
         // Gives dizziness and stupidity. If they have both and another mental, give thunderbrand.
         "Thunderclap" => {
@@ -558,6 +598,7 @@ pub fn handle_combat_action(
                         ascendril.cast_spell(Element::Air);
                     });
                 });
+                infer_equil(agent_states, &combat_action.caster, after, 2.5);
             }
         }
         // Knocks unconcious.
@@ -572,6 +613,7 @@ pub fn handle_combat_action(
                     ascendril.feedback_used();
                 });
             });
+            infer_equil(agent_states, &combat_action.caster, after, 3.75);
         }
         "Aeroblast" => {
             if combat_action.annotation.eq("hit") {
@@ -612,6 +654,7 @@ pub fn handle_combat_action(
                         ascendril.use_up_resonance();
                     });
                 });
+                infer_equil(agent_states, &combat_action.caster, after, 3.0);
             }
         }
         // Summons a stormwrath here.
@@ -630,6 +673,7 @@ pub fn handle_combat_action(
                     me.set_channel(ChannelType::Stormwrath, 4.);
                 });
             }
+            infer_equil(agent_states, &combat_action.caster, after, 6.0);
         }
         // Constructs a fulcrum.
         "Construct" => {
@@ -839,6 +883,7 @@ pub fn handle_combat_action(
                     ascendril.raise_capacitance();
                 });
             });
+            infer_equil(agent_states, &combat_action.caster, after, 3.0);
         }
         // Consumes brand on target; if target has Etherflux, enrich the caster.
         "Catalyst" => {

@@ -17,6 +17,14 @@ impl ProbableEvent {
     pub fn certain(observations: ActiveEvent) -> Vec<Self> {
         vec![Self::new(observations, 1)]
     }
+
+    pub fn observations(&self) -> &ActiveEvent {
+        &self.0
+    }
+
+    pub fn weight(&self) -> u32 {
+        self.1
+    }
 }
 
 pub trait ActiveTransition {
@@ -26,11 +34,7 @@ pub trait ActiveTransition {
     }
     fn skill_names(&self) -> Vec<String> {
         let name = self.skill_name();
-        if name.is_empty() {
-            vec![]
-        } else {
-            vec![name]
-        }
+        if name.is_empty() { vec![] } else { vec![name] }
     }
     fn simulate(&self, timline: &AetTimeline) -> Vec<ProbableEvent> {
         todo!()
@@ -41,14 +45,53 @@ pub trait ActiveTransition {
 macro_rules! untargetted_action {
     // 2-arg: skill name defaults to struct name, no separate mirror.
     ($name:ident, $action:expr) => {
-        untargetted_action!($name, $action, $action, stringify!($name), stringify!($name));
+        untargetted_action!(
+            $name,
+            $action,
+            $action,
+            stringify!($name),
+            stringify!($name)
+        );
+    };
+    // 2-arg + categories: skill name defaults to struct name with explicit categories.
+    ($name:ident, $action:expr, categories: ($category:expr, $mirror_category:expr)) => {
+        untargetted_action!(
+            $name,
+            $action,
+            $action,
+            stringify!($name),
+            stringify!($name),
+            categories: ($category, $mirror_category)
+        );
     };
     // 3-arg: explicit skill name, action used for both regular and mirror.
     ($name:ident, $action:expr, $skill_name:expr) => {
         untargetted_action!($name, $action, $action, $skill_name, $skill_name);
     };
+    // 4-arg + categories: explicit skill name plus regular/mirror categories.
+    ($name:ident, $action:expr, $skill_name:expr, categories: ($category:expr, $mirror_category:expr)) => {
+        untargetted_action!(
+            $name,
+            $action,
+            $action,
+            $skill_name,
+            $skill_name,
+            categories: ($category, $mirror_category)
+        );
+    };
     // 5-arg: full form — separate mirror action and both skill names.
     ($name:ident, $action:expr, $mirror:expr, $skill_name:expr, $mirror_skill_name:expr) => {
+        untargetted_action!(
+            $name,
+            $action,
+            $mirror,
+            $skill_name,
+            $mirror_skill_name,
+            categories: ("", "")
+        );
+    };
+    // 5-arg + categories: full form with separate mirror action, skills, and categories.
+    ($name:ident, $action:expr, $mirror:expr, $skill_name:expr, $mirror_skill_name:expr, categories: ($category:expr, $mirror_category:expr)) => {
         pub struct $name {
             pub caster: String,
         }
@@ -91,6 +134,27 @@ macro_rules! untargetted_action {
                     vec![name, mirror_name]
                 }
             }
+            fn simulate(&self, timline: &crate::timeline::AetTimeline) -> Vec<crate::observables::ProbableEvent> {
+                let category = if timline
+                    .state
+                    .borrow_agent(&self.caster)
+                    .class_state
+                    .is_mirrored()
+                {
+                    $mirror_category
+                } else {
+                    $category
+                };
+                crate::observables::ProbableEvent::certain(vec![
+                    crate::timeline::CombatAction::observation(
+                        &self.caster,
+                        category,
+                        &$skill_name.to_string(),
+                        "",
+                        "",
+                    )
+                ])
+            }
         }
     };
 }
@@ -99,14 +163,53 @@ macro_rules! untargetted_action {
 macro_rules! targetted_action {
     // 2-arg: skill name defaults to struct name, no separate mirror.
     ($name:ident, $action:expr) => {
-        targetted_action!($name, $action, $action, stringify!($name), stringify!($name));
+        targetted_action!(
+            $name,
+            $action,
+            $action,
+            stringify!($name),
+            stringify!($name)
+        );
+    };
+    // 2-arg + categories: skill name defaults to struct name with explicit categories.
+    ($name:ident, $action:expr, categories: ($category:expr, $mirror_category:expr)) => {
+        targetted_action!(
+            $name,
+            $action,
+            $action,
+            stringify!($name),
+            stringify!($name),
+            categories: ($category, $mirror_category)
+        );
     };
     // 3-arg: explicit skill name, action used for both regular and mirror.
     ($name:ident, $action:expr, $skill_name:expr) => {
         targetted_action!($name, $action, $action, $skill_name, $skill_name);
     };
+    // 4-arg + categories: explicit skill name plus regular/mirror categories.
+    ($name:ident, $action:expr, $skill_name:expr, categories: ($category:expr, $mirror_category:expr)) => {
+        targetted_action!(
+            $name,
+            $action,
+            $action,
+            $skill_name,
+            $skill_name,
+            categories: ($category, $mirror_category)
+        );
+    };
     // 5-arg: full form — separate mirror action and both skill names.
     ($name:ident, $action:expr, $mirror:expr, $skill_name:expr, $mirror_skill_name:expr) => {
+        targetted_action!(
+            $name,
+            $action,
+            $mirror,
+            $skill_name,
+            $mirror_skill_name,
+            categories: ("", "")
+        );
+    };
+    // 5-arg + categories: full form with separate mirror action, skills, and categories.
+    ($name:ident, $action:expr, $mirror:expr, $skill_name:expr, $mirror_skill_name:expr, categories: ($category:expr, $mirror_category:expr)) => {
         pub struct $name {
             pub caster: String,
             pub target: String,
@@ -168,6 +271,27 @@ macro_rules! targetted_action {
                 } else {
                     vec![name, mirror_name]
                 }
+            }
+            fn simulate(&self, timline: &crate::timeline::AetTimeline) -> Vec<crate::observables::ProbableEvent> {
+                let category = if timline
+                    .state
+                    .borrow_agent(&self.caster)
+                    .class_state
+                    .is_mirrored()
+                {
+                    $mirror_category
+                } else {
+                    $category
+                };
+                crate::observables::ProbableEvent::certain(vec![
+                    crate::timeline::CombatAction::observation(
+                        &self.caster,
+                        category,
+                        &$skill_name.to_string(),
+                        "",
+                        &self.target,
+                    )
+                ])
             }
         }
     };

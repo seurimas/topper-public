@@ -41,12 +41,14 @@ label {
 }
 
 input,
+select,
 textarea,
 button {
   font: inherit;
 }
 
 input,
+select,
 textarea {
   border: 1px solid #c8ced6;
   border-radius: 8px;
@@ -80,4 +82,19 @@ button:disabled {
 
 .result h2 {
   margin: 0;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+pre {
+  margin: 0;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: #f3f6fa;
+  border: 1px solid #d9e0e8;
+  overflow: auto;
 }

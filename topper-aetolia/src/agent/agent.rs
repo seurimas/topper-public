@@ -11,6 +11,31 @@ use topper_persuasion::PersuasionState;
 pub const SHOCK_TIME: f32 = 20.0;
 pub const BURNOUT_TIME: f32 = 20.0;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct StaticModifiers {
+    balance_scale: CType,
+    eq_scale: CType,
+}
+
+impl Default for StaticModifiers {
+    fn default() -> Self {
+        StaticModifiers {
+            balance_scale: 100,
+            eq_scale: 100,
+        }
+    }
+}
+
+impl StaticModifiers {
+    pub fn get_balance_scale(&self) -> f32 {
+        self.balance_scale as f32 / 100.0
+    }
+
+    pub fn get_eq_scale(&self) -> f32 {
+        self.eq_scale as f32 / 100.0
+    }
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 pub struct AgentState {
     pub balances: [Timer; BType::SIZE as usize],
@@ -40,6 +65,7 @@ pub struct AgentState {
     pub observation: ObservationState,
     pub fleeing: Timer,
     pub bleeding: Option<CType>,
+    pub static_modifiers: StaticModifiers,
 }
 
 // True = Aeon = Pause cooldowns.

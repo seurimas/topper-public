@@ -19,6 +19,21 @@ The learner should make it easy to:
 4. Add TS-side optimization loops (greedy, beam search, Monte Carlo, and eventually model-guided ranking).
 5. Keep this package private and excluded from public mirroring.
 
+## Usable MVP Requirements
+
+1. Allow class selection in the UI. Class selection defines the available action catalog.
+2. Implement Ascendril first, with all targeted and untargeted actions available for manual selection.
+3. Fix actor names for this tool: active player is `Learner`, target player is `Target`.
+4. Support class passive actions on fixed periods, auto-activating as timeline time advances.
+5. Display both players' battle stats as prettified JSON for immediate inspection.
+6. Provide manual action dispatch for testing:
+  - selected action executes as a simulated transition
+  - simulated observations are applied to the active timeline
+  - targeted actions automatically target `Target`
+7. Provide timeline advance controls:
+  - advance by 10, 25, 50, or 100 ms
+  - advance to current player's QEB balance
+
 ## Proposed Architecture
 
 ### Frontend (Svelte + TypeScript)

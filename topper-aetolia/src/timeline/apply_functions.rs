@@ -1119,7 +1119,14 @@ pub fn apply_or_infer_balance(
             _ => {}
         }
     }
-    who.set_balance(expected_value.0, expected_value.1);
+    let balance_amount = if expected_value.0 == BType::Balance {
+        expected_value.1 * who.static_modifiers.get_balance_scale()
+    } else if expected_value.0 == BType::Equil {
+        expected_value.1 * who.static_modifiers.get_eq_scale()
+    } else {
+        expected_value.1
+    };
+    who.set_balance(expected_value.0, balance_amount);
 }
 
 pub fn apply_or_infer_combo_balance(
