@@ -9,6 +9,7 @@ members = [
     "topper-core-mudlet",
     "topper-explainer",
     "topper-persuasion",
+    "topper-aetolia-learner/src-wasm",
     "topper-sect-watch/src-wasm",
     "topper-sect-watch/supabase/functions/share-log/share-log-wasm",
 ]
