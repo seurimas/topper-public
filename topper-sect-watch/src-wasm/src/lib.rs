@@ -1,3 +1,8 @@
+mod actions;
+mod constants;
+mod engine;
+mod models;
+mod passives;
 mod utils;
 
 use std::vec;
@@ -12,6 +17,8 @@ use topper_aetolia::{
 };
 use topper_core::timeline::db::DummyDatabaseModule;
 use wasm_bindgen::prelude::*;
+
+pub use engine::LearnerEngine;
 
 #[wasm_bindgen]
 pub struct WasmTimeSlices(Vec<AetTimeSlice>);

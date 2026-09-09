@@ -162,7 +162,7 @@ pub fn apply_observation(
                 for_agent(timeline, who, &move |me: &mut AgentState| {
                     for after in observations.iter() {
                         match after {
-                            AetObservation::ListItem(list_type, limb, damage, _) => {
+                            AetObservation::ListItem(list_type, limb, status, damage) => {
                                 if list_type.eq("Wounds") {
                                     if let (Ok(limb), Ok(damage)) =
                                         (get_limb_damage(limb), damage.parse::<f32>())

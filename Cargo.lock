@@ -5064,20 +5064,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "topper-aetolia-learner-wasm"
-version = "0.1.0"
-dependencies = [
- "console_error_panic_hook",
- "serde",
- "serde-wasm-bindgen",
- "serde_json",
- "topper-aetolia",
- "topper-core",
- "wasm-bindgen",
- "wasm-bindgen-test",
-]
-
-[[package]]
 name = "topper-aetolia-mudlet"
 version = "0.1.0"
 dependencies = [

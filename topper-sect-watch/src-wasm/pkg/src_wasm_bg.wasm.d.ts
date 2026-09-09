@@ -1,6 +1,16 @@
 /* tslint:disable */
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
+export const __wbg_learnerengine_free: (a: number, b: number) => void;
+export const learnerengine_advance_by: (a: number, b: number) => [number, number, number];
+export const learnerengine_advance_to_qeb: (a: number) => [number, number, number];
+export const learnerengine_get_actions: (a: number) => [number, number, number];
+export const learnerengine_get_passives: (a: number) => [number, number, number];
+export const learnerengine_get_state: (a: number) => [number, number, number];
+export const learnerengine_get_supported_classes: (a: number) => [number, number];
+export const learnerengine_new: () => number;
+export const learnerengine_set_active_class: (a: number, b: number, c: number) => [number, number, number];
+export const learnerengine_simulate_action: (a: number, b: number, c: number) => [number, number, number];
 export const __wbg_wasmtimeline_free: (a: number, b: number) => void;
 export const __wbg_wasmtimeslices_free: (a: number, b: number) => void;
 export const wasmtimeline_get_afflictions: (a: number, b: number, c: number) => any;
@@ -11,9 +21,10 @@ export const wasmtimeline_new: (a: number, b: number) => number;
 export const wasmtimeline_set_timeline_time: (a: number, b: number, c: number) => [number, number];
 export const wasmtimeslices_get_times: (a: number) => [number, number];
 export const wasmtimeslices_new: (a: number, b: number) => number;
-export const __wbindgen_free: (a: number, b: number, c: number) => void;
 export const __wbindgen_malloc: (a: number, b: number) => number;
 export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+export const __wbindgen_free: (a: number, b: number, c: number) => void;
 export const __wbindgen_export_3: WebAssembly.Table;
+export const __externref_table_dealloc: (a: number) => void;
 export const __externref_drop_slice: (a: number, b: number) => void;
 export const __wbindgen_start: () => void;

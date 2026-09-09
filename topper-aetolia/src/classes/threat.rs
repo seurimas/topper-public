@@ -6,6 +6,8 @@ use crate::classes::Class;
 pub enum ClassThreat {
     VitalsPressure, // Class does some damage. (e.g. Infiltrator classically does not have this)
     HighVitalsPressure, // Class does a lot of damage. (e.g. Carnifex, Indorani, Ascendril)
+    StrengthVitalsPressure, // Their vitals pressure is influenced by their strength.
+    IntelligenceVitalsPressure, // Their vitals pressure is influenced by their intelligence.
     Locks,
     FastLocks,
     PillsPressure,
@@ -41,6 +43,7 @@ impl Class {
             ],
             Class::Praenomen => vec![
                 ClassThreat::VitalsPressure,
+                ClassThreat::HighVitalsPressure,
                 ClassThreat::ManaKill,
                 ClassThreat::PillsPressure,
                 ClassThreat::Mentals,

@@ -18,7 +18,7 @@
     "observation_name": "ListStart"
   },
   {
-    "regex": "^(Head|Torso|Left arm|Right arm|Left leg|Right leg):\\s*(\\d+\\.\\d+)%\\s*\\((\\w+) bruising\\)",
+    "regex": "^(Head|Torso|Left arm|Right arm|Left leg|Right leg)\\s*: (Healthy|Hurt|Broken|Mangled|Amputated)\\s*(\\d+\\.\\d+)%\\s*\\((\\w+) bruising\\)",
     "args": [
       {
         "Literal": "Wounds"
@@ -30,10 +30,10 @@
         "GroupAsTarget": 2
       },
       {
-        "Literal": ""
+        "GroupAsTarget": 3
       },
       {
-        "Literal": ""
+        "GroupAsTarget": 4
       }
     ],
     "observation_name": "ListItem"

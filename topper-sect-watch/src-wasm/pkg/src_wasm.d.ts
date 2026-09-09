@@ -1,5 +1,17 @@
 /* tslint:disable */
 /* eslint-disable */
+export class LearnerEngine {
+  free(): void;
+  advance_by(delta_ms: number): any;
+  get_actions(): any;
+  get_passives(): any;
+  advance_to_qeb(): any;
+  simulate_action(action_id: string): any;
+  set_active_class(class_name: string): any;
+  get_supported_classes(): string[];
+  constructor();
+  get_state(): any;
+}
 export class WasmTimeSlices {
   free(): void;
   /**
@@ -25,6 +37,16 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
+  readonly __wbg_learnerengine_free: (a: number, b: number) => void;
+  readonly learnerengine_advance_by: (a: number, b: number) => [number, number, number];
+  readonly learnerengine_advance_to_qeb: (a: number) => [number, number, number];
+  readonly learnerengine_get_actions: (a: number) => [number, number, number];
+  readonly learnerengine_get_passives: (a: number) => [number, number, number];
+  readonly learnerengine_get_state: (a: number) => [number, number, number];
+  readonly learnerengine_get_supported_classes: (a: number) => [number, number];
+  readonly learnerengine_new: () => number;
+  readonly learnerengine_set_active_class: (a: number, b: number, c: number) => [number, number, number];
+  readonly learnerengine_simulate_action: (a: number, b: number, c: number) => [number, number, number];
   readonly __wbg_wasmtimeline_free: (a: number, b: number) => void;
   readonly __wbg_wasmtimeslices_free: (a: number, b: number) => void;
   readonly wasmtimeline_get_afflictions: (a: number, b: number, c: number) => any;
@@ -35,10 +57,11 @@ export interface InitOutput {
   readonly wasmtimeline_set_timeline_time: (a: number, b: number, c: number) => [number, number];
   readonly wasmtimeslices_get_times: (a: number) => [number, number];
   readonly wasmtimeslices_new: (a: number, b: number) => number;
-  readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+  readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_export_3: WebAssembly.Table;
+  readonly __externref_table_dealloc: (a: number) => void;
   readonly __externref_drop_slice: (a: number, b: number) => void;
   readonly __wbindgen_start: () => void;
 }
