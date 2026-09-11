@@ -26,7 +26,7 @@ impl PersuasionTransition for Draw {
         deck.iter()
             .map(|appeal| {
                 let mut events = vec![];
-                events.push(PersuasionEvent::Draw(vec![appeal.clone()]));
+                events.push(PersuasionEvent::Draw(vec![*appeal]));
                 (1.0 / deck.len() as f32, events)
             })
             .collect()

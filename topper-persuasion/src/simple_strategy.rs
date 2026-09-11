@@ -36,9 +36,9 @@ pub fn simple_strategy(
                     return EvaluatorResult::Zero;
                 }
                 if !me.is(PersuasionAff::Gravitas) && !me.would_unrhetoric(Appeals::Authority) {
-                    return EvaluatorResult::Add(5);
+                    EvaluatorResult::Add(5)
                 } else {
-                    return EvaluatorResult::Zero;
+                    EvaluatorResult::Zero
                 }
             }),
         ),
@@ -49,9 +49,9 @@ pub fn simple_strategy(
                     return EvaluatorResult::Zero;
                 }
                 if me.reasoned() {
-                    return EvaluatorResult::Add(2);
+                    EvaluatorResult::Add(2)
                 } else {
-                    return EvaluatorResult::Add(1);
+                    EvaluatorResult::Add(1)
                 }
             }),
         ),
@@ -67,7 +67,7 @@ pub fn simple_strategy(
                 } else {
                     assumed_value
                 };
-                return EvaluatorResult::Add(assumed_value / 300);
+                EvaluatorResult::Add(assumed_value / 300)
             }),
         ),
         (
@@ -82,22 +82,22 @@ pub fn simple_strategy(
                         aff_count += 1;
                     }
                 }
-                return EvaluatorResult::Add(aff_count);
+                EvaluatorResult::Add(aff_count)
             }),
         ),
         (
             Appeals::Reason,
             Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.reasoned() {
-                    return EvaluatorResult::Add(-5);
+                    EvaluatorResult::Add(-5)
                 } else if me
                     .appeals_in_hand
                     .iter()
                     .any(|appeal| appeal == &Appeals::Inspiration || appeal == &Appeals::Analogy)
                 {
-                    return EvaluatorResult::Add(2);
+                    EvaluatorResult::Add(2)
                 } else {
-                    return EvaluatorResult::Zero;
+                    EvaluatorResult::Zero
                 }
             }),
         ),
@@ -110,9 +110,9 @@ pub fn simple_strategy(
                         .iter()
                         .any(|appeal| denizen.personality().is_weak_to(*appeal))
                 {
-                    return EvaluatorResult::Add(2);
+                    EvaluatorResult::Add(2)
                 } else {
-                    return EvaluatorResult::Zero;
+                    EvaluatorResult::Zero
                 }
             }),
         ),
@@ -132,9 +132,9 @@ pub fn simple_strategy(
                         .iter()
                         .any(|appeal| appeal.appeal_type() != AppealType::Logos)
                 {
-                    return EvaluatorResult::Add(2);
+                    EvaluatorResult::Add(2)
                 } else {
-                    return EvaluatorResult::Zero;
+                    EvaluatorResult::Zero
                 }
             }),
         ),
@@ -145,14 +145,14 @@ pub fn simple_strategy(
                     return EvaluatorResult::Add(2);
                 }
                 if me.reasoned() {
-                    return EvaluatorResult::Add(3);
+                    EvaluatorResult::Add(3)
                 } else if me.appeals_in_hand.iter().any(|appeal| {
                     appeal == &Appeals::Tradition
                         || (appeal == &Appeals::Provocation && me.acumen > 2000)
                 }) {
-                    return EvaluatorResult::Add(3);
+                    EvaluatorResult::Add(3)
                 } else {
-                    return EvaluatorResult::Zero;
+                    EvaluatorResult::Zero
                 }
             }),
         ),
@@ -160,9 +160,9 @@ pub fn simple_strategy(
             Appeals::Intimidation,
             Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.acumen < 2000 {
-                    return EvaluatorResult::Zero;
+                    EvaluatorResult::Zero
                 } else {
-                    return EvaluatorResult::Add(1);
+                    EvaluatorResult::Add(1)
                 }
             }),
         ),
@@ -170,13 +170,13 @@ pub fn simple_strategy(
             Appeals::Reassurance,
             Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.cyclic == Some(Appeals::Reassurance) && me.acumen < 4000 {
-                    return EvaluatorResult::Add(5);
+                    EvaluatorResult::Add(5)
                 } else if me.acumen < 2000 {
-                    return EvaluatorResult::Add(3);
+                    EvaluatorResult::Add(3)
                 } else if me.acumen < 3000 {
-                    return EvaluatorResult::Add(2);
+                    EvaluatorResult::Add(2)
                 } else {
-                    return EvaluatorResult::Zero;
+                    EvaluatorResult::Zero
                 }
             }),
         ),
@@ -184,9 +184,9 @@ pub fn simple_strategy(
             Appeals::Inspiration,
             Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.reasoned() {
-                    return EvaluatorResult::Add(3);
+                    EvaluatorResult::Add(3)
                 } else {
-                    return EvaluatorResult::Zero;
+                    EvaluatorResult::Zero
                 }
             }),
         ),
@@ -199,11 +199,11 @@ pub fn simple_strategy(
                     return EvaluatorResult::Add(2);
                 }
                 if denizen.max_resolve() > 11000 {
-                    return EvaluatorResult::Add(-3);
+                    EvaluatorResult::Add(-3)
                 } else if me.acumen < 2000 {
-                    return EvaluatorResult::Add(-2);
+                    EvaluatorResult::Add(-2)
                 } else {
-                    return EvaluatorResult::Zero;
+                    EvaluatorResult::Zero
                 }
             }),
         ),
@@ -212,11 +212,11 @@ pub fn simple_strategy(
             Appeals::Provocation,
             Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.is(PersuasionAff::Pressured) {
-                    return EvaluatorResult::Add(-3);
+                    EvaluatorResult::Add(-3)
                 } else if me.is(PersuasionAff::Confounded) {
-                    return EvaluatorResult::Add(-1);
+                    EvaluatorResult::Add(-1)
                 } else {
-                    return EvaluatorResult::Zero;
+                    EvaluatorResult::Zero
                 }
             }),
         ),
@@ -224,9 +224,9 @@ pub fn simple_strategy(
             Appeals::Tradition,
             Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.is(PersuasionAff::Pressured) && !me.is(PersuasionAff::Conviction) {
-                    return EvaluatorResult::Add(-3);
+                    EvaluatorResult::Add(-3)
                 } else {
-                    return EvaluatorResult::Zero;
+                    EvaluatorResult::Zero
                 }
             }),
         ),
@@ -234,11 +234,11 @@ pub fn simple_strategy(
             Appeals::Causality,
             Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.is(PersuasionAff::Pressured) && !me.is(PersuasionAff::Conviction) {
-                    return EvaluatorResult::Add(-3);
+                    EvaluatorResult::Add(-3)
                 } else if me.is(PersuasionAff::Confounded) {
-                    return EvaluatorResult::Add(-1);
+                    EvaluatorResult::Add(-1)
                 } else {
-                    return EvaluatorResult::Zero;
+                    EvaluatorResult::Zero
                 }
             }),
         ),
@@ -246,9 +246,9 @@ pub fn simple_strategy(
             Appeals::Authority,
             Box::new(|me: &PersuasionState, _denizen: &PersuasionStatus| {
                 if me.is(PersuasionAff::Pressured) && !me.is(PersuasionAff::Conviction) {
-                    return EvaluatorResult::Add(-2);
+                    EvaluatorResult::Add(-2)
                 } else {
-                    return EvaluatorResult::Zero;
+                    EvaluatorResult::Zero
                 }
             }),
         ),

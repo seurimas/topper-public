@@ -117,8 +117,8 @@ impl ExplainerPageModel {
     }
 
     fn set_timeline_state(&mut self, me: String, prompt_line_idx: usize) -> Vec<AetTimeSlice> {
-        if let Some((last_line_idx, last_timeline)) = self.viewing_state.as_mut() {
-            if prompt_line_idx > *last_line_idx {
+        if let Some((last_line_idx, last_timeline)) = self.viewing_state.as_mut()
+            && prompt_line_idx > *last_line_idx {
                 let mut new_time_slices = Vec::new();
                 for slice in &self.time_slices {
                     if slice
@@ -140,10 +140,9 @@ impl ExplainerPageModel {
                         new_time_slices.push(slice.clone());
                     }
                 }
-                *last_line_idx = prompt_line_idx as usize;
+                *last_line_idx = prompt_line_idx;
                 return new_time_slices;
             }
-        }
         let mut timeline = AetTimeline::new();
         timeline.state.me = me;
         for slice in &self.time_slices {
@@ -157,7 +156,7 @@ impl ExplainerPageModel {
             }
             let _ = timeline.push_time_slice(slice.clone(), None as Option<&DummyDatabaseModule>);
         }
-        self.viewing_state = Some((prompt_line_idx as usize, timeline.clone()));
+        self.viewing_state = Some((prompt_line_idx, timeline.clone()));
         vec![]
     }
 
@@ -172,14 +171,11 @@ impl ExplainerPageModel {
         }
         for slice in new_slices {
             for observation in slice.observations.iter().flatten() {
-                match observation {
-                    AetObservation::CombatAction(action) => {
-                        if action.caster == self.you {
-                            ttsQueue(&format!("{}", action.skill));
-                        }
-                        trace(&format!("{:?}", action));
+                if let AetObservation::CombatAction(action) = observation {
+                    if action.caster == self.you {
+                        ttsQueue(&action.skill.to_string());
                     }
-                    _ => {}
+                    trace(&format!("{:?}", action));
                 }
             }
         }
@@ -199,7 +195,7 @@ impl Component for ExplainerPageModel {
     fn create(ctx: &Context<Self>) -> Self {
         let page = &ctx.props().page;
         let locked = page.locked && !is_unlocked();
-        let (me, you) = parse_me_and_you(&page);
+        let (me, you) = parse_me_and_you(page);
         Self {
             edit_mode: !locked,
             viewing_comments: if locked {
@@ -220,27 +216,20 @@ impl Component for ExplainerPageModel {
     fn changed(&mut self, ctx: &Context<Self>, old_props: &Self::Properties) -> bool {
         let last_time = old_props.time;
         let new_time = ctx.props().time;
-        if let (Some(last_time), Some(new_time)) = (last_time, new_time) {
-            if new_time != last_time {
+        if let (Some(last_time), Some(new_time)) = (last_time, new_time)
+            && new_time != last_time {
                 let last_last_line = self.get_last_line_for_time(Some(last_time));
                 let new_last_line = self.get_last_line_for_time(Some(new_time));
                 if let (Some(last_last_line), Some(new_last_line)) = (last_last_line, new_last_line)
-                {
-                    if last_last_line != new_last_line {
+                    && last_last_line != new_last_line {
                         let new_slices = self.view_state(new_last_line);
                         self.callout_combat_actions(new_slices);
                         return true;
                     }
-                }
             }
-        }
         if ctx.props().page != old_props.page {
             true
-        } else if old_props.time.is_none() && ctx.props().time.is_some() {
-            true
-        } else {
-            false
-        }
+        } else { old_props.time.is_none() && ctx.props().time.is_some() }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
@@ -357,11 +346,7 @@ impl Component for ExplainerPageModel {
             }
             ExplainerPageMessage::Export => {
                 let mut page = self.page.clone();
-                if !self.edit_mode {
-                    page.locked = true;
-                } else {
-                    page.locked = false;
-                }
+                page.locked = !self.edit_mode;
                 match serde_json::to_string(&page) {
                     Ok(exported) => export_json(&exported),
                     Err(err) => log(&format!("{:?}", err)),

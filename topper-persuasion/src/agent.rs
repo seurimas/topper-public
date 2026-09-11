@@ -103,12 +103,12 @@ impl PersuasionState {
 
     pub fn reasoned(&self) -> bool {
         self.last_appeal
-            .map_or(false, |(appeal, _)| appeal == Appeals::Reason)
+            .is_some_and(|(appeal, _)| appeal == Appeals::Reason)
     }
 
     pub fn analogizing(&self) -> bool {
         self.last_appeal
-            .map_or(false, |(appeal, _)| appeal == Appeals::Analogy)
+            .is_some_and(|(appeal, _)| appeal == Appeals::Analogy)
     }
 
     pub fn get_rhetoric_state(&self) -> RhetoricState {
@@ -215,7 +215,7 @@ impl PersuasionState {
     }
 
     pub fn could_follow_any_rhetoric(&self) -> bool {
-        vec![AppealType::Logos, AppealType::Ethos, AppealType::Pathos]
+        [AppealType::Logos, AppealType::Ethos, AppealType::Pathos]
             .iter()
             .any(|&x| self.could_follow_rhetoric(x))
     }
@@ -263,7 +263,7 @@ impl PersuasionState {
     pub fn appeal(&mut self, appeal: Appeals) {
         let was_reasoned = self
             .last_appeal
-            .map_or(false, |(app, _)| app == Appeals::Reason);
+            .is_some_and(|(app, _)| app == Appeals::Reason);
         if self.is(PersuasionAff::Conflicted) {
             self.conflicted_type = Some(appeal.appeal_type());
         }

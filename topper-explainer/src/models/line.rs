@@ -33,7 +33,7 @@ impl Component for PageLine {
                 .link()
                 .callback(move |_| ExplainerPageMessage::OpenComment(idx));
             Some(html!(<div class="page__open_comment" onclick={open_comment}>{"\""}</div>))
-        } else if !props.comment_open && props.edit_mode && line_content.trim().len() > 0 {
+        } else if !props.comment_open && props.edit_mode && !line_content.trim().is_empty() {
             let idx = props.idx;
             let add_comment = ctx
                 .link()

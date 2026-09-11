@@ -171,33 +171,24 @@ impl PersuasionStatus {
     }
 
     pub fn retorted(&mut self) {
-        match self {
-            PersuasionStatus::Persuading {
+        if let PersuasionStatus::Persuading {
                 retort_cooldown, ..
-            } => {
-                *retort_cooldown = 400;
-            }
-            _ => {}
+            } = self {
+            *retort_cooldown = 400;
         }
     }
 
     pub fn evidence(&mut self, appeal: AppealType) {
-        match self {
-            PersuasionStatus::Persuading { weakened, .. } => {
-                weakened.push(appeal);
-            }
-            _ => {}
+        if let PersuasionStatus::Persuading { weakened, .. } = self {
+            weakened.push(appeal);
         }
     }
 
     pub fn wait(&mut self, time: i32) {
-        match self {
-            PersuasionStatus::Persuading {
+        if let PersuasionStatus::Persuading {
                 retort_cooldown, ..
-            } => {
-                *retort_cooldown -= time;
-            }
-            _ => {}
+            } = self {
+            *retort_cooldown -= time;
         }
     }
 }

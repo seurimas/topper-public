@@ -73,14 +73,12 @@ impl Component for PlayerState {
         } else {
             Some(state.get_balance(BType::Rebounding))
         };
-        let limbs = vec![
-            LType::HeadDamage,
+        let limbs = [LType::HeadDamage,
             LType::TorsoDamage,
             LType::LeftArmDamage,
             LType::RightArmDamage,
             LType::LeftLegDamage,
-            LType::RightLegDamage,
-        ]
+            LType::RightLegDamage]
         .iter()
         .map(|limb| (limb.to_string(), state.get_limb_state(*limb)))
         .collect::<Vec<(String, LimbState)>>();
@@ -199,7 +197,7 @@ fn AfflictionsIndicator(props: &AfflictionsIndicatorProps) -> Html {
     let aff_indicator = props.afflictions.iter().map(|aff| {
         let classes = classes!(
             "aff",
-            format!("aff--{}", aff.to_string()),
+            format!("aff--{}", aff),
             if MENTAL_AFFLICTIONS.contains(aff) {
                 Some("aff--mental")
             } else {

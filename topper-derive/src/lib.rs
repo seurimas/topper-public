@@ -12,7 +12,7 @@ pub fn derive_enum_from_args(input: TokenStream) -> TokenStream {
     let arms: Vec<_> = match data {
         Data::Enum(DataEnum { variants, .. }) => variants
             .iter()
-            .filter(|variant| variant.attrs.len() == 0)
+            .filter(|variant| variant.attrs.is_empty())
             .map(|variant| {
                 let variant_ident = &variant.ident;
                 let variant_literal = proc_macro2::Literal::string(&variant.ident.to_string());

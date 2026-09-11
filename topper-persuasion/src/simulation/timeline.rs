@@ -105,7 +105,7 @@ impl PersuasionEvent {
                 their_status.start_persuasion();
             }
             PersuasionEvent::Appeal(appeal) => {
-                my_state.appeal(appeal.clone());
+                my_state.appeal(*appeal);
             }
             PersuasionEvent::Retort(retort) => match retort {
                 Retorts::HitProvocation | Retorts::MissedProvocation => {}
@@ -114,18 +114,18 @@ impl PersuasionEvent {
                 }
             },
             PersuasionEvent::Cyclic(appeals) => {
-                my_state.cyclic = Some(appeals.clone());
+                my_state.cyclic = Some(*appeals);
             }
             PersuasionEvent::Draw(appeals) => {
                 for appeal in appeals {
-                    my_state.drawn(appeal.clone());
+                    my_state.drawn(*appeal);
                 }
             }
             PersuasionEvent::Gained(aff) => {
-                my_state.set(aff.clone(), true);
+                my_state.set(*aff, true);
             }
             PersuasionEvent::Lost(aff) => {
-                my_state.set(aff.clone(), false);
+                my_state.set(*aff, false);
             }
             PersuasionEvent::RhetoricStart => {
                 my_state.rhetoric_start();
@@ -134,7 +134,7 @@ impl PersuasionEvent {
                 my_state.sip_prudence();
             }
             PersuasionEvent::Evidence(appeal) => {
-                their_status.evidence(appeal.clone());
+                their_status.evidence(*appeal);
             }
             PersuasionEvent::Compelling(_)
             | PersuasionEvent::CasualityReveals(_)

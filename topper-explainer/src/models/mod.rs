@@ -20,7 +20,9 @@ use crate::{
 use self::page::ExplainerPageModel;
 
 #[derive(Debug)]
+#[derive(Default)]
 pub enum ExplainerModel {
+    #[default]
     Welcome,
     Loading,
     Parsing(AetoliaSectParser),
@@ -33,11 +35,6 @@ pub enum ExplainerModel {
     Published(Vec<String>),
 }
 
-impl Default for ExplainerModel {
-    fn default() -> Self {
-        Self::Welcome
-    }
-}
 
 const PLAYBACK_TEXT: &str = "Playback controls on the right enable realtime-like viewing of logs. Press the play button to begin. Page Down/Page Up move forward and backwards in time by 10 seconds.";
 const TTS_TEXT: &str = "TTS calls out enemy combat actions during playback. 1-5 change the voice. -/+ change the speed. 0 toggles this on and off.";
@@ -101,13 +98,13 @@ impl Component for ExplainerModel {
                 html!(<>
                     <ExplainerPageModel
                       page={page.clone()}
-                      time={time.clone()}
+                      time={*time}
                     />
                     <TimeControl
                       start_time={first_time}
                       end_time={last_time}
-                      time={time.clone()}
-                      on_time_change={ctx.link().callback(|time| ExplainerMessage::SetTime(time))}
+                      time={*time}
+                      on_time_change={ctx.link().callback(ExplainerMessage::SetTime)}
                     />
                 </>)
             }
