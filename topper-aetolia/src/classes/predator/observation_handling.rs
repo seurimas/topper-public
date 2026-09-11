@@ -367,17 +367,9 @@ pub fn handle_combat_action(
             attack_limb_damage(
                 agent_states,
                 &combat_action.target,
-                (LType::TorsoDamage, damage, true),
+                (LType::HeadDamage, damage, true),
                 after,
             );
-            let mut parried = attack_parried(after);
-            if agent_states
-                .borrow_agent(&combat_action.target)
-                .is(FType::TorsoBroken)
-                && parried
-            {
-                toggle_mawcrush_freely(db, true);
-            }
         }
         "Tidalslash" => {
             if combat_action.annotation.eq_ignore_ascii_case("full") {

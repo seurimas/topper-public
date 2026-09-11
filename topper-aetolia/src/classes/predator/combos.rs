@@ -209,7 +209,7 @@ impl ComboAttack {
             ComboAttack::Gouge => 650,
             ComboAttack::Jab | ComboAttack::JabLeft | ComboAttack::JabRight => 550,
             ComboAttack::Lowhook | ComboAttack::LowhookLeft | ComboAttack::LowhookRight => 550,
-            ComboAttack::Spinslash => 400,
+            ComboAttack::Spinslash => 300,
             _ => 0,
         };
         if stance == KnifeStance::Gyanis {
