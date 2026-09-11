@@ -218,10 +218,10 @@ impl TopperHandler<BattleStats> for AetTopper {
         Ok(self
             .core_module
             .handle_message(&topper_msg, ())?
-            .then(
-                self.timeline_module
-                    .handle_message(&topper_msg, (&database_module,))?,
-            )
+            .then(self.timeline_module.handle_message(
+                &topper_msg,
+                (&database_module, &self.core_module.target),
+            )?)
             .then(self.telnet_module.handle_message(&topper_msg, ())?)
             .then(self.battlestats_module.handle_message(
                 &topper_msg,

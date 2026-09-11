@@ -219,9 +219,11 @@ impl ComboAttack {
         }
     }
 
-    pub fn can_drop_parry(&self) -> bool {
+    pub fn can_drop_parry(&self, leg_broken: bool) -> bool {
         if self == &ComboAttack::Feint || self == &ComboAttack::Pindown {
             true
+        } else if self == &ComboAttack::Trip {
+            leg_broken
         } else {
             false
         }
@@ -618,6 +620,7 @@ pub struct ComboSolver {
     blade_surge: bool,
     allow_bad_stances: bool,
     allow_parries: bool,
+    leg_broken: bool,
 }
 
 impl Default for ComboSolver {
@@ -638,6 +641,7 @@ impl ComboSolver {
             blade_surge: false,
             allow_bad_stances: false,
             allow_parries: false,
+            leg_broken: false,
         }
     }
 
@@ -694,6 +698,11 @@ impl ComboSolver {
         self
     }
 
+    pub fn set_leg_broken(&mut self, leg_broken: bool) -> &mut Self {
+        self.leg_broken = leg_broken;
+        self
+    }
+
     fn add_combos(
         &self,
         combos: &mut Vec<PredatorCombo>,
@@ -705,6 +714,7 @@ impl ComboSolver {
         mut prone: bool,
         mut rebounds: bool,
         mut shielded: bool,
+        leg_broken: bool,
     ) {
         if combos.len() > 3000 {
             return;
@@ -726,7 +736,7 @@ impl ComboSolver {
         } else if new_attacks.len() == 4 {
             return;
         }
-        parrying &= !attack.can_drop_parry();
+        parrying &= !attack.can_drop_parry(leg_broken);
         prone |= attack.can_prone();
         if attack.strips_rebounding() && shielded {
             shielded = false;
@@ -744,6 +754,7 @@ impl ComboSolver {
                 prone,
                 rebounds,
                 shielded,
+                leg_broken,
             );
         }
     }
@@ -759,6 +770,7 @@ impl ComboSolver {
         prone: bool,
         rebounds: bool,
         shielded: bool,
+        leg_broken: bool,
     ) {
         if (self.allow_bad_stances
             || next_attack.is_good_combo_attack(next_stance)
@@ -780,6 +792,7 @@ impl ComboSolver {
                 prone,
                 rebounds,
                 shielded,
+                leg_broken,
             );
         }
     }
@@ -793,10 +806,11 @@ impl ComboSolver {
                 attack,
                 self.starting_stance,
                 &vec![],
-                self.start_parry,
+                self.start_parry && !(self.leg_broken && self.start_prone),
                 self.start_prone,
                 self.start_rebounds,
                 self.start_shielded,
+                self.leg_broken,
             );
         }
         ComboSet(combos)
@@ -911,7 +925,7 @@ impl ComboGrader {
                             },
                         ),
                         |(stance, total, mut parrying), combo_attack| {
-                            if combo_attack.can_drop_parry() {
+                            if combo_attack.can_drop_parry(target.get_limbs_state().leg_broken()) {
                                 parrying = None;
                             } else if (target.is(FType::FeebleArms) || target.is(FType::FeebleLegs))
                                 && combo_attack.can_use_venom()
@@ -1010,7 +1024,7 @@ impl ComboGrader {
                 }
                 let mut stance = combo.0;
                 for combo_attack in combo.get_attacks().iter() {
-                    if combo_attack.can_drop_parry() {
+                    if combo_attack.can_drop_parry(target.get_limbs_state().leg_broken()) {
                         return parryable.values().max().cloned().unwrap_or(0) * *value;
                     } else if (target.is(FType::FeebleArms) || target.is(FType::FeebleLegs))
                         && combo_attack.can_use_venom()

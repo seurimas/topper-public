@@ -253,6 +253,10 @@ impl LimbsState {
         }
         acc
     }
+
+    pub fn leg_broken(&self) -> bool {
+        self.left_leg.broken || self.right_leg.broken
+    }
 }
 
 impl std::ops::Index<LType> for LimbsState {
