@@ -61,6 +61,9 @@ pub fn handle_combat_action(
     match combat_action.skill.as_ref() {
         // Knifeplay non-combo attacks.
         "Bloodscourge" => {
+            if combat_action.annotation.eq_ignore_ascii_case("miss") {
+                return Ok(());
+            }
             attack_afflictions(
                 agent_states,
                 &combat_action.target,
@@ -79,6 +82,9 @@ pub fn handle_combat_action(
             sitara_strike(agent_states, &combat_action.target, after, 1);
         }
         "Fleshbane" => {
+            if combat_action.annotation.eq_ignore_ascii_case("miss") {
+                return Ok(());
+            }
             attack_afflictions(
                 agent_states,
                 &combat_action.target,
