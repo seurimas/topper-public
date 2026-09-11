@@ -444,6 +444,8 @@ impl AetTimelineStateTrait for AetTimelineState {
         db: Option<&DB>,
     ) -> Result<(), String> {
         self.me = slice.me.clone();
+        // Advance balances/relapses to this slice's time before applying its observations.
+        self.update_time_with_stats(slice.time)?;
         for gmcp in slice.gmcp.iter() {
             self.apply_gmcp(gmcp, db);
         }
