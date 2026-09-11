@@ -5,13 +5,13 @@ use serde::*;
 
 use crate::{
     bt::*,
-    classes::{get_venoms_from_plan, VenomType},
+    classes::{VenomType, get_venoms_from_plan},
     items::WieldAction,
     types::*,
     with_defense_db,
 };
 
-use super::{actions::*, add_delphs, get_top_suggestion, BEDAZZLE_AFFS};
+use super::{BEDAZZLE_AFFS, actions::*, add_delphs, get_top_suggestion};
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub enum FlayType {

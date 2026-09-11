@@ -1,6 +1,6 @@
+use super::BattleModule;
 use super::battle_stats::BattleStats;
 use super::db::AetMudletDatabaseModule;
-use super::BattleModule;
 use topper_aetolia::db::AetDatabaseModule;
 use topper_aetolia::timeline::AetTimeline;
 use topper_aetolia::types::*;

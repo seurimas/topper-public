@@ -6,7 +6,7 @@ use super::*;
 
 use crate::{
     bt::*,
-    classes::{get_controller, get_stack, VenomPlan},
+    classes::{VenomPlan, get_controller, get_stack},
     curatives::firstaid::{self, FirstAidSetting},
     db::*,
     defense::*,
@@ -197,5 +197,7 @@ pub fn get_class_state(
     } else {
         "<red>DB??".to_string()
     };
-    format!("{dumbness}{globes}{runeband}{anelace}{thurible}{dithering}\n{needle}{halfbeat}{singing}{playing}\n{ironcollar}{self_loathing}{primary}{pipelocks}\n{missing_hints}")
+    format!(
+        "{dumbness}{globes}{runeband}{anelace}{thurible}{dithering}\n{needle}{halfbeat}{singing}{playing}\n{ironcollar}{self_loathing}{primary}{pipelocks}\n{missing_hints}"
+    )
 }

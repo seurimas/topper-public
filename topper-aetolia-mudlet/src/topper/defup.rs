@@ -1,6 +1,6 @@
+use super::BattleModule;
 use super::battle_stats::BattleStats;
 use super::db::AetMudletDatabaseModule;
-use super::BattleModule;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use sled::Tree;

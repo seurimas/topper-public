@@ -13,15 +13,16 @@ pub fn check_for_link<T: Component>(
         .batch_callback(move |_| {
             let window = window().unwrap();
             let location = window.location();
-            match location.search() { Ok(mut link) => {
-                if link.len() <= 1 {
-                    return None;
+            match location.search() {
+                Ok(mut link) => {
+                    if link.len() <= 1 {
+                        return None;
+                    }
+                    link.remove(0);
+                    Some(msg(fetch_file(link.as_ref()).into()))
                 }
-                link.remove(0);
-                Some(msg(fetch_file(link.as_ref()).into()))
-            } _ => {
-                None
-            }}
+                _ => None,
+            }
         })
         .emit(());
 }

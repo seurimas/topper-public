@@ -5,8 +5,8 @@ use crate::{
     agent::*,
     bt::*,
     classes::{
-        zealot::{actions::*, constants::*},
         Class,
+        zealot::{actions::*, constants::*},
     },
 };
 

@@ -33,7 +33,7 @@ pub use predator::*;
 pub use sentinel::*;
 pub use shapeshifter::*;
 pub use siderealist::*;
-pub use topper_core::timeline::{CType, BALANCE_SCALE};
+pub use topper_core::timeline::{BALANCE_SCALE, CType};
 pub use topper_persuasion::agent::*;
 pub use unknown_flags::*;
 pub use vitals::*;

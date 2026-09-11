@@ -2,7 +2,6 @@ use serde::{Deserialize, Serialize};
 use topper_aetolia::{curatives::MENTAL_AFFLICTIONS, timeline::AetTimeline, types::*};
 use yew::prelude::*;
 
-
 use super::page::ExplainerPageMessage;
 
 #[allow(dead_code)]

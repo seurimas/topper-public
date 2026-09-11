@@ -1,7 +1,7 @@
 use serde::Serialize;
 use topper_core::timeline::TimeSlice;
 
-use crate::topper::{send_response, TopperMessage, TopperModule, TopperResponse};
+use crate::topper::{TopperMessage, TopperModule, TopperResponse, send_response};
 use std::io::prelude::*;
 use std::io::{Error, ErrorKind};
 use std::net::{Shutdown, TcpListener, TcpStream};

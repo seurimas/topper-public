@@ -3,8 +3,8 @@ use std::env;
 use std::fs::File;
 use std::io::BufReader;
 use topper_persuasion::{
-    simulation::{PersuasionEvent, TimestampedEvent},
     PersuasionState, PersuasionStatus,
+    simulation::{PersuasionEvent, TimestampedEvent},
 };
 
 fn main() {

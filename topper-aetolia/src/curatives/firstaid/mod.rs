@@ -14,7 +14,7 @@ mod firstaid_tests {
     use topper_core::observations::strip_ansi;
     use types::FType;
 
-    use crate::curatives::{parse_priorities, FirstAidPriorities};
+    use crate::curatives::{FirstAidPriorities, parse_priorities};
 
     use super::super::super::*;
 

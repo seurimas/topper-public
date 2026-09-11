@@ -1,7 +1,7 @@
-use crate::curatives::top_missing_aff;
-use crate::curatives::SafetyAlert;
 use crate::curatives::MENTAL_AFFLICTIONS;
 use crate::curatives::PHYSICAL_AFFLICTIONS;
+use crate::curatives::SafetyAlert;
+use crate::curatives::top_missing_aff;
 use crate::timeline::*;
 use crate::types::*;
 

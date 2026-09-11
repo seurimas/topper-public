@@ -3,8 +3,8 @@ use crate::db::AetDatabaseModule;
 use crate::observables::ActionPlan;
 use crate::timeline::{AetObservation, AetPrompt, AetTimeSlice, AetTimeline};
 use std::collections::HashMap;
-use topper_core::timeline::db::DatabaseModule;
 use topper_core::timeline::BaseTimeline;
+use topper_core::timeline::db::DatabaseModule;
 
 pub trait ActionPlanner {
     fn get_strategies(&self) -> &'static [&'static str];

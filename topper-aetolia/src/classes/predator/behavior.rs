@@ -300,7 +300,10 @@ impl UnpoweredFunction for PredatorBehavior {
                     if !me.can_command() {
                         return UnpoweredFunctionState::Failed;
                     }
-                    if !me.check_if_predator(&|predator| predator.is_orel_with_me()).unwrap_or(false) {
+                    if !me
+                        .check_if_predator(&|predator| predator.is_orel_with_me())
+                        .unwrap_or(false)
+                    {
                         return UnpoweredFunctionState::Failed;
                     }
                     let venoms = controller.get_venoms_from_plan(
@@ -333,7 +336,10 @@ impl UnpoweredFunction for PredatorBehavior {
                     if !me.can_command() {
                         return UnpoweredFunctionState::Failed;
                     }
-                    if !me.check_if_predator(&|predator| predator.is_orel_with_me()).unwrap_or(false) {
+                    if !me
+                        .check_if_predator(&|predator| predator.is_orel_with_me())
+                        .unwrap_or(false)
+                    {
                         return UnpoweredFunctionState::Failed;
                     }
                     controller.plan.add_to_qeb(Box::new(SwoopAction::new(

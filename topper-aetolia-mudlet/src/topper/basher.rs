@@ -2,11 +2,11 @@ use regex::Regex;
 use std::collections::{HashMap, HashSet};
 use topper_aetolia::non_agent::auto_persuade;
 use topper_aetolia::timeline::{
-    for_agent, AetObservation, AetTimeSlice, AetTimeline, CombatAction,
+    AetObservation, AetTimeSlice, AetTimeline, CombatAction, for_agent,
 };
 use topper_core::observations::strip_ansi;
-use topper_core::timeline::db::DatabaseModule;
 use topper_core::timeline::CType;
+use topper_core::timeline::db::DatabaseModule;
 use topper_core_mudlet::topper::{TopperMessage, TopperModule, TopperRequest, TopperResponse};
 use topper_persuasion::simple_strategy::simple_strategy;
 use topper_persuasion::*;

@@ -14,7 +14,7 @@ use crate::{
     links::{check_for_link, load_file, load_page},
     models::time_control::TimeControl,
     msg::ExplainerMessage,
-    sect_parser::{load_sect_into_iframe, AetoliaSectParser},
+    sect_parser::{AetoliaSectParser, load_sect_into_iframe},
 };
 
 use self::page::ExplainerPageModel;

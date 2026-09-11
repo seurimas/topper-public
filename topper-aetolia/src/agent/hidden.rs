@@ -1,8 +1,8 @@
 use super::*;
 use num_enum::TryFromPrimitive;
 use serde::{Deserialize, Serialize};
-use std::collections::hash_set::Iter;
 use std::collections::HashSet;
+use std::collections::hash_set::Iter;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use topper_core::timeline::BaseAgentState;

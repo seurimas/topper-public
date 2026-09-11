@@ -3,7 +3,7 @@ extern crate syn;
 #[macro_use]
 extern crate quote;
 use proc_macro::TokenStream;
-use syn::{parse_macro_input, Data, DataEnum, DeriveInput, Fields};
+use syn::{Data, DataEnum, DeriveInput, Fields, parse_macro_input};
 
 #[proc_macro_derive(EnumFromArgs, attributes(skip_args))]
 pub fn derive_enum_from_args(input: TokenStream) -> TokenStream {

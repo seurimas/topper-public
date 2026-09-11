@@ -1,7 +1,7 @@
 use behavior_bark::unpowered::*;
 
 use crate::{
-    bt::{get_tree, BehaviorController},
+    bt::{BehaviorController, get_tree},
     classes::Class,
     curatives::AetTimeline,
     observables::ActionPlan,

@@ -1,5 +1,5 @@
-use serde::*;
 use behavior_bark::unpowered::*;
+use serde::*;
 use topper_core::timeline::CType;
 
 use crate::{bt::*, classes::VENOM_AFFLICTS, timeline::apply_functions::apply_venom, types::*};

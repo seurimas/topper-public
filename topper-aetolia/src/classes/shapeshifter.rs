@@ -1,5 +1,5 @@
-use crate::curatives::remove_in_order;
 use crate::curatives::STEROID_ORDER;
+use crate::curatives::remove_in_order;
 use crate::timeline::*;
 use crate::types::*;
 

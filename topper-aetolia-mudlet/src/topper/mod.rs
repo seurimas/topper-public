@@ -5,7 +5,7 @@ use serde_json::from_str;
 use std::sync::mpsc::Sender;
 use std::sync::{Arc, RwLock};
 use topper_aetolia::bt::{DEBUG_TREES, clear_behavior_trees};
-use topper_aetolia::classes::{VenomPlan, clear_aff_stacks, get_attack};
+use topper_aetolia::classes::{VenomPlan, clear_aff_stacks};
 use topper_aetolia::db::AetDatabaseModule;
 use topper_aetolia::defense::DEFENSE_DATABASE;
 use topper_aetolia::non_agent::{AetNonAgent, AetTimelineDenizenExt, AetTimelineRoomExt};
@@ -14,10 +14,11 @@ use topper_aetolia::types::AgentState;
 use topper_core::observations;
 use topper_core::observations::{BENCHMARKS, ObservationParser};
 use topper_core_mudlet::topper::{
-    TelnetModule, TimelineModule, Topper, TopperCore, TopperHandler, TopperMessage, TopperModule,
-    TopperRequest, TopperResponse,
+    TelnetModule, Topper, TopperCore, TopperHandler, TopperMessage, TopperModule, TopperRequest,
+    TopperResponse,
 };
 pub mod basher;
+pub mod battle;
 pub mod battle_stats;
 mod behavior_trees;
 pub mod db;
@@ -26,6 +27,7 @@ pub mod firstaid;
 pub mod group;
 pub mod prediction;
 pub mod stacks;
+pub mod timeline;
 pub mod web_ui;
 use crate::topper::basher::BasherModule;
 use crate::topper::behavior_trees::initialize_load_tree_func;
@@ -33,99 +35,12 @@ use crate::topper::defup::DefupModule;
 use crate::topper::prediction::prioritize_cures;
 use crate::topper::stacks::initialize_load_stack_func;
 
+use self::battle::BattleModule;
 use self::battle_stats::BattleStats;
 use self::db::AetMudletDatabaseModule;
 use self::firstaid::FirstAidModule;
+use self::timeline::AetTimelineModule;
 use self::web_ui::WebModule;
-
-pub type AetTimelineModule = TimelineModule<AetObservation, AetPrompt, AgentState, AetNonAgent>;
-
-impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for AetTimelineModule {
-    type Siblings = (&'s AetMudletDatabaseModule,);
-    fn handle_message(
-        &mut self,
-        message: &TopperMessage<AetTimeSlice>,
-        siblings: Self::Siblings,
-    ) -> Result<TopperResponse<BattleStats>, String> {
-        match message {
-            TopperMessage::TimeSlice(timeslice) => {
-                self.timeline
-                    .push_time_slice(timeslice.clone(), Some(siblings.0))?;
-                Ok(TopperResponse::silent())
-            }
-            TopperMessage::Request(request) => match request {
-                TopperRequest::BattleStats(when) => {
-                    self.timeline.update_time(*when, &REALTIME_STAT_NAMES)?;
-                    Ok(TopperResponse::silent())
-                }
-                TopperRequest::Hint(who, hint, value) => {
-                    self.timeline
-                        .state
-                        .add_player_hint(&who, &hint, value.to_string());
-                    Ok(TopperResponse::silent())
-                }
-                TopperRequest::Assume(who, aff_or_def, value) => {
-                    self.timeline
-                        .state
-                        .set_flag_for_agent(&who, &aff_or_def, *value);
-                    Ok(TopperResponse::silent())
-                }
-                TopperRequest::Reset(reset_type) => {
-                    self.timeline.reset(reset_type.eq("full"));
-                    Ok(TopperResponse::silent())
-                }
-                _ => Ok(TopperResponse::silent()),
-            },
-            _ => Ok(TopperResponse::silent()),
-        }
-    }
-}
-
-#[derive(Default)]
-pub struct BattleModule;
-
-impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for BattleModule {
-    type Siblings = (
-        &'s mut FirstAidModule,
-        &'s Option<String>,
-        &'s AetTimeline,
-        &'s AetMudletDatabaseModule,
-    );
-    fn handle_message(
-        &mut self,
-        message: &TopperMessage<AetTimeSlice>,
-        (firstaid, target, timeline, db): Self::Siblings,
-    ) -> Result<TopperResponse<BattleStats>, String> {
-        let me = timeline.who_am_i();
-        match message {
-            TopperMessage::Request(request) => match request {
-                TopperRequest::Attack(strategy) => {
-                    if let Some(target) = target {
-                        Ok(TopperResponse::qeb(get_attack(
-                            &timeline,
-                            &me,
-                            &target,
-                            &strategy,
-                            Some(db),
-                            firstaid.start_temporary_fa_settings(),
-                        )))
-                    } else {
-                        Ok(TopperResponse::qeb(get_attack(
-                            &timeline,
-                            &me,
-                            &"".to_string(),
-                            &strategy,
-                            Some(db),
-                            firstaid.start_temporary_fa_settings(),
-                        )))
-                    }
-                }
-                _ => Ok(TopperResponse::silent()),
-            },
-            _ => Ok(TopperResponse::silent()),
-        }
-    }
-}
 
 pub struct AetTopper {
     pub debug_mode: bool,

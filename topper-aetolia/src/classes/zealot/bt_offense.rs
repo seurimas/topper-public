@@ -7,7 +7,7 @@ use super::*;
 
 use crate::{
     bt::*,
-    classes::{get_controller, get_stack, VenomPlan},
+    classes::{VenomPlan, get_controller, get_stack},
     curatives::FirstAidSetting,
     db::*,
     defense::*,

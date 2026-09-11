@@ -3,7 +3,7 @@ use serde::*;
 
 use crate::{
     bt::*,
-    classes::{get_venoms_from_plan, group::*, AFFLICT_VENOMS},
+    classes::{AFFLICT_VENOMS, get_venoms_from_plan, group::*},
     curatives::get_cure_depth,
     items::{UnwieldAction, WieldAction},
     non_agent::AetTimelineRoomExt,

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    AppealType, Appeals, PersuasionAff, PersuasionState, PersuasionStatus, PERSUASION_AFFS,
+    AppealType, Appeals, PERSUASION_AFFS, PersuasionAff, PersuasionState, PersuasionStatus,
 };
 
 #[derive(Debug, Clone, Copy)]
