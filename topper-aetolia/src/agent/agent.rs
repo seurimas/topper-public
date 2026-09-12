@@ -5,6 +5,7 @@ use num_enum::TryFromPrimitive;
 use serde::{Deserialize, Serialize};
 use std::convert::{TryFrom, TryInto};
 use std::fmt;
+use structdiff::{Difference, StructDiff};
 use topper_core::timeline::BaseAgentState;
 use topper_persuasion::PersuasionState;
 
@@ -36,9 +37,11 @@ impl StaticModifiers {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Difference)]
+#[difference(expose)]
 pub struct AgentState {
-    pub balances: [Timer; BType::SIZE as usize],
+    #[difference(recurse)]
+    pub balances: BalanceSet,
     pub vitals: VitalsState,
     pub aggro: AggroState,
     pub flags: FlagSet,
@@ -70,6 +73,22 @@ pub struct AgentState {
 
 // True = Aeon = Pause cooldowns.
 pub type CooldownEffect = bool;
+
+impl AgentState {
+    /// Renders the changed fields between this and `other` as a human-readable summary.
+    pub fn diff_summary(&self, other: &Self) -> String {
+        let diffs = self.diff(other);
+        if diffs.is_empty() {
+            "No differences.".to_string()
+        } else {
+            diffs
+                .iter()
+                .map(|diff| format!("{:?}", diff))
+                .collect::<Vec<_>>()
+                .join("\n")
+        }
+    }
+}
 
 impl BaseAgentState for AgentState {
     fn wait(&mut self, duration: i32) {
@@ -120,23 +139,7 @@ impl BaseAgentState for AgentState {
             }
         }
         let rebound_pending = !self.balanced(BType::Rebounding) && !self.is(FType::Rebounding);
-        for i in 0..self.balances.len() {
-            match (i.try_into(), cooldown_effect) {
-                (
-                    Ok(BType::Fitness)
-                    | Ok(BType::Fitness)
-                    | Ok(BType::ClassCure1)
-                    | Ok(BType::ClassCure2)
-                    | Ok(BType::Regenerate),
-                    true,
-                ) => {
-                    // Aeon pauses cooldowns.
-                }
-                _ => {
-                    self.balances[i].wait(duration);
-                }
-            }
-        }
+        self.balances.wait(duration, cooldown_effect);
         if rebound_pending && self.balanced(BType::Rebounding) {
             self.set_flag(FType::AssumedRebounding, true);
         }
@@ -540,7 +543,7 @@ impl AgentState {
         }
         match balance {
             BType::Induce => self.assume_bard(&|mut bard| bard.set_induce_timer(value)),
-            _ => self.balances[balance as usize].start_count_down_seconds(value),
+            _ => self.balances[balance].start_count_down_seconds(value),
         }
     }
 
@@ -550,7 +553,7 @@ impl AgentState {
                 .check_if_bard(&|bard| bard.get_induce_time_left())
                 .map(|time: i32| time as CType)
                 .unwrap_or(0),
-            _ => self.balances[balance as usize].get_time_left(),
+            _ => self.balances[balance].get_time_left(),
         }
     }
 
@@ -570,7 +573,7 @@ impl AgentState {
                 .check_if_bard(&|bard| bard.get_induce_time_left())
                 .map(|time: i32| time as f32 / BALANCE_SCALE)
                 .unwrap_or(0.0),
-            _ => self.balances[balance as usize].get_time_left_seconds(),
+            _ => self.balances[balance].get_time_left_seconds(),
         }
     }
 
@@ -579,7 +582,7 @@ impl AgentState {
             BType::Induce => self
                 .check_if_bard(&|bard| bard.induce_ready())
                 .unwrap_or(false),
-            _ => !self.balances[balance as usize].is_active(),
+            _ => !self.balances[balance].is_active(),
         }
     }
 
@@ -836,15 +839,15 @@ impl AgentState {
         let mut earliest_escape = None;
         if self.is(FType::Asthma) && self.is(FType::Anorexia) && self.is(FType::Slickness) {
             if !self.is(FType::Paralysis) && !self.is(FType::Paresis) {
-                earliest_escape = Some(self.balances[BType::Tree as usize]);
+                earliest_escape = Some(self.balances[BType::Tree]);
             }
             if !self.is(FType::Impatience) && !self.is(FType::Stupidity) {
-                let focus_time = self.balances[BType::Focus as usize];
+                let focus_time = self.balances[BType::Focus];
                 earliest_escape = earliest_escape.map_or(Some(focus_time), |other| {
                     if other.get_time_left() < focus_time.get_time_left() {
                         Some(other)
                     } else {
-                        Some(self.balances[BType::Focus as usize])
+                        Some(self.balances[BType::Focus])
                     }
                 });
             } else {
@@ -855,7 +858,7 @@ impl AgentState {
             && self.is(FType::DestroyedThroat)
         {
             if !self.is(FType::Paralysis) && !self.is(FType::Paresis) {
-                earliest_escape = Some(self.balances[BType::Tree as usize]);
+                earliest_escape = Some(self.balances[BType::Tree]);
             } else {
                 earliest_escape = Some(Timer::count_down_seconds(15.));
             }

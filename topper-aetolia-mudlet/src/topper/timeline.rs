@@ -65,6 +65,9 @@ impl<'s> TopperModule<'s, AetTimeSlice, BattleStats> for AetTimelineModule {
                     } else if let Some(rest) = command.strip_prefix("snapshot check ") {
                         println!("{}", snapshot_check(&self.snapshots, rest, target, db));
                         Ok(TopperResponse::silent())
+                    } else if let Some(rest) = command.strip_prefix("snapshot diff ") {
+                        println!("{}", snapshot_diff(&self.snapshots, rest, target));
+                        Ok(TopperResponse::silent())
                     } else {
                         Ok(TopperResponse::silent())
                     }
@@ -110,4 +113,53 @@ fn snapshot_check(
         ),
         None => format!("No snapshot found at or before time {}", time),
     }
+}
+
+fn snapshot_diff(
+    snapshots: &Vec<(CType, topper_aetolia::timeline::AetTimeline)>,
+    rest: &str,
+    target: &Option<String>,
+) -> String {
+    let mut times = rest.split_whitespace();
+    let (Some(time_a_str), Some(time_b_str)) = (times.next(), times.next()) else {
+        return "Usage: snapshot diff <time1> <time2>".to_string();
+    };
+    let (time_a, time_b) = match (time_a_str.parse::<CType>(), time_b_str.parse::<CType>()) {
+        (Ok(time_a), Ok(time_b)) => (time_a, time_b),
+        _ => return format!("Invalid snapshot times: {} {}", time_a_str, time_b_str),
+    };
+    let target = match target {
+        Some(target) => target,
+        None => return "No target set.".to_string(),
+    };
+    let find_snapshot = |time: CType| {
+        snapshots
+            .iter()
+            .rev()
+            .find(|(snapshot_time, _)| *snapshot_time <= time)
+            .map(|(_, timeline)| timeline)
+    };
+    let (Some(snapshot_a), Some(snapshot_b)) = (find_snapshot(time_a), find_snapshot(time_b))
+    else {
+        return format!(
+            "No snapshot found at or before time {} and/or {}",
+            time_a, time_b
+        );
+    };
+    let me = snapshot_a.who_am_i();
+    let me_a = snapshot_a.state.borrow_agent(&me);
+    let me_b = snapshot_b.state.borrow_agent(&me);
+    let target_a = snapshot_a.state.borrow_agent(target);
+    let target_b = snapshot_b.state.borrow_agent(target);
+    format!(
+        "== {} ({} -> {}) ==\n{}\n== {} ({} -> {}) ==\n{}",
+        me,
+        time_a,
+        time_b,
+        me_a.diff_summary(&me_b),
+        target,
+        time_a,
+        time_b,
+        target_a.diff_summary(&target_b),
+    )
 }

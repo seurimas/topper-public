@@ -42,6 +42,27 @@
         "observation_name": "Proc"
     },
     {
+        "regex": "^(You)r fulcrum already extends into the Prime Material, thaumaturge.$",
+        "args": [
+            {
+                "GroupAsTarget": 1
+            },
+            {
+                "Literal": "Thaumaturgy"
+            },
+            {
+                "Literal": "Expand"
+            },
+            {
+                "Literal": ""
+            },
+            {
+                "Literal": ""
+            }
+        ],
+        "observation_name": "Proc"
+    },
+    {
         "regex": "^Planar radiation ripples across (\\w+), irritating .* flesh with elemental energy.$",
         "args": [
             {

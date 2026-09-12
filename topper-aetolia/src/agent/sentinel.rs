@@ -2,8 +2,6 @@ use super::*;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, hash::Hash};
 
-use crate::agent::general::Timer;
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SentinelBeast {
     Wisp,

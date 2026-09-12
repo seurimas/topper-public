@@ -31,3 +31,4 @@ log = "^0.4.8"
 simplelog = "^0.7.4"
 chrono = "0.4"
 tl = "0.7.8"
+structdiff = { version = "0.7", features = ["debug_diffs"] }

@@ -141,8 +141,8 @@ impl MatchRunner {
         let timeline_fixes: Vec<(&str, Box<dyn Fn(&mut AgentState)>)> = vec![(
             "balance corrected",
             Box::new(|me: &mut AgentState| {
-                me.balances[BType::Balance as usize].reset();
-                me.balances[BType::Equil as usize].reset();
+                me.balances[BType::Balance].reset();
+                me.balances[BType::Equil].reset();
             }),
         )];
 
