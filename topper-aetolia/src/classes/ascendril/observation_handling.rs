@@ -686,16 +686,19 @@ pub fn handle_combat_action(
         // Expands a fulcrum.
         "Expand" => {
             if combat_action.annotation.eq("etherfluxed") {
+                // This proc's "caster" is just whoever the radiation rippled across, not
+                // necessarily the fulcrum's owner, so only the flag applies here.
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.set_flag(FType::Etherflux, true);
                 });
-            }
-            for_agent(agent_states, &combat_action.caster, &|me| {
-                let room = me.room_id;
-                me.assume_ascendril(&|ascendril| {
-                    ascendril.fulcrum_expand(room);
+            } else {
+                for_agent(agent_states, &combat_action.caster, &|me| {
+                    let room = me.room_id;
+                    me.assume_ascendril(&|ascendril| {
+                        ascendril.fulcrum_expand(room);
+                    });
                 });
-            });
+            }
         }
         // Contracts a fulcrum.
         "Interfuse" | "Callback" => {
