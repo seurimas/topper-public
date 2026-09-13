@@ -1,9 +1,10 @@
 use super::*;
+use structdiff::{Difference, StructDiff};
 
 pub const RECENT_UNPARRIED_WINDOW: f32 = 2.0;
 pub const RECENT_PARRIED_WINDOW: f32 = 1.25;
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Difference)]
 pub struct ParryState {
     parrying: Option<LType>,
     parry_known: bool,

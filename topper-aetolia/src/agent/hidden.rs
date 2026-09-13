@@ -5,9 +5,10 @@ use std::collections::HashSet;
 use std::collections::hash_set::Iter;
 use std::fmt;
 use std::hash::{Hash, Hasher};
+use structdiff::{Difference, StructDiff};
 use topper_core::timeline::BaseAgentState;
 
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Difference)]
 pub struct HiddenState {
     unknown: isize,          // Truly unknown, with no guesses. Non-branched.
     guessed: HashSet<FType>, // Partially unknown, some guesses existing in this branch.

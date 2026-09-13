@@ -3,6 +3,7 @@ use num_enum::TryFromPrimitive;
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use std::fmt;
+use structdiff::{Difference, StructDiff};
 use topper_core::timeline::BaseAgentState;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -12,7 +13,7 @@ pub struct Branch {
     points: usize,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Difference)]
 pub enum BranchState {
     Single,
     Branched(Branch),

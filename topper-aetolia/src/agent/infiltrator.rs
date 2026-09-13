@@ -1,9 +1,10 @@
 use super::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use structdiff::{Difference, StructDiff};
 use topper_core::combinatorics::combinations;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Difference)]
 pub enum RelapseState {
     Inactive,
     Active(Vec<(CType, String)>),
@@ -120,7 +121,7 @@ pub enum Hypnosis {
     Trigger(String),
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Difference)]
 pub enum HypnoState {
     #[default]
     Empty,

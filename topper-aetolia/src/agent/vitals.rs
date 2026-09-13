@@ -1,6 +1,7 @@
 use super::*;
 use serde::{Deserialize, Serialize};
 use std::hash::Hash;
+use structdiff::{Difference, StructDiff};
 
 /// Tracks the state of a single vital stat.
 ///
@@ -247,7 +248,7 @@ impl VitalState {
 // ── VitalsState ───────────────────────────────────────────────────────────────
 
 /// All vital stats for a single agent, stored as one [`VitalState`] per [`SType`].
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, Difference)]
 pub struct VitalsState {
     pub vitals: [VitalState; SType::SIZE as usize],
 }

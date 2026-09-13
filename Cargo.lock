@@ -5195,6 +5195,7 @@ dependencies = [
  "serde_json",
  "simplelog 0.7.6",
  "sled",
+ "structdiff",
  "strum 0.16.0",
  "strum_macros 0.16.0",
 ]

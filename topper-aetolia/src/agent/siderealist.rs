@@ -2,8 +2,9 @@ use std::{collections::HashMap, hash::Hash};
 
 use super::*;
 use serde::*;
+use structdiff::{Difference, StructDiff};
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Difference)]
 pub struct SiderealistBoard {
     dustring: Timer,
     asterism: Timer,

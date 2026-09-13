@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::ascii::AsciiExt;
 use std::convert::{TryFrom, TryInto};
 use std::fmt;
+use structdiff::{Difference, StructDiff};
 use topper_core::timeline::BaseAgentState;
 use topper_persuasion::PersuasionAff;
 
@@ -27,7 +28,7 @@ impl AreaStatus {
     }
 }
 
-#[derive(Debug, Default, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, Default, PartialEq, Eq, Hash, Clone, Difference)]
 pub struct ObservationState {
     pub time_since_seen: CType,
     pub area_status: AreaStatus,
@@ -680,7 +681,7 @@ impl FType {
 const COUNTERS_SIZE: usize = FType::TIMED as usize - FType::SIZE as usize - 1;
 const TIMERS_SIZE: usize = FType::FULL as usize - FType::TIMED as usize - 1;
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Difference)]
 pub struct FlagSet {
     simple: [bool; FType::SIZE as usize],
     counters: [u8; COUNTERS_SIZE],
@@ -977,7 +978,7 @@ impl Clone for FlagSet {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Difference)]
 pub enum WieldState {
     Normal {
         left: Option<String>,
@@ -1140,7 +1141,7 @@ impl Default for DodgeType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, Difference)]
 pub struct DodgeState {
     pub dodge_type: DodgeType,
     dodge_timer: DodgeTimer,
@@ -1190,7 +1191,7 @@ impl DodgeState {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Difference)]
 pub enum ClassState {
     Ascendril(AscendrilClassState),
     Bloodborn(AscendrilClassState), // Mirror of Ascendril
@@ -1346,7 +1347,7 @@ impl ChannelType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Difference)]
 pub enum ChannelState {
     Inactive,
     ChannelWithLimb {

@@ -1,4 +1,5 @@
 use super::*;
+use structdiff::{Difference, StructDiff};
 
 const PIPE_PUFFS: usize = 10;
 
@@ -108,7 +109,7 @@ impl PipeState {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Difference)]
 pub struct PipesState {
     yarrow: PipeState,
     reishi: PipeState,

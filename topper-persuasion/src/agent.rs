@@ -1,4 +1,5 @@
 use crate::*;
+use structdiff::{Difference, StructDiff};
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 pub enum RhetoricState {
@@ -9,7 +10,7 @@ pub enum RhetoricState {
     OneLeft(AppealType),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Difference)]
 pub struct PersuasionState {
     pub max_acumen: i32,
     pub acumen: i32,

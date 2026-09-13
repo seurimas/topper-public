@@ -42,29 +42,51 @@ impl StaticModifiers {
 pub struct AgentState {
     #[difference(recurse)]
     pub balances: BalanceSet,
+    #[difference(recurse)]
     pub vitals: VitalsState,
+    #[difference(recurse)]
     pub aggro: AggroState,
+    #[difference(recurse)]
     pub flags: FlagSet,
+    #[difference(recurse)]
     pub unknown_flags: UnknownFlagSet,
+    #[difference(recurse)]
     pub limb_damage: LimbSet,
+    #[difference(recurse)]
     pub hypno_state: HypnoState,
+    #[difference(recurse)]
     pub class_state: ClassState,
+    #[difference(recurse)]
     pub relapses: RelapseState,
+    #[difference(recurse)]
     pub parry_state: ParryState,
+    #[difference(recurse)]
     pub wield_state: WieldState,
+    #[difference(recurse)]
     pub dodge_state: DodgeState,
+    #[difference(recurse)]
     pub channel_state: ChannelState,
+    #[difference(recurse)]
     pub hidden_state: HiddenState,
+    #[difference(recurse)]
     pub branch_state: BranchState,
+    #[difference(recurse)]
     pub resin_state: ResinState,
+    #[difference(recurse)]
     pub pipe_state: PipesState,
+    #[difference(recurse)]
     pub bard_board: BardBoard,
+    #[difference(recurse)]
     pub predator_board: PredatorBoard,
+    #[difference(recurse)]
     pub ascendril_board: AscendrilBoard,
+    #[difference(recurse)]
     pub siderealist_board: SiderealistBoard,
     pub room_id: i64,
     pub elevation: Elevation,
+    #[difference(recurse)]
     pub persuasion_state: PersuasionState,
+    #[difference(recurse)]
     pub observation: ObservationState,
     pub fleeing: Timer,
     pub bleeding: Option<CType>,

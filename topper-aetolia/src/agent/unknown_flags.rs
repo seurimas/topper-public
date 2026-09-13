@@ -1,6 +1,7 @@
 use std::{collections::HashSet, hash::Hash, sync::Arc};
+use structdiff::{Difference, StructDiff};
 
-#[derive(Clone, Default, Debug, PartialEq, Eq)]
+#[derive(Clone, Default, Debug, PartialEq, Eq, Difference)]
 pub struct UnknownFlagSet {
     pub set_flags: HashSet<Arc<str>>,
 }

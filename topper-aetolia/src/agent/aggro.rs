@@ -1,4 +1,5 @@
 use super::*;
+use structdiff::{Difference, StructDiff};
 
 const AGGRO_WINDOWS: CType = (BALANCE_SCALE * 10.0) as CType;
 
@@ -9,7 +10,7 @@ struct AggroTimeState {
     attackers: Vec<String>,
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, Difference)]
 pub struct AggroState {
     timer: CType,
     latest: AggroTimeState,

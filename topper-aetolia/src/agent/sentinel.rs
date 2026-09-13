@@ -1,6 +1,7 @@
 use super::*;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, hash::Hash};
+use structdiff::{Difference, StructDiff};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SentinelBeast {
@@ -120,7 +121,7 @@ pub enum Resin {
     Lysirine,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Difference)]
 pub struct ResinState {
     pub hot: Option<Resin>,
     pub cold: Option<Resin>,

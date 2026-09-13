@@ -2,6 +2,7 @@ use crate::classes::VenomType;
 
 use super::*;
 use serde::*;
+use structdiff::{Difference, StructDiff};
 
 pub const FEINT_COOLDOWN: CType = 10 * BALANCE_SCALE as CType;
 
@@ -413,7 +414,7 @@ impl PredatorClassState {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Difference)]
 pub struct PredatorBoard {
     pub fleshbane: Timer,
     pub fleshbane_count: u32,

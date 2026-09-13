@@ -3,6 +3,7 @@ use num_enum::TryFromPrimitive;
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use std::fmt;
+use structdiff::{Difference, StructDiff};
 use topper_core::timeline::BaseAgentState;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, TryFromPrimitive, Serialize, Deserialize)]
@@ -132,7 +133,7 @@ pub fn get_damage_barrier(aff: &String) -> Result<(LType, CType), String> {
     }
 }
 
-#[derive(Clone, Copy, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct Limb {
     pub damage: CType,
     pub crippled: bool,
@@ -142,7 +143,7 @@ pub struct Limb {
     pub welt: bool,
 }
 
-#[derive(Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Default, PartialEq, Eq, Hash, Difference)]
 pub struct LimbSet {
     pub limbs: [Limb; LType::SIZE as usize],
     pub restoring: Option<LType>,

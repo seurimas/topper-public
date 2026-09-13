@@ -9,6 +9,7 @@ use crate::{
 };
 
 use super::CooldownEffect;
+use structdiff::{Difference, StructDiff};
 
 const ECHOES_TIME: f32 = 60.0 * 10.0 * BALANCE_SCALE;
 
@@ -37,7 +38,7 @@ pub struct Phenomena {
     pub state: PhenomenaKind,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash, Difference)]
 pub struct AscendrilBoard {
     sunspot: Timer,
     icicles: i32,

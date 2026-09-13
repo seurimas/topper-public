@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use serde::*;
 
 use super::*;
+use structdiff::{Difference, StructDiff};
 
 pub const GLOBE_AFFS: [FType; 3] = [FType::Dizziness, FType::Confusion, FType::Perplexity];
 pub const RUNEBAND_AFFS: [FType; 7] = [
@@ -734,7 +735,7 @@ impl EmotionState {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Difference)]
 pub struct BardBoard {
     pub emotion_state: EmotionState,
     pub runeband_state: RunebandState,
