@@ -1,4 +1,5 @@
 use super::*;
+use std::hash::{Hash, Hasher};
 use structdiff::{Difference, StructDiff};
 
 const AGGRO_WINDOWS: CType = (BALANCE_SCALE * 10.0) as CType;
@@ -10,12 +11,28 @@ struct AggroTimeState {
     attackers: Vec<String>,
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, Difference)]
+#[derive(Debug, Default, Clone, Difference)]
 pub struct AggroState {
     #[difference(skip)]
     timer: CType,
     latest: AggroTimeState,
     oldest: AggroTimeState,
+}
+
+// Ignores `timer`: it's just the countdown to the next window rotation, not part of the value.
+impl PartialEq for AggroState {
+    fn eq(&self, other: &Self) -> bool {
+        self.latest == other.latest && self.oldest == other.oldest
+    }
+}
+
+impl Eq for AggroState {}
+
+impl Hash for AggroState {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.latest.hash(state);
+        self.oldest.hash(state);
+    }
 }
 
 impl AggroState {

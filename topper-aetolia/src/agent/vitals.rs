@@ -10,46 +10,73 @@ use structdiff::{Difference, StructDiff};
 /// `Estimated` variant is used. All existing [`AgentState`] accessor methods remain
 /// compatible: for `Estimated`, [`get_current`] maps `current_percent` to a 0–100
 /// integer and [`get_max`] returns 100.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Difference)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Difference)]
 pub enum VitalState {
     /// Exact values confirmed at a specific timeline timestamp.
     KnownAt {
         current: CType,
         max: CType,
         /// The [`TimelineState::time`] value when these values were last observed.
-        #[difference(skip)]
         last_check: CType,
     },
     Estimated {
         current_percent: CType,
         max: CType,
-        #[difference(skip)]
         last_check: CType,
     },
 }
 
+// Ignores `last_check`: it's bookkeeping for estimate freshness, not part of the value.
+impl PartialEq for VitalState {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (
+                VitalState::KnownAt {
+                    current: c1,
+                    max: m1,
+                    ..
+                },
+                VitalState::KnownAt {
+                    current: c2,
+                    max: m2,
+                    ..
+                },
+            ) => c1 == c2 && m1 == m2,
+            (
+                VitalState::Estimated {
+                    current_percent: p1,
+                    max: m1,
+                    ..
+                },
+                VitalState::Estimated {
+                    current_percent: p2,
+                    max: m2,
+                    ..
+                },
+            ) => p1 == p2 && m1 == m2,
+            _ => false,
+        }
+    }
+}
+
+impl Eq for VitalState {}
+
 impl Hash for VitalState {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         match self {
-            VitalState::KnownAt {
-                current,
-                max,
-                last_check,
-            } => {
+            VitalState::KnownAt { current, max, .. } => {
                 0u8.hash(state);
                 current.hash(state);
                 max.hash(state);
-                last_check.hash(state);
             }
             VitalState::Estimated {
                 current_percent,
                 max,
-                last_check,
+                ..
             } => {
                 1u8.hash(state);
                 current_percent.hash(state);
                 max.hash(state);
-                last_check.hash(state);
             }
         }
     }

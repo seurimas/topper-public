@@ -3,7 +3,7 @@ use num_enum::TryFromPrimitive;
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use std::fmt;
-use structdiff::{Difference, StructDiff};
+use structdiff::StructDiff;
 use topper_persuasion::PersuasionAff;
 
 // Flags
@@ -620,11 +620,119 @@ impl FType {
 const COUNTERS_SIZE: usize = FType::TIMED as usize - FType::SIZE as usize - 1;
 const TIMERS_SIZE: usize = FType::FULL as usize - FType::TIMED as usize - 1;
 
-#[derive(PartialEq, Eq, Hash, Difference)]
+#[derive(PartialEq, Eq, Hash)]
 pub struct FlagSet {
     simple: [bool; FType::SIZE as usize],
     counters: [u8; COUNTERS_SIZE],
     timed: [Timer; TIMERS_SIZE as usize],
+}
+
+/// A single semantic change to a [`FlagSet`], grouped by the kind of flag it targets.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum FlagSetDiff {
+    /// A normal flag was set.
+    Add(FType),
+    /// A normal flag was cleared.
+    Remove(FType),
+    /// A counter flag's count changed to a nonzero value.
+    Set(FType, u8),
+    /// A counter flag dropped to zero.
+    Unset(FType),
+    /// A timed flag was (re)armed with a fresh timer.
+    Start(FType, Timer),
+    /// A timed flag's existing timer advanced by this much time.
+    Tick(FType, CType),
+}
+
+fn timed_flag(idx: usize) -> FType {
+    FType::try_from(idx as u16 + FType::TIMED as u16 + 1).unwrap()
+}
+
+// Only CountDown-CountDown and matching CountUpObserve-CountUpObserve pairs can be
+// expressed as a single elapsed-time tick; anything else needs a fresh Start.
+fn tick_delta(old: &Timer, new: &Timer) -> Option<CType> {
+    if !old.is_active() || !new.is_active() {
+        return None;
+    }
+    match (old, new) {
+        (Timer::CountDown(_), Timer::CountDown(_)) => {
+            Some(old.get_time_left() - new.get_time_left())
+        }
+        (
+            Timer::CountUpObserve {
+                up_to: u1,
+                expire_at: e1,
+                ..
+            },
+            Timer::CountUpObserve {
+                up_to: u2,
+                expire_at: e2,
+                ..
+            },
+        ) if u1 == u2 && e1 == e2 => Some(old.get_time_left() - new.get_time_left()),
+        _ => None,
+    }
+}
+
+impl StructDiff for FlagSet {
+    type Diff = FlagSetDiff;
+    type DiffRef<'target> = FlagSetDiff;
+
+    fn diff(&self, updated: &Self) -> Vec<Self::Diff> {
+        let mut diffs = Vec::new();
+
+        for idx in 0..self.simple.len() {
+            if self.simple[idx] != updated.simple[idx] {
+                if let Ok(flag) = FType::try_from(idx as u16) {
+                    diffs.push(if updated.simple[idx] {
+                        FlagSetDiff::Add(flag)
+                    } else {
+                        FlagSetDiff::Remove(flag)
+                    });
+                }
+            }
+        }
+
+        for idx in 0..self.counters.len() {
+            if self.counters[idx] != updated.counters[idx] {
+                if let Ok(flag) = FType::try_from_counter_idx(idx) {
+                    diffs.push(if updated.counters[idx] > 0 {
+                        FlagSetDiff::Set(flag, updated.counters[idx])
+                    } else {
+                        FlagSetDiff::Unset(flag)
+                    });
+                }
+            }
+        }
+
+        for idx in 0..self.timed.len() {
+            let (old, new) = (&self.timed[idx], &updated.timed[idx]);
+            if old != new {
+                let flag = timed_flag(idx);
+                diffs.push(match tick_delta(old, new) {
+                    Some(delta) => FlagSetDiff::Tick(flag, delta),
+                    None => FlagSetDiff::Start(flag, *new),
+                });
+            }
+        }
+
+        diffs
+    }
+
+    fn diff_ref<'target>(&'target self, updated: &'target Self) -> Vec<Self::DiffRef<'target>> {
+        self.diff(updated)
+    }
+
+    fn apply_single(&mut self, diff: Self::Diff) {
+        match diff {
+            FlagSetDiff::Add(flag) => self.simple[flag as usize] = true,
+            FlagSetDiff::Remove(flag) => self.simple[flag as usize] = false,
+            FlagSetDiff::Set(flag, value) => *self.get_counter_mut(flag) = value,
+            FlagSetDiff::Unset(flag) => *self.get_counter_mut(flag) = 0,
+            FlagSetDiff::Start(flag, timer) => *self.get_timer_mut(flag) = timer,
+            FlagSetDiff::Tick(flag, delta) => self.get_timer_mut(flag).wait(delta),
+        }
+    }
 }
 
 impl FlagSet {
