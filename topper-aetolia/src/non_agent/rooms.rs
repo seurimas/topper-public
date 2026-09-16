@@ -4,7 +4,7 @@ use serde::Deserialize;
 use topper_core::timeline::CType;
 
 use crate::{
-    agent::{Timer, Vibration, VibrationState},
+    agent::{FType, Timer, Vibration, VibrationState},
     classes::ascendril::Glyph,
     timeline::*,
 };
@@ -275,6 +275,9 @@ impl AetTimelineRoomExt for AetTimelineState {
         });
         self.for_agent(&player, &|me| {
             me.room_id = room_id;
+            if old_room_id != room_id {
+                me.set_flag(FType::Hobbled, false);
+            }
         });
     }
 

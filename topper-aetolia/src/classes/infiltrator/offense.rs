@@ -864,7 +864,7 @@ pub fn get_shadow_attack<'s>(
             || you.hypno_state.active
         {
             if you.lock_duration().is_some() {
-                Box::new(SleightAction::new(me, &target, &"blank"))
+                Box::new(SleightAction::new(me, &target, &"seclude"))
             } else if strategy == "salve" {
                 Box::new(SleightAction::new(me, &target, &"abrasion"))
             } else {

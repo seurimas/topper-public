@@ -18,10 +18,11 @@ const PYROCLAST_DAMAGE_PERCENT: CType = 20;
 const DISINTEGRATE_DAMAGE_PERCENT: CType = 40;
 
 const ICERAY_DAMAGE_PERCENT: CType = 10;
-const ICICLE_DAMAGE_PERCENT: CType = 15;
+const ICICLE_DAMAGE_PERCENT: CType = 12;
 const ICE_SHARD_DAMAGE_PERCENT: CType = 1;
-const DIREFROST_DAMAGE_PERCENT: CType = 7;
-const DIREFROST_PROC_DAMAGE_PERCENT: CType = 10;
+const DIREFROST_DAMAGE_PERCENT: CType = 4;
+const DIREFROST_PROC_DAMAGE_PERCENT: CType = 5;
+const DIREFROST_STACKS: u8 = 3;
 // Mana drains
 const DRENCH_BASE_PERCENT: CType = 7;
 const DRENCH_SHIVERING_PERCENT: CType = 14;
@@ -364,7 +365,7 @@ pub fn handle_combat_action(
         "Direfrost" => {
             if combat_action.annotation.eq("direfrosted") {
                 for_agent(agent_states, &combat_action.caster, &|me| {
-                    me.set_flag(FType::Direfrost, false);
+                    me.tick_flag_down(FType::Direfrost);
                     me.set_flag(FType::Mindfog, true);
                     me.set_flag(FType::Whiplash, true);
                     me.damage_stat_percent(SType::Health, DIREFROST_PROC_DAMAGE_PERCENT);
@@ -372,7 +373,7 @@ pub fn handle_combat_action(
             } else {
                 for_agent(agent_states, &combat_action.target, &|me| {
                     me.damage_stat_percent(SType::Health, DIREFROST_DAMAGE_PERCENT);
-                    me.set_flag(FType::Direfrost, true);
+                    me.set_count(FType::Direfrost, DIREFROST_STACKS);
                 });
                 for_agent(agent_states, &combat_action.caster, &|me| {
                     me.assume_ascendril(&|ascendril| {
@@ -477,7 +478,15 @@ pub fn handle_combat_action(
                     me.set_flag(FType::FrozenFeet, true);
                     conditions += 1;
                 }
-                me.damage_stat_percent(SType::Mana, CRYSTALISE_DAMAGE_PERCENTS[conditions]);
+                let drain = CRYSTALISE_DAMAGE_PERCENTS[conditions];
+                let mana_percent = me.get_stat_percent(SType::Mana);
+                if mana_percent < drain {
+                    // Not enough mana to drain, so the shortfall spills over as health damage.
+                    me.damage_stat_percent(SType::Mana, mana_percent);
+                    me.damage_stat_percent(SType::Health, drain - mana_percent);
+                } else {
+                    me.damage_stat_percent(SType::Mana, drain);
+                }
             });
             for_agent(agent_states, &combat_action.caster, &move |me| {
                 me.assume_ascendril(&|ascendril| {
@@ -700,8 +709,16 @@ pub fn handle_combat_action(
                 });
             }
         }
-        // Contracts a fulcrum.
-        "Interfuse" | "Callback" => {
+        // Contracts a fulcrum. Interfuse also upgrades a half resonance stack to full.
+        "Interfuse" => {
+            for_agent(agent_states, &combat_action.caster, &|me| {
+                me.assume_ascendril(&|ascendril| {
+                    ascendril.upgrade_half_resonance();
+                    ascendril.fulcrum_contract();
+                });
+            });
+        }
+        "Callback" => {
             for_agent(agent_states, &combat_action.caster, &|me| {
                 me.assume_ascendril(&|ascendril| {
                     ascendril.fulcrum_contract();

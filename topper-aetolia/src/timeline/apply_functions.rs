@@ -808,6 +808,7 @@ pub fn apply_venom(who: &mut AgentState, venom: &String, relapse: bool) -> Resul
         who.set_flag(FType::Insomnia, false);
     } else if venom == "delphinium" && !who.is(FType::Asleep) {
         who.set_flag(FType::Asleep, true);
+        who.set_flag(FType::Hobbled, false);
     } else if venom == "delphinium" {
         who.set_flag(FType::Instawake, false);
     } else if venom == "wasi" {

@@ -341,7 +341,6 @@ pub enum FType {
     Frostbrand,
     Thunderbrand,
     FrozenFeet,
-    Direfrost,
 
     // Shapeshifter
     RippedThroat,
@@ -377,6 +376,7 @@ pub enum FType {
     SappedStrength,
     SelfLoathing,
     Hobbled,
+    Direfrost,
     Illgrasp,
 
     // Timed affs

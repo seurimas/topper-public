@@ -230,6 +230,39 @@ impl ThuribleState {
     }
 }
 
+const HEARTCAGE_FORM_TIME: f32 = 3.0;
+
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum HeartcageState {
+    #[default]
+    Inactive,
+    Forming(Timer),
+    Formed,
+}
+
+impl HeartcageState {
+    pub fn wait(&mut self, time: CType) {
+        if let HeartcageState::Forming(timer) = self {
+            timer.wait(time);
+            if !timer.is_active() {
+                *self = HeartcageState::Formed;
+            }
+        }
+    }
+
+    pub fn start(&mut self) {
+        *self = HeartcageState::Forming(Timer::count_down_seconds(HEARTCAGE_FORM_TIME));
+    }
+
+    pub fn form(&mut self) {
+        *self = HeartcageState::Formed;
+    }
+
+    pub fn end(&mut self) {
+        *self = HeartcageState::Inactive;
+    }
+}
+
 #[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum HorologeState {
     #[default]
@@ -733,6 +766,16 @@ impl EmotionState {
         }
         max_emotion_and_level.map(|(emotion, _)| emotion)
     }
+
+    pub fn drain_primary(&mut self, percent: CType) {
+        if let Some(primary) = self.primary {
+            for (emotion, level) in &mut self.levels {
+                if *emotion == primary {
+                    *level -= *level * percent / 100;
+                }
+            }
+        }
+    }
 }
 
 // Counts down to 0 when a needle lands, then keeps counting down past zero so
@@ -839,6 +882,7 @@ pub struct BardBoard {
     pub globes_state: GlobesState,
     pub fate_state: FateState,
     pub iron_collar_state: IronCollarState,
+    pub heartcage: HeartcageState,
     pub blades_count: usize,
     pub needle_venom: Option<String>,
     #[difference(recurse)]
@@ -850,6 +894,7 @@ impl BardBoard {
     pub fn wait(&mut self, duration: i32) {
         self.fate_state.wait(duration);
         self.runeband_state.wait(duration);
+        self.heartcage.wait(duration);
         if self.needle_timer.wait(duration) {
             self.needle_venom = None;
         }

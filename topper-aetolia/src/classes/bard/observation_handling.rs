@@ -374,17 +374,39 @@ pub fn handle_weaving_action(
                     my_room.remove_tag("boundary");
                 }
             }
-            "end" => {}
-            "form" => {}
-            _ => for_agent(
+            "end" => for_agent(
                 agent_states,
-                &combat_action.caster,
+                &combat_action.target,
                 &|me: &mut AgentState| {
-                    me.assume_bard(&|bard: &mut BardClassState| {
-                        bard.dithering = HEARTCAGE_DITHER;
-                    });
+                    me.bard_board.heartcage.end();
                 },
             ),
+            "form" => for_agent(
+                agent_states,
+                &combat_action.target,
+                &|me: &mut AgentState| {
+                    me.bard_board.heartcage.form();
+                    me.bard_board.emotion_state.drain_primary(15);
+                },
+            ),
+            _ => {
+                for_agent(
+                    agent_states,
+                    &combat_action.caster,
+                    &|me: &mut AgentState| {
+                        me.assume_bard(&|bard: &mut BardClassState| {
+                            bard.dithering = HEARTCAGE_DITHER;
+                        });
+                    },
+                );
+                for_agent(
+                    agent_states,
+                    &combat_action.target,
+                    &|me: &mut AgentState| {
+                        me.bard_board.heartcage.start();
+                    },
+                );
+            }
         },
         "Horologe" => {
             if combat_action.annotation.eq("turn") {

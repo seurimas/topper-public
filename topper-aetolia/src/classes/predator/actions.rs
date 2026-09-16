@@ -637,6 +637,25 @@ impl ActiveTransition for RoarAction {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct TeardownAction;
+
+impl TeardownAction {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl ActiveTransition for TeardownAction {
+    fn skill_name(&self) -> String {
+        "Teardown".to_string()
+    }
+
+    fn act(&self, timeline: &AetTimeline) -> ActivateResult {
+        Ok(format!("teardown"))
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct WeakenAction {
     pub target: String,
 }

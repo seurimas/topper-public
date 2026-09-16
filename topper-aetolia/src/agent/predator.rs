@@ -5,6 +5,8 @@ use serde::*;
 use structdiff::{Difference, StructDiff};
 
 pub const FEINT_COOLDOWN: CType = 10 * BALANCE_SCALE as CType;
+pub const TEARDOWN_COOLDOWN: CType = 32 * BALANCE_SCALE as CType;
+pub const TEARDOWN_DURATION: CType = 18 * BALANCE_SCALE as CType;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TraversingState {
@@ -119,6 +121,8 @@ pub struct PredatorClassState {
     pub apex: u32,
     pub stance: KnifeStance,
     pub feint_time: CType,
+    pub teardown_cooldown: CType,
+    pub teardown_active: CType,
     pub tidalslash: bool,
     pub companion: Option<PredatorCompanionState>,
 }
@@ -127,6 +131,8 @@ impl PredatorClassState {
     pub fn wait(&mut self, time: CType, cooldown_effect: CooldownEffect) {
         if !cooldown_effect {
             self.feint_time -= time;
+            self.teardown_cooldown -= time;
+            self.teardown_active -= time;
         }
         self.companion
             .iter_mut()
@@ -135,6 +141,11 @@ impl PredatorClassState {
 
     pub fn feint(&mut self) {
         self.feint_time = FEINT_COOLDOWN;
+    }
+
+    pub fn teardown(&mut self) {
+        self.teardown_cooldown = TEARDOWN_COOLDOWN;
+        self.teardown_active = TEARDOWN_DURATION;
     }
 
     pub fn get_spider(&mut self) {

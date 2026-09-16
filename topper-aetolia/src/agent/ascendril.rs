@@ -240,6 +240,7 @@ pub struct AscendrilClassState {
     freshest_phenomenon: Option<(i64, i64, PhenomenaKind)>,
     shift_cooldown: Timer,
     feedback_cooldown: Timer,
+    mana_spent: i32,
 }
 
 impl AscendrilClassState {
@@ -572,6 +573,33 @@ impl AscendrilClassState {
             FulcrumState::FulcrumOnMe { resonance, .. }
             | FulcrumState::FulcrumExpanded { resonance, .. } => *resonance = None,
             FulcrumState::NoFulcrum => {}
+        }
+    }
+
+    pub fn upgrade_half_resonance(&mut self) {
+        let resonance = match &mut self.fulcrum {
+            FulcrumState::FulcrumOnMe { resonance, .. }
+            | FulcrumState::FulcrumExpanded { resonance, .. } => resonance,
+            FulcrumState::NoFulcrum => return,
+        };
+        if let Some((_, stacks)) = resonance {
+            if *stacks == 1 {
+                *stacks = 2;
+            }
+        }
+    }
+
+    // Accumulates mana spent towards a Convergence charge; the etherflux effect itself is wired up separately.
+    pub fn add_mana_spent(&mut self, amount: i32) {
+        self.mana_spent += amount;
+    }
+
+    pub fn take_convergence_charge(&mut self) -> bool {
+        if self.mana_spent >= 3000 {
+            self.mana_spent = 0;
+            true
+        } else {
+            false
         }
     }
 

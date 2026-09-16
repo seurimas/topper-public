@@ -273,6 +273,13 @@ pub fn handle_combat_action(
                 target.set_parrying(limb);
             });
         }
+        "Teardown" => {
+            for_agent(agent_states, &combat_action.caster, &|me| {
+                me.assume_predator(&|class_state| {
+                    class_state.teardown();
+                });
+            });
+        }
         "Flashkick" => {
             let damage = apply_gyanis(combat_action, agent_states, FLASHKICK_DAMAGE);
             attack_limb_damage(

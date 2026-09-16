@@ -300,6 +300,9 @@ fn handle_room_info(
 ) {
     if let Some(room_id) = gmcp.get("num").and_then(|num| num.as_i64()) {
         timeline.for_agent(&timeline.me.clone(), &|me| {
+            if me.room_id != room_id {
+                me.set_flag(FType::Hobbled, false);
+            }
             me.room_id = room_id;
         });
         if let Some(tags) = gmcp.get("details").and_then(|details| details.as_array()) {

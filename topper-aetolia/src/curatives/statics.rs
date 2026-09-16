@@ -2,7 +2,6 @@ use crate::types::*;
 use std::collections::HashMap;
 lazy_static! {
     pub static ref MENTAL_AFFLICTIONS: Vec<FType> = vec![
-        FType::Egocentrism,
         FType::Stupidity,
         FType::Anorexia,
         FType::Epilepsy,
@@ -34,6 +33,7 @@ lazy_static! {
         FType::Impatience,
         FType::Confusion,
         FType::Dementia,
+        FType::Egocentrism,
         FType::Nyctophobia,
         // Premonition
     ];

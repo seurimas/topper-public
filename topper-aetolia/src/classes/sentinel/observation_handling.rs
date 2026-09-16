@@ -499,9 +499,26 @@ pub fn handle_combat_action(
             }
             _ => {}
         },
+        // Hot burn grants 3 Hobbled stacks, cleared on sleep or moving rooms.
+        "Corsin" => match combat_action.annotation.as_ref() {
+            "hot" => {
+                let caster = combat_action.caster.clone();
+                for_agent(agent_states, &caster, &|you: &mut AgentState| {
+                    you.set_count(FType::Hobbled, 3);
+                    you.resin_state.hot_burn();
+                });
+            }
+            "cold" => {
+                let caster = combat_action.caster.clone();
+                for_agent(agent_states, &caster, &|you: &mut AgentState| {
+                    you.resin_state.cold_burn();
+                });
+            }
+            _ => {}
+        },
         // State tracking for remaining resins. Hot burns clear the resin state; cold burns
         // advance the tick counter. Specific cold/hot effects are not modelled here yet.
-        "Pyrolum" | "Corsin" | "Harimel" | "Glauxe" | "Badulem" => {
+        "Pyrolum" | "Harimel" | "Glauxe" | "Badulem" => {
             match combat_action.annotation.as_ref() {
                 "hot" => {
                     let caster = combat_action.caster.clone();

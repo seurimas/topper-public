@@ -60,7 +60,7 @@ pub enum SleightType {
     Dissipate,
     Abrasion,
     Invasion,
-    Blank,
+    Seclude,
     Void,
     Pall,
 }
@@ -71,7 +71,7 @@ impl SleightType {
             SleightType::Dissipate => "dissipate".to_string(),
             SleightType::Abrasion => "abrasion".to_string(),
             SleightType::Invasion => "invasion".to_string(),
-            SleightType::Blank => "blank".to_string(),
+            SleightType::Seclude => "seclude".to_string(),
             SleightType::Void => "void".to_string(),
             SleightType::Pall => "pall".to_string(),
         }
