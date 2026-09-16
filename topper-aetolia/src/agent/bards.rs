@@ -737,7 +737,7 @@ impl EmotionState {
 
 // Counts down to 0 when a needle lands, then keeps counting down past zero so
 // `is_almost_needling` can look ahead; once far enough negative the venom expires.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct NeedleTimer(CType);
 
 impl NeedleTimer {
@@ -775,7 +775,7 @@ impl std::fmt::Display for NeedleTimer {
 }
 
 /// Coarse state a [`NeedleTimer`] can be in, used so diffs ignore exact tick counts.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 enum NeedleTimerState {
     Armed,
     Needling,
@@ -791,6 +791,22 @@ impl NeedleTimer {
         } else {
             NeedleTimerState::Needling
         }
+    }
+}
+
+// Equality/hash follow the same bucket as `diff_state` so a BardBoard diff only
+// fires when the bucket actually changes, not on every tick of the timer.
+impl PartialEq for NeedleTimer {
+    fn eq(&self, other: &Self) -> bool {
+        self.diff_state() == other.diff_state()
+    }
+}
+
+impl Eq for NeedleTimer {}
+
+impl std::hash::Hash for NeedleTimer {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.diff_state().hash(state);
     }
 }
 
