@@ -12,6 +12,7 @@ struct AggroTimeState {
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, Difference)]
 pub struct AggroState {
+    #[difference(skip)]
     timer: CType,
     latest: AggroTimeState,
     oldest: AggroTimeState,

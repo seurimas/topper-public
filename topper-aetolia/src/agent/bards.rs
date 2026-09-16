@@ -410,7 +410,7 @@ impl BardClassState {
             };
             if you.is(aff) {
                 return true;
-            } else if you.bard_board.needle_timer < time_til {
+            } else if you.bard_board.needle_timer.time_left() < time_til {
                 match (aff, &you.bard_board.needle_venom) {
                     (FType::Paresis, Some(venom)) if venom == "curare" => return true,
                     (FType::Shyness, Some(venom)) if venom == "digitalis" => return true,
@@ -735,6 +735,87 @@ impl EmotionState {
     }
 }
 
+// Counts down to 0 when a needle lands, then keeps counting down past zero so
+// `is_almost_needling` can look ahead; once far enough negative the venom expires.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct NeedleTimer(CType);
+
+impl NeedleTimer {
+    pub fn arm(&mut self) {
+        self.0 = NEEDLE_TIMEOUT;
+    }
+
+    pub fn consume(&mut self) {
+        self.0 = 0;
+    }
+
+    /// Ticks the timer down and reports whether the venom should now expire.
+    pub fn wait(&mut self, duration: CType) -> bool {
+        self.0 -= duration;
+        self.0 < -100
+    }
+
+    pub fn is_needling(&self) -> bool {
+        self.0 <= 0
+    }
+
+    pub fn is_almost_needling(&self, time: f32) -> bool {
+        self.0 <= (time * BALANCE_SCALE) as CType
+    }
+
+    pub fn time_left(&self) -> CType {
+        self.0
+    }
+}
+
+impl std::fmt::Display for NeedleTimer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+/// Coarse state a [`NeedleTimer`] can be in, used so diffs ignore exact tick counts.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum NeedleTimerState {
+    Armed,
+    Needling,
+    Inactive,
+}
+
+impl NeedleTimer {
+    fn diff_state(&self) -> NeedleTimerState {
+        if self.0 > 0 {
+            NeedleTimerState::Armed
+        } else if self.0 < -100 {
+            NeedleTimerState::Inactive
+        } else {
+            NeedleTimerState::Needling
+        }
+    }
+}
+
+// Only counts as a difference when the armed/needling/inactive bucket changes, not every tick.
+impl StructDiff for NeedleTimer {
+    type Diff = NeedleTimer;
+    type DiffRef<'target> = NeedleTimer;
+
+    fn diff(&self, updated: &Self) -> Vec<Self::Diff> {
+        if self.diff_state() == updated.diff_state() {
+            Vec::new()
+        } else {
+            vec![*updated]
+        }
+    }
+
+    fn diff_ref<'target>(&'target self, updated: &'target Self) -> Vec<Self::DiffRef<'target>> {
+        self.diff(updated)
+    }
+
+    fn apply_single(&mut self, diff: Self::Diff) {
+        *self = diff;
+    }
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Difference)]
 pub struct BardBoard {
     pub emotion_state: EmotionState,
@@ -744,8 +825,8 @@ pub struct BardBoard {
     pub iron_collar_state: IronCollarState,
     pub blades_count: usize,
     pub needle_venom: Option<String>,
-    // Not a timer, because we have some rather specific logic.
-    pub needle_timer: CType,
+    #[difference(recurse)]
+    pub needle_timer: NeedleTimer,
     pub dumb: Option<bool>,
 }
 
@@ -753,22 +834,21 @@ impl BardBoard {
     pub fn wait(&mut self, duration: i32) {
         self.fate_state.wait(duration);
         self.runeband_state.wait(duration);
-        self.needle_timer -= duration;
-        if self.needle_timer < -100 {
+        if self.needle_timer.wait(duration) {
             self.needle_venom = None;
         }
     }
 
     pub fn needle_with(&mut self, venom: &String) {
         self.needle_venom = Some(venom.clone());
-        self.needle_timer = NEEDLE_TIMEOUT;
+        self.needle_timer.arm();
     }
 
     pub fn needled(&mut self) -> Option<String> {
         println!("Needled at {}", self.needle_timer);
         let needled = self.needle_venom.clone();
         self.needle_venom = None;
-        self.needle_timer = 0;
+        self.needle_timer.consume();
         needled
     }
 
@@ -777,11 +857,11 @@ impl BardBoard {
     }
 
     pub fn needling(&self) -> bool {
-        self.needle_venom.is_some() && self.needle_timer <= 0 as CType
+        self.needle_venom.is_some() && self.needle_timer.is_needling()
     }
 
     pub fn almost_needling(&self, time: f32) -> bool {
-        self.needle_venom.is_some() && self.needle_timer <= (time * BALANCE_SCALE) as CType
+        self.needle_venom.is_some() && self.needle_timer.is_almost_needling(time)
     }
 
     pub fn next_globe(&self) -> Option<FType> {

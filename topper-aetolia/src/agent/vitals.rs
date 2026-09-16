@@ -10,18 +10,20 @@ use structdiff::{Difference, StructDiff};
 /// `Estimated` variant is used. All existing [`AgentState`] accessor methods remain
 /// compatible: for `Estimated`, [`get_current`] maps `current_percent` to a 0–100
 /// integer and [`get_max`] returns 100.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Difference)]
 pub enum VitalState {
     /// Exact values confirmed at a specific timeline timestamp.
     KnownAt {
         current: CType,
         max: CType,
         /// The [`TimelineState::time`] value when these values were last observed.
+        #[difference(skip)]
         last_check: CType,
     },
     Estimated {
         current_percent: CType,
         max: CType,
+        #[difference(skip)]
         last_check: CType,
     },
 }
@@ -248,9 +250,56 @@ impl VitalState {
 // ── VitalsState ───────────────────────────────────────────────────────────────
 
 /// All vital stats for a single agent, stored as one [`VitalState`] per [`SType`].
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, Difference)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
 pub struct VitalsState {
     pub vitals: [VitalState; SType::SIZE as usize],
+}
+
+/// A single recursed change: the [`SType`] index and its `VitalState` diff.
+#[derive(Debug, Clone)]
+pub struct VitalsStateDiff(usize, <VitalState as StructDiff>::Diff);
+
+/// Borrowed counterpart of [`VitalsStateDiff`], produced by [`StructDiff::diff_ref`].
+#[derive(Debug, Clone)]
+pub struct VitalsStateDiffRef<'target>(usize, <VitalState as StructDiff>::DiffRef<'target>);
+
+impl<'target> From<VitalsStateDiffRef<'target>> for VitalsStateDiff {
+    fn from(value: VitalsStateDiffRef<'target>) -> Self {
+        VitalsStateDiff(value.0, value.1.into())
+    }
+}
+
+// `[VitalState; N]` doesn't itself implement `StructDiff`, so `vitals` can't use
+// `#[difference(recurse)]` directly; this hand-written impl recurses per-index instead.
+impl StructDiff for VitalsState {
+    type Diff = VitalsStateDiff;
+    type DiffRef<'target> = VitalsStateDiffRef<'target>;
+
+    fn diff(&self, updated: &Self) -> Vec<Self::Diff> {
+        self.vitals
+            .iter()
+            .zip(updated.vitals.iter())
+            .enumerate()
+            .flat_map(|(i, (a, b))| a.diff(b).into_iter().map(move |d| VitalsStateDiff(i, d)))
+            .collect()
+    }
+
+    fn diff_ref<'target>(&'target self, updated: &'target Self) -> Vec<Self::DiffRef<'target>> {
+        self.vitals
+            .iter()
+            .zip(updated.vitals.iter())
+            .enumerate()
+            .flat_map(|(i, (a, b))| {
+                a.diff_ref(b)
+                    .into_iter()
+                    .map(move |d| VitalsStateDiffRef(i, d))
+            })
+            .collect()
+    }
+
+    fn apply_single(&mut self, diff: Self::Diff) {
+        self.vitals[diff.0].apply_single(diff.1);
+    }
 }
 
 impl VitalsState {

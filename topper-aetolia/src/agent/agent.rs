@@ -86,7 +86,7 @@ pub struct AgentState {
     pub elevation: Elevation,
     #[difference(recurse)]
     pub persuasion_state: PersuasionState,
-    #[difference(recurse)]
+    #[difference(skip)]
     pub observation: ObservationState,
     pub fleeing: Timer,
     pub bleeding: Option<CType>,

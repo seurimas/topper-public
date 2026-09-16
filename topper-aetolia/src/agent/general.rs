@@ -28,7 +28,7 @@ impl AreaStatus {
     }
 }
 
-#[derive(Debug, Default, PartialEq, Eq, Hash, Clone, Difference)]
+#[derive(Debug, Default, PartialEq, Eq, Hash, Clone)]
 pub struct ObservationState {
     pub time_since_seen: CType,
     pub area_status: AreaStatus,
