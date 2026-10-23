@@ -209,7 +209,6 @@ pub fn handle_combat_action(
                     me.toggle_flag(FType::Insomnia, false);
                 } else if !me.is(FType::Asleep) {
                     me.toggle_flag(FType::Asleep, true);
-                    me.set_flag(FType::Hobbled, false);
                 } else if me.is(FType::Instawake) {
                     me.toggle_flag(FType::Instawake, false);
                 }

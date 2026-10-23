@@ -891,7 +891,6 @@ pub fn handle_combat_action(
                         you.toggle_flag(FType::Insomnia, false);
                     } else if !you.is(FType::Asleep) {
                         you.toggle_flag(FType::Asleep, true);
-                        you.set_flag(FType::Hobbled, false);
                     }
                 });
                 Ok(())
