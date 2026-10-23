@@ -33,9 +33,17 @@
 -- Configuration
 -- ============================================================
 
--- Root of the user's home directory; all backend paths below are relative
--- to this. Adjust if this script is used from a different machine/checkout.
-HOME_DIR = HOME_DIR -- Set this, if missing
+-- Root of the user's home directory (e.g. "C:\Users\<user>\"); all backend
+-- paths below (the running executable, its logs/db/triggers/behavior-trees/
+-- aff-stacks directories) are relative to this, same as before.
+--
+-- Mudlet's getMudletHomeDir() returns the current *profile's* directory
+-- instead, e.g. "<HOME_DIR>.config/mudlet/profiles/<ProfileName>", so we
+-- recover HOME_DIR by stripping that ".config/mudlet/profiles/<ProfileName>"
+-- suffix back off -- this works for any profile name, without needing one
+-- hardcoded here.
+local mudletHomeDir = getMudletHomeDir()
+HOME_DIR = (mudletHomeDir:gsub("[\\/]%.config[\\/]mudlet[\\/]profiles[\\/][^\\/]+[\\/]?$", "")) .. "/"
 
 -- ============================================================
 -- Wire format (JSON)
@@ -44,8 +52,11 @@ HOME_DIR = HOME_DIR -- Set this, if missing
 -- the original profile used (rather than Mudlet's built-in yajl) because its
 -- encoding of empty tables/booleans and the "None" sentinel substitution
 -- below are already tuned to match what serde_json expects on the Rust side.
+-- JSON.lua lives alongside the profile itself, so it's located via
+-- getMudletHomeDir() directly (not HOME_DIR) -- this also works for any
+-- profile name.
 if JSON == nil then
-  local jsonPath = HOME_DIR .. [[.config\mudlet\profiles\SyncedAetolia\JSON.lua]]
+  local jsonPath = mudletHomeDir .. "/JSON.lua"
   local chunk, err = loadfile(jsonPath)
   if chunk then
     JSON = chunk()
