@@ -17,10 +17,7 @@
   raw lines itself via ObservationParser::new_from_directory() against the
   JSON trigger definitions in the triggers/ directory of this repository,
   so those Mudlet-side regex triggers are redundant game/content logic, not
-  backend plumbing. This script still exposes the generic tagging API
-  (catch_line/tag_line/observe/add_observation/...) those other, external
-  triggers call into, so they continue to work if kept elsewhere in the
-  profile.
+  backend plumbing.
 
   Nothing here depends on any pre-existing GUI-created Trigger/Alias/Script
   from the exported profile; every Mudlet trigger and event handler this
@@ -182,30 +179,11 @@ end
 -- triggers elsewhere in the profile use to attach structured Observations
 -- to the TimeSlice this script builds and sends. They don't parse any game
 -- text themselves.
+-- 
+-- Adding new triggers to the observation system should be preferred over
+-- injecting them like this.
 -- ============================================================
 
-toppered = false
-tags = {}
-
-function is_caught()
-  return toppered
-end
-
-function catch_line()
-  toppered = true
-end
-
-function end_line()
-  toppered = false
-  tags = {}
-end
-
-function tag_line(new_tags)
-  local tag_size = #tags
-  for i, tag in ipairs(new_tags) do
-    tags[tag_size + i] = tag
-  end
-end
 
 function add_observation(observation)
   if observations == nil then
@@ -272,25 +250,6 @@ function begin_proc(caster, category, skill, annotation, target)
   add_observation(tagged("Proc", combat_message))
 end
 
-function simple_cure_action(who, type, name, annotation)
-  if who == "You" then
-    who = gmcp.Char.Name.name
-  end
-  if annotation == nil then
-    annotation = ""
-  end
-  local simple_cure = {}
-  simple_cure["caster"] = who
-  if type == "Pill" then
-    simple_cure["cure_type"] = tagged("Pill", name)
-  elseif type == "Smoke" then
-    simple_cure["cure_type"] = tagged("Smoke", name)
-  elseif type == "Salve" then
-    simple_cure["cure_type"] = tagged("Salve", { name, annotation })
-  end
-  add_observation(tagged("SimpleCureAction", simple_cure))
-end
-
 -- ============================================================
 -- Raw line / GMCP / sent-command collection
 -- ============================================================
@@ -304,7 +263,8 @@ end
 
 -- Optional escape hatch: define topper_should_skip_line() elsewhere in the
 -- profile to suppress line capture under specific conditions (e.g. during a
--- stealth/skulk sequence) without coupling this bridge to that feature.
+-- spammy sequence, where timing matters) without coupling this bridge to
+-- that feature.
 function send_line(echo)
   if type(topper_should_skip_line) == "function" and topper_should_skip_line() then
     return
