@@ -3,10 +3,12 @@ resolver = "3"
 members = [
     "topper-core",
     # "topper-bt",
-    "topper-derive",
     "topper-aetolia",
     "topper-aetolia-mudlet",
     "topper-core-mudlet",
+    # Cargo rejects globs that match nothing, so this one also matches topper-derive.
+    # It picks up topper-duris* on the private mirror and is harmless on the public one.
+    "topper-d[eu]*",
     "topper-explainer",
     "topper-persuasion",
     "topper-sect-watch/src-wasm",

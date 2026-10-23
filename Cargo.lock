@@ -5155,6 +5155,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "topper-duris"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "serde",
+ "serde_json",
+ "topper-core",
+ "topper-derive",
+]
+
+[[package]]
+name = "topper-duris-mudlet"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "log",
+ "serde",
+ "serde_json",
+ "simplelog 0.7.6",
+ "topper-core",
+ "topper-core-mudlet",
+ "topper-duris",
+]
+
+[[package]]
 name = "topper-explainer"
 version = "0.1.0"
 dependencies = [
