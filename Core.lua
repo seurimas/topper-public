@@ -19,6 +19,11 @@
   so those Mudlet-side regex triggers are redundant game/content logic, not
   backend plumbing.
 
+  It also does NOT include anything specific to the Aetolia build of the
+  backend (concrete TopperRequest wrappers, Aetolia's GMCP schema, how to
+  read Aetolia's vitals into the "Stats" prompt variant) -- see Aetolia.lua,
+  which must be loaded after this file and supplies those pieces.
+
   Nothing here depends on any pre-existing GUI-created Trigger/Alias/Script
   from the exported profile; every Mudlet trigger and event handler this
   bridge needs is created by this script when it loads.
@@ -286,32 +291,10 @@ function full_echo(text)
   send_line()
 end
 
-function handle_gmcp(name)
-  if topper_gmcp == nil then
-    topper_gmcp = {}
-  end
-  local gmcp_obj = nil
-  if name == "gmcp.Room.Info" then
-    gmcp_obj = gmcp.Room.Info
-  elseif name == "gmcp.Char.Vitals" then
-    gmcp_obj = gmcp.Char.Vitals
-  elseif name == "gmcp.Char.Status" then
-    gmcp_obj = gmcp.Char.Status
-  elseif name == "gmcp.Char.Items.List" then
-    gmcp_obj = gmcp.Char.Items.List
-  elseif name == "gmcp.Char.Items.Add" then
-    gmcp_obj = gmcp.Char.Items.Add
-  elseif name == "gmcp.Char.Items.Remove" then
-    gmcp_obj = gmcp.Char.Items.Remove
-  elseif name == "gmcp.Room.Players" then
-    gmcp_obj = gmcp.Room.Players
-  elseif name == "gmcp.Room.AddPlayer" then
-    gmcp_obj = gmcp.Room.AddPlayer
-  elseif name == "gmcp.Room.RemovePlayer" then
-    gmcp_obj = gmcp.Room.RemovePlayer
-  end
-  topper_gmcp[#topper_gmcp + 1] = { name, gmcp_obj }
-end
+-- GMCP capture is game-specific (which paths exist and what they contain
+-- varies by MUD/backend) -- see handle_gmcp() in Aetolia.lua, which appends
+-- to topper_gmcp the same way this file's observe_line() appends to
+-- topper_lines.
 
 function observe_send(command)
   if topper_now == nil then
@@ -335,21 +318,11 @@ end
 -- TimeSlice assembly and dispatch
 -- ============================================================
 
-function build_prompt_stats(vitals)
-  local prompt_stats = {}
-  prompt_stats.health = tonumber(vitals.hp)
-  prompt_stats.mana = tonumber(vitals.mp)
-  if vitals.psi ~= nil then
-    prompt_stats.sp = tonumber(vitals.psi)
-  else
-    prompt_stats.sp = 0
-  end
-  prompt_stats.equilibrium = json_bool(vitals.equilibrium)
-  prompt_stats.balance = json_bool(vitals.balance)
-  prompt_stats.shadow = json_bool(vitals.ability_bal)
-  prompt_stats.prone = json_bool(vitals.prone)
-  return prompt_stats
-end
+-- build_prompt_stats(vitals) turns the game's vitals into the "Stats"
+-- prompt variant the backend expects; what "vitals" looks like is game
+-- specific, so the implementation lives in a game module (see
+-- build_aetolia_prompt_stats in Aetolia.lua, which this is pointed at).
+build_prompt_stats = nil
 
 function build_time_slice(prompt)
   local time_slice = {}
@@ -366,7 +339,12 @@ function send_time_slice(vitals)
   if vitals == nil or topper_now == nil then
     return
   end
-  local prompt = tagged("Stats", build_prompt_stats(vitals))
+  local prompt
+  if type(build_prompt_stats) == "function" then
+    prompt = tagged("Stats", build_prompt_stats(vitals))
+  else
+    prompt = "Promptless"
+  end
   write_topper(tagged("TimeSlice", build_time_slice(prompt)))
   observations = {}
   topper_lines = {}
@@ -376,9 +354,10 @@ end
 -- ============================================================
 -- Request API
 --
--- Thin wrappers around the TopperRequest JSON contract
--- (see topper-core-mudlet/src/topper/mod.rs). Used by command aliases
--- and other scripts elsewhere in the profile.
+-- Generic wrappers around the TopperRequest JSON contract
+-- (see topper-core-mudlet/src/topper/mod.rs). Concrete request shortcuts
+-- (Target/Attack/Plan/Hint/...) are backend-specific and live in a game
+-- module such as Aetolia.lua.
 -- ============================================================
 
 function send_request(type, value)
@@ -389,109 +368,8 @@ function send_request(type, value)
   end
 end
 
-function topper_target(who)
-  send_request("Target", who)
-end
-
-function request_attack(strategy)
-  send_request("Attack", strategy)
-end
-
-function request_plan(strategy)
-  topper_plan = strategy
-  send_request("Plan", strategy)
-end
-
-function request_api(who)
-  send_request("Api", who)
-end
-
-function request_web()
-  send_request("OpenWeb")
-end
-
-function request_hint(who, hint, value)
-  send_request("Hint", { who, hint, value })
-end
-
 function request_module(module, command)
   send_request("ModuleMsg", { module, command })
-end
-
-function assume_aff(who, what, value)
-  send_request("Assume", { who, what, value == "true" })
-end
-
-function request_reset(type)
-  write_topper(tagged("Request", tagged("Reset", type)))
-end
-
-function request_battle_stats()
-  send_request("BattleStats", math.floor(os.clock() * 100))
-end
-
-function request_inspect(tree, key)
-  request_module("db", "inspect " .. tree .. " " .. key)
-end
-
-function request_priority(stack, index, plan)
-  request_module("db", "priority " .. stack .. " " .. index .. " " .. plan)
-end
-
-function request_hypnosis(stack, index, plan)
-  request_module("db", "hypnosis " .. stack .. " " .. index .. " " .. plan)
-end
-
-function request_db_hint(key, value)
-  request_module("db", "hint " .. key .. " " .. value)
-end
-
-function request_db_myhint(key, value)
-  request_module("db", "myhint " .. key .. " " .. value)
-end
-
-function request_basher(command)
-  request_module("basher", command)
-end
-
-function request_defup(command)
-  request_module("defup", JSON:encode(command))
-end
-
-function request_defup_check()
-  request_defup("Check")
-end
-
-function request_defup_add_command(command, defense)
-  request_defup(tagged("AddCommand", { command, defense }))
-end
-
-function request_defup_add_trigger(trigger, defense)
-  request_defup(tagged("AddUpTrigger", { trigger, defense }))
-end
-
-function request_defup_add_down_trigger(trigger, defense)
-  request_defup(tagged("AddDownTrigger", { trigger, defense }))
-end
-
-function request_defup_remove_command(defense)
-  request_defup(tagged("RemoveCommand", { defense }))
-end
-
-function request_defup_remove_trigger(trigger)
-  request_defup(tagged("RemoveUpTrigger", { trigger }))
-end
-
-function request_defup_remove_down_trigger(trigger)
-  request_defup(tagged("RemoveDownTrigger", { trigger }))
-end
-
-function request_defup_set_player_order(order)
-  request_defup(tagged("SetPlayerOrder", { order }))
-end
-
-function request_defup_set_class_order(order)
-  request_defup(tagged("SetClassOrder", { order }))
 end
 
 -- ============================================================
@@ -508,9 +386,6 @@ end
 -- "Topper End" catch-all trigger).
 function topper_catch_all_line()
   send_line()
-  if is_caught() then
-    end_line()
-  end
 end
 
 -- Fires once per prompt: this is the heartbeat that actually sends the
@@ -521,18 +396,6 @@ function topper_on_prompt()
     send_time_slice(gmcp.Char.Vitals)
   end
 end
-
-local TOPPER_GMCP_EVENTS = {
-  "gmcp.Room.Info",
-  "gmcp.Room.Players",
-  "gmcp.Room.AddPlayer",
-  "gmcp.Room.RemovePlayer",
-  "gmcp.Char.Vitals",
-  "gmcp.Char.Items.Add",
-  "gmcp.Char.Items.Remove",
-  "gmcp.Char.Items.List",
-  "gmcp.Char.Status",
-}
 
 local function install_topper_core_triggers()
   if topper_core_catch_all_trigger_id then
@@ -545,11 +408,9 @@ local function install_topper_core_triggers()
   topper_core_catch_all_trigger_id = tempRegexTrigger("^(.*)$", topper_catch_all_line)
   topper_core_prompt_trigger_id = tempPromptTrigger(topper_on_prompt)
 
-  -- registerAnonymousEventHandler is a no-op if the same (event, function)
-  -- pair is already registered, so these are safe to call again on reload.
-  for _, event in ipairs(TOPPER_GMCP_EVENTS) do
-    registerAnonymousEventHandler(event, "handle_gmcp")
-  end
+  -- GMCP event handlers are game-specific (which paths exist varies by
+  -- MUD/backend) and are registered by a game module instead, e.g.
+  -- install_aetolia_gmcp_handlers() in Aetolia.lua.
   registerAnonymousEventHandler("sysDataSendRequest", "watch_data")
 end
 
