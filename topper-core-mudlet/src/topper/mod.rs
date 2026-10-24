@@ -1,7 +1,11 @@
+#[cfg(feature = "skippy")]
+pub use crate::topper::skippy::SkippyModule;
 pub use crate::topper::telnet::TelnetModule;
 pub use crate::topper::timeline::TimelineModule;
 use topper_core::timeline::db::DatabaseModule;
 use topper_core::timeline::{BaseAgentState, CType, NonAgentState, Timeline};
+#[cfg(feature = "skippy")]
+pub mod skippy;
 pub mod telnet;
 pub mod timeline;
 use log::info;
