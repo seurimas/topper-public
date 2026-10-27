@@ -86,7 +86,7 @@ end
 -- Backend process lifecycle
 -- ============================================================
 
-function start_topper()
+function start_topper(TOPPER_VERSION)
   if topper == nil or not topper.isRunning() then
     topper_now = math.floor(os.clock() * 100)
     feeds = {}
@@ -95,7 +95,7 @@ function start_topper()
     feeds["defend"] = true
     feeds["firstaid"] = true
     topper = spawn(read_topper,
-      HOME_DIR .. [[git\topper\target\release\topper-aetolia-mudlet.exe]],
+      HOME_DIR .. [[git\topper\target\release\topper-]] .. TOPPER_VERSION .. [[-mudlet.exe]],
       HOME_DIR .. [[topper_logs]],
       HOME_DIR .. [[git\topper\topper.db-fixed]],
       HOME_DIR .. [[git\topper\triggers]],
@@ -426,5 +426,3 @@ local function install_topper_core_triggers()
 end
 
 install_topper_core_triggers()
-
-start_topper()

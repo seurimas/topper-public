@@ -200,3 +200,5 @@ end
 -- Core.lua's send_time_slice() calls the game-agnostic build_prompt_stats();
 -- point it at Aetolia's implementation.
 build_prompt_stats = build_aetolia_prompt_stats
+
+start_topper("aetolia")
