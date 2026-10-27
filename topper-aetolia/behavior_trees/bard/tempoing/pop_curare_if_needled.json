@@ -1,0 +1,25 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "BardPredicate": [
+                    "Target",
+                    {
+                        "Needled": "curare"
+                    }
+                ]
+            },
+            {
+                "BardPredicate": [
+                    "Target",
+                    "NeedlePending"
+                ]
+            },
+            {
+                "UnstackAffs": [
+                    "Paresis"
+                ]
+            }
+        ]
+    }
+}

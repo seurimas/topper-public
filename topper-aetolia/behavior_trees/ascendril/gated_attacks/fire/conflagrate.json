@@ -1,0 +1,31 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Courage"
+                ]
+            ]
+        },
+        {
+            "AscendrilPredicate": [
+                "Me",
+                {
+                    "Resonance": "Fire"
+                }
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Ablaze"
+                ]
+            ]
+        },
+        {
+            "Conflagrate": "Target"
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+{
+    "Sequence": [
+        {
+            "BardPredicate": [
+                "Target",
+                "IronCollared"
+            ]
+        },
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Target",
+                    {
+                        "Needled": null
+                    }
+                ]
+            }
+        },
+        {
+            "BardPredicate": [
+                "Me",
+                "InRhythm"
+            ]
+        },
+        {
+            "SubTree": "bard/gated_attacks/headstitch"
+        }
+    ]
+}

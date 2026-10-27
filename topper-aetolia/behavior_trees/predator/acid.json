@@ -1,0 +1,46 @@
+{
+    "Selector": [
+        {
+            "Inverter": {
+                "HasBalanceEquilibrium": "Me"
+            }
+        },
+        {
+            "SomeAffs": [
+                "Me",
+                [
+                    "Stun"
+                ]
+            ]
+        },
+        {
+            "SubTree": "defend_first"
+        },
+        {
+            "SomeAffs": [
+                "Me",
+                [
+                    "Paralysis"
+                ]
+            ]
+        },
+        {
+            "SubTree": "predator/common/interrupt_channels"
+        },
+        {
+            "Sequence": [
+                {
+                    "PredatorPredicate": [
+                        "Me",
+                        "HasSpider"
+                    ]
+                },
+                {
+                    "Succeeder": {
+                        "SubTree": "predator/spider_acid/base"
+                    }
+                }
+            ]
+        }
+    ]
+}

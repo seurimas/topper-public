@@ -1,0 +1,66 @@
+{
+    "Selector": [
+        {
+            "Inverter": {
+                "HasBalanceEquilibrium": "Me"
+            }
+        },
+        {
+            "SubTree": "defend_first"
+        },
+        {
+            "ManageEnemy": "Target"
+        },
+        {
+            "SomeAffs": [
+                "Me",
+                [
+                    "Stun",
+                    "Paralysis"
+                ]
+            ]
+        },
+        {
+            "SubTree": "ascendril/styles/set"
+        },
+        {
+            "SubTree": "ascendril/styles/fire/head"
+        },
+        {
+            "SubTree": "ascendril/styles/water/head"
+        },
+        {
+            "SubTree": "ascendril/styles/air/head"
+        },
+        {
+            "SubTree": "ascendril/styles/salve/head"
+        },
+        {
+            "SubTree": "ascendril/styles/pills/head"
+        },
+        {
+            "SubTree": "ascendril/mobilities/chase"
+        },
+        {
+            "SubTree": "ascendril/mobilities/mid"
+        },
+        {
+            "SubTree": "ascendril/mobilities/turtle"
+        },
+        {
+            "SubTree": "ascendril/styles/fire/primary"
+        },
+        {
+            "SubTree": "ascendril/styles/water/primary"
+        },
+        {
+            "SubTree": "ascendril/styles/air/primary"
+        },
+        {
+            "SubTree": "ascendril/styles/salve/primary"
+        },
+        {
+            "SubTree": "ascendril/styles/pills/primary"
+        }
+    ]
+}

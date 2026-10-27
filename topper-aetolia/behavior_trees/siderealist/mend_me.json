@@ -1,0 +1,69 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "NoAffs": [
+                    "Me",
+                    [
+                        "RippedThroat",
+                        "CrippledThroat"
+                    ]
+                ]
+            },
+            {
+                "AffCountOver": [
+                    "Me",
+                    2,
+                    [
+                        "LeftLegCrippled",
+                        "RightLegCrippled",
+                        "LeftArmCrippled",
+                        "RightArmCrippled",
+                        "LeftLegBroken",
+                        "RightLegBroken",
+                        "LeftArmBroken",
+                        "RightArmBroken",
+                        "Ablaze"
+                    ]
+                ]
+            },
+            {
+                "Selector": [
+                    {
+                        "CanMend": [
+                            "Me",
+                            {
+                                "Static": "LeftLegDamage"
+                            }
+                        ]
+                    },
+                    {
+                        "CanMend": [
+                            "Me",
+                            {
+                                "Static": "RightLegDamage"
+                            }
+                        ]
+                    },
+                    {
+                        "CanMend": [
+                            "Me",
+                            {
+                                "Static": "LeftArmDamage"
+                            }
+                        ]
+                    },
+                    {
+                        "CanMend": [
+                            "Me",
+                            {
+                                "Static": "RightArmDamage"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "EjaKodosaMend"
+        ]
+    }
+}

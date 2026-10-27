@@ -1,0 +1,42 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "PushAff": "Squelched"
+            },
+            {
+                "PushAff": "Anorexia"
+            },
+            {
+                "PushAff": "FeebleLegs"
+            },
+            {
+                "PushAff": "FeebleArms"
+            },
+            {
+                "PushAff": "Blindness"
+            },
+            {
+                "Sequence": [
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Clumsiness"
+                            ]
+                        ]
+                    },
+                    {
+                        "IsAffectedBy": [
+                            "Target",
+                            "Clumsiness"
+                        ]
+                    },
+                    {
+                        "PushAff": "WateryEyes"
+                    }
+                ]
+            }
+        ]
+    }
+}

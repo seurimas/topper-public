@@ -1,0 +1,83 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "Inverter": {
+                        "SentinelPredicate": [
+                            "Target",
+                            "HasHotResin"
+                        ]
+                    }
+                },
+                {
+                    "Inverter": {
+                        "SentinelPredicate": [
+                            "Target",
+                            "IsBurning"
+                        ]
+                    }
+                },
+                {
+                    "Hurl": [
+                        "Target",
+                        "Lysirine"
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "SentinelPredicate": [
+                        "Target",
+                        "HasColdResin"
+                    ]
+                },
+                {
+                    "Inverter": {
+                        "SentinelPredicate": [
+                            "Target",
+                            "HasHotResin"
+                        ]
+                    }
+                },
+                {
+                    "Inverter": {
+                        "SentinelPredicate": [
+                            "Target",
+                            "IsBurning"
+                        ]
+                    }
+                },
+                {
+                    "Hurl": [
+                        "Target",
+                        "Harimel"
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "SentinelPredicate": [
+                        "Target",
+                        "HasColdResin"
+                    ]
+                },
+                {
+                    "Inverter": {
+                        "SentinelPredicate": [
+                            "Target",
+                            "IsBurning"
+                        ]
+                    }
+                },
+                {
+                    "Combust": "Target"
+                }
+            ]
+        }
+    ]
+}

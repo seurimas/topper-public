@@ -1,0 +1,22 @@
+{
+    "Selector": [
+        {
+            "SubTree": "zealot/full_breakers/break_torso"
+        },
+        {
+            "SubTree": "zealot/full_breakers/break_left_arm"
+        },
+        {
+            "SubTree": "zealot/full_breakers/break_right_arm"
+        },
+        {
+            "SubTree": "zealot/full_breakers/break_left_leg"
+        },
+        {
+            "SubTree": "zealot/full_breakers/break_right_leg"
+        },
+        {
+            "SubTree": "zealot/full_breakers/break_head"
+        }
+    ]
+}

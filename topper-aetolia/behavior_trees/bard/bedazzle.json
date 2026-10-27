@@ -1,0 +1,98 @@
+[
+    "BardWrapper",
+    [
+        {
+            "Selector": [
+                {
+                    "Inverter": {
+                        "HasBalanceEquilibrium": "Me"
+                    }
+                },
+                {
+                    "HintSet": [
+                        "USE_INSTRUMENT",
+                        "true"
+                    ]
+                },
+                {
+                    "Failer": {
+                        "CopyHint": [
+                            "FAST_WEAPON",
+                            "WEAPON"
+                        ]
+                    }
+                },
+                {
+                    "SubTree": "defend_first"
+                },
+                {
+                    "SubTree": "bard/common/interrupt_channels"
+                },
+                {
+                    "SubTree": "bard/tempoing/pop_curare_if_needled"
+                },
+                {
+                    "SubTree": "bard/tempoing/pop_digitalis_if_needled"
+                },
+                {
+                    "SomeAffs": [
+                        "Me",
+                        [
+                            "Stun"
+                        ]
+                    ]
+                },
+                {
+                    "SubTree": "bard/common/keep_me_alive"
+                },
+                {
+                    "SomeAffs": [
+                        "Me",
+                        [
+                            "Paralysis"
+                        ]
+                    ]
+                },
+                {
+                    "SubTree": "bard/for_lethal/heartcage"
+                },
+                {
+                    "SubTree": "bard/induces/base"
+                },
+                {
+                    "SubTree": "bard/upfront_essentials/keepup_defences"
+                },
+                {
+                    "Selector": [
+                        {
+                            "Sequence": [
+                                {
+                                    "BardPredicate": [
+                                        "Me",
+                                        "InHalfBeat"
+                                    ]
+                                },
+                                {
+                                    "SubTree": "bard/bedazzle/halfbeat/base"
+                                }
+                            ]
+                        },
+                        {
+                            "Sequence": [
+                                {
+                                    "BardPredicate": [
+                                        "Me",
+                                        "InWholeBeat"
+                                    ]
+                                },
+                                {
+                                    "SubTree": "bard/bedazzle/wholebeat/base"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+]

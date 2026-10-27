@@ -1,0 +1,172 @@
+{
+    "Failer": {
+        "Executor": [
+            {
+                "Sequence": [
+                    {
+                        "SomeAffs": [
+                            "Target",
+                            [
+                                "TorsoBroken"
+                            ]
+                        ]
+                    },
+                    {
+                        "AddComboAttacks": [
+                            "Bleed"
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "ValueMove": [
+                                    "Bleed",
+                                    20,
+                                    3
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Selector": [
+                    {
+                        "IsRestoring": [
+                            "Target",
+                            {
+                                "Static": "HeadDamage"
+                            }
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "ValueMoveInStance": [
+                                    "Gouge",
+                                    "VaeSant",
+                                    30
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "Selector": [
+                            {
+                                "SalveBlocked": [
+                                    "Target",
+                                    100
+                                ]
+                            },
+                            {
+                                "AffCountOver": [
+                                    "Target",
+                                    1,
+                                    [
+                                        "LeftLegBroken",
+                                        "RightLegBroken",
+                                        "LeftArmBroken",
+                                        "RightArmBroken",
+                                        "HeadBroken",
+                                        "TorsoBroken"
+                                    ]
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "HasVenom": 50
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Selector": [
+                    {
+                        "IsRestoring": [
+                            "Target",
+                            {
+                                "Static": "TorsoDamage"
+                            }
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "ValueMove": [
+                                    "Lateral",
+                                    20,
+                                    3
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "AddGraders": [
+                    {
+                        "ValueMove": [
+                            "Pindown",
+                            20,
+                            -2000
+                        ]
+                    },
+                    {
+                        "ValueMove": [
+                            "Freefall",
+                            2000,
+                            -2000
+                        ]
+                    },
+                    {
+                        "ValueMove": [
+                            "Crescentcut",
+                            5,
+                            5
+                        ]
+                    },
+                    {
+                        "HasVenom": 20
+                    },
+                    {
+                        "Breaks": [
+                            [
+                                "LeftLegDamage",
+                                "RightArmDamage",
+                                "LeftArmDamage",
+                                "RightLegDamage"
+                            ],
+                            1,
+                            -100
+                        ]
+                    },
+                    {
+                        "Breaks": [
+                            [
+                                "LeftLegDamage",
+                                "RightArmDamage",
+                                "LeftArmDamage",
+                                "RightLegDamage",
+                                "TorsoDamage",
+                                "HeadDamage"
+                            ],
+                            2,
+                            200
+                        ]
+                    },
+                    {
+                        "PerPossibleParry": -15
+                    }
+                ]
+            }
+        ]
+    }
+}

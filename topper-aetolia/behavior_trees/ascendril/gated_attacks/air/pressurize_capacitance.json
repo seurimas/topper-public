@@ -1,0 +1,21 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Confusion"
+                ]
+            ]
+        },
+        {
+            "AscendrilPredicate": [
+                "Me",
+                "CapacitanceWillDisrupt"
+            ]
+        },
+        {
+            "Pressurize": "Target"
+        }
+    ]
+}

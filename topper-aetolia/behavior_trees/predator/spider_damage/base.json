@@ -1,0 +1,95 @@
+{
+    "Selector": [
+        {
+            "SubTree": "predator/venom/cirisosis_for_the_win"
+        },
+        {
+            "SubTree": "predator/venom/cirisosis_twinshots"
+        },
+        {
+            "SubTree": "predator/common/ferocity_always"
+        },
+        {
+            "SubTree": "predator/common/arouse_always"
+        },
+        {
+            "Sequence": [
+                {
+                    "AffCountOver": [
+                        "Target",
+                        2,
+                        []
+                    ]
+                },
+                {
+                    "SubTree": "predator/spider_damage/intoxicate_sneakiness"
+                }
+            ]
+        },
+        {
+            "SubTree": "predator/venom/secure_locks"
+        },
+        {
+            "SubTree": "predator/spider_damage/eq_combo/keep_intoxicate_up"
+        },
+        {
+            "SubTree": "predator/spider_damage/eq_combo/start_bloodscourge"
+        },
+        {
+            "SubTree": "predator/spider_damage/eq_combo/negate_for_kill_threat"
+        },
+        {
+            "SubTree": "predator/venom/add_venom_attacks"
+        },
+        {
+            "SubTree": "predator/spider_damage/add_variety"
+        },
+        {
+            "SubTree": "predator/venom/pinprick_for_epilepsy"
+        },
+        {
+            "SubTree": "predator/common/pindown_for_writhe"
+        },
+        {
+            "SubTree": "predator/common/add_raze"
+        },
+        {
+            "SubTree": "predator/common/tidalslash_when_ready"
+        },
+        {
+            "SubTree": "predator/spider_damage/quickassess_for_shock"
+        },
+        {
+            "Failer": {
+                "CalculateCombos": "Target"
+            }
+        },
+        {
+            "SubTree": "predator/spider_damage/kill_combo"
+        },
+        {
+            "SubTree": "predator/spider_damage/eq_combo/web_to_stall"
+        },
+        {
+            "SubTree": "predator/spider_damage/flashkick_combo"
+        },
+        {
+            "SubTree": "predator/spider_damage/veinrip_combo"
+        },
+        {
+            "SubTree": "predator/spider_damage/dps_combo_to_vae_sant"
+        },
+        {
+            "SubTree": "predator/spider_damage/combo_for_intoxicated"
+        },
+        {
+            "SubTree": "predator/spider_damage/twinshot_with_vae_sant"
+        },
+        {
+            "SubTree": "predator/spider_damage/combo_to_vae_sant"
+        },
+        {
+            "Dartshot": "Target"
+        }
+    ]
+}

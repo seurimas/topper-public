@@ -1,0 +1,29 @@
+{
+    "Sequence": [
+        {
+            "ClassIn": [
+                "Target",
+                [
+                    "Carnifex",
+                    "Praenomen"
+                ]
+            ]
+        },
+        {
+            "PriorityAffIs": [
+                "Target",
+                "Weariness"
+            ]
+        },
+        {
+            "StatUnderPercent": [
+                "Health",
+                "Me",
+                60
+            ]
+        },
+        {
+            "VayuaAttack": "Target"
+        }
+    ]
+}

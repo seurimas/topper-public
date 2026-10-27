@@ -1,0 +1,19 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Dizziness",
+                    "Stupidity"
+                ]
+            ]
+        },
+        {
+            "PlainQebBehavior": "echo Dry thunderclap"
+        },
+        {
+            "Thunderclap": "Target"
+        }
+    ]
+}

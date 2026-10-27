@@ -1,0 +1,114 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/paresis_for_tree_2_10"
+        },
+        {
+            "SubTree": "firstaid/common/disrupted"
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "SimplePriority": [
+                        "Rebounding",
+                        0
+                    ]
+                },
+                {
+                    "UseClotting": "Safe"
+                },
+                {
+                    "ClotAbovePercentMana": 60
+                },
+                {
+                    "ClotAboveBleed": 150
+                },
+                {
+                    "SimplePriority": [
+                        "Frozen",
+                        2
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Frigid",
+                        5
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Blisters",
+                        2
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Vertigo",
+                        3
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Ablaze",
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "StatUnderPercent": [
+                                "Mana",
+                                "Me",
+                                60
+                            ]
+                        },
+                        {
+                            "AddFirstAidSettings": [
+                                {
+                                    "VitalsPriority": "Mp"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "StatUnderPercent": [
+                                "Health",
+                                "Me",
+                                60
+                            ]
+                        },
+                        {
+                            "NoAffs": [
+                                "Target",
+                                [
+                                    "Weariness"
+                                ]
+                            ]
+                        },
+                        {
+                            "AddFirstAidSettings": [
+                                {
+                                    "VitalsPriority": "Hp"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "VitalsPriority": "Alt"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

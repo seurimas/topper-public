@@ -1,0 +1,35 @@
+{
+    "Sequence": [
+        {
+            "SentinelPredicate": [
+                "Me",
+                "HasFirstStrike"
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "SubTree": "sentinel/follow_up/slash_slickness"
+                },
+                {
+                    "SubTree": "sentinel/follow_up/finish_them"
+                },
+                {
+                    "SubTree": "sentinel/follow_up/stick_arrythmia"
+                },
+                {
+                    "SentinelSecondStrike": [
+                        "Target",
+                        "Flourish"
+                    ]
+                },
+                {
+                    "SentinelSecondStrike": [
+                        "Target",
+                        "Stab"
+                    ]
+                }
+            ]
+        }
+    ]
+}

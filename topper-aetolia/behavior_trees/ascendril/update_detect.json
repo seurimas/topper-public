@@ -1,0 +1,22 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "StatEstimateGood": [
+                    "Health",
+                    "Target"
+                ]
+            }
+        },
+        {
+            "StatUnderPercent": [
+                "Health",
+                "Target",
+                50
+            ]
+        },
+        {
+            "FulcrumDetect": "Target"
+        }
+    ]
+}

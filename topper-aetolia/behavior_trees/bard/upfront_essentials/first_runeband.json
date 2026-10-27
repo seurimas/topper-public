@@ -1,0 +1,15 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Target",
+                    "Runebanded"
+                ]
+            }
+        },
+        {
+            "WeaveAttack": "Runeband"
+        }
+    ]
+}

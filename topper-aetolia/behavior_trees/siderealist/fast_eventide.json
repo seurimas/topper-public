@@ -1,0 +1,13 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "RandomCuresOver": [
+                    "Me",
+                    5
+                ]
+            },
+            "Eventide"
+        ]
+    }
+}

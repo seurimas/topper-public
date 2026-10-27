@@ -1,0 +1,45 @@
+{
+    "Sequence": [
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "SiderealistPredicate": [
+                                "Target",
+                                "HasAsterism"
+                            ]
+                        },
+                        {
+                            "SiderealistPredicate": [
+                                "Target",
+                                "HasMoonlet"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "AffCountOver": [
+                        "Target",
+                        8,
+                        []
+                    ]
+                }
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Loneliness"
+                ]
+            ]
+        },
+        {
+            "Tones": [
+                "Target",
+                "Creeps"
+            ]
+        }
+    ]
+}

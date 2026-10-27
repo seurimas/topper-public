@@ -1,0 +1,64 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Rebounding",
+                    "AssumedRebounding"
+                ]
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "Inverter": {
+                                "HasFocus": [
+                                    "Target",
+                                    2.5
+                                ]
+                            }
+                        },
+                        {
+                            "Inverter": {
+                                "HasTree": [
+                                    "Target",
+                                    0.0
+                                ]
+                            }
+                        },
+                        {
+                            "NearLocked": [
+                                "Target",
+                                "Soft",
+                                2
+                            ]
+                        },
+                        {
+                            "PushLockers": "Soft"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "NearLocked": [
+                                "Target",
+                                "Buffered",
+                                2
+                            ]
+                        },
+                        {
+                            "PushLockers": "Buffered"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Twinshot": "Target"
+        }
+    ]
+}

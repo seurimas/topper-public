@@ -1,0 +1,38 @@
+{
+    "Sequence": [
+        {
+            "BardPredicate": [
+                "Target",
+                "IronCollared"
+            ]
+        },
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "Hallucinations",
+                    "Addiction",
+                    "Perplexity",
+                    "Asthma"
+                ]
+            ]
+        },
+        {
+            "BardPredicate": [
+                "Target",
+                "GlobeAffIsValid"
+            ]
+        },
+        {
+            "BardPredicate": [
+                "Target",
+                {
+                    "GlobeAffIs": "Confusion"
+                }
+            ]
+        },
+        {
+            "WeaveAttack": "Headstitch"
+        }
+    ]
+}

@@ -1,0 +1,67 @@
+{
+    "Sequence": [
+        {
+            "Sequence": [
+                {
+                    "BardPredicate": [
+                        "Target",
+                        {
+                            "EmotionLevel": [
+                                "Disgust",
+                                20
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "BardPredicate": [
+                        "Target",
+                        "IronCollared"
+                    ]
+                },
+                {
+                    "IsAffectedBy": [
+                        "Target",
+                        "Besilence"
+                    ]
+                },
+                {
+                    "Selector": [
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                {
+                                    "EmotionLevel": [
+                                        "Disgust",
+                                        70
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "NoAffs": [
+                                "Target",
+                                [
+                                    "SelfLoathing",
+                                    "Fallen"
+                                ]
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "NoAffs": [
+                        "Target",
+                        [
+                            "SelfLoathing",
+                            "Fallen"
+                        ]
+                    ]
+                },
+                {
+                    "Induce": "Disgust"
+                }
+            ]
+        }
+    ]
+}

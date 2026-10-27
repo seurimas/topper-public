@@ -1,0 +1,22 @@
+{
+    "Selector": [
+        {
+            "Emberbrand": [
+                "Target",
+                false
+            ]
+        },
+        {
+            "Thunderbrand": [
+                "Target",
+                true
+            ]
+        },
+        {
+            "Emberbrand": [
+                "Target",
+                true
+            ]
+        }
+    ]
+}

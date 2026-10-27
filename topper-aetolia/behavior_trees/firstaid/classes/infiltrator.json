@@ -1,0 +1,79 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/paresis_for_tree_2_10"
+        },
+        {
+            "SubTree": "firstaid/common/disrupted"
+        },
+        {
+            "SubTree": "firstaid/common/default_vitals"
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "Inverter": {
+                                "HasFitness": [
+                                    "Me",
+                                    3.0
+                                ]
+                            }
+                        },
+                        {
+                            "NoAffs": [
+                                "Me",
+                                [
+                                    "Paralysis"
+                                ]
+                            ]
+                        },
+                        {
+                            "AddFirstAidSettings": [
+                                {
+                                    "SimplePriority": [
+                                        "Asthma",
+                                        1
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "SimplePriority": [
+                                "Asthma",
+                                3
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "SimplePriority": [
+                        "Addiction",
+                        4
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Hypersomnia",
+                        2
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Rebounding",
+                        5
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,35 @@
+{
+    "Selector": [
+        {
+            "Inverter": {
+                "HasBalanceEquilibrium": "Me"
+            }
+        },
+        {
+            "SomeAffs": [
+                "Me",
+                [
+                    "Stun",
+                    "Asleep"
+                ]
+            ]
+        },
+        {
+            "SubTree": "defend_first"
+        },
+        {
+            "SubTree": "infiltrator/shrug_from_lock"
+        },
+        {
+            "SomeAffs": [
+                "Me",
+                [
+                    "Paralysis"
+                ]
+            ]
+        },
+        {
+            "SubTree": "infiltrator/setup_hypnosis"
+        }
+    ]
+}

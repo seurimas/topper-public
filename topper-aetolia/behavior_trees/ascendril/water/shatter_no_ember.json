@@ -1,0 +1,21 @@
+{
+    "Sequence": [
+        {
+            "AscendrilPredicate": [
+                "Target",
+                "IciclesOn"
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Emberbrand"
+                ]
+            ]
+        },
+        {
+            "Shatter": "Target"
+        }
+    ]
+}

@@ -1,0 +1,28 @@
+{
+    "Sequence": [
+        {
+            "Buffered": [
+                "Target",
+                "Asthma"
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Besilence",
+                    "Deadening"
+                ]
+            ]
+        },
+        {
+            "BardPredicate": [
+                "Target",
+                "GlobeAffIsValid"
+            ]
+        },
+        {
+            "WeaveAttack": "Headstitch"
+        }
+    ]
+}

@@ -1,0 +1,19 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Shielded",
+                    "Rebounding"
+                ]
+            ]
+        },
+        {
+            "Bite": [
+                "Target",
+                "Stack"
+            ]
+        }
+    ]
+}

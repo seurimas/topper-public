@@ -1,0 +1,255 @@
+{
+    "Failer": {
+        "Selector": [
+            {
+                "Sequence": [
+                    {
+                        "AtLeastNLimbsOver": [
+                            "Target",
+                            [],
+                            2,
+                            15,
+                            true
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "ValueMove": [
+                                    "Feint",
+                                    20,
+                                    -2000
+                                ]
+                            },
+                            {
+                                "ValueMove": [
+                                    "Spinslash",
+                                    5,
+                                    5
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "Executor": [
+                            {
+                                "Sequence": [
+                                    {
+                                        "LimbOver": [
+                                            "Target",
+                                            {
+                                                "Static": "LeftArmDamage"
+                                            },
+                                            15,
+                                            true
+                                        ]
+                                    },
+                                    {
+                                        "AddGraders": [
+                                            {
+                                                "ValueMove": [
+                                                    "JabLeft",
+                                                    20,
+                                                    3
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "Sequence": [
+                                    {
+                                        "LimbOver": [
+                                            "Target",
+                                            {
+                                                "Static": "RightArmDamage"
+                                            },
+                                            15,
+                                            true
+                                        ]
+                                    },
+                                    {
+                                        "AddGraders": [
+                                            {
+                                                "ValueMove": [
+                                                    "JabRight",
+                                                    20,
+                                                    3
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "Sequence": [
+                                    {
+                                        "LimbOver": [
+                                            "Target",
+                                            {
+                                                "Static": "LeftLegDamage"
+                                            },
+                                            15,
+                                            true
+                                        ]
+                                    },
+                                    {
+                                        "AddGraders": [
+                                            {
+                                                "ValueMove": [
+                                                    "LowhookLeft",
+                                                    20,
+                                                    3
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "Sequence": [
+                                    {
+                                        "LimbOver": [
+                                            "Target",
+                                            {
+                                                "Static": "RightLegDamage"
+                                            },
+                                            15,
+                                            true
+                                        ]
+                                    },
+                                    {
+                                        "AddGraders": [
+                                            {
+                                                "ValueMove": [
+                                                    "LowhookRight",
+                                                    20,
+                                                    3
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Executor": [
+                    {
+                        "AddGraders": [
+                            {
+                                "ValueMove": [
+                                    "Feint",
+                                    -10,
+                                    -2000
+                                ]
+                            },
+                            {
+                                "ValueMove": [
+                                    "Spinslash",
+                                    25,
+                                    15
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "Selector": [
+                            {
+                                "IsRestoring": [
+                                    "Target",
+                                    {
+                                        "Static": "LeftArmDamage"
+                                    }
+                                ]
+                            },
+                            {
+                                "AddGraders": [
+                                    {
+                                        "ValueMove": [
+                                            "JabLeft",
+                                            20,
+                                            3
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "Selector": [
+                            {
+                                "IsRestoring": [
+                                    "Target",
+                                    {
+                                        "Static": "RightArmDamage"
+                                    }
+                                ]
+                            },
+                            {
+                                "AddGraders": [
+                                    {
+                                        "ValueMove": [
+                                            "JabRight",
+                                            20,
+                                            3
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "Selector": [
+                            {
+                                "IsRestoring": [
+                                    "Target",
+                                    {
+                                        "Static": "LeftLegDamage"
+                                    }
+                                ]
+                            },
+                            {
+                                "AddGraders": [
+                                    {
+                                        "ValueMove": [
+                                            "LowhookLeft",
+                                            20,
+                                            3
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "Selector": [
+                            {
+                                "IsRestoring": [
+                                    "Target",
+                                    {
+                                        "Static": "RightLegDamage"
+                                    }
+                                ]
+                            },
+                            {
+                                "AddGraders": [
+                                    {
+                                        "ValueMove": [
+                                            "LowhookRight",
+                                            20,
+                                            3
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

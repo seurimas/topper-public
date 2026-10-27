@@ -1,0 +1,66 @@
+{
+    "Sequence": [
+        {
+            "SubTree": "sentinel/parry_guard"
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "SalveBlocked": [
+                                "Target",
+                                200
+                            ]
+                        },
+                        {
+                            "SomeAffs": [
+                                "Target",
+                                [
+                                    "Weariness",
+                                    "Clumsiness",
+                                    "Asthma"
+                                ]
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "SomeAffs": [
+                                "Target",
+                                [
+                                    "Impatience",
+                                    "Stupidity"
+                                ]
+                            ]
+                        },
+                        {
+                            "SomeAffs": [
+                                "Target",
+                                [
+                                    "Weariness",
+                                    "Clumsiness",
+                                    "Asthma"
+                                ]
+                            ]
+                        },
+                        {
+                            "CanBreak": [
+                                "Target",
+                                {
+                                    "Static": "HeadDamage"
+                                },
+                                2.0
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "SentinelThroatcrush": "Target"
+        }
+    ]
+}

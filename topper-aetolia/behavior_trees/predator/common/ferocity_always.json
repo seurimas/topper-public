@@ -1,0 +1,34 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "RandomCuresOver": [
+                    "Me",
+                    3
+                ]
+            },
+            {
+                "HasClassCure": [
+                    "Me",
+                    0.0
+                ]
+            },
+            {
+                "AddComboAttacks": [
+                    "Ferocity"
+                ]
+            },
+            {
+                "AddGraders": [
+                    {
+                        "ValueMove": [
+                            "Ferocity",
+                            2000,
+                            -2000
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

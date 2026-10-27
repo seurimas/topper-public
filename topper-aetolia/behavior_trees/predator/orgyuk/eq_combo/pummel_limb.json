@@ -1,0 +1,54 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "CanParry": "Target"
+            }
+        },
+        {
+            "SetLimbHint": [
+                "Target",
+                {
+                    "Breakable": [
+                        [
+                            "TorsoDamage",
+                            2000
+                        ],
+                        [
+                            "HeadDamage",
+                            2000
+                        ],
+                        [
+                            "LeftLegDamage",
+                            2000
+                        ],
+                        [
+                            "RightLegDamage",
+                            2000
+                        ],
+                        [
+                            "LeftArmDamage",
+                            2000
+                        ],
+                        [
+                            "RightArmDamage",
+                            2000
+                        ]
+                    ]
+                },
+                "PummelLimb"
+            ]
+        },
+        {
+            "Pummel": [
+                "Target",
+                {
+                    "FromHint": "PummelLimb"
+                }
+            ]
+        },
+        {
+            "Fleshbane": "Target"
+        }
+    ]
+}

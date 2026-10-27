@@ -1,0 +1,30 @@
+{
+    "Failer": {
+        "Selector": [
+            {
+                "SubTree": "bard/induces/fear_with_collar"
+            },
+            {
+                "SubTree": "bard/induces/disgust_with_collar"
+            },
+            {
+                "SubTree": "bard/induces/sadness_for_clumsiness"
+            },
+            {
+                "SubTree": "bard/induces/stress_before_halfbeat"
+            },
+            {
+                "SubTree": "bard/induces/full_happiness"
+            },
+            {
+                "SubTree": "bard/induces/full_sadness"
+            },
+            {
+                "SubTree": "bard/induces/full_anger"
+            },
+            {
+                "SubTree": "bard/induces/full_surprise"
+            }
+        ]
+    }
+}

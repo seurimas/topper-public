@@ -1,0 +1,58 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "Inverter": {
+                    "IsOverRestoring": [
+                        "Target",
+                        {
+                            "Static": "HeadDamage"
+                        }
+                    ]
+                }
+            },
+            {
+                "Inverter": {
+                    "RestoredBreak": [
+                        "Target",
+                        {
+                            "Static": "HeadDamage"
+                        },
+                        6.0
+                    ]
+                }
+            },
+            {
+                "Inverter": {
+                    "ExpectedParry": [
+                        "Target",
+                        {
+                            "Static": "HeadDamage"
+                        }
+                    ]
+                }
+            },
+            {
+                "IsAffectedBy": [
+                    "Target",
+                    "Clumsiness"
+                ]
+            },
+            {
+                "NoAffs": [
+                    "Target",
+                    [
+                        "Stuttering",
+                        "CrippledThroat"
+                    ]
+                ]
+            },
+            {
+                "AddComboAttackAtPriority": [
+                    "Edgekick",
+                    21
+                ]
+            }
+        ]
+    }
+}

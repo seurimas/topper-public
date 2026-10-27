@@ -1,0 +1,26 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Dissonance"
+                ]
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Loneliness"
+                ]
+            ]
+        },
+        {
+            "Tones": [
+                "Target",
+                "Creeps"
+            ]
+        }
+    ]
+}

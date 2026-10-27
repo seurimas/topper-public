@@ -1,0 +1,22 @@
+{
+    "Sequence": [
+        {
+            "ChannelStoppedBy": [
+                "Target",
+                "Asleep"
+            ]
+        },
+        {
+            "Tones": [
+                "Target",
+                "Lullaby"
+            ]
+        },
+        {
+            "PushAff": "Asleep"
+        },
+        {
+            "VayuaAttack": "Target"
+        }
+    ]
+}

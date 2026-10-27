@@ -1,0 +1,34 @@
+{
+    "Sequence": [
+        {
+            "BardPredicate": [
+                "Me",
+                "InHalfBeat"
+            ]
+        },
+        {
+            "Succeeder": "ColdRead"
+        },
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Target",
+                    "Awakened"
+                ]
+            }
+        },
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Me",
+                    {
+                        "SingingOrPlaying": null
+                    }
+                ]
+            }
+        },
+        {
+            "SingSong": "Awakening"
+        }
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    "Sequence": [
+        {
+            "Selector": [
+                {
+                    "RandomCuresOver": [
+                        "Me",
+                        5
+                    ]
+                },
+                {
+                    "Locked": [
+                        "Me",
+                        true
+                    ]
+                }
+            ]
+        },
+        "Equinox"
+    ]
+}

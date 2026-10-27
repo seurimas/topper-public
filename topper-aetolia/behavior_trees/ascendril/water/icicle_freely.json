@@ -1,0 +1,15 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "AscendrilPredicate": [
+                    "Target",
+                    "IciclesOn"
+                ]
+            }
+        },
+        {
+            "Icicle": "Target"
+        }
+    ]
+}

@@ -1,0 +1,23 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "SelfLoathing",
+                    "Magnanimity"
+                ]
+            ]
+        },
+        {
+            "AffCountOver": [
+                "Target",
+                3,
+                []
+            ]
+        },
+        {
+            "PerformanceAttack": "Ridicule"
+        }
+    ]
+}

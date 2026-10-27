@@ -1,0 +1,10 @@
+{
+    "Executor": [
+        {
+            "SubTree": "infiltrator/setup_hypnosis"
+        },
+        {
+            "SubTree": "infiltrator/pill_sleights_on_balance"
+        }
+    ]
+}

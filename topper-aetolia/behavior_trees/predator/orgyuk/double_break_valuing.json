@@ -1,0 +1,92 @@
+{
+    "Failer": {
+        "Executor": [
+            {
+                "Sequence": [
+                    {
+                        "AffCountOver": [
+                            "Target",
+                            1,
+                            [
+                                "LeftArmCrippled",
+                                "RightArmCrippled"
+                            ]
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "Breaks": [
+                                    [
+                                        "LeftArmDamage",
+                                        "RightArmDamage"
+                                    ],
+                                    1,
+                                    200
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "AffCountOver": [
+                            "Target",
+                            1,
+                            [
+                                "LeftLegCrippled",
+                                "RightLegCrippled"
+                            ]
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "Breaks": [
+                                    [
+                                        "LeftLegDamage",
+                                        "RightLegDamage"
+                                    ],
+                                    1,
+                                    200
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "AffCountOver": [
+                            "Target",
+                            2,
+                            [
+                                "LeftLegCrippled",
+                                "RightLegCrippled",
+                                "LeftArmCrippled",
+                                "RightArmCrippled"
+                            ]
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "Breaks": [
+                                    [
+                                        "HeadDamage",
+                                        "TorsoDamage"
+                                    ],
+                                    1,
+                                    200
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

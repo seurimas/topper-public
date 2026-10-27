@@ -1,0 +1,29 @@
+{
+    "Sequence": [
+        {
+            "AffCountOver": [
+                "Target",
+                2,
+                [
+                    "LeftLegBroken",
+                    "RightLegBroken",
+                    "LeftArmBroken",
+                    "RightArmBroken",
+                    "HeadBroken",
+                    "TorsoBroken"
+                ]
+            ]
+        },
+        {
+            "Inverter": {
+                "SiderealistPredicate": [
+                    "Target",
+                    "HasMoonlet"
+                ]
+            }
+        },
+        {
+            "Moonlet": "Target"
+        }
+    ]
+}

@@ -1,0 +1,160 @@
+{
+    "Executor": [
+        {
+            "AddGraders": [
+                {
+                    "ValueMove": [
+                        "Crescentcut",
+                        50,
+                        50
+                    ]
+                },
+                {
+                    "ValueMoveInStance": [
+                        "Crescentcut",
+                        "Rizet",
+                        100
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "AllAffs": [
+                        "Target",
+                        [
+                            "LeftLegCrippled"
+                        ]
+                    ]
+                },
+                {
+                    "AddGraders": [
+                        {
+                            "ValueMove": [
+                                "Crescentcut",
+                                10,
+                                10
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "AllAffs": [
+                        "Target",
+                        [
+                            "RightLegCrippled"
+                        ]
+                    ]
+                },
+                {
+                    "AddGraders": [
+                        {
+                            "ValueMove": [
+                                "Crescentcut",
+                                10,
+                                10
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "AllAffs": [
+                        "Target",
+                        [
+                            "TorsoBroken"
+                        ]
+                    ]
+                },
+                {
+                    "AddGraders": [
+                        {
+                            "ValueMove": [
+                                "Crescentcut",
+                                30,
+                                30
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "AllAffs": [
+                        "Target",
+                        [
+                            "HeadBroken"
+                        ]
+                    ]
+                },
+                {
+                    "AddGraders": [
+                        {
+                            "ValueMove": [
+                                "Crescentcut",
+                                30,
+                                30
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "AllAffs": [
+                        "Target",
+                        [
+                            "TorsoMangled"
+                        ]
+                    ]
+                },
+                {
+                    "AddGraders": [
+                        {
+                            "ValueMove": [
+                                "Crescentcut",
+                                30,
+                                30
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "AllAffs": [
+                        "Target",
+                        [
+                            "HeadMangled"
+                        ]
+                    ]
+                },
+                {
+                    "AddGraders": [
+                        {
+                            "ValueMove": [
+                                "Crescentcut",
+                                30,
+                                30
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

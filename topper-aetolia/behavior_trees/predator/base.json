@@ -1,0 +1,83 @@
+{
+    "Selector": [
+        {
+            "Inverter": {
+                "HasBalanceEquilibrium": "Me"
+            }
+        },
+        {
+            "SomeAffs": [
+                "Me",
+                [
+                    "Stun"
+                ]
+            ]
+        },
+        {
+            "SubTree": "defend_first"
+        },
+        {
+            "SomeAffs": [
+                "Me",
+                [
+                    "Paralysis"
+                ]
+            ]
+        },
+        {
+            "SubTree": "predator/common/interrupt_channels"
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "PredatorPredicate": [
+                                "Me",
+                                "HasOrgyuk"
+                            ]
+                        },
+                        {
+                            "Succeeder": {
+                                "SubTree": "predator/orgyuk/base"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "PredatorPredicate": [
+                                "Me",
+                                "HasOrel"
+                            ]
+                        },
+                        {
+                            "Succeeder": {
+                                "SubTree": "predator/orel/base"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "PredatorPredicate": [
+                                "Me",
+                                "HasSpider"
+                            ]
+                        },
+                        {
+                            "Succeeder": {
+                                "SubTree": "predator/spider_acid/base"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "SubTree": "predator/venom/base"
+                }
+            ]
+        }
+    ]
+}

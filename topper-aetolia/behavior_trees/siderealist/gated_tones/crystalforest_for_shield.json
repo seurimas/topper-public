@@ -1,0 +1,18 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Shielded"
+                ]
+            ]
+        },
+        {
+            "Tones": [
+                "Target",
+                "Crystalforest"
+            ]
+        }
+    ]
+}

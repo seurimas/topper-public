@@ -1,0 +1,25 @@
+{
+    "Sequence": [
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "DestroyedThroat"
+                ]
+            ]
+        },
+        {
+            "PushAff": "Slickness"
+        },
+        {
+            "PushAff": "Asthma"
+        },
+        {
+            "SentinelComboFull": [
+                "Target",
+                "Slash",
+                "Stab"
+            ]
+        }
+    ]
+}

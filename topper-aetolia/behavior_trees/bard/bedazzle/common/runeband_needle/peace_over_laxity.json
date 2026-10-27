@@ -1,0 +1,43 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Target",
+                    {
+                        "Needled": null
+                    }
+                ]
+            }
+        },
+        {
+            "BardPredicate": [
+                "Target",
+                {
+                    "RunebandAffIs": "Laxity"
+                }
+            ]
+        },
+        {
+            "BardPredicate": [
+                "Target",
+                {
+                    "RunebandTimerNear": 400
+                }
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Peace"
+                ]
+            ]
+        },
+        {
+            "PerformanceAttack": {
+                "Needle": "ouabain"
+            }
+        }
+    ]
+}

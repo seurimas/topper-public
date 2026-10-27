@@ -1,0 +1,16 @@
+{
+    "Sequence": [
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "Burnout",
+                    "Shock"
+                ]
+            ]
+        },
+        {
+            "ArcboltForElectrosphere": "Target"
+        }
+    ]
+}

@@ -1,0 +1,52 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "NoAffs": [
+                    "Target",
+                    [
+                        "MuscleSpasms",
+                        "Stiffness"
+                    ]
+                ]
+            },
+            {
+                "Selector": [
+                    {
+                        "AffCountOver": [
+                            "Target",
+                            2,
+                            [
+                                "Whiplash",
+                                "Backstrain",
+                                "SoreWrist",
+                                "SoreAnkle",
+                                "LeftLegCrippled",
+                                "RightLegCrippled",
+                                "LeftArmCrippled",
+                                "RightArmCrippled",
+                                "Ablaze"
+                            ]
+                        ]
+                    },
+                    {
+                        "BalanceOver": [
+                            "Me",
+                            "Secondary",
+                            3
+                        ]
+                    },
+                    {
+                        "IsRestoringAny": "Target"
+                    }
+                ]
+            },
+            {
+                "AddComboAttackAtPriority": [
+                    "Twinpress",
+                    40
+                ]
+            }
+        ]
+    }
+}

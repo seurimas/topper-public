@@ -1,0 +1,75 @@
+{
+    "Sequence": [
+        {
+            "HintSet": [
+                "MOBILITY",
+                "TURTLE"
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "SubTree": "ascendril/fulcrum/restore_from_lock"
+                },
+                {
+                    "SubTree": "ascendril/fulcrum/restore_for_struggle"
+                },
+                {
+                    "SubTree": "ascendril/fulcrum/keep_fulcrum_up"
+                },
+                "FulcrumExpand",
+                "Degradation",
+                {
+                    "Sequence": [
+                        {
+                            "HintSet": [
+                                "STRATEGY",
+                                "SALVE"
+                            ]
+                        },
+                        {
+                            "Inverter": {
+                                "InRoom": "Target"
+                            }
+                        },
+                        {
+                            "Selector": [
+                                {
+                                    "TraceGlyph": "Entrapment"
+                                },
+                                {
+                                    "TraceGlyph": "Leaching"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "HintSet": [
+                                "STRATEGY",
+                                "PILLS"
+                            ]
+                        },
+                        {
+                            "Inverter": {
+                                "InRoom": "Target"
+                            }
+                        },
+                        {
+                            "Selector": [
+                                {
+                                    "TraceGlyph": "Vainglory"
+                                },
+                                {
+                                    "TraceGlyph": "Addling"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

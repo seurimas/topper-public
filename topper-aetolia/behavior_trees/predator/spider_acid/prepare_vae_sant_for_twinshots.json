@@ -1,0 +1,37 @@
+{
+    "Sequence": [
+        {
+            "Selector": [
+                {
+                    "AllAffs": [
+                        "Target",
+                        [
+                            "Dyscrasia"
+                        ]
+                    ]
+                },
+                {
+                    "Inverter": {
+                        "HasFitness": [
+                            "Target",
+                            8.0
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "GradedCombo": [
+                "Target",
+                [
+                    {
+                        "EndsInStance": "VaeSant"
+                    },
+                    "HasVenom"
+                ],
+                [],
+                []
+            ]
+        }
+    ]
+}

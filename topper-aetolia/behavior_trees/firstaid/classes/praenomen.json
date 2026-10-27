@@ -1,0 +1,174 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/paresis_for_tree_2_10"
+        },
+        {
+            "SubTree": "firstaid/common/disrupted"
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "SimplePriority": [
+                        "Rebounding",
+                        5
+                    ]
+                },
+                {
+                    "ClotAboveBleed": 150
+                }
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "StatUnderPercent": [
+                                "Mana",
+                                "Me",
+                                55
+                            ]
+                        },
+                        {
+                            "AddFirstAidSettings": [
+                                {
+                                    "SimplePriority": [
+                                        "Haemophilia",
+                                        7
+                                    ]
+                                },
+                                {
+                                    "UseClotting": "Off"
+                                },
+                                {
+                                    "ClotAbovePercentMana": 60
+                                },
+                                {
+                                    "VitalsPriority": "Mp"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "StatUnderPercent": [
+                                "Health",
+                                "Me",
+                                60
+                            ]
+                        },
+                        {
+                            "NoAffs": [
+                                "Target",
+                                [
+                                    "Weariness"
+                                ]
+                            ]
+                        },
+                        {
+                            "AddFirstAidSettings": [
+                                {
+                                    "SimplePriority": [
+                                        "Haemophilia",
+                                        7
+                                    ]
+                                },
+                                {
+                                    "ClotAbovePercentMana": 50
+                                },
+                                {
+                                    "UseClotting": "Safe"
+                                },
+                                {
+                                    "VitalsPriority": "Hp"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "SimplePriority": [
+                                "Haemophilia",
+                                10
+                            ]
+                        },
+                        {
+                            "ClotAbovePercentMana": 50
+                        },
+                        {
+                            "UseClotting": "Safe"
+                        },
+                        {
+                            "VitalsPriority": "Hp"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "Selector": [
+                                {
+                                    "StatUnderPercent": [
+                                        "Mana",
+                                        "Me",
+                                        60
+                                    ]
+                                },
+                                {
+                                    "AffCountOver": [
+                                        "Me",
+                                        2,
+                                        [
+                                            "Stupidity",
+                                            "Dizziness",
+                                            "Faintness",
+                                            "Shyness",
+                                            "Epilepsy",
+                                            "Impatience",
+                                            "Recklessness"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "AddFirstAidSettings": [
+                                {
+                                    "SimplePriority": [
+                                        "Impatience",
+                                        10
+                                    ]
+                                },
+                                {
+                                    "UseFocus": false
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "SimplePriority": [
+                                "Impatience",
+                                3
+                            ]
+                        },
+                        {
+                            "UseFocus": true
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

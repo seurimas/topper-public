@@ -1,0 +1,34 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Dyscrasia"
+                ]
+            ]
+        },
+        {
+            "HintSet": [
+                "SNEAK",
+                "true"
+            ]
+        },
+        {
+            "GradedCombo": [
+                "Target",
+                [
+                    {
+                        "MaxBalanceTime": 240
+                    },
+                    "HasVenom",
+                    {
+                        "MinimumAffs": 2
+                    }
+                ],
+                [],
+                []
+            ]
+        }
+    ]
+}

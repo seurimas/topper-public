@@ -1,0 +1,23 @@
+{
+    "Sequence": [
+        {
+            "IsAffectedBy": [
+                "Target",
+                "Weariness"
+            ]
+        },
+        {
+            "StatUnderPercent": [
+                "Health",
+                "Me",
+                50
+            ]
+        },
+        {
+            "Tones": [
+                "Me",
+                "Harmony"
+            ]
+        }
+    ]
+}

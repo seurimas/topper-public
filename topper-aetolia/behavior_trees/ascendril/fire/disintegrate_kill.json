@@ -1,0 +1,25 @@
+{
+    "Sequence": [
+        {
+            "StatUnderPercent": [
+                "Health",
+                "Target",
+                60
+            ]
+        },
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Unconsciousness"
+                ]
+            ]
+        },
+        {
+            "Disintegrate": [
+                "Target",
+                "EnrichOrCatalyze"
+            ]
+        }
+    ]
+}

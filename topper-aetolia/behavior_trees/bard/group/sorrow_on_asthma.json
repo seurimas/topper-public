@@ -1,0 +1,29 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Me",
+                    {
+                        "SingingOrPlaying": null
+                    }
+                ]
+            }
+        },
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "Addiction",
+                    "Perplexity",
+                    "Asthma",
+                    "Clumsiness"
+                ]
+            ]
+        },
+        {
+            "SingOrPlaySong": "Sorrow"
+        },
+        "AudienceTarget"
+    ]
+}

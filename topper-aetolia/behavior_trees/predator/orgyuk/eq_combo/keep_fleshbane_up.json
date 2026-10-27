@@ -1,0 +1,47 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "PredatorPredicate": [
+                    "Target",
+                    "Fleshbaned"
+                ]
+            }
+        },
+        {
+            "Executor": [
+                {
+                    "Selector": [
+                        {
+                            "Sequence": [
+                                {
+                                    "ClassThreatens": [
+                                        "Target",
+                                        "StrengthVitalsPressure"
+                                    ]
+                                },
+                                {
+                                    "Weaken": "Target"
+                                }
+                            ]
+                        },
+                        {
+                            "Rake": "Target"
+                        },
+                        {
+                            "Pummel": [
+                                "Target",
+                                {
+                                    "Static": "RightArmDamage"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fleshbane": "Target"
+                }
+            ]
+        }
+    ]
+}

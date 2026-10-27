@@ -1,0 +1,60 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "CanMend": [
+                        "Target",
+                        {
+                            "Static": "LeftArmDamage"
+                        }
+                    ]
+                },
+                {
+                    "Inverter": {
+                        "IsRestoring": [
+                            "Target",
+                            {
+                                "Static": "LeftArmDamage"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "SentinelSever": [
+                        "Target",
+                        "left"
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "CanMend": [
+                        "Target",
+                        {
+                            "Static": "RightArmDamage"
+                        }
+                    ]
+                },
+                {
+                    "Inverter": {
+                        "IsRestoring": [
+                            "Target",
+                            {
+                                "Static": "RightArmDamage"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "SentinelSever": [
+                        "Target",
+                        "right"
+                    ]
+                }
+            ]
+        }
+    ]
+}

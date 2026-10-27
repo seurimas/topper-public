@@ -1,0 +1,35 @@
+{
+    "Sequence": [
+        {
+            "ClassIn": [
+                "Target",
+                [
+                    "Archivist",
+                    "Shaman"
+                ]
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "SiderealistPredicate": [
+                        "Me",
+                        {
+                            "HasRegalia": "IzuAri"
+                        }
+                    ]
+                },
+                {
+                    "Reenact": [
+                        "IzuAri",
+                        [
+                            "Peripleko",
+                            "Drobia",
+                            "EjaKodosa"
+                        ]
+                    ]
+                }
+            ]
+        }
+    ]
+}

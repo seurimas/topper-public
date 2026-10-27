@@ -1,0 +1,27 @@
+{
+    "Selector": [
+        {
+            "Failer": {
+                "PlainQebBehavior": "inspire"
+            }
+        },
+        {
+            "SubTree": "bard/group/full_youth"
+        },
+        {
+            "Patch": "MostAggroedAlly"
+        },
+        {
+            "SubTree": "bard/common/dither"
+        },
+        {
+            "SubTree": "bard/common/bravado_always"
+        },
+        {
+            "SubTree": "bard/group/ridicule_always"
+        },
+        {
+            "SubTree": "bard/gated_attacks/hiltblow"
+        }
+    ]
+}

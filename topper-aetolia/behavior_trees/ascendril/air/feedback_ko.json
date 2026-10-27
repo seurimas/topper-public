@@ -1,0 +1,24 @@
+{
+    "Sequence": [
+        {
+            "Sequence": [
+                {
+                    "StatEstimateGood": [
+                        "Mana",
+                        "Target"
+                    ]
+                },
+                {
+                    "StatUnderPercent": [
+                        "Mana",
+                        "Target",
+                        15
+                    ]
+                }
+            ]
+        },
+        {
+            "Feedback": "Target"
+        }
+    ]
+}

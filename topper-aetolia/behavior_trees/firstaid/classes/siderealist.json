@@ -1,0 +1,76 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/paresis_for_tree_2_10"
+        },
+        {
+            "SubTree": "firstaid/common/deafness_high"
+        },
+        {
+            "SubTree": "firstaid/common/default_vitals"
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "SimplePriority": [
+                        "Rebounding",
+                        0
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Dissonance",
+                        3
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Echoes",
+                        2
+                    ]
+                }
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "AffCountOver": [
+                                "Me",
+                                3,
+                                [
+                                    "Stupidity",
+                                    "Confusion",
+                                    "Dementia",
+                                    "Hallucinations",
+                                    "Disrupted"
+                                ]
+                            ]
+                        },
+                        {
+                            "AddFirstAidSettings": [
+                                {
+                                    "SimplePriority": [
+                                        "Confusion",
+                                        1
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "SimplePriority": [
+                                "Confusion",
+                                8
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

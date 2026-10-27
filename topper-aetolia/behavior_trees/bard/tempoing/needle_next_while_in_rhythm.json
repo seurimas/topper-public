@@ -1,0 +1,33 @@
+[
+    {
+        "WithoutAffsInStack": [
+            "Paresis",
+            "Shyness"
+        ]
+    },
+    [
+        {
+            "Sequence": [
+                {
+                    "Inverter": {
+                        "BardPredicate": [
+                            "Target",
+                            {
+                                "Needled": null
+                            }
+                        ]
+                    }
+                },
+                {
+                    "BardPredicate": [
+                        "Me",
+                        "InRhythm"
+                    ]
+                },
+                {
+                    "VenomAttack": "Needle"
+                }
+            ]
+        }
+    ]
+]

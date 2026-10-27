@@ -1,0 +1,25 @@
+{
+    "Sequence": [
+        {
+            "AffCountOver": [
+                "Target",
+                4,
+                [
+                    "RingingEars",
+                    "Vomiting",
+                    "Allergies",
+                    "Dyscrasia",
+                    "Paresis",
+                    "Paralysis",
+                    "Asthma"
+                ]
+            ]
+        },
+        {
+            "Bite": [
+                "Target",
+                "Camus"
+            ]
+        }
+    ]
+}

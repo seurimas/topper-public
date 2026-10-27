@@ -1,0 +1,80 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "StatUnderPercent": [
+                    "Mana",
+                    "Target",
+                    20
+                ]
+            }
+        },
+        {
+            "AscendrilPredicate": [
+                "Target",
+                {
+                    "PhenomenaOn": "Glazeflow"
+                }
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "AllAffs": [
+                        "Target",
+                        [
+                            "Fallen",
+                            "Frostbrand"
+                        ]
+                    ]
+                },
+                {
+                    "NoAffs": [
+                        "Target",
+                        [
+                            "Speed"
+                        ]
+                    ]
+                },
+                {
+                    "AllAffs": [
+                        "Target",
+                        [
+                            "Frigid"
+                        ]
+                    ]
+                }
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "AllAffs": [
+                                "Target",
+                                [
+                                    "Fallen"
+                                ]
+                            ]
+                        },
+                        {
+                            "Crystalise": [
+                                "Target",
+                                "Enrich",
+                                true
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Crystalise": [
+                        "Target",
+                        "Resonating",
+                        true
+                    ]
+                }
+            ]
+        }
+    ]
+}

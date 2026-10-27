@@ -1,0 +1,76 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "SelfLoathing"
+                ]
+            ]
+        },
+        {
+            "BardPredicate": [
+                "Target",
+                "IronCollared"
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "AffCountOver": [
+                        "Target",
+                        2,
+                        [
+                            "Misery",
+                            "Hollow",
+                            "Loneliness",
+                            "Narcolepsy",
+                            "Perplexity"
+                        ]
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "AffCountOver": [
+                                "Target",
+                                1,
+                                [
+                                    "Misery",
+                                    "Hollow",
+                                    "Loneliness",
+                                    "Narcolepsy",
+                                    "Perplexity"
+                                ]
+                            ]
+                        },
+                        {
+                            "NoAffs": [
+                                "Target",
+                                [
+                                    "Magnanimity"
+                                ]
+                            ]
+                        },
+                        {
+                            "AffCountOver": [
+                                "Target",
+                                3,
+                                []
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "BardPredicate": [
+                "Target",
+                "IronCollared"
+            ]
+        },
+        {
+            "PerformanceAttack": "Ridicule"
+        }
+    ]
+}

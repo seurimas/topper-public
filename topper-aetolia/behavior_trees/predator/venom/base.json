@@ -1,0 +1,150 @@
+{
+    "Selector": [
+        {
+            "SubTree": "predator/venom/cirisosis_for_the_win"
+        },
+        {
+            "SubTree": "predator/venom/cirisosis_twinshots"
+        },
+        {
+            "SubTree": "predator/common/ferocity_always"
+        },
+        {
+            "SubTree": "predator/common/arouse_always"
+        },
+        {
+            "SubTree": "predator/venom/secure_locks"
+        },
+        {
+            "SubTree": "predator/venom/prepare_veinrip"
+        },
+        {
+            "SubTree": "predator/venom/eq_combo/keep_bloodscourge_up"
+        },
+        {
+            "SubTree": "predator/venom/add_venom_attacks"
+        },
+        {
+            "SubTree": "predator/common/add_raze"
+        },
+        {
+            "SubTree": "predator/common/tidalslash_when_ready"
+        },
+        {
+            "SubTree": "predator/common/safe_stance"
+        },
+        {
+            "Failer": {
+                "CalculateCombos": "Target"
+            }
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 2
+                    },
+                    {
+                        "WithAttack": "Veinrip"
+                    }
+                ],
+                []
+            ]
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 2
+                    },
+                    {
+                        "EndsInStance": "VaeSant"
+                    },
+                    {
+                        "WithAttack": "Tidalslash"
+                    }
+                ],
+                []
+            ]
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 2
+                    },
+                    {
+                        "EndsInStance": "VaeSant"
+                    },
+                    {
+                        "WithAttack": "Vertical"
+                    },
+                    {
+                        "WithAttack": "Flashkick"
+                    }
+                ],
+                []
+            ]
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 3
+                    },
+                    {
+                        "EndsInStance": "VaeSant"
+                    },
+                    {
+                        "WithAttack": "Vertical"
+                    },
+                    {
+                        "WithAttack": "Pinprick"
+                    }
+                ],
+                []
+            ]
+        },
+        {
+            "SubTree": "predator/venom/twinshot_with_vae_sant"
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 2
+                    },
+                    {
+                        "EndsInStance": "VaeSant"
+                    },
+                    {
+                        "WithAttack": "Vertical"
+                    }
+                ],
+                []
+            ]
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 2
+                    },
+                    {
+                        "WithAttack": "Vertical"
+                    }
+                ],
+                []
+            ]
+        },
+        {
+            "Dartshot": "Target"
+        }
+    ]
+}

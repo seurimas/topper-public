@@ -1,0 +1,38 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/paresis_for_tree_2_6"
+        },
+        {
+            "SubTree": "firstaid/common/disrupted"
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "VitalsPriority": "Hp"
+                },
+                {
+                    "SimplePriority": [
+                        "Arrhythmia",
+                        3
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Rebounding",
+                        10
+                    ]
+                },
+                {
+                    "UseClotting": "On"
+                },
+                {
+                    "ClotAbovePercentMana": 40
+                },
+                {
+                    "ClotAboveBleed": 50
+                }
+            ]
+        }
+    ]
+}

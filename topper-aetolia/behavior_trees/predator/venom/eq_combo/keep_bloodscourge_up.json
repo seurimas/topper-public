@@ -1,0 +1,29 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "PredatorPredicate": [
+                    "Target",
+                    "Bloodscourged"
+                ]
+            }
+        },
+        {
+            "Executor": [
+                {
+                    "Selector": [
+                        {
+                            "Intoxicate": "Target"
+                        },
+                        {
+                            "Acid": "Target"
+                        }
+                    ]
+                },
+                {
+                    "Bloodscourge": "Target"
+                }
+            ]
+        }
+    ]
+}

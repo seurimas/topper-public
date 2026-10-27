@@ -1,0 +1,110 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "AffStacksOver": [
+                        "Me",
+                        3,
+                        "SelfLoathing"
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "SimplePriority": [
+                                "SelfLoathing",
+                                2
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "AffStacksOver": [
+                        "Me",
+                        2,
+                        "SelfLoathing"
+                    ]
+                },
+                {
+                    "Buffered": [
+                        "Me",
+                        "SelfLoathing"
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "SimplePriority": [
+                                "SelfLoathing",
+                                2
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "AffStacksOver": [
+                        "Me",
+                        2,
+                        "SelfLoathing"
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "SimplePriority": [
+                                "SelfLoathing",
+                                5
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "AffStacksOver": [
+                        "Me",
+                        1,
+                        "SelfLoathing"
+                    ]
+                },
+                {
+                    "Buffered": [
+                        "Me",
+                        "SelfLoathing"
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "SimplePriority": [
+                                "SelfLoathing",
+                                5
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "SimplePriority": [
+                        "SelfLoathing",
+                        11
+                    ]
+                }
+            ]
+        }
+    ]
+}

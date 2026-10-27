@@ -1,0 +1,39 @@
+{
+    "Sequence": [
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "Rebounding",
+                    "AssumedRebounding",
+                    "Shielded"
+                ]
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Dyscrasia",
+                    "Hypersomnia",
+                    "Marked"
+                ]
+            ]
+        },
+        {
+            "HasTree": [
+                "Target",
+                3.0
+            ]
+        },
+        {
+            "HasFitness": [
+                "Target",
+                3.0
+            ]
+        },
+        {
+            "Bedazzle": "Target"
+        }
+    ]
+}

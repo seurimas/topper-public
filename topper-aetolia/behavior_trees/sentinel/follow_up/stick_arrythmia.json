@@ -1,0 +1,16 @@
+{
+    "Sequence": [
+        {
+            "KnownUnparry": [
+                "Target",
+                "TorsoDamage"
+            ]
+        },
+        {
+            "SentinelSecondStrike": [
+                "Target",
+                "Heartbreaker"
+            ]
+        }
+    ]
+}

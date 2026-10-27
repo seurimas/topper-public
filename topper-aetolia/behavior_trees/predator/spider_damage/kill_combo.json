@@ -1,0 +1,115 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "NoAffs": [
+                        "Target",
+                        [
+                            "Shielded"
+                        ]
+                    ]
+                },
+                {
+                    "StatUnderPercent": [
+                        "Health",
+                        "Target",
+                        50
+                    ]
+                },
+                {
+                    "SeriesCombo": [
+                        "Target",
+                        [
+                            "VaeSant",
+                            [
+                                "Vertical",
+                                "Crescentcut",
+                                "Crescentcut",
+                                "Crescentcut"
+                            ]
+                        ],
+                        []
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "AffCountOver": [
+                        "Target",
+                        2,
+                        [
+                            "RingingEars",
+                            "Recklessness",
+                            "Negated",
+                            "Shock"
+                        ]
+                    ]
+                },
+                {
+                    "PlainQebBehavior": "echo Going for a damage kill..."
+                },
+                {
+                    "DpsCombo": [
+                        "Target",
+                        [
+                            "HasVenom"
+                        ],
+                        []
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "StatUnderPercent": [
+                        "Health",
+                        "Target",
+                        40
+                    ]
+                },
+                {
+                    "PlainQebBehavior": "echo Going for a damage kill..."
+                },
+                {
+                    "DpsCombo": [
+                        "Target",
+                        [
+                            "HasVenom"
+                        ],
+                        []
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "AffCountOver": [
+                        "Target",
+                        3,
+                        [
+                            "RingingEars",
+                            "Recklessness",
+                            "Negated",
+                            "Shock"
+                        ]
+                    ]
+                },
+                {
+                    "PlainQebBehavior": "echo Going for a high damage kill..."
+                },
+                {
+                    "DpsCombo": [
+                        "Target",
+                        [],
+                        []
+                    ]
+                }
+            ]
+        }
+    ]
+}

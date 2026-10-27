@@ -1,0 +1,51 @@
+{
+    "Selector": [
+        {
+            "Inverter": {
+                "HasBalanceEquilibrium": "Me"
+            }
+        },
+        {
+            "SomeAffs": [
+                "Me",
+                [
+                    "Stun",
+                    "Asleep"
+                ]
+            ]
+        },
+        {
+            "SubTree": "defend_first"
+        },
+        {
+            "SubTree": "infiltrator/shrug_from_lock"
+        },
+        {
+            "SubTree": "infiltrator/struggle_shrug"
+        },
+        {
+            "SomeAffs": [
+                "Me",
+                [
+                    "Paralysis"
+                ]
+            ]
+        },
+        {
+            "SubTree": "infiltrator/thin_blood/voyria_for_the_win"
+        },
+        {
+            "SubTree": "infiltrator/buffer_hypnosis"
+        },
+        {
+            "Sequence": [
+                {
+                    "SubTree": "infiltrator/strong_balance"
+                },
+                {
+                    "SubTree": "infiltrator/base_off_balance"
+                }
+            ]
+        }
+    ]
+}

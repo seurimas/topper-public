@@ -1,0 +1,24 @@
+{
+    "Sequence": [
+        {
+            "HintSet": [
+                "MAWCRUSH_FREELY",
+                "true"
+            ]
+        },
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "TorsoBroken"
+                ]
+            ]
+        },
+        {
+            "Mawcrush": "Target"
+        },
+        {
+            "Fleshbane": "Target"
+        }
+    ]
+}

@@ -1,0 +1,136 @@
+{
+    "Failer": {
+        "Executor": [
+            {
+                "AddComboAttacks": [
+                    "Swiftkick",
+                    "Crescentcut",
+                    "Flashkick"
+                ]
+            },
+            {
+                "SubTree": "predator/venom/mindnumb_for_impairment"
+            },
+            {
+                "SubTree": "predator/venom/pheromones_for_lovers"
+            },
+            {
+                "SubTree": "predator/venom/pinprick_for_epilepsy"
+            },
+            {
+                "SubTree": "predator/common/pindown_for_writhe"
+            },
+            {
+                "Sequence": [
+                    {
+                        "Inverter": {
+                            "PredatorPredicate": [
+                                "Target",
+                                "Intoxicated"
+                            ]
+                        }
+                    },
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Dyscrasia"
+                            ]
+                        ]
+                    },
+                    {
+                        "AddComboAttacks": [
+                            "VerticalLoki"
+                        ]
+                    }
+                ]
+            },
+            {
+                "AddComboAttacks": [
+                    "Swiftkick"
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "SomeAffs": [
+                            "Me",
+                            [
+                                "Clumsiness",
+                                "WateryEyes",
+                                "Blindness"
+                            ]
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "ValueMove": [
+                                    "Vertical",
+                                    0,
+                                    10
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "AddGraders": [
+                    {
+                        "HasVenom": 100
+                    },
+                    {
+                        "ValueMove": [
+                            "Swiftkick",
+                            10,
+                            0
+                        ]
+                    },
+                    {
+                        "ValueMove": [
+                            "Pinprick",
+                            20,
+                            0
+                        ]
+                    },
+                    {
+                        "ValueMove": [
+                            "Mindnumb",
+                            10,
+                            0
+                        ]
+                    },
+                    {
+                        "ValueMove": [
+                            "VerticalLoki",
+                            15,
+                            0
+                        ]
+                    },
+                    {
+                        "ValueMove": [
+                            "Pheromones",
+                            20,
+                            0
+                        ]
+                    },
+                    {
+                        "ValueMoveUnparried": [
+                            "Flashkick",
+                            30,
+                            40
+                        ]
+                    },
+                    {
+                        "ValueMoveUnparried": [
+                            "Veinrip",
+                            100,
+                            0
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

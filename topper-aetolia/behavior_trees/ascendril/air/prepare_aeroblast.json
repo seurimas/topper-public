@@ -1,0 +1,120 @@
+{
+    "Sequence": [
+        {
+            "AscendrilPredicate": [
+                "Me",
+                {
+                    "HalfResonance": "Air"
+                }
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "AllAffs": [
+                                "Target",
+                                [
+                                    "Dizziness"
+                                ]
+                            ]
+                        },
+                        {
+                            "NoAffs": [
+                                "Target",
+                                [
+                                    "Vertigo"
+                                ]
+                            ]
+                        },
+                        {
+                            "PlainQebBehavior": "echo Vertigo pressurize"
+                        },
+                        {
+                            "Pressurize": "Target"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "AllAffs": [
+                                "Target",
+                                [
+                                    "Stupidity"
+                                ]
+                            ]
+                        },
+                        {
+                            "NoAffs": [
+                                "Target",
+                                [
+                                    "Confusion"
+                                ]
+                            ]
+                        },
+                        {
+                            "PlainQebBehavior": "echo Confusion pressurize"
+                        },
+                        {
+                            "Pressurize": "Target"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "AllAffs": [
+                                "Target",
+                                [
+                                    "Vertigo"
+                                ]
+                            ]
+                        },
+                        {
+                            "NoAffs": [
+                                "Target",
+                                [
+                                    "Dizziness"
+                                ]
+                            ]
+                        },
+                        {
+                            "PlainQebBehavior": "echo Dizzy thunderclap"
+                        },
+                        {
+                            "Thunderclap": "Target"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "AllAffs": [
+                                "Target",
+                                [
+                                    "Confusion"
+                                ]
+                            ]
+                        },
+                        {
+                            "NoAffs": [
+                                "Target",
+                                [
+                                    "Stupidity"
+                                ]
+                            ]
+                        },
+                        {
+                            "PlainQebBehavior": "echo Stupid thunderclap"
+                        },
+                        {
+                            "Thunderclap": "Target"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

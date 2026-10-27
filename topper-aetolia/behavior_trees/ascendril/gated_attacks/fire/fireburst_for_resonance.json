@@ -1,0 +1,30 @@
+{
+    "Sequence": [
+        {
+            "AscendrilPredicate": [
+                "Me",
+                {
+                    "NoResonance": null
+                }
+            ]
+        },
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Emberbrand"
+                ]
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Clumsiness",
+                    "Weariness"
+                ]
+            ]
+        },
+        "FireburstCast"
+    ]
+}

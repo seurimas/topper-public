@@ -1,0 +1,44 @@
+{
+    "Selector": [
+        {
+            "SubTree": "sentinel/follow_up/base"
+        },
+        {
+            "WhirlContinue": "Target"
+        },
+        {
+            "Inverter": {
+                "HasBalanceEquilibrium": "Me"
+            }
+        },
+        {
+            "SomeAffs": [
+                "Me",
+                [
+                    "Stun",
+                    "Asleep"
+                ]
+            ]
+        },
+        {
+            "SubTree": "defend_first"
+        },
+        {
+            "SubTree": "sentinel/might_for_struggle"
+        },
+        {
+            "SubTree": "sentinel/might_from_lock"
+        },
+        {
+            "SomeAffs": [
+                "Me",
+                [
+                    "Paralysis"
+                ]
+            ]
+        },
+        {
+            "SubTree": "sentinel/base_balance"
+        }
+    ]
+}

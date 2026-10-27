@@ -1,0 +1,27 @@
+{
+    "Sequence": [
+        {
+            "AffCountUnder": [
+                "Target",
+                1,
+                [
+                    "Recklessness",
+                    "Shock",
+                    "Negated",
+                    "RingingEars"
+                ]
+            ]
+        },
+        {
+            "PredatorPredicate": [
+                "Me",
+                {
+                    "InStance": "VaeSant"
+                }
+            ]
+        },
+        {
+            "Twinshot": "Target"
+        }
+    ]
+}

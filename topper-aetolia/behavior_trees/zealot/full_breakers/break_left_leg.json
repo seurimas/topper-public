@@ -1,0 +1,30 @@
+{
+    "Sequence": [
+        {
+            "RestoredBreak": [
+                "Target",
+                {
+                    "Static": "LeftLegDamage"
+                },
+                18
+            ]
+        },
+        {
+            "Inverter": {
+                "ExpectedParry": [
+                    "Target",
+                    {
+                        "Static": "LeftLegDamage"
+                    }
+                ]
+            }
+        },
+        {
+            "FullCombo": [
+                "Target",
+                "WanekickLeft",
+                "WanekickLeft"
+            ]
+        }
+    ]
+}

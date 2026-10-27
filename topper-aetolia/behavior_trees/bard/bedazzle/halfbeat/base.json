@@ -1,0 +1,61 @@
+{
+    "Selector": [
+        {
+            "SubTree": "bard/upfront_essentials/awaken_first"
+        },
+        {
+            "SubTree": "bard/upfront_essentials/free_globes"
+        },
+        {
+            "SubTree": "bard/common/bravado_always"
+        },
+        {
+            "SubTree": "bard/upfront_essentials/first_runeband"
+        },
+        {
+            "SubTree": "bard/bedazzle/halfbeat/fast_anelace"
+        },
+        {
+            "SubTree": "bard/perplexed_ladder/ironcollar_if_buffered"
+        },
+        {
+            "SubTree": "bard/for_lethal/ridicule_if_buffered"
+        },
+        {
+            "SubTree": "bard/tempoing/tempo_needled"
+        },
+        {
+            "SubTree": "bard/common/crackshot_if_buffered"
+        },
+        {
+            "SubTree": "bard/bedazzle/halfbeat/play_or_sing_sorrow"
+        },
+        {
+            "SubTree": "bard/bedazzle/halfbeat/play_or_sing_decadence"
+        },
+        {
+            "SubTree": "bard/bedazzle/halfbeat/play_or_sing_destiny"
+        },
+        {
+            "SubTree": "bard/runeband_needle/base"
+        },
+        {
+            "SubTree": "bard/tempoing/needle_curare_in_window"
+        },
+        {
+            "SubTree": "bard/gated_attacks/dumb_quip"
+        },
+        {
+            "SubTree": "bard/gated_attacks/hiltblow"
+        },
+        {
+            "SubTree": "bard/gated_attacks/happy_seduce"
+        },
+        {
+            "SubTree": "bard/tempoing/pierce_shield_or_rebounding"
+        },
+        {
+            "SubTree": "bard/common/dither"
+        }
+    ]
+}

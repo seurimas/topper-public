@@ -1,0 +1,33 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "AffCountUnder": [
+                    "Me",
+                    6,
+                    []
+                ]
+            },
+            {
+                "AffCountOver": [
+                    "Target",
+                    6,
+                    []
+                ]
+            },
+            {
+                "NoAffs": [
+                    "Target",
+                    [
+                        "Infatuation"
+                    ]
+                ]
+            },
+            {
+                "AddComboAttacks": [
+                    "Pheromones"
+                ]
+            }
+        ]
+    }
+}

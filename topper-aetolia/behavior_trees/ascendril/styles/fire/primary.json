@@ -1,0 +1,87 @@
+{
+    "Sequence": [
+        {
+            "HintSet": [
+                "STRATEGY",
+                "FIRE"
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "SubTree": "ascendril/brand_pairs/fire_air"
+                },
+                {
+                    "SubTree": "ascendril/air/support_aeroblast"
+                },
+                {
+                    "SubTree": "ascendril/fire/big_pyroclast"
+                },
+                {
+                    "SubTree": "ascendril/air/big_aeroblast"
+                },
+                {
+                    "SubTree": "ascendril/water/big_crystalize"
+                },
+                {
+                    "AshenFeet": "Target"
+                },
+                {
+                    "Sequence": [
+                        {
+                            "AscendrilPredicate": [
+                                "Me",
+                                "AfterburnRaising"
+                            ]
+                        },
+                        {
+                            "SubTree": "ascendril/water/icicle_freely"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "Selector": [
+                                {
+                                    "IsAffectedBy": [
+                                        "Target",
+                                        "Clumsiness"
+                                    ]
+                                },
+                                {
+                                    "IsAffectedBy": [
+                                        "Target",
+                                        "Weariness"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "SubTree": "ascendril/gated_attacks/fire/fireburst_full"
+                        }
+                    ]
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/fire/spark"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/fire/fireburst_for_resonance"
+                },
+                "Afterburn",
+                {
+                    "SubTree": "ascendril/gated_attacks/fire/fireburst_full"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/fire/conflagrate"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/air/deaf_thunderclap"
+                },
+                {
+                    "SubTree": "ascendril/water/icicle_freely"
+                }
+            ]
+        }
+    ]
+}

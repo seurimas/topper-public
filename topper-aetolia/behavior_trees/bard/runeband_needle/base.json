@@ -1,0 +1,22 @@
+{
+    "Selector": [
+        {
+            "SubTree": "bard/runeband_needle/shyness_under_stupidity"
+        },
+        {
+            "SubTree": "bard/runeband_needle/stupidity_over_paranoia"
+        },
+        {
+            "SubTree": "bard/runeband_needle/asthma_over_ringing_ears"
+        },
+        {
+            "SubTree": "bard/runeband_needle/vomiting_over_exhausted"
+        },
+        {
+            "SubTree": "bard/runeband_needle/peace_over_laxity"
+        },
+        {
+            "SubTree": "bard/runeband_needle/asthma_under_clumsiness"
+        }
+    ]
+}

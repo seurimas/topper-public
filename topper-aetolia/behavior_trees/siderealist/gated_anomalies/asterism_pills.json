@@ -1,0 +1,47 @@
+{
+    "Sequence": [
+        {
+            "AffCountOver": [
+                "Target",
+                4,
+                [
+                    "Recklessness",
+                    "Dizziness",
+                    "Clumsiness",
+                    "Paresis",
+                    "Paralysis",
+                    "Paranoia",
+                    "Echoes",
+                    "Stupidity",
+                    "Confusion",
+                    "Dementia",
+                    "Hallucinations",
+                    "Shyness",
+                    "Agoraphobia",
+                    "Claustrophobia",
+                    "Loneliness",
+                    "Masochism",
+                    "Epilepsy",
+                    "Mania",
+                    "RingingEars",
+                    "Dissonance",
+                    "Weariness",
+                    "Superstition",
+                    "Vomiting",
+                    "Anorexia"
+                ]
+            ]
+        },
+        {
+            "Inverter": {
+                "SiderealistPredicate": [
+                    "Target",
+                    "HasAsterism"
+                ]
+            }
+        },
+        {
+            "Asterism": "Target"
+        }
+    ]
+}

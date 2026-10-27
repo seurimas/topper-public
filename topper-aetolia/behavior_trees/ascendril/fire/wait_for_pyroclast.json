@@ -1,0 +1,32 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Arcane"
+                ]
+            ]
+        },
+        {
+            "AscendrilPredicate": [
+                "Me",
+                {
+                    "CanCatalyze": [
+                        "Target",
+                        "Fire"
+                    ]
+                }
+            ]
+        },
+        {
+            "AscendrilPredicate": [
+                "Target",
+                "ShatteringOn"
+            ]
+        },
+        {
+            "PlainQebBehavior": "echo Waiting for a Pyroclast window, maybe"
+        }
+    ]
+}

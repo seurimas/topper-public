@@ -1,0 +1,22 @@
+{
+    "Sequence": [
+        {
+            "QuickLocked": "Target"
+        },
+        {
+            "PushAff": "FeebleArms"
+        },
+        {
+            "PushAff": "FeebleLegs"
+        },
+        {
+            "PushAff": "Paresis"
+        },
+        {
+            "SentinelSecondStrike": [
+                "Target",
+                "Stab"
+            ]
+        }
+    ]
+}

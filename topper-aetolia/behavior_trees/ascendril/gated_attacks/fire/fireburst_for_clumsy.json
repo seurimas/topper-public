@@ -1,0 +1,26 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Emberbrand"
+                ]
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Clumsiness"
+                ]
+            ]
+        },
+        {
+            "Fireburst": [
+                "Target",
+                true
+            ]
+        }
+    ]
+}

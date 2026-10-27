@@ -1,0 +1,35 @@
+{
+    "Sequence": [
+        {
+            "HintSet": [
+                "STRATEGY",
+                "WATER"
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "SubTree": "ascendril/brand_pairs/water_fire"
+                },
+                {
+                    "SubTree": "ascendril/water/big_crystalize"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/water/drench_frozen"
+                },
+                {
+                    "SubTree": "ascendril/water/shatter_no_ember"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/water/coldsnap"
+                },
+                {
+                    "SubTree": "ascendril/water/shatter_for_low_caloric"
+                },
+                {
+                    "SubTree": "ascendril/water/icicle_freely"
+                }
+            ]
+        }
+    ]
+}

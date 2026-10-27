@@ -1,0 +1,51 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "Inverter": {
+                    "PredatorPredicate": [
+                        "Me",
+                        "CanFeint"
+                    ]
+                }
+            },
+            {
+                "CanParry": "Target"
+            },
+            {
+                "AllAffs": [
+                    "Target",
+                    [
+                        "Fallen"
+                    ]
+                ]
+            },
+            {
+                "NoAffs": [
+                    "Target",
+                    [
+                        "WritheDartpinned",
+                        "LeftLegBroken",
+                        "RightLegBroken"
+                    ]
+                ]
+            },
+            {
+                "AddComboAttacks": [
+                    "Pindown"
+                ]
+            },
+            {
+                "AddGraders": [
+                    {
+                        "ValueMove": [
+                            "Pindown",
+                            200,
+                            -2000
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

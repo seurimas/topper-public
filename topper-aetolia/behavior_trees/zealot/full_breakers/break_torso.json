@@ -1,0 +1,30 @@
+{
+    "Sequence": [
+        {
+            "RestoredBreak": [
+                "Target",
+                {
+                    "Static": "TorsoDamage"
+                },
+                17
+            ]
+        },
+        {
+            "Inverter": {
+                "ExpectedParry": [
+                    "Target",
+                    {
+                        "Static": "TorsoDamage"
+                    }
+                ]
+            }
+        },
+        {
+            "FullCombo": [
+                "Target",
+                "Clawtwist",
+                "Clawtwist"
+            ]
+        }
+    ]
+}

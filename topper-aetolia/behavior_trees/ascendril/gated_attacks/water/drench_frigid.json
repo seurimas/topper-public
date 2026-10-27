@@ -1,0 +1,18 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Frigid"
+                ]
+            ]
+        },
+        {
+            "Drench": [
+                "Target",
+                true
+            ]
+        }
+    ]
+}

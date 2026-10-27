@@ -1,0 +1,80 @@
+[
+    {
+        "Stick": "Paresis"
+    },
+    {
+        "IfClassHates": [
+            "Clumsiness",
+            {
+                "Stick": "Clumsiness"
+            }
+        ]
+    },
+    {
+        "IfDo": [
+            "Dyscrasia",
+            {
+                "OneOf": [
+                    "Vomiting",
+                    "Allergies"
+                ]
+            }
+        ]
+    },
+    {
+        "IfNotDo": [
+            "Dyscrasia",
+            {
+                "Stick": "Allergies"
+            }
+        ]
+    },
+    {
+        "IfClassHates": [
+            "Weariness",
+            {
+                "Stick": "Weariness"
+            }
+        ]
+    },
+    {
+        "Stick": "Asthma"
+    },
+    {
+        "IfNotDo": [
+            "Dyscrasia",
+            {
+                "Stick": "Vomiting"
+            }
+        ]
+    },
+    {
+        "Stick": "Stupidity"
+    },
+    {
+        "IfNotClassHates": [
+            "Clumsiness",
+            {
+                "OneOf": [
+                    "Clumsiness",
+                    "Weariness"
+                ]
+            }
+        ]
+    },
+    {
+        "Stick": "RingingEars"
+    },
+    {
+        "Stick": "Slickness"
+    },
+    {
+        "Stick": "Anorexia"
+    },
+    {
+        "Stick": "Squelched"
+    },
+    {
+        "Stick": "Recklessness"
+    }
+]

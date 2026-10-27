@@ -1,0 +1,15 @@
+{
+    "Sequence": [
+        {
+            "PredatorPredicate": [
+                "Me",
+                {
+                    "InStance": "VaeSant"
+                }
+            ]
+        },
+        {
+            "Twinshot": "Target"
+        }
+    ]
+}

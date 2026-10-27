@@ -1,0 +1,30 @@
+{
+    "Sequence": [
+        {
+            "RestoredBreak": [
+                "Target",
+                {
+                    "Static": "HeadDamage"
+                },
+                12.0
+            ]
+        },
+        {
+            "Inverter": {
+                "ExpectedParry": [
+                    "Target",
+                    {
+                        "Static": "HeadDamage"
+                    }
+                ]
+            }
+        },
+        {
+            "FullCombo": [
+                "Target",
+                "Sunkick",
+                "Sunkick"
+            ]
+        }
+    ]
+}

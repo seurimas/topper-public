@@ -1,0 +1,13 @@
+{
+    "Executor": [
+        {
+            "HintPlan": [
+                "STRATEGY",
+                "FIRE"
+            ]
+        },
+        {
+            "SubTree": "ascendril/base"
+        }
+    ]
+}

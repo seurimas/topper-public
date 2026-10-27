@@ -1,0 +1,35 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Target",
+                    {
+                        "Needled": null
+                    }
+                ]
+            }
+        },
+        {
+            "BardPredicate": [
+                "Target",
+                {
+                    "PrimaryEmotion": "Sadness"
+                }
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Shyness"
+                ]
+            ]
+        },
+        {
+            "PerformanceAttack": {
+                "Needle": "digitalis"
+            }
+        }
+    ]
+}

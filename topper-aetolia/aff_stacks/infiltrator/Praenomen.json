@@ -1,0 +1,56 @@
+[
+    {
+        "Stick": "Paresis"
+    },
+    {
+        "Stick": "Asthma"
+    },
+    {
+        "IfNotDo": [
+            "Anorexia",
+            {
+                "OneOf": [
+                    "Weariness",
+                    "Clumsiness"
+                ]
+            }
+        ]
+    },
+    {
+        "IfDo": [
+            "Slickness",
+            {
+                "Stick": "Stupidity"
+            }
+        ]
+    },
+    {
+        "Stick": "Slickness"
+    },
+    {
+        "IfDo": [
+            "Impatience",
+            {
+                "Stick": "Dizziness"
+            }
+        ]
+    },
+    {
+        "Stick": "Allergies"
+    },
+    {
+        "Stick": "Vomiting"
+    },
+    {
+        "Stick": "LeftLegCrippled"
+    },
+    {
+        "Stick": "RightLegCrippled"
+    },
+    {
+        "Stick": "LeftArmCrippled"
+    },
+    {
+        "Stick": "RightArmCrippled"
+    }
+]

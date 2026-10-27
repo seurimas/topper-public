@@ -1,0 +1,13 @@
+{
+    "Sequence": [
+        {
+            "QuickLocked": "Target"
+        },
+        {
+            "SentinelFirstStrike": [
+                "Target",
+                "Twirl"
+            ]
+        }
+    ]
+}

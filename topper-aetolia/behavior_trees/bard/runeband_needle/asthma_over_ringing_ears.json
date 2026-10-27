@@ -1,0 +1,43 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Target",
+                    {
+                        "Needled": null
+                    }
+                ]
+            }
+        },
+        {
+            "BardPredicate": [
+                "Target",
+                {
+                    "RunebandAffIs": "RingingEars"
+                }
+            ]
+        },
+        {
+            "BardPredicate": [
+                "Target",
+                {
+                    "RunebandTimerNear": 400
+                }
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Asthma"
+                ]
+            ]
+        },
+        {
+            "PerformanceAttack": {
+                "Needle": "kalmia"
+            }
+        }
+    ]
+}

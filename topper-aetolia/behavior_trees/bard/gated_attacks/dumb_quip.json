@@ -1,0 +1,36 @@
+{
+    "Sequence": [
+        {
+            "Selector": [
+                {
+                    "BardPredicate": [
+                        "Target",
+                        {
+                            "Dumb": true
+                        }
+                    ]
+                },
+                {
+                    "BardPredicate": [
+                        "Target",
+                        {
+                            "PrimaryEmotion": "Anger"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Hatred",
+                    "Mania"
+                ]
+            ]
+        },
+        {
+            "PerformanceAttack": "Quip"
+        }
+    ]
+}

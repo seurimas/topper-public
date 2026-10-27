@@ -1,0 +1,67 @@
+{
+    "Selector": [
+        {
+            "Failer": {
+                "PlainQebBehavior": "inspire"
+            }
+        },
+        {
+            "SubTree": "bard/group/half_beat_youth"
+        },
+        {
+            "Sequence": [
+                {
+                    "Buffered": [
+                        "Target",
+                        "Asthma"
+                    ]
+                },
+                {
+                    "NoAffs": [
+                        "Target",
+                        [
+                            "Besilence"
+                        ]
+                    ]
+                },
+                {
+                    "Selector": [
+                        {
+                            "Sequence": [
+                                {
+                                    "Inverter": {
+                                        "BardPredicate": [
+                                            "Target",
+                                            "Globed"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "WeaveAttack": "Globes"
+                                }
+                            ]
+                        },
+                        {
+                            "WeaveAttack": "Headstitch"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Patch": "MostAggroedAlly"
+        },
+        {
+            "SubTree": "bard/common/dither"
+        },
+        {
+            "SubTree": "bard/common/bravado_always"
+        },
+        {
+            "SubTree": "bard/group/ridicule_always"
+        },
+        {
+            "SubTree": "bard/gated_attacks/hiltblow"
+        }
+    ]
+}

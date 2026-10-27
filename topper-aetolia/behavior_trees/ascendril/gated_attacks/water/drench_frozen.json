@@ -1,0 +1,27 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Frozen"
+                ]
+            ]
+        },
+        {
+            "Inverter": {
+                "StatUnderPercent": [
+                    "Mana",
+                    "Target",
+                    15
+                ]
+            }
+        },
+        {
+            "Drench": [
+                "Target",
+                true
+            ]
+        }
+    ]
+}

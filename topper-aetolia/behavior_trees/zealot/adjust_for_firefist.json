@@ -1,0 +1,16 @@
+{
+    "AdjustPriority": [
+        [
+            "PummelLeft",
+            "PummelRight",
+            "Palmforce",
+            "Clawtwist",
+            "DislocateLeftArm",
+            "DislocateRightArm",
+            "DislocateLeftLeg",
+            "DislocateRightLeg",
+            "Twinpress"
+        ],
+        3
+    ]
+}

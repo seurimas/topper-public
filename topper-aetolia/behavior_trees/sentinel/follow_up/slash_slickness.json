@@ -1,0 +1,27 @@
+{
+    "Sequence": [
+        {
+            "Buffered": [
+                "Target",
+                "Asthma"
+            ]
+        },
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "Paresis"
+                ]
+            ]
+        },
+        {
+            "PushAff": "Slickness"
+        },
+        {
+            "SentinelSecondStrike": [
+                "Target",
+                "Stab"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,245 @@
+[
+    "BardWrapper",
+    [
+        {
+            "Selector": [
+                {
+                    "Failer": {
+                        "TempoVenom": true
+                    }
+                },
+                {
+                    "Inverter": {
+                        "HasBalanceEquilibrium": "Me"
+                    }
+                },
+                {
+                    "Failer": {
+                        "CopyHint": [
+                            "FAST_WEAPON",
+                            "WEAPON"
+                        ]
+                    }
+                },
+                {
+                    "SubTree": "defend_first"
+                },
+                {
+                    "SubTree": "bard/common/interrupt_channels"
+                },
+                {
+                    "SubTree": "bard/tempoing/pop_curare_if_needled"
+                },
+                {
+                    "SubTree": "bard/tempoing/pop_digitalis_if_needled"
+                },
+                {
+                    "SomeAffs": [
+                        "Me",
+                        [
+                            "Stun"
+                        ]
+                    ]
+                },
+                {
+                    "SubTree": "bard/common/keep_me_alive"
+                },
+                {
+                    "SomeAffs": [
+                        "Me",
+                        [
+                            "Paralysis"
+                        ]
+                    ]
+                },
+                {
+                    "SubTree": "bard/for_lethal/heartcage"
+                },
+                {
+                    "SubTree": "bard/induces/base"
+                },
+                {
+                    "SubTree": "bard/for_lethal/tempo_blackstar"
+                },
+                {
+                    "SubTree": "bard/tempoing/tempo_needled"
+                },
+                {
+                    "SubTree": "bard/upfront_essentials/keepup_defences"
+                },
+                {
+                    "Sequence": [
+                        {
+                            "Selector": [
+                                {
+                                    "NoAffs": [
+                                        "Target",
+                                        [
+                                            "Perplexity",
+                                            "Misery",
+                                            "Hollow",
+                                            "Loneliness",
+                                            "Narcolepsy"
+                                        ]
+                                    ]
+                                },
+                                {
+                                    "BardPredicate": [
+                                        "Target",
+                                        "IronCollared"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "SubTree": "bard/upfront_essentials/awaken_first"
+                        }
+                    ]
+                },
+                {
+                    "SubTree": "bard/upfront_essentials/free_masterstroke"
+                },
+                {
+                    "SubTree": "bard/upfront_essentials/free_globes"
+                },
+                {
+                    "SubTree": "bard/upfront_essentials/first_runeband"
+                },
+                {
+                    "Sequence": [
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                "IronCollared"
+                            ]
+                        },
+                        {
+                            "SubTree": "bard/destiny_weaving/base"
+                        }
+                    ]
+                },
+                {
+                    "SubTree": "bard/gated_attacks/addiction_half_beat"
+                },
+                {
+                    "SubTree": "bard/perplexed_ladder/ironcollar_if_buffered"
+                },
+                {
+                    "SubTree": "bard/perplexed_ladder/anelace_bufferered"
+                },
+                {
+                    "Sequence": [
+                        {
+                            "Inverter": {
+                                "Selector": [
+                                    {
+                                        "NoAffs": [
+                                            "Target",
+                                            [
+                                                "Perplexity",
+                                                "Misery",
+                                                "Hollow",
+                                                "Narcolepsy"
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "BardPredicate": [
+                                            "Target",
+                                            "IronCollared"
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "SubTree": "bard/upfront_essentials/awaken_first"
+                        }
+                    ]
+                },
+                {
+                    "SubTree": "bard/tempoing/needle_curare_in_window"
+                },
+                {
+                    "SubTree": "bard/for_lethal/ridicule_if_buffered"
+                },
+                {
+                    "SubTree": "bard/windows/besilence_if_buffered"
+                },
+                {
+                    "SubTree": "bard/perplexed_ladder/perplexed_if_buffered"
+                },
+                {
+                    "SubTree": "bard/windows/sorrow_if_struggling"
+                },
+                {
+                    "SubTree": "bard/common/bravado_always"
+                },
+                {
+                    "SubTree": "bard/tempoing/timed_tempo"
+                },
+                {
+                    "SubTree": "bard/tempoing/headstitch_while_in_rhythm"
+                },
+                {
+                    "SubTree": "bard/needle_freely"
+                },
+                {
+                    "SubTree": "bard/gated_attacks/hard_ridicule"
+                },
+                {
+                    "SubTree": "bard/gated_attacks/hiltblow"
+                },
+                {
+                    "Sequence": [
+                        {
+                            "Inverter": {
+                                "BardPredicate": [
+                                    "Target",
+                                    "IronCollared"
+                                ]
+                            }
+                        },
+                        {
+                            "SubTree": "bard/destiny_weaving/base"
+                        }
+                    ]
+                },
+                {
+                    "SubTree": "bard/for_lethal/boundary_after_ironcollar"
+                },
+                {
+                    "Sequence": [
+                        {
+                            "SomeAffs": [
+                                "Target",
+                                [
+                                    "Vertigo",
+                                    "Addiction"
+                                ]
+                            ]
+                        },
+                        {
+                            "SubTree": "bard/gated_attacks/dumb_quip"
+                        }
+                    ]
+                },
+                {
+                    "SubTree": "bard/gated_attacks/happy_seduce"
+                },
+                {
+                    "SubTree": "bard/common/slow_bladestorm"
+                },
+                {
+                    "SubTree": "bard/perplexed_ladder/perplexed_freely"
+                },
+                {
+                    "SubTree": "bard/grips/pierce_shield_rebounding"
+                },
+                {
+                    "SubTree": "bard/common/dither"
+                }
+            ]
+        }
+    ]
+]

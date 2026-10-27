@@ -1,0 +1,117 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "AffCountOver": [
+                    "Target",
+                    2,
+                    [
+                        "LeftLegBroken",
+                        "RightLegBroken",
+                        "LeftArmBroken",
+                        "RightArmBroken",
+                        "HeadBroken",
+                        "TorsoBroken",
+                        "TorsoBroken"
+                    ]
+                ]
+            },
+            {
+                "Selector": [
+                    {
+                        "Sequence": [
+                            {
+                                "LimbsEqual": [
+                                    "Target",
+                                    {
+                                        "Static": "LeftLegDamage"
+                                    },
+                                    {
+                                        "Lowest": [
+                                            "LeftArmDamage",
+                                            "RightArmDamage",
+                                            "LeftLegDamage",
+                                            "RightLegDamage"
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "SubTree": "zealot/dislocate_at_30/dislocate_left_leg"
+                            }
+                        ]
+                    },
+                    {
+                        "Sequence": [
+                            {
+                                "LimbsEqual": [
+                                    "Target",
+                                    {
+                                        "Static": "LeftArmDamage"
+                                    },
+                                    {
+                                        "Lowest": [
+                                            "LeftArmDamage",
+                                            "RightArmDamage",
+                                            "LeftLegDamage",
+                                            "RightLegDamage"
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "SubTree": "zealot/dislocate_at_30/dislocate_left_arm"
+                            }
+                        ]
+                    },
+                    {
+                        "Sequence": [
+                            {
+                                "LimbsEqual": [
+                                    "Target",
+                                    {
+                                        "Static": "RightLegDamage"
+                                    },
+                                    {
+                                        "Lowest": [
+                                            "LeftArmDamage",
+                                            "RightArmDamage",
+                                            "LeftLegDamage",
+                                            "RightLegDamage"
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "SubTree": "zealot/dislocate_at_30/dislocate_right_leg"
+                            }
+                        ]
+                    },
+                    {
+                        "Sequence": [
+                            {
+                                "LimbsEqual": [
+                                    "Target",
+                                    {
+                                        "Static": "RightArmDamage"
+                                    },
+                                    {
+                                        "Lowest": [
+                                            "LeftArmDamage",
+                                            "RightArmDamage",
+                                            "LeftLegDamage",
+                                            "RightLegDamage"
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "SubTree": "zealot/dislocate_at_30/dislocate_right_arm"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,163 @@
+{
+    "Failer": {
+        "Selector": [
+            {
+                "Inverter": {
+                    "BardPredicate": [
+                        "Target",
+                        "IronCollared"
+                    ]
+                }
+            },
+            {
+                "Inverter": {
+                    "SomeAffs": [
+                        "Target",
+                        [
+                            "SelfLoathing",
+                            "Misery",
+                            "Perplexity",
+                            "Hollow",
+                            "Loneliness",
+                            "Narcolepsy"
+                        ]
+                    ]
+                }
+            },
+            {
+                "BardPredicate": [
+                    "Target",
+                    {
+                        "PrimaryEmotionLevel": 62
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "BardPredicate": [
+                            "Target",
+                            {
+                                "EmotionLevel": [
+                                    "Sadness",
+                                    60
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "Induce": "Sadness"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "BardPredicate": [
+                            "Target",
+                            {
+                                "EmotionLevel": [
+                                    "Happiness",
+                                    60
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "Induce": "Happiness"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "BardPredicate": [
+                            "Target",
+                            {
+                                "EmotionLevel": [
+                                    "Surprise",
+                                    60
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "Induce": "Surprise"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "BardPredicate": [
+                            "Target",
+                            {
+                                "EmotionLevel": [
+                                    "Anger",
+                                    60
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "Induce": "Anger"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "BardPredicate": [
+                            "Target",
+                            {
+                                "EmotionLevel": [
+                                    "Stress",
+                                    60
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "Induce": "Stress"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "BardPredicate": [
+                            "Target",
+                            {
+                                "EmotionLevel": [
+                                    "Fear",
+                                    60
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "Induce": "Fear"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "BardPredicate": [
+                            "Target",
+                            {
+                                "EmotionLevel": [
+                                    "Disgust",
+                                    60
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "Induce": "Disgust"
+                    }
+                ]
+            }
+        ]
+    }
+}

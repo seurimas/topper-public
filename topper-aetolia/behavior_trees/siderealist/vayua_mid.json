@@ -1,0 +1,21 @@
+{
+    "Sequence": [
+        {
+            "ClassIn": [
+                "Target",
+                [
+                    "Luminary"
+                ]
+            ]
+        },
+        {
+            "PriorityAffIs": [
+                "Target",
+                "Peace"
+            ]
+        },
+        {
+            "VayuaAttack": "Target"
+        }
+    ]
+}

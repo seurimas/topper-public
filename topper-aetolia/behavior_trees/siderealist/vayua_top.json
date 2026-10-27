@@ -1,0 +1,26 @@
+{
+    "Sequence": [
+        {
+            "PriorityAffIs": [
+                "Target",
+                "Asthma"
+            ]
+        },
+        {
+            "AffCountOver": [
+                "Target",
+                1,
+                [
+                    "Clumsiness",
+                    "Weariness",
+                    "Sensitivity",
+                    "RingingEars",
+                    "Sepsis"
+                ]
+            ]
+        },
+        {
+            "VayuaAttack": "Target"
+        }
+    ]
+}

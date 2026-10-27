@@ -1,0 +1,69 @@
+{
+    "Sequence": [
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                {
+                                    "Needled": "curare"
+                                }
+                            ]
+                        },
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                "NeedlePending"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "AffCountOver": [
+                                "Target",
+                                3,
+                                []
+                            ]
+                        },
+                        {
+                            "SomeAffs": [
+                                "Target",
+                                [
+                                    "Paresis",
+                                    "Paralysis"
+                                ]
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Shyness"
+                ]
+            ]
+        },
+        {
+            "BardPredicate": [
+                "Me",
+                "ImpetusReady"
+            ]
+        },
+        {
+            "CopyHint": [
+                "IMPETUS_WEAPON",
+                "WEAPON"
+            ]
+        },
+        {
+            "PerformanceAttack": "TempoNaked"
+        }
+    ]
+}

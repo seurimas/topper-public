@@ -1,0 +1,58 @@
+{
+    "Selector": [
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "EndsInStance": "VaeSant"
+                    },
+                    "HasVenom",
+                    {
+                        "WithAttack": "Ferocity"
+                    }
+                ],
+                []
+            ]
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 3
+                    },
+                    {
+                        "EndsInStance": "VaeSant"
+                    },
+                    "HasVenom"
+                ],
+                []
+            ]
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "EndsInStance": "VaeSant"
+                    },
+                    "HasVenom"
+                ],
+                []
+            ]
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 3
+                    },
+                    "HasVenom"
+                ],
+                []
+            ]
+        }
+    ]
+}

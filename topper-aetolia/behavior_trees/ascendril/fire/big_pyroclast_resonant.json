@@ -1,0 +1,15 @@
+{
+    "Sequence": [
+        {
+            "AscendrilPredicate": [
+                "Me",
+                {
+                    "Resonance": "Fire"
+                }
+            ]
+        },
+        {
+            "SubTree": "ascendril/fire/big_pyroclast"
+        }
+    ]
+}

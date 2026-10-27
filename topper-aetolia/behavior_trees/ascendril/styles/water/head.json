@@ -1,0 +1,15 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "HintSet": [
+                    "STRATEGY",
+                    "WATER"
+                ]
+            },
+            {
+                "Selector": []
+            }
+        ]
+    }
+}

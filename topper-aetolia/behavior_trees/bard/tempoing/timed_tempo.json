@@ -1,0 +1,13 @@
+{
+    "Sequence": [
+        {
+            "CannotCure": [
+                "Target",
+                "Paresis"
+            ]
+        },
+        {
+            "VenomAttack": "TempoOne"
+        }
+    ]
+}

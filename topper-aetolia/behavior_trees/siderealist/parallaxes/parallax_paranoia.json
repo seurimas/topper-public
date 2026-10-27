@@ -1,0 +1,36 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "IsAffectedBy": [
+                    "Target",
+                    "Peace"
+                ]
+            }
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Paranoia"
+                ]
+            ]
+        },
+        {
+            "SiderealistPredicate": [
+                "Me",
+                {
+                    "HasGleamStar": "Violet"
+                }
+            ]
+        },
+        {
+            "ParallaxWithAb": [
+                "Target",
+                3,
+                "Inflict",
+                "Violet"
+            ]
+        }
+    ]
+}

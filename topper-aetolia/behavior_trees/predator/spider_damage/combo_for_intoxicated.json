@@ -1,0 +1,25 @@
+{
+    "Sequence": [
+        {
+            "HintSet": [
+                "SNEAK",
+                "true"
+            ]
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 3
+                    },
+                    {
+                        "EndsInStance": "VaeSant"
+                    },
+                    "HasVenom"
+                ],
+                []
+            ]
+        }
+    ]
+}

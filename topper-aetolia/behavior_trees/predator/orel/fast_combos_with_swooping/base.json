@@ -1,0 +1,10 @@
+{
+    "Selector": [
+        {
+            "SubTree": "predator/orel/fast_combos_with_swooping/aff_rate_combo"
+        },
+        {
+            "SubTree": "predator/orel/fast_combos_with_swooping/pyrrhic_raze"
+        }
+    ]
+}

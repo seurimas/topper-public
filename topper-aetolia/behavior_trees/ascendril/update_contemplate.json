@@ -1,0 +1,22 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "StatEstimateGood": [
+                    "Mana",
+                    "Target"
+                ]
+            }
+        },
+        {
+            "StatUnderPercent": [
+                "Mana",
+                "Target",
+                50
+            ]
+        },
+        {
+            "Contemplate": "Target"
+        }
+    ]
+}

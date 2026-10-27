@@ -1,0 +1,25 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Dyscrasia"
+                ]
+            ]
+        },
+        {
+            "AffCountOver": [
+                "Me",
+                5,
+                []
+            ]
+        },
+        {
+            "Web": "Target"
+        },
+        {
+            "Fleshbane": "Target"
+        }
+    ]
+}

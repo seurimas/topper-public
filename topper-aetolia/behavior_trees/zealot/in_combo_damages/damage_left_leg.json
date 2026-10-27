@@ -1,0 +1,41 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "IsOverRestoring": [
+                    "Target",
+                    {
+                        "Static": "LeftLegDamage"
+                    }
+                ]
+            }
+        },
+        {
+            "Inverter": {
+                "RestoredBreak": [
+                    "Target",
+                    {
+                        "Static": "LeftLegDamage"
+                    },
+                    9
+                ]
+            }
+        },
+        {
+            "Inverter": {
+                "ExpectedParry": [
+                    "Target",
+                    {
+                        "Static": "LeftLegDamage"
+                    }
+                ]
+            }
+        },
+        {
+            "AddComboAttackAtPriority": [
+                "WanekickLeft",
+                20
+            ]
+        }
+    ]
+}

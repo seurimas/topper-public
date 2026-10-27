@@ -1,0 +1,61 @@
+{
+    "Sequence": [
+        {
+            "BardPredicate": [
+                "Me",
+                "InHalfBeat"
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Inverter": {
+                        "BardPredicate": [
+                            "Me",
+                            {
+                                "HasAnelace": 1
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Inverter": {
+                        "BardPredicate": [
+                            "Me",
+                            "ThuribleReady"
+                        ]
+                    }
+                },
+                {
+                    "Inverter": {
+                        "BardPredicate": [
+                            "Target",
+                            "Bladestorm"
+                        ]
+                    }
+                },
+                {
+                    "Sequence": [
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                "IronCollared"
+                            ]
+                        },
+                        {
+                            "Inverter": {
+                                "BardPredicate": [
+                                    "Target",
+                                    "Boundaried"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "SingOrPlaySong": "Destiny"
+        }
+    ]
+}

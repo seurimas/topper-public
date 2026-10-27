@@ -1,0 +1,10 @@
+{
+    "Selector": [
+        {
+            "SubTree": "predator/venom/flashkick_for_mentals"
+        },
+        {
+            "SubTree": "predator/base"
+        }
+    ]
+}

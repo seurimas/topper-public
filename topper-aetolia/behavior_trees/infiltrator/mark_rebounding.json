@@ -1,0 +1,30 @@
+{
+    "Sequence": [
+        {
+            "InfiltratorPredicate": [
+                "Target",
+                "HypnoFiring"
+            ]
+        },
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "AssumedRebounding",
+                    "Rebounding"
+                ]
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Marked"
+                ]
+            ]
+        },
+        {
+            "Mark": "Target"
+        }
+    ]
+}

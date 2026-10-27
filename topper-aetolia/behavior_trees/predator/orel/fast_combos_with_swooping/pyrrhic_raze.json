@@ -1,0 +1,46 @@
+{
+    "Sequence": [
+        {
+            "PredatorPredicate": [
+                "Me",
+                {
+                    "OrelSwooping": "Target"
+                }
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Epilepsy",
+                    "Infatuation",
+                    "Shielded"
+                ]
+            ]
+        },
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "Rebounding",
+                    "AssumedRebounding"
+                ]
+            ]
+        },
+        {
+            "SeriesCombo": [
+                "Target",
+                [
+                    "VaeSant",
+                    [
+                        "Jab",
+                        "Raze",
+                        "Pheromones",
+                        "Pinprick"
+                    ]
+                ],
+                []
+            ]
+        }
+    ]
+}

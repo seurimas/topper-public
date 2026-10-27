@@ -1,0 +1,60 @@
+{
+    "Sequence": [
+        {
+            "SiderealistPredicate": [
+                "Me",
+                "EnigmaAlive"
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "SiderealistPredicate": [
+                        "Me",
+                        {
+                            "HasRegalia": "Vayua"
+                        }
+                    ]
+                },
+                {
+                    "Reenact": [
+                        "Vayua",
+                        [
+                            "Averroes",
+                            "Ontesme",
+                            "EjaKodosa"
+                        ]
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "SiderealistPredicate": [
+                                "Me",
+                                {
+                                    "HasRegalia": "Drobia"
+                                }
+                            ]
+                        },
+                        {
+                            "SiderealistPredicate": [
+                                "Me",
+                                {
+                                    "HasRegalia": "Peripleko"
+                                }
+                            ]
+                        },
+                        {
+                            "Reenact": [
+                                "Vayua",
+                                [
+                                    "Peripleko"
+                                ]
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

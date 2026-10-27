@@ -1,0 +1,35 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "BalanceUnder": [
+                        "Me",
+                        "Tree",
+                        1.0
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "SimplePriority": [
+                                "Paresis",
+                                2
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "SimplePriority": [
+                        "Paresis",
+                        10
+                    ]
+                }
+            ]
+        }
+    ]
+}

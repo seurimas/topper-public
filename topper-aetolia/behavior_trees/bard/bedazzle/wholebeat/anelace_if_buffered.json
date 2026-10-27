@@ -1,0 +1,30 @@
+{
+    "Sequence": [
+        {
+            "BardPredicate": [
+                "Me",
+                {
+                    "HasAnelace": 1
+                }
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Hollow",
+                    "Narcolepsy"
+                ]
+            ]
+        },
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "Misery"
+                ]
+            ]
+        },
+        "Anelace"
+    ]
+}

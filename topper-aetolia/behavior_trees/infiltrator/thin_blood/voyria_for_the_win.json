@@ -1,0 +1,23 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "Locked": [
+                    "Target",
+                    true
+                ]
+            },
+            {
+                "NoAffs": [
+                    "Target",
+                    [
+                        "Voyria"
+                    ]
+                ]
+            },
+            {
+                "PushAff": "Voyria"
+            }
+        ]
+    }
+}

@@ -1,0 +1,78 @@
+{
+    "Failer": {
+        "Executor": [
+            {
+                "AddComboAttacks": [
+                    "Swiftkick",
+                    "Crescentcut"
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Infatuation"
+                            ]
+                        ]
+                    },
+                    {
+                        "AddComboAttacks": [
+                            "Pheromones"
+                        ]
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Epilepsy"
+                            ]
+                        ]
+                    },
+                    {
+                        "AddComboAttacks": [
+                            "Pinprick"
+                        ]
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Impairment",
+                                "Asthma"
+                            ]
+                        ]
+                    },
+                    {
+                        "AddComboAttacks": [
+                            "Mindnumb"
+                        ]
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "Inverter": {
+                            "CanParry": "Target"
+                        }
+                    },
+                    {
+                        "AddComboAttacks": [
+                            "Flashkick"
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

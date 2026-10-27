@@ -1,0 +1,44 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "NoAffs": [
+                    "Target",
+                    [
+                        "Fallen"
+                    ]
+                ]
+            },
+            {
+                "AffCountOver": [
+                    "Target",
+                    2,
+                    [
+                        "LeftLegCrippled",
+                        "RightLegCrippled",
+                        "LeftLegBroken",
+                        "RightLegBroken",
+                        "HeadBroken",
+                        "TorsoBroken"
+                    ]
+                ]
+            },
+            {
+                "AddComboAttacks": [
+                    "Trip"
+                ]
+            },
+            {
+                "AddGraders": [
+                    {
+                        "ValueMove": [
+                            "Trip",
+                            1000,
+                            -2000
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

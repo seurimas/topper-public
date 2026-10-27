@@ -1,0 +1,19 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "AllAffs": [
+                    "Target",
+                    [
+                        "Hallucinations",
+                        "Masochism",
+                        "Mania"
+                    ]
+                ]
+            }
+        },
+        {
+            "SingOrPlaySong": "Destiny"
+        }
+    ]
+}

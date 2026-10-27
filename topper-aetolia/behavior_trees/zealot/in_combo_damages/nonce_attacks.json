@@ -1,0 +1,112 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "NonceModEqual": {
+                        "modulus": 6,
+                        "remainder": 0
+                    }
+                },
+                {
+                    "AdjustPriority": [
+                        [
+                            "PummelLeft"
+                        ],
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "NonceModEqual": {
+                        "modulus": 6,
+                        "remainder": 3
+                    }
+                },
+                {
+                    "AdjustPriority": [
+                        [
+                            "PummelRight"
+                        ],
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "NonceModEqual": {
+                        "modulus": 6,
+                        "remainder": 2
+                    }
+                },
+                {
+                    "AdjustPriority": [
+                        [
+                            "WanekickLeft"
+                        ],
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "NonceModEqual": {
+                        "modulus": 6,
+                        "remainder": 5
+                    }
+                },
+                {
+                    "AdjustPriority": [
+                        [
+                            "WanekickRight"
+                        ],
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "NonceModEqual": {
+                        "modulus": 6,
+                        "remainder": 4
+                    }
+                },
+                {
+                    "AdjustPriority": [
+                        [
+                            "Sunkick"
+                        ],
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "NonceModEqual": {
+                        "modulus": 6,
+                        "remainder": 1
+                    }
+                },
+                {
+                    "AdjustPriority": [
+                        [
+                            "Clawtwist"
+                        ],
+                        1
+                    ]
+                }
+            ]
+        }
+    ]
+}

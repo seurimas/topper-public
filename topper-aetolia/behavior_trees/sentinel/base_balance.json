@@ -1,0 +1,49 @@
+{
+    "Selector": [
+        {
+            "SubTree": "sentinel/setup_beasts"
+        },
+        {
+            "SubTree": "sentinel/spinecut"
+        },
+        {
+            "SubTree": "sentinel/dualraze"
+        },
+        {
+            "SubTree": "sentinel/raze_combo"
+        },
+        {
+            "SubTree": "sentinel/pierce"
+        },
+        {
+            "SubTree": "sentinel/sever"
+        },
+        {
+            "SubTree": "sentinel/mentals_combo"
+        },
+        {
+            "SubTree": "sentinel/confused_ftw"
+        },
+        {
+            "SubTree": "sentinel/throatcrush"
+        },
+        {
+            "SubTree": "sentinel/lock_combo"
+        },
+        {
+            "SubTree": "sentinel/apply_resin"
+        },
+        {
+            "SubTree": "sentinel/whirl_before_rebounding"
+        },
+        {
+            "SubTree": "sentinel/secure_locks"
+        },
+        {
+            "SentinelFirstStrike": [
+                "Target",
+                "Slash"
+            ]
+        }
+    ]
+}

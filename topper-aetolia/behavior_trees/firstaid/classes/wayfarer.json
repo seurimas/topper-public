@@ -1,0 +1,23 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/paresis_for_tree_2_6"
+        },
+        {
+            "SubTree": "firstaid/common/disrupted"
+        },
+        {
+            "SubTree": "firstaid/common/default_vitals"
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "SimplePriority": [
+                        "Rebounding",
+                        5
+                    ]
+                }
+            ]
+        }
+    ]
+}

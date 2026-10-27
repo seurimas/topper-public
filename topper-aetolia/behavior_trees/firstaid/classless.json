@@ -1,0 +1,69 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/default_defenses"
+        },
+        {
+            "Sequence": [
+                {
+                    "Persuading": "Me"
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "TreeCount": 0
+                        },
+                        {
+                            "FocusCount": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "Inverter": {
+                        "Persuading": "Me"
+                    }
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "TreeCount": 1
+                        },
+                        {
+                            "FocusCount": 1
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "AddFirstAidSettings": [
+                "ResetPriorities",
+                {
+                    "SimplePriority": [
+                        "Rebounding",
+                        0
+                    ]
+                },
+                {
+                    "UseClotting": "On"
+                },
+                {
+                    "UseFocus": true
+                },
+                {
+                    "UseTree": true
+                },
+                {
+                    "ClotAbovePercentMana": 40
+                },
+                {
+                    "ClotAboveBleed": 50
+                }
+            ]
+        }
+    ]
+}

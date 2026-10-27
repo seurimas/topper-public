@@ -1,0 +1,23 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "Channeling": [
+                        "Target",
+                        "Death"
+                    ]
+                },
+                {
+                    "PerformanceAttack": {
+                        "TempoThree": [
+                            "delphinium",
+                            "delphinium",
+                            "delphinium"
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

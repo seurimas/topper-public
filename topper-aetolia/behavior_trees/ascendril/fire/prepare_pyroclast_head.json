@@ -1,0 +1,32 @@
+{
+    "Sequence": [
+        {
+            "AscendrilPredicate": [
+                "Me",
+                {
+                    "Resonance": "Fire"
+                }
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Ablaze"
+                ]
+            ]
+        },
+        {
+            "SalveBlocked": [
+                "Target",
+                220
+            ]
+        },
+        {
+            "Fireburst": [
+                "Target",
+                true
+            ]
+        }
+    ]
+}

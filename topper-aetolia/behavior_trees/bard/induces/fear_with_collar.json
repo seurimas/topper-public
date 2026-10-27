@@ -1,0 +1,37 @@
+{
+    "Sequence": [
+        {
+            "Sequence": [
+                {
+                    "BardPredicate": [
+                        "Target",
+                        {
+                            "EmotionLevel": [
+                                "Fear",
+                                20
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "BardPredicate": [
+                        "Target",
+                        "IronCollared"
+                    ]
+                },
+                {
+                    "NoAffs": [
+                        "Target",
+                        [
+                            "SelfLoathing",
+                            "Fallen"
+                        ]
+                    ]
+                },
+                {
+                    "Induce": "Fear"
+                }
+            ]
+        }
+    ]
+}

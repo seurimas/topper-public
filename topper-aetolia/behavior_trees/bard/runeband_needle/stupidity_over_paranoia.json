@@ -1,0 +1,43 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Target",
+                    {
+                        "Needled": null
+                    }
+                ]
+            }
+        },
+        {
+            "BardPredicate": [
+                "Target",
+                {
+                    "RunebandAffIs": "Paranoia"
+                }
+            ]
+        },
+        {
+            "BardPredicate": [
+                "Target",
+                {
+                    "RunebandTimerNear": 400
+                }
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Stupidity"
+                ]
+            ]
+        },
+        {
+            "PerformanceAttack": {
+                "Needle": "aconite"
+            }
+        }
+    ]
+}

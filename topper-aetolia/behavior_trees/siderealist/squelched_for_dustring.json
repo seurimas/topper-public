@@ -1,0 +1,29 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "SiderealistPredicate": [
+                    "Target",
+                    "HasAsterism"
+                ]
+            },
+            {
+                "SiderealistPredicate": [
+                    "Target",
+                    "HasMoonlet"
+                ]
+            },
+            {
+                "Inverter": {
+                    "SiderealistPredicate": [
+                        "Target",
+                        "HasDustring"
+                    ]
+                }
+            },
+            {
+                "PushAff": "Squelched"
+            }
+        ]
+    }
+}

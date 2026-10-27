@@ -1,0 +1,61 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "AffCountOver": [
+                        "Me",
+                        1,
+                        [
+                            "Fallen"
+                        ]
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "SimplePriority": [
+                                "LeftLegCrippled",
+                                3
+                            ]
+                        },
+                        {
+                            "SimplePriority": [
+                                "RightLegCrippled",
+                                3
+                            ]
+                        },
+                        {
+                            "SimplePriority": [
+                                "Frozen",
+                                3
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "SimplePriority": [
+                        "LeftLegCrippled",
+                        10
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "RightLegCrippled",
+                        10
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Frozen",
+                        8
+                    ]
+                }
+            ]
+        }
+    ]
+}

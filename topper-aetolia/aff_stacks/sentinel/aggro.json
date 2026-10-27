@@ -1,0 +1,82 @@
+[
+    {
+        "IfClassHates": [
+            "Paresis",
+            {
+                "Stick": "Paresis"
+            }
+        ]
+    },
+    {
+        "IfNotClassHates": [
+            "Paresis",
+            {
+                "OnTree": "Paresis"
+            }
+        ]
+    },
+    {
+        "Stick": "Asthma"
+    },
+    {
+        "IfDo": [
+            "Slickness",
+            {
+                "Stick": "Stupidity"
+            }
+        ]
+    },
+    {
+        "IfNotDo": [
+            "Weariness",
+            {
+                "Stick": "Clumsiness"
+            }
+        ]
+    },
+    {
+        "Stick": "Slickness"
+    },
+    {
+        "IfDo": [
+            "Weariness",
+            {
+                "Stick": "Clumsiness"
+            }
+        ]
+    },
+    {
+        "IfDo": [
+            "Impatience",
+            {
+                "Stick": "Dizziness"
+            }
+        ]
+    },
+    {
+        "IfNotClassHates": [
+            "Paresis",
+            {
+                "OffTree": "Paresis"
+            }
+        ]
+    },
+    {
+        "Stick": "Allergies"
+    },
+    {
+        "Stick": "Vomiting"
+    },
+    {
+        "Stick": "LeftLegCrippled"
+    },
+    {
+        "Stick": "RightLegCrippled"
+    },
+    {
+        "Stick": "LeftArmCrippled"
+    },
+    {
+        "Stick": "RightArmCrippled"
+    }
+]

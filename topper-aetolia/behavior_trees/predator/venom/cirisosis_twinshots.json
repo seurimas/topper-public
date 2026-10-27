@@ -1,0 +1,15 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Cirisosis"
+                ]
+            ]
+        },
+        {
+            "Twinshot": "Target"
+        }
+    ]
+}

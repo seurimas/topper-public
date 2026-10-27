@@ -1,0 +1,28 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "AllAffs": [
+                    "Target",
+                    [
+                        "Hallucinations",
+                        "Masochism",
+                        "Mania"
+                    ]
+                ]
+            }
+        },
+        {
+            "BardPredicate": [
+                "Me",
+                {
+                    "WholebeatWithin": 6
+                }
+            ]
+        },
+        {
+            "SingOrPlaySong": "Sorrow"
+        },
+        "AudienceTarget"
+    ]
+}

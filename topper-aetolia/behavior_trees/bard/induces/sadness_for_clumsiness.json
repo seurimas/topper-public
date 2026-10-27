@@ -1,0 +1,52 @@
+{
+    "Sequence": [
+        {
+            "Sequence": [
+                {
+                    "BardPredicate": [
+                        "Target",
+                        {
+                            "EmotionLevel": [
+                                "Sadness",
+                                20
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "IsAffectedBy": [
+                        "Target",
+                        "Clumsiness"
+                    ]
+                },
+                {
+                    "Selector": [
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                {
+                                    "EmotionLevel": [
+                                        "Sadness",
+                                        70
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "NoAffs": [
+                                "Target",
+                                [
+                                    "SelfLoathing",
+                                    "Fallen"
+                                ]
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Induce": "Sadness"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,124 @@
+[
+    "BardWrapper",
+    [
+        {
+            "Selector": [
+                {
+                    "Inverter": {
+                        "HasBalanceEquilibrium": "Me"
+                    }
+                },
+                {
+                    "Failer": {
+                        "CopyHint": [
+                            "FAST_WEAPON",
+                            "WEAPON"
+                        ]
+                    }
+                },
+                {
+                    "SubTree": "defend_first"
+                },
+                {
+                    "SomeAffs": [
+                        "Me",
+                        [
+                            "Stun"
+                        ]
+                    ]
+                },
+                {
+                    "SubTree": "bard/common/keep_me_alive"
+                },
+                {
+                    "SomeAffs": [
+                        "Me",
+                        [
+                            "Paralysis"
+                        ]
+                    ]
+                },
+                {
+                    "Failer": {
+                        "PlainQebBehavior": "inspire"
+                    }
+                },
+                {
+                    "SubTree": "bard/for_lethal/heartcage"
+                },
+                {
+                    "SubTree": "bard/upfront_essentials/free_globes"
+                },
+                {
+                    "SubTree": "bard/perplexed_ladder/ironcollar_if_buffered"
+                },
+                {
+                    "SubTree": "bard/perplexed_ladder/anelace_bufferered"
+                },
+                {
+                    "SubTree": "bard/for_lethal/ridicule_if_buffered"
+                },
+                {
+                    "SubTree": "bard/perplexed_ladder/perplexed_if_buffered"
+                },
+                {
+                    "SubTree": "bard/group/sorrow_on_asthma"
+                },
+                {
+                    "SubTree": "bard/windows/addiction_if_buffered"
+                },
+                {
+                    "SubTree": "bard/common/bravado_always"
+                },
+                {
+                    "Patch": "MostAggroedAlly"
+                },
+                {
+                    "SubTree": "bard/upfront_essentials/first_runeband"
+                },
+                {
+                    "SubTree": "bard/group/headstitch_on_asthma"
+                },
+                {
+                    "SubTree": "bard/grips/pierce_for_curare_needle"
+                },
+                {
+                    "SubTree": "bard/grips/runeband_clumsiness_paranoia"
+                },
+                {
+                    "SubTree": "bard/grips/perplexed_half_beat_destiny"
+                },
+                {
+                    "SubTree": "bard/grips/addiction_half_beat"
+                },
+                {
+                    "SubTree": "bard/gated_attacks/hiltblow"
+                },
+                {
+                    "SubTree": "bard/gated_attacks/hard_ridicule"
+                },
+                {
+                    "SubTree": "bard/gated_attacks/dumb_quip"
+                },
+                {
+                    "SubTree": "bard/grips/keep_song_up"
+                },
+                {
+                    "SubTree": "bard/windows/dazed_sock"
+                },
+                {
+                    "SubTree": "bard/tempoing/timed_tempo"
+                },
+                {
+                    "SubTree": "bard/grips/keep_manabarbs_up"
+                },
+                {
+                    "SubTree": "bard/grips/pierce_shield_rebounding"
+                },
+                {
+                    "SubTree": "bard/group/free_needle"
+                }
+            ]
+        }
+    ]
+]

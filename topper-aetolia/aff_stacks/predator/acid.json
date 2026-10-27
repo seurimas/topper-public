@@ -1,0 +1,86 @@
+[
+    {
+        "IfDo": [
+            "Dyscrasia",
+            {
+                "OneOf": [
+                    "Vomiting",
+                    "Allergies"
+                ]
+            }
+        ]
+    },
+    {
+        "IfClassHates": [
+            "Paresis",
+            {
+                "Stick": "Paresis"
+            }
+        ]
+    },
+    {
+        "IfDo": [
+            "Anorexia",
+            {
+                "IfNotDo": [
+                    "Epilepsy",
+                    {
+                        "Stick": "Stupidity"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "IfDo": [
+            "Epilepsy",
+            {
+                "Stick": "Stupidity"
+            }
+        ]
+    },
+    {
+        "IfNotClassHates": [
+            "Paresis",
+            {
+                "OnTree": "Paresis"
+            }
+        ]
+    },
+    {
+        "IfNotDo": [
+            "Weariness",
+            {
+                "Stick": "Clumsiness"
+            }
+        ]
+    },
+    {
+        "Stick": "Allergies"
+    },
+    {
+        "IfDo": [
+            "Weariness",
+            {
+                "Stick": "Clumsiness"
+            }
+        ]
+    },
+    {
+        "IfNotClassHates": [
+            "Paresis",
+            {
+                "OffTree": "Paresis"
+            }
+        ]
+    },
+    {
+        "Stick": "Vomiting"
+    },
+    {
+        "Stick": "Asthma"
+    },
+    {
+        "Stick": "Slickness"
+    }
+]

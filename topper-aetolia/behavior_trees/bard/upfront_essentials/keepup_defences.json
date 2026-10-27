@@ -1,0 +1,79 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "Inverter": {
+                        "ClassIn": [
+                            "Target",
+                            [
+                                "Carnifex",
+                                "Praenomen",
+                                "Ascendril"
+                            ]
+                        ]
+                    }
+                },
+                {
+                    "NoAffs": [
+                        "Me",
+                        [
+                            "Discordance"
+                        ]
+                    ]
+                },
+                {
+                    "PlainQebBehavior": "discordance"
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "ClassIn": [
+                        "Target",
+                        [
+                            "Carnifex",
+                            "Praenomen",
+                            "Ascendril"
+                        ]
+                    ]
+                },
+                {
+                    "NoAffs": [
+                        "Me",
+                        [
+                            "Euphonia"
+                        ]
+                    ]
+                },
+                {
+                    "PlainQebBehavior": "euphonia"
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "Inverter": {
+                        "BardPredicate": [
+                            "Me",
+                            "InHalfBeat"
+                        ]
+                    }
+                },
+                {
+                    "Inverter": {
+                        "BardPredicate": [
+                            "Me",
+                            "InWholeBeat"
+                        ]
+                    }
+                },
+                {
+                    "PlainQebBehavior": "halfbeat"
+                }
+            ]
+        }
+    ]
+}

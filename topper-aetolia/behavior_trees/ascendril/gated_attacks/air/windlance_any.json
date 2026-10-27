@@ -1,0 +1,16 @@
+{
+    "Sequence": [
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "Shielded",
+                    "Direfrost"
+                ]
+            ]
+        },
+        {
+            "Windlance": "Target"
+        }
+    ]
+}

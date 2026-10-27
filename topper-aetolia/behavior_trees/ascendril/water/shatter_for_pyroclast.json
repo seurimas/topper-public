@@ -1,0 +1,32 @@
+{
+    "Sequence": [
+        {
+            "AscendrilPredicate": [
+                "Target",
+                "IciclesOn"
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Arcane"
+                ]
+            ]
+        },
+        {
+            "AscendrilPredicate": [
+                "Me",
+                {
+                    "CanCatalyze": [
+                        "Target",
+                        "Fire"
+                    ]
+                }
+            ]
+        },
+        {
+            "Shatter": "Target"
+        }
+    ]
+}

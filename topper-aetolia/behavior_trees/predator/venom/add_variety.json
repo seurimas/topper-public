@@ -1,0 +1,26 @@
+{
+    "Failer": {
+        "Executor": [
+            {
+                "AddComboAttacks": [
+                    "Jab",
+                    "Lowhook",
+                    "Swiftkick",
+                    "Crescentcut"
+                ]
+            },
+            {
+                "SubTree": "predator/venom/mindnumb_for_impairment"
+            },
+            {
+                "SubTree": "predator/venom/pheromones_for_lovers"
+            },
+            {
+                "SubTree": "predator/venom/pinprick_for_epilepsy"
+            },
+            {
+                "SubTree": "predator/common/pindown_for_writhe"
+            }
+        ]
+    }
+}

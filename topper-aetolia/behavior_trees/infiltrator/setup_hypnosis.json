@@ -1,0 +1,10 @@
+{
+    "Selector": [
+        {
+            "StackSuggest": "Target"
+        },
+        {
+            "Seal": "Target"
+        }
+    ]
+}

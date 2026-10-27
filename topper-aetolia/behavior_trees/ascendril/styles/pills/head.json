@@ -1,0 +1,70 @@
+{
+    "Sequence": [
+        {
+            "HintSet": [
+                "STRATEGY",
+                "PILLS"
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Failer": {
+                        "SubTree": "ascendril/update_contemplate"
+                    }
+                },
+                {
+                    "Failer": {
+                        "SubTree": "ascendril/update_detect"
+                    }
+                },
+                {
+                    "SubTree": "ascendril/fulcrum/kill"
+                },
+                {
+                    "SubTree": "ascendril/fire/disintegrate_kill"
+                },
+                {
+                    "SubTree": "ascendril/fire/pyroclast_kill"
+                },
+                {
+                    "Sequence": [
+                        {
+                            "AscendrilPredicate": [
+                                "Me",
+                                {
+                                    "HalfResonance": "Air"
+                                }
+                            ]
+                        },
+                        {
+                            "Selector": [
+                                {
+                                    "SubTree": "ascendril/air/electro_lockdown"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "SubTree": "ascendril/fire/wait_for_pyroclast"
+                },
+                {
+                    "SubTree": "ascendril/air/resonant_aeroblast"
+                },
+                {
+                    "SubTree": "ascendril/fire/big_pyroclast_catalyze"
+                },
+                {
+                    "SubTree": "ascendril/fire/big_pyroclast"
+                },
+                {
+                    "SubTree": "ascendril/air/feedback_ko"
+                },
+                {
+                    "SubTree": "ascendril/air/support_aeroblast"
+                }
+            ]
+        }
+    ]
+}

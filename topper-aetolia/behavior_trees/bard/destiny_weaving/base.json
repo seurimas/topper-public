@@ -1,0 +1,19 @@
+{
+    "Selector": [
+        {
+            "SubTree": "bard/destiny_weaving/destiny_for_fast_craft"
+        },
+        {
+            "SubTree": "bard/destiny_weaving/fast_anelace"
+        },
+        {
+            "SubTree": "bard/destiny_weaving/fast_boundary"
+        },
+        {
+            "SubTree": "bard/destiny_weaving/fast_thurible"
+        },
+        {
+            "SubTree": "bard/destiny_weaving/fast_bladestorm"
+        }
+    ]
+}

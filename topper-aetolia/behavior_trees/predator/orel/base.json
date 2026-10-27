@@ -1,0 +1,176 @@
+{
+    "Selector": [
+        {
+            "SubTree": "predator/venom/cirisosis_for_the_win"
+        },
+        {
+            "SubTree": "predator/venom/cirisosis_twinshots"
+        },
+        {
+            "SubTree": "predator/common/ferocity_always"
+        },
+        {
+            "SubTree": "predator/common/arouse_always"
+        },
+        {
+            "SubTree": "predator/venom/secure_locks"
+        },
+        {
+            "SubTree": "predator/orel/resecure_locks"
+        },
+        {
+            "SubTree": "predator/venom/prepare_veinrip"
+        },
+        {
+            "SubTree": "predator/venom/add_venom_attacks"
+        },
+        {
+            "SubTree": "predator/venom/mindnumb_for_impairment"
+        },
+        {
+            "SubTree": "predator/orel/pheromones_for_lovers"
+        },
+        {
+            "SubTree": "predator/venom/pinprick_for_epilepsy"
+        },
+        {
+            "SubTree": "predator/common/pindown_for_writhe"
+        },
+        {
+            "SubTree": "predator/common/add_raze"
+        },
+        {
+            "SubTree": "predator/common/tidalslash_when_ready"
+        },
+        {
+            "SubTree": "predator/common/safe_stance"
+        },
+        {
+            "Failer": {
+                "CalculateCombos": "Target"
+            }
+        },
+        {
+            "SubTree": "predator/orel/fast_combos_with_swooping/base"
+        },
+        {
+            "SubTree": "predator/orel/swoop_for_lock"
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 2
+                    },
+                    {
+                        "WithAttack": "Ferocity"
+                    }
+                ],
+                []
+            ]
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 2
+                    },
+                    {
+                        "WithAttack": "Veinrip"
+                    }
+                ],
+                []
+            ]
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 2
+                    },
+                    {
+                        "EndsInStance": "VaeSant"
+                    },
+                    {
+                        "WithAttack": "Tidalslash"
+                    }
+                ],
+                []
+            ]
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 2
+                    },
+                    "HasVenom",
+                    {
+                        "EndsInStance": "VaeSant"
+                    },
+                    {
+                        "WithAttack": "Flashkick"
+                    }
+                ],
+                []
+            ]
+        },
+        {
+            "SubTree": "predator/venom/twinshot_with_vae_sant"
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 3
+                    },
+                    {
+                        "EndsInStance": "VaeSant"
+                    },
+                    "HasVenom",
+                    {
+                        "WithAttack": "Pinprick"
+                    }
+                ],
+                []
+            ]
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 2
+                    },
+                    {
+                        "EndsInStance": "VaeSant"
+                    },
+                    "HasVenom"
+                ],
+                []
+            ]
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 2
+                    },
+                    {
+                        "WithAttack": "Vertical"
+                    }
+                ],
+                []
+            ]
+        },
+        {
+            "Dartshot": "Target"
+        }
+    ]
+}

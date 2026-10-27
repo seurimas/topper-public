@@ -1,0 +1,58 @@
+{
+    "Failer": {
+        "Selector": [
+            {
+                "Sequence": [
+                    {
+                        "SomeAffs": [
+                            "Target",
+                            [
+                                "RingingEars",
+                                "Recklessness",
+                                "Shock",
+                                "Negated"
+                            ]
+                        ]
+                    },
+                    {
+                        "Inverter": {
+                            "ClassIn": [
+                                "Target",
+                                [
+                                    "Praenomen"
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Quickassess": "Target"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "StatUnderPercent": [
+                            "Health",
+                            "Target",
+                            50
+                        ]
+                    },
+                    {
+                        "Inverter": {
+                            "ClassIn": [
+                                "Target",
+                                [
+                                    "Praenomen"
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Quickassess": "Target"
+                    }
+                ]
+            }
+        ]
+    }
+}

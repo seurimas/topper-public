@@ -1,0 +1,53 @@
+{
+    "Failer": {
+        "Selector": [
+            {
+                "Sequence": [
+                    {
+                        "ClassThreatens": [
+                            "Target",
+                            "HighVitalsPressure"
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "EndsInStance": [
+                                    "EinFasit",
+                                    50
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "ClassThreatens": [
+                            "Target",
+                            "VitalsPressure"
+                        ]
+                    },
+                    {
+                        "StatUnderPercent": [
+                            "Health",
+                            "Target",
+                            60
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "EndsInStance": [
+                                    "EinFasit",
+                                    30
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

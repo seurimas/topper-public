@@ -1,0 +1,36 @@
+{
+    "Sequence": [
+        {
+            "AffCountOver": [
+                "Target",
+                4,
+                [
+                    "LeftLegCrippled",
+                    "RightLegCrippled",
+                    "LeftArmCrippled",
+                    "RightArmCrippled",
+                    "Mindfog",
+                    "Manablight",
+                    "Gnawing",
+                    "Phosphenes",
+                    "Shivering",
+                    "Frigid",
+                    "Frozen",
+                    "Hypothermia",
+                    "Anorexia"
+                ]
+            ]
+        },
+        {
+            "Inverter": {
+                "SiderealistPredicate": [
+                    "Target",
+                    "HasAsterism"
+                ]
+            }
+        },
+        {
+            "Asterism": "Target"
+        }
+    ]
+}

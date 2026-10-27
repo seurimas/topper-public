@@ -1,0 +1,28 @@
+{
+    "Sequence": [
+        {
+            "BardPredicate": [
+                "Target",
+                "IronCollared"
+            ]
+        },
+        {
+            "BardPredicate": [
+                "Target",
+                "GlobeAffIsValid"
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Besilence",
+                    "Deadening"
+                ]
+            ]
+        },
+        {
+            "WeaveAttack": "Headstitch"
+        }
+    ]
+}

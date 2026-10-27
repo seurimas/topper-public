@@ -1,0 +1,51 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "PredatorPredicate": [
+                    "Target",
+                    "Negated"
+                ]
+            }
+        },
+        {
+            "Selector": [
+                {
+                    "AllAffs": [
+                        "Target",
+                        [
+                            "RingingEars",
+                            "Recklessness"
+                        ]
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "HintSet": [
+                                "SNEAK",
+                                "true"
+                            ]
+                        },
+                        {
+                            "PriorityAffIs": [
+                                "Target",
+                                "RingingEars"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "Negate": "Target"
+                },
+                {
+                    "Fleshbane": "Target"
+                }
+            ]
+        }
+    ]
+}

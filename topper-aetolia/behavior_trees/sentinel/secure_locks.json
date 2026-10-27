@@ -1,0 +1,69 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Rebounding",
+                    "AssumedRebounding"
+                ]
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "NearLocked": [
+                                "Target",
+                                "Soft",
+                                2
+                            ]
+                        },
+                        {
+                            "PushLockers": "Soft"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "NearLocked": [
+                                "Target",
+                                "Buffered",
+                                2
+                            ]
+                        },
+                        {
+                            "PushLockers": "Buffered"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "NearLocked": [
+                                "Target",
+                                "Hard",
+                                2
+                            ]
+                        },
+                        {
+                            "NearLocked": [
+                                "Target",
+                                "HardVenom",
+                                2
+                            ]
+                        },
+                        {
+                            "PushLockers": "HardVenom"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "SentinelCombo": "Target"
+        }
+    ]
+}

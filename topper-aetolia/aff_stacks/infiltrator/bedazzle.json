@@ -1,0 +1,63 @@
+[
+    {
+        "IfDo": [
+            "Vomiting",
+            {
+                "Stick": "Allergies"
+            }
+        ]
+    },
+    {
+        "IfDo": [
+            "Weariness",
+            {
+                "Stick": "Clumsiness"
+            }
+        ]
+    },
+    {
+        "IfDo": [
+            "Laxity",
+            {
+                "Stick": "Stupidity"
+            }
+        ]
+    },
+    {
+        "IfDo": [
+            "Weariness",
+            {
+                "Stick": "Asthma"
+            }
+        ]
+    },
+    {
+        "Stick": "Paresis"
+    },
+    {
+        "IfNotDo": [
+            "Weariness",
+            {
+                "Stick": "Clumsiness"
+            }
+        ]
+    },
+    {
+        "Stick": "Slickness"
+    },
+    {
+        "Stick": "LeftArmCrippled"
+    },
+    {
+        "Stick": "RightArmCrippled"
+    },
+    {
+        "Stick": "Vomiting"
+    },
+    {
+        "Stick": "LeftLegCrippled"
+    },
+    {
+        "Stick": "RightLegCrippled"
+    }
+]

@@ -1,0 +1,94 @@
+{
+    "Selector": [
+        {
+            "SubTree": "predator/venom/cirisosis_for_the_win"
+        },
+        {
+            "SubTree": "predator/venom/cirisosis_twinshots"
+        },
+        {
+            "SubTree": "predator/common/ferocity_always"
+        },
+        {
+            "SubTree": "predator/common/arouse_always"
+        },
+        {
+            "SubTree": "predator/venom/secure_locks"
+        },
+        {
+            "SubTree": "predator/venom/resecure_locks"
+        },
+        {
+            "SubTree": "predator/fallback/eq_combo/start_bloodscourge"
+        },
+        {
+            "SubTree": "predator/fallback/eq_combo/keep_fleshbane_up"
+        },
+        {
+            "SubTree": "predator/venom/add_venom_attacks"
+        },
+        {
+            "SubTree": "predator/venom/add_variety"
+        },
+        {
+            "SubTree": "predator/venom/prepare_veinrip"
+        },
+        {
+            "SubTree": "predator/common/pindown_for_writhe"
+        },
+        {
+            "SubTree": "predator/common/trip_for_unparry"
+        },
+        {
+            "SubTree": "predator/common/add_raze"
+        },
+        {
+            "SubTree": "predator/common/tidalslash_when_ready"
+        },
+        {
+            "Sequence": [
+                {
+                    "AffCountOver": [
+                        "Target",
+                        2,
+                        [
+                            "Dyscrasia",
+                            "Asthma",
+                            "Paresis",
+                            "Clumsiness",
+                            "Weariness",
+                            "Stupidity",
+                            "Recklessness"
+                        ]
+                    ]
+                },
+                {
+                    "SubTree": "predator/spider_acid/twinshot_with_vae_sant"
+                }
+            ]
+        },
+        {
+            "Failer": {
+                "CalculateCombos": "Target"
+            }
+        },
+        {
+            "SubTree": "predator/spider_acid/eq_combo/web_to_stall"
+        },
+        {
+            "SubTree": "predator/spider_acid/fast_intoxicate_combo"
+        },
+        {
+            "SubTree": "predator/spider_acid/prepare_vae_sant_for_twinshots"
+        },
+        {
+            "SubTree": "predator/spider_acid/twinshot_with_vae_sant"
+        },
+        {
+            "SubTree": "predator/spider_acid/just_combo"
+        },
+        {
+            "Dartshot": "Target"
+        }
+    ]
+}

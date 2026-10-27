@@ -1,0 +1,40 @@
+{
+    "Sequence": [
+        {
+            "SiderealistPredicate": [
+                "Me",
+                "EmbodyAlive"
+            ]
+        },
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Illgrasp"
+                ]
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "SiderealistPredicate": [
+                        "Me",
+                        {
+                            "HasRegalia": "Averroes"
+                        }
+                    ]
+                },
+                {
+                    "Reenact": [
+                        "Averroes",
+                        [
+                            "Ontesme",
+                            "Vayua",
+                            "EjaKodosa"
+                        ]
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,78 @@
+{
+    "Selector": [
+        {
+            "SubTree": "predator/orgyuk/change_stack"
+        },
+        {
+            "SubTree": "predator/orgyuk/eq_combo/mawcrush_em"
+        },
+        {
+            "SubTree": "predator/common/ferocity_always"
+        },
+        {
+            "SubTree": "predator/common/arouse_always"
+        },
+        {
+            "SubTree": "predator/common/add_raze"
+        },
+        {
+            "SubTree": "predator/common/freefall_always"
+        },
+        {
+            "SubTree": "predator/common/tidalslash_when_ready"
+        },
+        {
+            "SubTree": "predator/orgyuk/eq_combo/keep_fleshbane_up"
+        },
+        {
+            "SubTree": "predator/orgyuk/eq_combo/pummel_limb"
+        },
+        {
+            "SubTree": "predator/orgyuk/add_bread_and_butter"
+        },
+        {
+            "SubTree": "predator/orgyuk/feint_or_allow_parries"
+        },
+        {
+            "SubTree": "predator/common/trip_for_unparry"
+        },
+        {
+            "SubTree": "predator/common/pindown_for_writhe"
+        },
+        {
+            "SubTree": "predator/orgyuk/base_valuing"
+        },
+        {
+            "SubTree": "predator/orgyuk/build_valuing_15"
+        },
+        {
+            "SubTree": "predator/orgyuk/double_break_valuing"
+        },
+        {
+            "SubTree": "predator/orgyuk/crescentcut_for_win"
+        },
+        {
+            "SubTree": "predator/orgyuk/unparry_valuing"
+        },
+        {
+            "SubTree": "predator/common/safe_stance"
+        },
+        {
+            "Failer": {
+                "CalculateCombos": "Target"
+            }
+        },
+        {
+            "GradedCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 2
+                    }
+                ],
+                [],
+                []
+            ]
+        }
+    ]
+}

@@ -1,0 +1,16 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Blisters",
+                    "Impairment"
+                ]
+            ]
+        },
+        {
+            "Spark": "Target"
+        }
+    ]
+}

@@ -1,0 +1,17 @@
+{
+    "Sequence": [
+        {
+            "HintSet": [
+                "STRATEGY",
+                "FIRE"
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "SubTree": "ascendril/fire/prepare_pyroclast"
+                }
+            ]
+        }
+    ]
+}

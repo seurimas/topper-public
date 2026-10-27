@@ -1,0 +1,41 @@
+[
+    {
+        "OneOf": [
+            "Weariness",
+            "Clumsiness"
+        ]
+    },
+    {
+        "OnTree": "Paresis"
+    },
+    {
+        "Stick": "Asthma"
+    },
+    {
+        "OffTree": "Paresis"
+    },
+    {
+        "Stick": "Slickness"
+    },
+    {
+        "Stick": "Stupidity"
+    },
+    {
+        "Stick": "Haemophilia"
+    },
+    {
+        "Stick": "Dizziness"
+    },
+    {
+        "Stick": "Recklessness"
+    },
+    {
+        "Stick": "Anorexia"
+    },
+    {
+        "Stick": "LeftLegBroken"
+    },
+    {
+        "Stick": "RightLegBroken"
+    }
+]

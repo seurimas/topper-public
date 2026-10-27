@@ -1,0 +1,53 @@
+{
+    "Sequence": [
+        {
+            "Selector": [
+                {
+                    "AllAffs": [
+                        "Target",
+                        [
+                            "Blisters"
+                        ]
+                    ]
+                },
+                {
+                    "NoAffs": [
+                        "Target",
+                        [
+                            "Arcane"
+                        ]
+                    ]
+                }
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "AllAffs": [
+                        "Target",
+                        [
+                            "Ablaze"
+                        ]
+                    ]
+                },
+                {
+                    "Inverter": {
+                        "CanParry": "Target"
+                    }
+                },
+                {
+                    "KnownUnparry": [
+                        "Target",
+                        "HeadDamage"
+                    ]
+                }
+            ]
+        },
+        {
+            "Pyroclast": [
+                "Target",
+                "Enrich"
+            ]
+        }
+    ]
+}

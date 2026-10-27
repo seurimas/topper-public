@@ -1,0 +1,103 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/paresis_for_tree_2_10"
+        },
+        {
+            "SubTree": "firstaid/common/disrupted"
+        },
+        {
+            "SubTree": "firstaid/common/default_vitals"
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "SimplePriority": [
+                        "Rebounding",
+                        0
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Indifference",
+                        3
+                    ]
+                }
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "AffStacksOver": [
+                                "Me",
+                                7,
+                                "Ablaze"
+                            ]
+                        },
+                        {
+                            "AddFirstAidSettings": [
+                                {
+                                    "SimplePriority": [
+                                        "Ablaze",
+                                        1
+                                    ]
+                                },
+                                {
+                                    "SimplePriority": [
+                                        "Heatspear",
+                                        1
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "AffStacksOver": [
+                                "Me",
+                                4,
+                                "Ablaze"
+                            ]
+                        },
+                        {
+                            "AddFirstAidSettings": [
+                                {
+                                    "SimplePriority": [
+                                        "Ablaze",
+                                        5
+                                    ]
+                                },
+                                {
+                                    "SimplePriority": [
+                                        "Heatspear",
+                                        3
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "SimplePriority": [
+                                "Ablaze",
+                                11
+                            ]
+                        },
+                        {
+                            "SimplePriority": [
+                                "Heatspear",
+                                15
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

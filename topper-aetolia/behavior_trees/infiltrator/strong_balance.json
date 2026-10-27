@@ -1,0 +1,40 @@
+{
+    "Selector": [
+        {
+            "SubTree": "infiltrator/thin_blood/bite_scytherus"
+        },
+        {
+            "SubTree": "infiltrator/thin_blood/flay_fangbarrier"
+        },
+        {
+            "SubTree": "infiltrator/bedazzle_for_tree_rebounding"
+        },
+        {
+            "SubTree": "infiltrator/mark_rebounding"
+        },
+        {
+            "SubTree": "infiltrator/garrote_prone"
+        },
+        {
+            "SubTree": "infiltrator/bite_camus"
+        },
+        {
+            "SubTree": "infiltrator/flay_away"
+        },
+        {
+            "SubTree": "infiltrator/secure_locks"
+        },
+        {
+            "SubTree": "infiltrator/secure_clumsy_locks"
+        },
+        {
+            "SubTree": "infiltrator/bind_sleepers"
+        },
+        {
+            "Doublestab": "Target"
+        },
+        {
+            "Bedazzle": "Target"
+        }
+    ]
+}

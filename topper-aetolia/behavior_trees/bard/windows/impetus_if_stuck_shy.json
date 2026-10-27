@@ -1,0 +1,34 @@
+{
+    "Sequence": [
+        {
+            "Buffered": [
+                "Target",
+                "Shyness"
+            ]
+        },
+        {
+            "AffCountOver": [
+                "Target",
+                5,
+                []
+            ]
+        },
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Me",
+                    "ImpetusReady"
+                ]
+            }
+        },
+        {
+            "CopyHint": [
+                "IMPETUS_WEAPON",
+                "WEAPON"
+            ]
+        },
+        {
+            "Weave": "Impetus"
+        }
+    ]
+}

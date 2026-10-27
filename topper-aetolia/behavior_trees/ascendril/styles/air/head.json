@@ -1,0 +1,12 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "HintSet": [
+                    "STRATEGY",
+                    "AIR"
+                ]
+            }
+        ]
+    }
+}

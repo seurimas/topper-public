@@ -1,0 +1,18 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Clumsiness"
+                ]
+            ]
+        },
+        {
+            "GleamInflict": [
+                "Target",
+                "Green"
+            ]
+        }
+    ]
+}

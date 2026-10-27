@@ -1,0 +1,11 @@
+{
+    "Sequence": [
+        {
+            "Locked": [
+                "Me",
+                true
+            ]
+        },
+        "Restore"
+    ]
+}

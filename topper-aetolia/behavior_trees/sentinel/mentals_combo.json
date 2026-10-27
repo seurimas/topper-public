@@ -1,0 +1,14 @@
+{
+    "Sequence": [
+        {
+            "SubTree": "sentinel/parry_guard"
+        },
+        {
+            "SentinelComboFull": [
+                "Target",
+                "Slam",
+                "Gouge"
+            ]
+        }
+    ]
+}

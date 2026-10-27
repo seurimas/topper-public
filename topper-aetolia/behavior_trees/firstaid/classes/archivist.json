@@ -1,0 +1,135 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/default_vitals"
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "SimplePriority": [
+                        "Rebounding",
+                        0
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Lethargy",
+                        3
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Allergies",
+                        3
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Vomiting",
+                        3
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Blisters",
+                        3
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Paresis",
+                        3
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Impairment",
+                        3
+                    ]
+                }
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "AffCountOver": [
+                                "Me",
+                                3,
+                                [
+                                    "Dementia",
+                                    "Confusion",
+                                    "Hallucinations",
+                                    "Paranoia",
+                                    "Hatred",
+                                    "Addiction"
+                                ]
+                            ]
+                        },
+                        {
+                            "AddFirstAidSettings": [
+                                {
+                                    "SimplePriority": [
+                                        "Addiction",
+                                        12
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "SimplePriority": [
+                                "Addiction",
+                                3
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "AffCountOver": [
+                                "Me",
+                                1,
+                                [
+                                    "Addiction",
+                                    "Lethargy",
+                                    "Allergies",
+                                    "Blisters"
+                                ]
+                            ]
+                        },
+                        {
+                            "AddFirstAidSettings": [
+                                {
+                                    "SimplePriority": [
+                                        "Patterns",
+                                        10
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "SimplePriority": [
+                                "Patterns",
+                                6
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

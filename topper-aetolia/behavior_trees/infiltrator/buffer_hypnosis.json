@@ -1,0 +1,111 @@
+{
+    "Failer": {
+        "Selector": [
+            {
+                "Sequence": [
+                    {
+                        "InfiltratorPredicate": [
+                            "Target",
+                            {
+                                "TopHypnoAffIs": "Impatience"
+                            }
+                        ]
+                    },
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Stupidity"
+                            ]
+                        ]
+                    },
+                    {
+                        "PushAff": "Shyness"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "AllAffs": [
+                            "Target",
+                            [
+                                "Impatience"
+                            ]
+                        ]
+                    },
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Stupidity"
+                            ]
+                        ]
+                    },
+                    {
+                        "PushAff": "Stupidity"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "InfiltratorPredicate": [
+                            "Target",
+                            {
+                                "TopHypnoAffIs": "Mania"
+                            }
+                        ]
+                    },
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Recklessness"
+                            ]
+                        ]
+                    },
+                    {
+                        "AllAffs": [
+                            "Target",
+                            [
+                                "Impatience"
+                            ]
+                        ]
+                    },
+                    {
+                        "PushAff": "Recklessness"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "AffCountOver": [
+                            "Target",
+                            2,
+                            [
+                                "Impatience",
+                                "Mania",
+                                "Masochism",
+                                "Loneliness",
+                                "Vertigo"
+                            ]
+                        ]
+                    },
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Recklessness"
+                            ]
+                        ]
+                    },
+                    {
+                        "PushAff": "Recklessness"
+                    }
+                ]
+            }
+        ]
+    }
+}

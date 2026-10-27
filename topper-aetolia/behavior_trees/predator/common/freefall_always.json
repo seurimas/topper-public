@@ -1,0 +1,21 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "Selector": [
+                    {
+                        "IsFlying": "Me"
+                    },
+                    {
+                        "IsClimbing": "Me"
+                    }
+                ]
+            },
+            {
+                "AddComboAttacks": [
+                    "Freefall"
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,41 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Perplexity",
+                    "Dizziness"
+                ]
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                {
+                                    "GlobeAffIs": "Perplexity"
+                                }
+                            ]
+                        },
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                "IronCollared"
+                            ]
+                        },
+                        {
+                            "WeaveAttack": "Headstitch"
+                        }
+                    ]
+                },
+                {
+                    "PerformanceAttack": "Crackshot"
+                }
+            ]
+        }
+    ]
+}

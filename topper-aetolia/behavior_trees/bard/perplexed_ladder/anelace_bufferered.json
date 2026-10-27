@@ -1,0 +1,74 @@
+{
+    "Sequence": [
+        {
+            "BardPredicate": [
+                "Me",
+                {
+                    "HasAnelace": null
+                }
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Hollow",
+                    "Narcolepsy"
+                ]
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                "IronCollared"
+                            ]
+                        },
+                        {
+                            "SomeAffs": [
+                                "Target",
+                                [
+                                    "Misery",
+                                    "Perplexity",
+                                    "SelfLoathing"
+                                ]
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "Inverter": {
+                                "BardPredicate": [
+                                    "Target",
+                                    "IronCollared"
+                                ]
+                            }
+                        },
+                        {
+                            "SomeAffs": [
+                                "Target",
+                                [
+                                    "Misery",
+                                    "Perplexity"
+                                ]
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "AffCountOver": [
+                        "Target",
+                        6,
+                        []
+                    ]
+                }
+            ]
+        },
+        "Anelace"
+    ]
+}

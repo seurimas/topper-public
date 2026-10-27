@@ -1,0 +1,41 @@
+{
+    "Sequence": [
+        {
+            "ClassIn": [
+                "Target",
+                [
+                    "Bard",
+                    "Infiltrator",
+                    "Templar",
+                    "Wayfarer",
+                    "Sentinel",
+                    "Luminary",
+                    "Indorani",
+                    "Zealot"
+                ]
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "SiderealistPredicate": [
+                        "Me",
+                        {
+                            "HasRegalia": "Peripleko"
+                        }
+                    ]
+                },
+                {
+                    "Reenact": [
+                        "Peripleko",
+                        [
+                            "IzuAri",
+                            "Drobia",
+                            "EjaKodosa"
+                        ]
+                    ]
+                }
+            ]
+        }
+    ]
+}

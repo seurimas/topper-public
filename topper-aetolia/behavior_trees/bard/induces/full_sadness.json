@@ -1,0 +1,22 @@
+{
+    "Sequence": [
+        {
+            "Sequence": [
+                {
+                    "BardPredicate": [
+                        "Target",
+                        {
+                            "EmotionLevel": [
+                                "Sadness",
+                                90
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Induce": "Sadness"
+                }
+            ]
+        }
+    ]
+}

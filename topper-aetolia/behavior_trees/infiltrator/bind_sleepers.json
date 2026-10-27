@@ -1,0 +1,30 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Asleep"
+                ]
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "WritheBind"
+                ]
+            ]
+        },
+        {
+            "AffCountUnder": [
+                "Target",
+                8,
+                []
+            ]
+        },
+        {
+            "Bind": "Target"
+        }
+    ]
+}

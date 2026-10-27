@@ -1,0 +1,31 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "NoAffs": [
+                    "Target",
+                    [
+                        "Fallen"
+                    ]
+                ]
+            },
+            {
+                "SomeAffs": [
+                    "Target",
+                    [
+                        "LeftLegCrippled",
+                        "RightLegCrippled",
+                        "LeftLegBroken",
+                        "RightLegBroken",
+                        "HeadBroken"
+                    ]
+                ]
+            },
+            {
+                "AddComboAttacks": [
+                    "Trip"
+                ]
+            }
+        ]
+    }
+}

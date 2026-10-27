@@ -1,0 +1,28 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Paresis"
+                ]
+            ]
+        },
+        {
+            "SiderealistPredicate": [
+                "Me",
+                {
+                    "HasGleamStar": "Indigo"
+                }
+            ]
+        },
+        {
+            "ParallaxWithAb": [
+                "Target",
+                3,
+                "Inflict",
+                "Indigo"
+            ]
+        }
+    ]
+}

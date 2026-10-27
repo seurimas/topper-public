@@ -1,0 +1,24 @@
+{
+    "Failer": {
+        "Executor": [
+            {
+                "SubTree": "zealot/in_combo_breakers/break_left_arm"
+            },
+            {
+                "SubTree": "zealot/in_combo_breakers/break_right_arm"
+            },
+            {
+                "SubTree": "zealot/in_combo_breakers/break_left_leg"
+            },
+            {
+                "SubTree": "zealot/in_combo_breakers/break_right_leg"
+            },
+            {
+                "SubTree": "zealot/in_combo_breakers/break_torso"
+            },
+            {
+                "SubTree": "zealot/in_combo_breakers/break_head"
+            }
+        ]
+    }
+}

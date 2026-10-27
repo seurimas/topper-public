@@ -1,0 +1,21 @@
+{
+    "Sequence": [
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "AssumedRebounding",
+                    "Rebounding",
+                    "Shielded"
+                ]
+            ]
+        },
+        {
+            "SentinelComboFull": [
+                "Target",
+                "Reave",
+                "Stab"
+            ]
+        }
+    ]
+}

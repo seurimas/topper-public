@@ -1,0 +1,22 @@
+{
+    "Selector": [
+        {
+            "SubTree": "siderealist/gated_anomalies/stillness_for_moonlet"
+        },
+        {
+            "SubTree": "siderealist/gated_anomalies/asterism_pills"
+        },
+        {
+            "SubTree": "siderealist/gated_anomalies/asterism_salves"
+        },
+        {
+            "SubTree": "siderealist/gated_anomalies/dustring"
+        },
+        {
+            "SubTree": "siderealist/gated_anomalies/fast_moonlet"
+        },
+        {
+            "Syzygy": "Target"
+        }
+    ]
+}

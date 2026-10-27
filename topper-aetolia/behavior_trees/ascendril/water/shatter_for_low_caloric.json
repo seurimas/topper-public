@@ -1,0 +1,24 @@
+{
+    "Sequence": [
+        {
+            "AscendrilPredicate": [
+                "Target",
+                "IciclesOn"
+            ]
+        },
+        {
+            "AffCountUnder": [
+                "Target",
+                1,
+                [
+                    "Frigid",
+                    "Frozen",
+                    "Shivering"
+                ]
+            ]
+        },
+        {
+            "Shatter": "Target"
+        }
+    ]
+}

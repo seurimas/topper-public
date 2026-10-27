@@ -1,0 +1,26 @@
+{
+    "Sequence": [
+        {
+            "Selector": [
+                {
+                    "SiderealistPredicate": [
+                        "Me",
+                        {
+                            "HasRegalia": "EjaKodosa"
+                        }
+                    ]
+                },
+                {
+                    "Reenact": [
+                        "EjaKodosa",
+                        [
+                            "Peripleko",
+                            "Drobia",
+                            "IzuAri"
+                        ]
+                    ]
+                }
+            ]
+        }
+    ]
+}

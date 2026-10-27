@@ -1,0 +1,47 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Echoes"
+                ]
+            ]
+        },
+        {
+            "AffCountUnder": [
+                "Target",
+                2,
+                [
+                    "Stupidity",
+                    "Confusion",
+                    "Dementia",
+                    "Hallucinations"
+                ]
+            ]
+        },
+        {
+            "SiderealistPredicate": [
+                "Target",
+                "HasAsterism"
+            ]
+        },
+        {
+            "SiderealistPredicate": [
+                "Target",
+                "HasMoonlet"
+            ]
+        },
+        {
+            "Inverter": {
+                "SiderealistPredicate": [
+                    "Target",
+                    "HasDustring"
+                ]
+            }
+        },
+        {
+            "Stillness": "Target"
+        }
+    ]
+}

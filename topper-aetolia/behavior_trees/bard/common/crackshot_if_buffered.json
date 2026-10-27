@@ -1,0 +1,27 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Perplexity"
+                ]
+            ]
+        },
+        {
+            "AffCountOver": [
+                "Target",
+                2,
+                [
+                    "Misery",
+                    "Hollow",
+                    "Loneliness",
+                    "Narcolepsy"
+                ]
+            ]
+        },
+        {
+            "PerformanceAttack": "Crackshot"
+        }
+    ]
+}

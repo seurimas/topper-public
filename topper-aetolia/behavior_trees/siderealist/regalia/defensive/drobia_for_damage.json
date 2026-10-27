@@ -1,0 +1,36 @@
+{
+    "Sequence": [
+        {
+            "ClassIn": [
+                "Target",
+                [
+                    "Carnifex",
+                    "Praenomen",
+                    "Predator"
+                ]
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "SiderealistPredicate": [
+                        "Me",
+                        {
+                            "HasRegalia": "Drobia"
+                        }
+                    ]
+                },
+                {
+                    "Reenact": [
+                        "Drobia",
+                        [
+                            "IzuAri",
+                            "Peripleko",
+                            "EjaKodosa"
+                        ]
+                    ]
+                }
+            ]
+        }
+    ]
+}

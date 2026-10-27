@@ -1,0 +1,11 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "AddComboAttacks": [
+                    "Pheromones"
+                ]
+            }
+        ]
+    }
+}

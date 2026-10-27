@@ -1,0 +1,44 @@
+{
+    "Sequence": [
+        {
+            "SiderealistPredicate": [
+                "Target",
+                "HasDustring"
+            ]
+        },
+        {
+            "SiderealistPredicate": [
+                "Target",
+                "HasAsterism"
+            ]
+        },
+        {
+            "SiderealistPredicate": [
+                "Target",
+                "HasMoonlet"
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "SiderealistPredicate": [
+                        "Me",
+                        {
+                            "HasRegalia": "EjaKodosa"
+                        }
+                    ]
+                },
+                {
+                    "Reenact": [
+                        "EjaKodosa",
+                        [
+                            "Averroes",
+                            "Vayua",
+                            "Ontesme"
+                        ]
+                    ]
+                }
+            ]
+        }
+    ]
+}

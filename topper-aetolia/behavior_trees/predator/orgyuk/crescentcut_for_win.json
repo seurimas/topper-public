@@ -1,0 +1,33 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "AffCountOver": [
+                    "Target",
+                    3,
+                    [
+                        "Fallen",
+                        "LeftLegCrippled",
+                        "RightLegCrippled",
+                        "LeftLegBroken",
+                        "RightLegBroken",
+                        "TorsoBroken",
+                        "TorsoMangled",
+                        "HeadBroken",
+                        "HeadMangled",
+                        "Paresis",
+                        "WritheDartpinned"
+                    ]
+                ]
+            },
+            {
+                "AddComboAttacks": [
+                    "Crescentcut"
+                ]
+            },
+            {
+                "SubTree": "predator/orgyuk/crescentcut_valuing"
+            }
+        ]
+    }
+}

@@ -1,0 +1,125 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "IsRestoringAny": "Target"
+                },
+                {
+                    "SubTree": "zealot/dislocate_at_30/dislocate_lowest"
+                }
+            ]
+        },
+        {
+            "SubTree": "zealot/in_combo_damages/damage_any"
+        },
+        {
+            "SubTree": "zealot/edgekick_freely"
+        },
+        {
+            "SubTree": "zealot/twinpress_at_40"
+        },
+        {
+            "Sequence": [
+                {
+                    "LimbsBreakableCount": {
+                        "target": "Target",
+                        "min_count": 3,
+                        "assume_restoration": true,
+                        "left_arm_damage": 9.5,
+                        "right_arm_damage": 9.5,
+                        "left_leg_damage": 9,
+                        "right_leg_damage": 9,
+                        "torso_damage": 8.5,
+                        "head_damage": 6
+                    }
+                },
+                {
+                    "PlainQebBehavior": "echo Going for some breaks!"
+                },
+                {
+                    "SubTree": "zealot/in_combo_breakers/break_any"
+                }
+            ]
+        },
+        {
+            "Failer": {
+                "Sequence": [
+                    {
+                        "AllAffs": [
+                            "Me",
+                            [
+                                "Firefist"
+                            ]
+                        ]
+                    },
+                    {
+                        "SubTree": "zealot/adjust_for_firefist"
+                    }
+                ]
+            }
+        },
+        {
+            "Failer": {
+                "Sequence": [
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "SoreWrist"
+                            ]
+                        ]
+                    },
+                    "ToggleWristlashOnCombo"
+                ]
+            }
+        },
+        {
+            "TakeComboAttacksIfOver": [
+                "Target",
+                30
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "ZealotPredicate": [
+                        "Target",
+                        "HasInfernalPartial"
+                    ]
+                },
+                {
+                    "PlainQebBehavior": "echo Going for an Infernal break!"
+                },
+                {
+                    "SubTree": "zealot/full_breakers/break_any"
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "Inverter": {
+                        "ZealotPredicate": [
+                            "Me",
+                            "ZenithUp"
+                        ]
+                    }
+                },
+                {
+                    "Selector": [
+                        {
+                            "Heatspear": "Target"
+                        },
+                        {
+                            "Quicken": "Target"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "TakeComboAttacks": "Target"
+        }
+    ]
+}

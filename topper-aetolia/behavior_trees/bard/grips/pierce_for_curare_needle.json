@@ -1,0 +1,23 @@
+{
+    "Sequence": [
+        {
+            "BardPredicate": [
+                "Target",
+                {
+                    "Needled": "curare"
+                }
+            ]
+        },
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Rebounding"
+                ]
+            ]
+        },
+        {
+            "PerformanceAttack": "Pierce"
+        }
+    ]
+}

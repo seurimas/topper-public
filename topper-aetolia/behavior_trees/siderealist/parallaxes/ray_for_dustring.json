@@ -1,0 +1,31 @@
+{
+    "Sequence": [
+        {
+            "SiderealistPredicate": [
+                "Target",
+                "HasAsterism"
+            ]
+        },
+        {
+            "SiderealistPredicate": [
+                "Target",
+                "HasMoonlet"
+            ]
+        },
+        {
+            "Inverter": {
+                "SiderealistPredicate": [
+                    "Target",
+                    "HasDustring"
+                ]
+            }
+        },
+        {
+            "Parallax": [
+                "Target",
+                3,
+                "Ray"
+            ]
+        }
+    ]
+}

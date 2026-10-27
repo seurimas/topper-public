@@ -1,0 +1,23 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "AscendrilPredicate": [
+                    "Target",
+                    "IciclesOn"
+                ]
+            }
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Arcane"
+                ]
+            ]
+        },
+        {
+            "Icicle": "Target"
+        }
+    ]
+}

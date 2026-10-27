@@ -1,0 +1,26 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "LimbsOver": [
+                    "Target",
+                    [],
+                    30.0,
+                    false
+                ]
+            },
+            {
+                "ZealotPredicate": [
+                    "Me",
+                    {
+                        "ZenithRising": 4.0
+                    }
+                ]
+            },
+            "Firefist",
+            {
+                "SubTree": "zealot/adjust_for_firefist"
+            }
+        ]
+    }
+}

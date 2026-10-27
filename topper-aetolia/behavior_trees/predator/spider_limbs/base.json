@@ -1,0 +1,148 @@
+{
+    "Selector": [
+        {
+            "SubTree": "predator/venom/cirisosis_for_the_win"
+        },
+        {
+            "SubTree": "predator/venom/cirisosis_twinshots"
+        },
+        {
+            "SubTree": "predator/common/ferocity_always"
+        },
+        {
+            "SubTree": "predator/common/arouse_always"
+        },
+        {
+            "SubTree": "predator/spider_damage/intoxicate_sneakiness"
+        },
+        {
+            "SubTree": "predator/venom/secure_locks"
+        },
+        {
+            "SubTree": "predator/spider_damage/eq_combo/keep_intoxicate_up"
+        },
+        {
+            "SubTree": "predator/spider_damage/eq_combo/start_bloodscourge"
+        },
+        {
+            "SubTree": "predator/spider_damage/eq_combo/negate_for_kill_threat"
+        },
+        {
+            "SubTree": "predator/orgyuk/twinshot_in_window_vae_sant"
+        },
+        {
+            "SubTree": "predator/common/add_raze"
+        },
+        {
+            "SubTree": "predator/common/freefall_always"
+        },
+        {
+            "SubTree": "predator/common/tidalslash_when_ready"
+        },
+        {
+            "SubTree": "predator/orgyuk/eq_combo/keep_fleshbane_up"
+        },
+        {
+            "SubTree": "predator/orgyuk/eq_combo/pummel_limb"
+        },
+        {
+            "SubTree": "predator/orgyuk/add_bread_and_butter"
+        },
+        {
+            "SubTree": "predator/orgyuk/feint_or_allow_parries"
+        },
+        {
+            "SubTree": "predator/common/trip_for_unparry"
+        },
+        {
+            "SubTree": "predator/common/pindown_for_writhe"
+        },
+        {
+            "Failer": {
+                "CalculateCombos": "Target"
+            }
+        },
+        {
+            "SubTree": "predator/orgyuk/base_valuing"
+        },
+        {
+            "SubTree": "predator/orgyuk/parry_penalties"
+        },
+        {
+            "SubTree": "predator/orgyuk/crescentcut_for_win"
+        },
+        {
+            "SubTree": "predator/orgyuk/break_valuing"
+        },
+        {
+            "SubTree": "predator/orgyuk/unparry_valuing"
+        },
+        {
+            "GradedCombo": [
+                "Target",
+                [
+                    {
+                        "MinimumAttacks": 2
+                    }
+                ],
+                [],
+                [
+                    {
+                        "NotRestoring": [
+                            "LeftLegDamage",
+                            "RightLegDamage"
+                        ]
+                    },
+                    {
+                        "NotRestoring": [
+                            "LeftArmDamage",
+                            "RightArmDamage"
+                        ]
+                    },
+                    {
+                        "Breakable": [
+                            [
+                                "LeftLegDamage",
+                                1100
+                            ],
+                            [
+                                "RightLegDamage",
+                                1100
+                            ]
+                        ]
+                    },
+                    {
+                        "Breakable": [
+                            [
+                                "LeftArmDamage",
+                                1100
+                            ],
+                            [
+                                "RightArmDamage",
+                                1100
+                            ]
+                        ]
+                    },
+                    {
+                        "LowestOver": [
+                            [
+                                "LeftLegDamage",
+                                "RightLegDamage"
+                            ],
+                            10
+                        ]
+                    },
+                    {
+                        "LowestOver": [
+                            [
+                                "LeftArmDamage",
+                                "RightArmDamage"
+                            ],
+                            10
+                        ]
+                    }
+                ]
+            ]
+        }
+    ]
+}

@@ -1,0 +1,101 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Rebounding",
+                    "AssumedRebounding"
+                ]
+            ]
+        },
+        {
+            "PredatorPredicate": [
+                "Me",
+                {
+                    "InStance": "VaeSant"
+                }
+            ]
+        },
+        {
+            "Inverter": {
+                "HasFitness": [
+                    "Target",
+                    8.0
+                ]
+            }
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "Inverter": {
+                                "HasFocus": [
+                                    "Target",
+                                    3.0
+                                ]
+                            }
+                        },
+                        {
+                            "Inverter": {
+                                "HasTree": [
+                                    "Target",
+                                    3.0
+                                ]
+                            }
+                        },
+                        {
+                            "NearLocked": [
+                                "Target",
+                                "Soft",
+                                3
+                            ]
+                        },
+                        {
+                            "PushLockers": "Soft"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "NearLocked": [
+                                "Target",
+                                "Buffered",
+                                4
+                            ]
+                        },
+                        {
+                            "PushLockers": "Buffered"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Succeeder": {
+                "Sequence": [
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Clumsiness",
+                                "Weariness"
+                            ]
+                        ]
+                    },
+                    {
+                        "PushAff": "Clumsiness"
+                    }
+                ]
+            }
+        },
+        {
+            "PlainQebBehavior": "echo Pressing a resecured lock..."
+        },
+        {
+            "Twinshot": "Target"
+        }
+    ]
+}

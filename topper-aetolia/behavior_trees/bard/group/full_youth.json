@@ -1,0 +1,38 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "Inverter": {
+                        "BardPredicate": [
+                            "Me",
+                            {
+                                "Singing": null
+                            }
+                        ]
+                    }
+                },
+                {
+                    "SingSong": "Youth"
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "Inverter": {
+                        "BardPredicate": [
+                            "Me",
+                            {
+                                "Playing": null
+                            }
+                        ]
+                    }
+                },
+                {
+                    "PlaySong": "Youth"
+                }
+            ]
+        }
+    ]
+}

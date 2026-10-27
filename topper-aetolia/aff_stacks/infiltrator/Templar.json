@@ -1,0 +1,40 @@
+[
+    {
+        "Stick": "Paresis"
+    },
+    {
+        "Stick": "Asthma"
+    },
+    {
+        "OneOf": [
+            "Peace",
+            "Stupidity"
+        ]
+    },
+    {
+        "IfDo": [
+            "Impatience",
+            {
+                "Stick": "Dizziness"
+            }
+        ]
+    },
+    {
+        "Stick": "Allergies"
+    },
+    {
+        "Stick": "Vomiting"
+    },
+    {
+        "Stick": "LeftLegCrippled"
+    },
+    {
+        "Stick": "RightLegCrippled"
+    },
+    {
+        "Stick": "LeftArmCrippled"
+    },
+    {
+        "Stick": "RightArmCrippled"
+    }
+]

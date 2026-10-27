@@ -1,0 +1,123 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/paresis_for_tree_2_10"
+        },
+        {
+            "SubTree": "firstaid/common/disrupted"
+        },
+        {
+            "SubTree": "firstaid/common/default_vitals"
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "AffCountOver": [
+                                "Me",
+                                3,
+                                [
+                                    "Agoraphobia",
+                                    "Claustrophobia",
+                                    "Vertigo",
+                                    "Loneliness",
+                                    "Shyness",
+                                    "Paranoia",
+                                    "Superstition"
+                                ]
+                            ]
+                        },
+                        {
+                            "AddFirstAidSettings": [
+                                {
+                                    "SimplePriority": [
+                                        "Shyness",
+                                        3
+                                    ]
+                                },
+                                {
+                                    "SimplePriority": [
+                                        "Paranoia",
+                                        3
+                                    ]
+                                },
+                                {
+                                    "SimplePriority": [
+                                        "Superstition",
+                                        6
+                                    ]
+                                },
+                                {
+                                    "SimplePriority": [
+                                        "Agoraphobia",
+                                        3
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "SimplePriority": [
+                                "Shyness",
+                                15
+                            ]
+                        },
+                        {
+                            "SimplePriority": [
+                                "Paranoia",
+                                12
+                            ]
+                        },
+                        {
+                            "SimplePriority": [
+                                "Superstition",
+                                15
+                            ]
+                        },
+                        {
+                            "SimplePriority": [
+                                "Agoraphobia",
+                                13
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "AffCountOver": [
+                                "Me",
+                                1,
+                                [
+                                    "Stormtouched"
+                                ]
+                            ]
+                        },
+                        {
+                            "AddFirstAidSettings": [
+                                {
+                                    "Stormtouched": true
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "Stormtouched": false
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

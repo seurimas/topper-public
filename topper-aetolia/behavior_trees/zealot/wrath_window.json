@@ -1,0 +1,15 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "LimbsOver": [
+                    "Target",
+                    [],
+                    50.0,
+                    false
+                ]
+            },
+            "Wrath"
+        ]
+    }
+}

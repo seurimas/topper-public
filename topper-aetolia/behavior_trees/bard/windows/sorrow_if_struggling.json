@@ -1,0 +1,30 @@
+{
+    "Sequence": [
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "Addiction",
+                    "Perplexity"
+                ]
+            ]
+        },
+        {
+            "AffCountOver": [
+                "Target",
+                4,
+                []
+            ]
+        },
+        {
+            "BardPredicate": [
+                "Me",
+                "InHalfBeat"
+            ]
+        },
+        {
+            "SingOrPlaySong": "Sorrow"
+        },
+        "AudienceTarget"
+    ]
+}

@@ -1,0 +1,25 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Dizziness"
+                ]
+            ]
+        },
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Target",
+                    {
+                        "Needled": null
+                    }
+                ]
+            }
+        },
+        {
+            "PerformanceAttack": "Sock"
+        }
+    ]
+}

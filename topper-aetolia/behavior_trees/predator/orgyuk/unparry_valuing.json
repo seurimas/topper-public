@@ -1,0 +1,34 @@
+{
+    "Failer": {
+        "AddGraders": [
+            {
+                "ValueMoveUnparried": [
+                    "Jab",
+                    5,
+                    5
+                ]
+            },
+            {
+                "ValueMoveUnparried": [
+                    "Lowhook",
+                    5,
+                    5
+                ]
+            },
+            {
+                "ValueMoveUnparried": [
+                    "Lateral",
+                    10,
+                    10
+                ]
+            },
+            {
+                "ValueMoveUnparried": [
+                    "Gouge",
+                    20,
+                    20
+                ]
+            }
+        ]
+    }
+}

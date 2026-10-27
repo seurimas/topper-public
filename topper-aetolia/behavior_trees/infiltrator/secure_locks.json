@@ -1,0 +1,105 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Rebounding",
+                    "AssumedRebounding"
+                ]
+            ]
+        },
+        {
+            "NoAffs": [
+                "Me",
+                [
+                    "Clumsiness"
+                ]
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "Selector": [
+                                {
+                                    "Inverter": {
+                                        "HasFocus": [
+                                            "Target",
+                                            2.5
+                                        ]
+                                    }
+                                },
+                                {
+                                    "SomeAffs": [
+                                        "Target",
+                                        [
+                                            "Stupidity"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Inverter": {
+                                "HasTree": [
+                                    "Target",
+                                    0.0
+                                ]
+                            }
+                        },
+                        {
+                            "NearLocked": [
+                                "Target",
+                                "Soft",
+                                2
+                            ]
+                        },
+                        {
+                            "PushLockers": "Soft"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "NearLocked": [
+                                "Target",
+                                "Buffered",
+                                2
+                            ]
+                        },
+                        {
+                            "PushLockers": "Buffered"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "NearLocked": [
+                                "Target",
+                                "Hard",
+                                2
+                            ]
+                        },
+                        {
+                            "NearLocked": [
+                                "Target",
+                                "HardVenom",
+                                2
+                            ]
+                        },
+                        {
+                            "PushLockers": "HardVenom"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Doublestab": "Target"
+        }
+    ]
+}

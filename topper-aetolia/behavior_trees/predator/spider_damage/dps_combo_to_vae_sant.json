@@ -1,0 +1,47 @@
+{
+    "Sequence": [
+        {
+            "AffCountOver": [
+                "Target",
+                2,
+                [
+                    "RingingEars",
+                    "Recklessness",
+                    "Negated",
+                    "Shock"
+                ]
+            ]
+        },
+        {
+            "PlainQebBehavior": "echo Keeping damage pressure on..."
+        },
+        {
+            "Selector": [
+                {
+                    "DpsCombo": [
+                        "Target",
+                        [
+                            "HasVenom",
+                            {
+                                "WithAttack": "Ferocity"
+                            }
+                        ],
+                        []
+                    ]
+                },
+                {
+                    "DpsCombo": [
+                        "Target",
+                        [
+                            "HasVenom",
+                            {
+                                "EndsInStance": "VaeSant"
+                            }
+                        ],
+                        []
+                    ]
+                }
+            ]
+        }
+    ]
+}

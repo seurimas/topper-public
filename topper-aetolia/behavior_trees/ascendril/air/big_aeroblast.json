@@ -1,0 +1,43 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "AscendrilPredicate": [
+                    "Target",
+                    "AeroblastOn"
+                ]
+            }
+        },
+        {
+            "AscendrilPredicate": [
+                "Me",
+                {
+                    "IsResonantOrCanEnrich": "Air"
+                }
+            ]
+        },
+        {
+            "AffCountOver": [
+                "Target",
+                3,
+                [
+                    "Dizziness",
+                    "Vertigo",
+                    "Stupidity",
+                    "Laxity",
+                    "Confusion",
+                    "TorsoBroken"
+                ]
+            ]
+        },
+        {
+            "PlainQebBehavior": "echo 'Big' Aeroblast? Let's see."
+        },
+        {
+            "AeroblastFast": [
+                "Target",
+                "Enrich"
+            ]
+        }
+    ]
+}

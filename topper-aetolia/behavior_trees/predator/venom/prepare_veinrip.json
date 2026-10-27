@@ -1,0 +1,37 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "NoAffs": [
+                    "Target",
+                    [
+                        "Veinrip"
+                    ]
+                ]
+            },
+            {
+                "AffCountUnder": [
+                    "Target",
+                    3,
+                    []
+                ]
+            },
+            {
+                "AffCountUnder": [
+                    "Me",
+                    6,
+                    []
+                ]
+            },
+            {
+                "AddComboAttacks": [
+                    "Veinrip",
+                    "Feint"
+                ]
+            },
+            {
+                "SubTree": "predator/venom/flashkick_for_mentals"
+            }
+        ]
+    }
+}

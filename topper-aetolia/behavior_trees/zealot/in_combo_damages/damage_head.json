@@ -1,0 +1,41 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "IsOverRestoring": [
+                    "Target",
+                    {
+                        "Static": "HeadDamage"
+                    }
+                ]
+            }
+        },
+        {
+            "Inverter": {
+                "RestoredBreak": [
+                    "Target",
+                    {
+                        "Static": "HeadDamage"
+                    },
+                    6.0
+                ]
+            }
+        },
+        {
+            "Inverter": {
+                "ExpectedParry": [
+                    "Target",
+                    {
+                        "Static": "HeadDamage"
+                    }
+                ]
+            }
+        },
+        {
+            "AddComboAttackAtPriority": [
+                "Sunkick",
+                19
+            ]
+        }
+    ]
+}

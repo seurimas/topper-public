@@ -1,0 +1,21 @@
+{
+    "Sequence": [
+        {
+            "PredatorPredicate": [
+                "Me",
+                {
+                    "InStance": "VaeSant"
+                }
+            ]
+        },
+        {
+            "SalveBlocked": [
+                "Target",
+                200
+            ]
+        },
+        {
+            "Twinshot": "Target"
+        }
+    ]
+}

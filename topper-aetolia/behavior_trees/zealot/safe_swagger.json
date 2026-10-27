@@ -1,0 +1,67 @@
+{
+    "Failer": {
+        "Selector": [
+            {
+                "Sequence": [
+                    {
+                        "HasTree": [
+                            "Me",
+                            1.0
+                        ]
+                    },
+                    {
+                        "RandomCuresOver": [
+                            "Me",
+                            2
+                        ]
+                    },
+                    "SafeSwagger"
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "AffCountOver": [
+                            "Me",
+                            2,
+                            [
+                                "Asthma",
+                                "Paresis",
+                                "Slickness",
+                                "Anorexia"
+                            ]
+                        ]
+                    },
+                    "SafeSwagger"
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "AffCountOver": [
+                            "Me",
+                            1,
+                            [
+                                "Paresis"
+                            ]
+                        ]
+                    },
+                    {
+                        "RandomCuresOver": [
+                            "Me",
+                            2
+                        ]
+                    },
+                    {
+                        "BalanceUnder": [
+                            "Me",
+                            "ParesisParalysis",
+                            2.0
+                        ]
+                    },
+                    "SafeSwagger"
+                ]
+            }
+        ]
+    }
+}

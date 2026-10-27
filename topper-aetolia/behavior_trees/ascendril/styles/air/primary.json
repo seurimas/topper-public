@@ -1,0 +1,123 @@
+{
+    "Sequence": [
+        {
+            "HintSet": [
+                "STRATEGY",
+                "AIR"
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "SubTree": "ascendril/brand_pairs/air_fire"
+                },
+                {
+                    "SubTree": "ascendril/air/support_aeroblast"
+                },
+                {
+                    "SubTree": "ascendril/fire/big_pyroclast"
+                },
+                {
+                    "SubTree": "ascendril/air/big_aeroblast"
+                },
+                {
+                    "SubTree": "ascendril/air/resonant_aeroblast"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/water/fast_crystalise"
+                },
+                {
+                    "Sequence": [
+                        {
+                            "BalanceUnder": [
+                                "Me",
+                                "Secondary",
+                                0.0
+                            ]
+                        },
+                        {
+                            "SubTree": "ascendril/gated_attacks/air/pressurize"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "SomeAffs": [
+                                "Target",
+                                [
+                                    "Dizziness",
+                                    "Stupidity"
+                                ]
+                            ]
+                        },
+                        {
+                            "SubTree": "ascendril/gated_attacks/air/pressurize"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "HasFocus": [
+                                "Target",
+                                0
+                            ]
+                        },
+                        {
+                            "SubTree": "ascendril/gated_attacks/air/pressurize"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "AllAffs": [
+                                "Target",
+                                [
+                                    "Vertigo",
+                                    "Confusion"
+                                ]
+                            ]
+                        },
+                        {
+                            "SubTree": "ascendril/gated_attacks/air/thunderclap"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "Inverter": {
+                                "AscendrilPredicate": [
+                                    "Me",
+                                    {
+                                        "AnyResonance": "Air"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "SubTree": "ascendril/gated_attacks/air/spark"
+                        }
+                    ]
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/fire/fireburst_for_resonance"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/fire/fireburst_full"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/air/pressurize"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/air/thunderclap"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/fire/spark"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,251 @@
+{
+    "Failer": {
+        "Selector": [
+            {
+                "Sequence": [
+                    {
+                        "AllAffs": [
+                            "Target",
+                            [
+                                "RingingEars",
+                                "Negated"
+                            ]
+                        ]
+                    },
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Recklessness"
+                            ]
+                        ]
+                    },
+                    {
+                        "PredatorPredicate": [
+                            "Target",
+                            "Intoxicated"
+                        ]
+                    },
+                    {
+                        "PlainQebBehavior": "echo Sneaking in some recklessness..."
+                    },
+                    {
+                        "HintPlan": [
+                            "SNEAK",
+                            "true"
+                        ]
+                    },
+                    {
+                        "PushAff": "Recklessness"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Weariness",
+                                "Asthma"
+                            ]
+                        ]
+                    },
+                    {
+                        "IsAffectedBy": [
+                            "Target",
+                            "Weariness"
+                        ]
+                    },
+                    {
+                        "PredatorPredicate": [
+                            "Target",
+                            "Intoxicated"
+                        ]
+                    },
+                    {
+                        "PlainQebBehavior": "echo Sneaking in some weariness (class)..."
+                    },
+                    {
+                        "HintPlan": [
+                            "SNEAK",
+                            "true"
+                        ]
+                    },
+                    {
+                        "PushAff": "Weariness"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "ReboundingWindow": [
+                            "Target",
+                            450
+                        ]
+                    },
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Slickness"
+                            ]
+                        ]
+                    },
+                    {
+                        "PredatorPredicate": [
+                            "Target",
+                            "Intoxicated"
+                        ]
+                    },
+                    {
+                        "PlainQebBehavior": "echo Sneaking in some slickness..."
+                    },
+                    {
+                        "HintPlan": [
+                            "SNEAK",
+                            "true"
+                        ]
+                    },
+                    {
+                        "PushAff": "Slickness"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Peace"
+                            ]
+                        ]
+                    },
+                    {
+                        "IsAffectedBy": [
+                            "Target",
+                            "Peace"
+                        ]
+                    },
+                    {
+                        "PredatorPredicate": [
+                            "Target",
+                            "Intoxicated"
+                        ]
+                    },
+                    {
+                        "PlainQebBehavior": "echo Sneaking in some peace..."
+                    },
+                    {
+                        "HintPlan": [
+                            "SNEAK",
+                            "true"
+                        ]
+                    },
+                    {
+                        "PushAff": "Peace"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "RingingEars"
+                            ]
+                        ]
+                    },
+                    {
+                        "PredatorPredicate": [
+                            "Target",
+                            "Intoxicated"
+                        ]
+                    },
+                    {
+                        "PlainQebBehavior": "echo Sneaking in some sensitivity..."
+                    },
+                    {
+                        "HintPlan": [
+                            "SNEAK",
+                            "true"
+                        ]
+                    },
+                    {
+                        "PushAff": "RingingEars"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Clumsiness"
+                            ]
+                        ]
+                    },
+                    {
+                        "IsAffectedBy": [
+                            "Target",
+                            "Clumsiness"
+                        ]
+                    },
+                    {
+                        "PredatorPredicate": [
+                            "Target",
+                            "Intoxicated"
+                        ]
+                    },
+                    {
+                        "PlainQebBehavior": "echo Sneaking in some clumsiness..."
+                    },
+                    {
+                        "HintPlan": [
+                            "SNEAK",
+                            "true"
+                        ]
+                    },
+                    {
+                        "PushAff": "Clumsiness"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Dizziness",
+                                "Veinrip"
+                            ]
+                        ]
+                    },
+                    {
+                        "PredatorPredicate": [
+                            "Target",
+                            "Intoxicated"
+                        ]
+                    },
+                    {
+                        "PlainQebBehavior": "echo Sneaking in some dizziness..."
+                    },
+                    {
+                        "HintPlan": [
+                            "SNEAK",
+                            "true"
+                        ]
+                    },
+                    {
+                        "PushAff": "Dizziness"
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,54 @@
+{
+    "Sequence": [
+        {
+            "Sequence": [
+                {
+                    "BardPredicate": [
+                        "Target",
+                        {
+                            "EmotionLevel": [
+                                "Stress",
+                                20
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "BardPredicate": [
+                        "Me",
+                        {
+                            "HalfbeatWithin": 8
+                        }
+                    ]
+                },
+                {
+                    "Selector": [
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                {
+                                    "EmotionLevel": [
+                                        "Stress",
+                                        70
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "NoAffs": [
+                                "Target",
+                                [
+                                    "SelfLoathing",
+                                    "Fallen"
+                                ]
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Induce": "Stress"
+                }
+            ]
+        }
+    ]
+}

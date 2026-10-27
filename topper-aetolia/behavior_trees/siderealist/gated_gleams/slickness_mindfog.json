@@ -1,0 +1,16 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Asthma",
+                    "Slickness"
+                ]
+            ]
+        },
+        {
+            "SubTree": "siderealist/gated_gleams/simple/blue_for_mingfog"
+        }
+    ]
+}

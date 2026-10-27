@@ -1,0 +1,43 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Unconsciousness"
+                ]
+            ]
+        },
+        {
+            "IsProne": "Target"
+        },
+        {
+            "Inverter": {
+                "ClassIn": [
+                    "Target",
+                    [
+                        "Shapeshifter"
+                    ]
+                ]
+            }
+        },
+        {
+            "Selector": [
+                {
+                    "AffCountOver": [
+                        "Target",
+                        2,
+                        [
+                            "Frozen",
+                            "HeadBroken",
+                            "Hypothermia"
+                        ]
+                    ]
+                }
+            ]
+        },
+        {
+            "Enrapture": "Target"
+        }
+    ]
+}

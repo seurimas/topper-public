@@ -1,0 +1,29 @@
+{
+    "Sequence": [
+        {
+            "MentalAffsOver": [
+                "Target",
+                1
+            ]
+        },
+        {
+            "Inverter": {
+                "HasBalance": "Me"
+            }
+        },
+        {
+            "HasEquilibrium": "Me"
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Indifference"
+                ]
+            ]
+        },
+        {
+            "PsiShock": "Target"
+        }
+    ]
+}

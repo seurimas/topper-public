@@ -1,0 +1,67 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/paresis_for_tree_2_10"
+        },
+        {
+            "SubTree": "firstaid/common/disrupted"
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "SimplePriority": [
+                        "Rebounding",
+                        0
+                    ]
+                },
+                {
+                    "UseClotting": "Safe"
+                },
+                {
+                    "ClotAbovePercentMana": 20
+                },
+                {
+                    "ClotAboveBleed": 50
+                },
+                {
+                    "ForceHealthPercent": 30
+                },
+                {
+                    "ForceManaPercent": 50
+                },
+                {
+                    "VitalsPriority": "Alt"
+                }
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "StatUnderPercent": [
+                                "Mana",
+                                "Me",
+                                60
+                            ]
+                        },
+                        {
+                            "AddFirstAidSettings": [
+                                {
+                                    "Adder": null
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "Adder": 3
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

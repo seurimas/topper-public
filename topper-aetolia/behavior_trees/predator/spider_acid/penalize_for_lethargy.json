@@ -1,0 +1,44 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Me",
+                [
+                    "Lethargy"
+                ]
+            ]
+        },
+        {
+            "AddGraders": [
+                {
+                    "ValueMove": [
+                        "Pheromones",
+                        -5,
+                        -5
+                    ]
+                },
+                {
+                    "ValueMoveUnparried": [
+                        "Flashkick",
+                        -30,
+                        -30
+                    ]
+                },
+                {
+                    "ValueMoveUnparried": [
+                        "Crescentcut",
+                        -30,
+                        -30
+                    ]
+                },
+                {
+                    "ValueMoveUnparried": [
+                        "Veinrip",
+                        -300,
+                        -300
+                    ]
+                }
+            ]
+        }
+    ]
+}

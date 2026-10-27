@@ -1,0 +1,114 @@
+{
+    "Sequence": [
+        {
+            "HintSet": [
+                "MOBILITY",
+                "MID"
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "SubTree": "ascendril/fulcrum/restore_from_lock"
+                },
+                {
+                    "SubTree": "ascendril/fulcrum/restore_for_struggle"
+                },
+                {
+                    "SubTree": "ascendril/fulcrum/keep_fulcrum_up"
+                },
+                {
+                    "Sequence": [
+                        {
+                            "InRoom": "Target"
+                        },
+                        {
+                            "Selector": [
+                                {
+                                    "StatUnderPercent": [
+                                        "Mana",
+                                        "Target",
+                                        70
+                                    ]
+                                },
+                                {
+                                    "StatUnderPercent": [
+                                        "Health",
+                                        "Target",
+                                        70
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Selector": [
+                                {
+                                    "AffCountOver": [
+                                        "Target",
+                                        2,
+                                        [
+                                            "Stupidity",
+                                            "Impatience",
+                                            "Dizziness",
+                                            "Faintness",
+                                            "Shyness"
+                                        ]
+                                    ]
+                                },
+                                {
+                                    "AscendrilPredicate": [
+                                        "Me",
+                                        {
+                                            "Resonance": "Fire"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "AscendrilPredicate": [
+                                        "Me",
+                                        {
+                                            "Resonance": "Water"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "AscendrilPredicate": [
+                                        "Target",
+                                        "IciclesOn"
+                                    ]
+                                },
+                                {
+                                    "StatUnderPercent": [
+                                        "Health",
+                                        "Target",
+                                        40
+                                    ]
+                                }
+                            ]
+                        },
+                        "FulcrumExpand"
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "Inverter": {
+                                "InRoom": "Target"
+                            }
+                        },
+                        {
+                            "Inverter": {
+                                "StatUnderPercent": [
+                                    "Mana",
+                                    "Target",
+                                    70
+                                ]
+                            }
+                        },
+                        "FulcrumInterfuse"
+                    ]
+                }
+            ]
+        }
+    ]
+}

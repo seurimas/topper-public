@@ -1,0 +1,18 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Dissonance"
+                ]
+            ]
+        },
+        {
+            "Tones": [
+                "Target",
+                "Plague"
+            ]
+        }
+    ]
+}

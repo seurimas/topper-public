@@ -1,0 +1,27 @@
+{
+    "Sequence": [
+        {
+            "AscendrilPredicate": [
+                "Target",
+                "IciclesOn"
+            ]
+        },
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Arcane"
+                ]
+            ]
+        },
+        {
+            "KnownParry": [
+                "Target",
+                "TorsoDamage"
+            ]
+        },
+        {
+            "Shatter": "Target"
+        }
+    ]
+}

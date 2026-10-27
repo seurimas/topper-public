@@ -1,0 +1,15 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Me",
+                    "Undithered"
+                ]
+            }
+        },
+        {
+            "PlainQebBehavior": "dither"
+        }
+    ]
+}

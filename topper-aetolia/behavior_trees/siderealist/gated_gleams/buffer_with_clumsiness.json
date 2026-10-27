@@ -1,0 +1,18 @@
+{
+    "Sequence": [
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "Weariness",
+                    "Asthma",
+                    "RingingEars",
+                    "Sepsis"
+                ]
+            ]
+        },
+        {
+            "SubTree": "siderealist/gated_gleams/simple/green_for_clumsiness"
+        }
+    ]
+}

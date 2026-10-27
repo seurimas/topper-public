@@ -1,0 +1,19 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "NoAffs": [
+                    "Target",
+                    [
+                        "Epilepsy"
+                    ]
+                ]
+            },
+            {
+                "AddComboAttacks": [
+                    "Pinprick"
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,86 @@
+{
+    "Sequence": [
+        {
+            "PredatorPredicate": [
+                "Me",
+                {
+                    "InStance": "VaeSant"
+                }
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "ReboundingWindow": [
+                        "Target",
+                        500
+                    ]
+                },
+                {
+                    "BalanceUnder": [
+                        "Target",
+                        "Rebounding",
+                        2.0
+                    ]
+                },
+                {
+                    "SomeAffs": [
+                        "Target",
+                        [
+                            "Rebounding",
+                            "AssumedRebounding"
+                        ]
+                    ]
+                },
+                {
+                    "NoAffs": [
+                        "Target",
+                        [
+                            "Asthma",
+                            "Stupidity"
+                        ]
+                    ]
+                }
+            ]
+        },
+        {
+            "Inverter": {
+                "PredatorPredicate": [
+                    "Me",
+                    {
+                        "OrelSwooping": "Target"
+                    }
+                ]
+            }
+        },
+        {
+            "Swoop": [
+                "Target",
+                "Stupidity",
+                "Asthma"
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "Inverter": {
+                                "PredatorPredicate": [
+                                    "Target",
+                                    "Bloodscourged"
+                                ]
+                            }
+                        },
+                        {
+                            "Bloodscourge": "Target"
+                        }
+                    ]
+                },
+                {
+                    "Fleshbane": "Target"
+                }
+            ]
+        }
+    ]
+}

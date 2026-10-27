@@ -1,0 +1,23 @@
+{
+    "Sequence": [
+        {
+            "SomeAffs": [
+                "Me",
+                [
+                    "Shock",
+                    "Burnout"
+                ]
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "SingOrPlaySong": "Youth"
+                },
+                {
+                    "PerformanceAttack": "Guilt"
+                }
+            ]
+        }
+    ]
+}

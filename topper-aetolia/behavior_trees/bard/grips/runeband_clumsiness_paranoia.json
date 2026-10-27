@@ -1,0 +1,122 @@
+{
+    "Sequence": [
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                {
+                                    "RunebandAffIs": "Paranoia"
+                                }
+                            ]
+                        },
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                "RunebandForward"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                {
+                                    "RunebandAffIs": "RingingEars"
+                                }
+                            ]
+                        },
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                "RunebandForward"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                {
+                                    "RunebandAffIs": "Clumsiness"
+                                }
+                            ]
+                        },
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                "RunebandReversed"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                {
+                                    "RunebandAffIs": "Laxity"
+                                }
+                            ]
+                        },
+                        {
+                            "BardPredicate": [
+                                "Target",
+                                "RunebandReversed"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "AllAffs": [
+                                "Target",
+                                [
+                                    "Perplexity"
+                                ]
+                            ]
+                        },
+                        {
+                            "Inverter": {
+                                "BardPredicate": [
+                                    "Target",
+                                    "IronCollared"
+                                ]
+                            }
+                        },
+                        {
+                            "WeaveAttack": "Ironcollar"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "Inverter": {
+                                "BardPredicate": [
+                                    "Target",
+                                    "Bladestorm"
+                                ]
+                            }
+                        },
+                        {
+                            "WeaveAttack": "Bladestorm"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

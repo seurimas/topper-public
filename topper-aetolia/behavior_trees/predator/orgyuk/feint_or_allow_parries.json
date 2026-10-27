@@ -1,0 +1,39 @@
+{
+    "Failer": {
+        "Selector": [
+            {
+                "Sequence": [
+                    {
+                        "PredatorPredicate": [
+                            "Me",
+                            "CanFeint"
+                        ]
+                    },
+                    {
+                        "CanParry": "Target"
+                    },
+                    {
+                        "AddComboAttacks": [
+                            "Feint"
+                        ]
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Fallen"
+                            ]
+                        ]
+                    },
+                    {
+                        "AllowParries": true
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,150 @@
+{
+    "Failer": {
+        "Executor": [
+            {
+                "Sequence": [
+                    {
+                        "CanBreak": [
+                            "Target",
+                            {
+                                "Static": "LeftArmDamage"
+                            },
+                            11.0
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "ValueMoveUnparried": [
+                                    "Jab",
+                                    50,
+                                    50
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "CanBreak": [
+                            "Target",
+                            {
+                                "Static": "RightArmDamage"
+                            },
+                            11.0
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "ValueMoveUnparried": [
+                                    "Jab",
+                                    50,
+                                    50
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "CanBreak": [
+                            "Target",
+                            {
+                                "Static": "LeftLegDamage"
+                            },
+                            11.0
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "ValueMoveUnparried": [
+                                    "Lowhook",
+                                    50,
+                                    50
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "CanBreak": [
+                            "Target",
+                            {
+                                "Static": "RightLegDamage"
+                            },
+                            11.0
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "ValueMoveUnparried": [
+                                    "Lowhook",
+                                    50,
+                                    50
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "CanBreak": [
+                            "Target",
+                            {
+                                "Static": "TorsoDamage"
+                            },
+                            12.0
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "ValueMoveUnparried": [
+                                    "Lateral",
+                                    60,
+                                    30
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "CanBreak": [
+                            "Target",
+                            {
+                                "Static": "HeadDamage"
+                            },
+                            11.0
+                        ]
+                    },
+                    {
+                        "AddGraders": [
+                            {
+                                "ValueMoveUnparried": [
+                                    "Gouge",
+                                    50,
+                                    50
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

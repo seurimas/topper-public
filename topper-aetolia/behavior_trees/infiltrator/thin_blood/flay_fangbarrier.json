@@ -1,0 +1,29 @@
+{
+    "Sequence": [
+        {
+            "AffCountOver": [
+                "Target",
+                2,
+                [
+                    "Vomiting",
+                    "Lethargy",
+                    "Allergies"
+                ]
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Dyscrasia"
+                ]
+            ]
+        },
+        {
+            "Flay": [
+                "Target",
+                "Fangbarrier"
+            ]
+        }
+    ]
+}

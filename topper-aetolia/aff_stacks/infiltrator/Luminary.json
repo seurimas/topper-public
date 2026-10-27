@@ -1,0 +1,74 @@
+[
+    {
+        "IfDo": [
+            "Impatience",
+            {
+                "Stick": "Peace"
+            }
+        ]
+    },
+    {
+        "IfDo": [
+            "Dyscrasia",
+            {
+                "OneOf": [
+                    "Allergies",
+                    "Vomiting"
+                ]
+            }
+        ]
+    },
+    {
+        "OffFitness": "Asthma"
+    },
+    {
+        "OnTree": "Paresis"
+    },
+    {
+        "OnFitness": "Asthma"
+    },
+    {
+        "IfNotDo": [
+            "Dyscrasia",
+            {
+                "OneOf": [
+                    "Allergies",
+                    "Vomiting"
+                ]
+            }
+        ]
+    },
+    {
+        "Stick": "Stupidity"
+    },
+    {
+        "OffTree": "Paresis"
+    },
+    {
+        "Stick": "Weariness"
+    },
+    {
+        "Stick": "Dizziness"
+    },
+    {
+        "Stick": "Haemophilia"
+    },
+    {
+        "Stick": "Shyness"
+    },
+    {
+        "Stick": "RightLegBroken"
+    },
+    {
+        "Stick": "LeftLegBroken"
+    },
+    {
+        "Stick": "LeftArmBroken"
+    },
+    {
+        "Stick": "RightArmBroken"
+    },
+    {
+        "Stick": "RingingEars"
+    }
+]

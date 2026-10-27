@@ -1,0 +1,29 @@
+{
+    "Sequence": [
+        {
+            "AffCountOver": [
+                "Me",
+                5,
+                []
+            ]
+        },
+        {
+            "AffCountUnder": [
+                "Target",
+                2,
+                [
+                    "RingingEars",
+                    "Recklessness",
+                    "Shock",
+                    "Paralysis"
+                ]
+            ]
+        },
+        {
+            "Web": "Target"
+        },
+        {
+            "Fleshbane": "Target"
+        }
+    ]
+}

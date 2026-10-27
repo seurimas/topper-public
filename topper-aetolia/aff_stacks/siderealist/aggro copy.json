@@ -1,0 +1,30 @@
+[
+    {
+        "IfClassHates": [
+            "Weariness",
+            {
+                "Stick": "Weariness"
+            }
+        ]
+    },
+    {
+        "Stick": "Asthma"
+    },
+    {
+        "IfClassHates": [
+            "Clumsiness",
+            {
+                "Stick": "Clumsiness"
+            }
+        ]
+    },
+    {
+        "Stick": "Slickness"
+    },
+    {
+        "Stick": "Anorexia"
+    },
+    {
+        "Stick": "Squelched"
+    }
+]

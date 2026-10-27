@@ -1,0 +1,22 @@
+{
+    "Sequence": [
+        {
+            "SalveBlocked": [
+                "Target",
+                100
+            ]
+        },
+        {
+            "AffCountUnder": [
+                "Target",
+                1,
+                [
+                    "Frigid",
+                    "Frozen",
+                    "Shivering"
+                ]
+            ]
+        },
+        "Coldsnap"
+    ]
+}

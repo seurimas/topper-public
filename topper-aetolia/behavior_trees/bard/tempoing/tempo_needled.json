@@ -1,0 +1,84 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "CannotCure": [
+                        "Target",
+                        "Paresis"
+                    ]
+                },
+                {
+                    "VenomAttack": "TempoOne"
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "BardPredicate": [
+                        "Target",
+                        {
+                            "Needled": "curare"
+                        }
+                    ]
+                },
+                {
+                    "Selector": [
+                        {
+                            "Sequence": [
+                                {
+                                    "BardPredicate": [
+                                        "Target",
+                                        "NeedlePending"
+                                    ]
+                                },
+                                {
+                                    "UnstackAffs": [
+                                        "Paresis"
+                                    ]
+                                },
+                                {
+                                    "VenomAttack": "TempoOne"
+                                }
+                            ]
+                        },
+                        {
+                            "Sequence": [
+                                {
+                                    "NoAffs": [
+                                        "Target",
+                                        [
+                                            "Rebounding"
+                                        ]
+                                    ]
+                                },
+                                {
+                                    "Inverter": {
+                                        "BardPredicate": [
+                                            "Me",
+                                            "InRhythm"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "BardPredicate": [
+                                        "Target",
+                                        {
+                                            "NeedleAlmostPending": 1.5
+                                        }
+                                    ]
+                                },
+                                {
+                                    "PerformanceAttack": {
+                                        "Needle": "curare"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

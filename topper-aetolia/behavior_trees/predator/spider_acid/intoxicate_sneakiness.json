@@ -1,0 +1,45 @@
+{
+    "Failer": {
+        "Selector": [
+            {
+                "Sequence": [
+                    {
+                        "ReboundingWindow": [
+                            "Target",
+                            450
+                        ]
+                    },
+                    {
+                        "NoAffs": [
+                            "Target",
+                            [
+                                "Asthma"
+                            ]
+                        ]
+                    },
+                    {
+                        "PredatorPredicate": [
+                            "Target",
+                            "Intoxicated"
+                        ]
+                    },
+                    {
+                        "PlainQebBehavior": "echo Sneaking in some asthma..."
+                    },
+                    {
+                        "HintPlan": [
+                            "SNEAK",
+                            "true"
+                        ]
+                    },
+                    {
+                        "PushAff": "Asthma"
+                    }
+                ]
+            },
+            {
+                "Sequence": []
+            }
+        ]
+    }
+}

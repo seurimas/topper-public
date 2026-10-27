@@ -1,0 +1,22 @@
+{
+    "Sequence": [
+        {
+            "StatUnderPercent": [
+                "Health",
+                "Target",
+                50
+            ]
+        },
+        {
+            "Inverter": {
+                "SiderealistPredicate": [
+                    "Target",
+                    "HasDustring"
+                ]
+            }
+        },
+        {
+            "Dustring": "Target"
+        }
+    ]
+}

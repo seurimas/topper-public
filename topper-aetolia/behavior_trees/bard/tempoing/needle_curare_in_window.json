@@ -1,0 +1,25 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Target",
+                    {
+                        "Needled": null
+                    }
+                ]
+            }
+        },
+        {
+            "ReboundingWindow": [
+                "Target",
+                450
+            ]
+        },
+        {
+            "PerformanceAttack": {
+                "Needle": "curare"
+            }
+        }
+    ]
+}

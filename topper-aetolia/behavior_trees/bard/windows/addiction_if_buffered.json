@@ -1,0 +1,33 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Addiction"
+                ]
+            ]
+        },
+        {
+            "AffCountOver": [
+                "Target",
+                1,
+                [
+                    "Paranoia",
+                    "Hallucinations",
+                    "Confusion",
+                    "Hatred"
+                ]
+            ]
+        },
+        {
+            "BardPredicate": [
+                "Me",
+                "InHalfBeat"
+            ]
+        },
+        {
+            "SingOrPlaySong": "Decadence"
+        }
+    ]
+}

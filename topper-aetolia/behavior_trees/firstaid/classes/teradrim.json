@@ -1,0 +1,26 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/paresis_for_tree_2_10"
+        },
+        {
+            "SubTree": "firstaid/common/disrupted"
+        },
+        {
+            "SubTree": "firstaid/common/standup"
+        },
+        {
+            "SubTree": "firstaid/common/default_vitals"
+        },
+        {
+            "Sequence": [
+                {
+                    "IsRestoringAny": "Target"
+                },
+                {
+                    "Selector": []
+                }
+            ]
+        }
+    ]
+}

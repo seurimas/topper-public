@@ -1,0 +1,29 @@
+{
+    "Sequence": [
+        {
+            "AffCountUnder": [
+                "Target",
+                2,
+                [
+                    "Anorexia",
+                    "Manablight"
+                ]
+            ]
+        },
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Illgrasp"
+                ]
+            ]
+        },
+        {
+            "Parallax": [
+                "Target",
+                3,
+                "Ray"
+            ]
+        }
+    ]
+}

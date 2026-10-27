@@ -1,0 +1,22 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Cirisosis"
+                ]
+            ]
+        },
+        {
+            "AffCountOver": [
+                "Target",
+                12,
+                []
+            ]
+        },
+        {
+            "CirisosisDart": "Target"
+        }
+    ]
+}

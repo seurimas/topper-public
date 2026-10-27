@@ -1,0 +1,35 @@
+{
+    "Failer": {
+        "Executor": [
+            {
+                "Selector": [
+                    {
+                        "SubTree": "siderealist/regalia/offensive/ontesme_for_illgrasp"
+                    },
+                    {
+                        "SubTree": "siderealist/regalia/offensive/averroes_for_illgrasp"
+                    },
+                    {
+                        "SubTree": "siderealist/regalia/offensive/vayua_for_affs"
+                    }
+                ]
+            },
+            {
+                "Selector": [
+                    {
+                        "SubTree": "siderealist/regalia/defensive/drobia_for_damage"
+                    },
+                    {
+                        "SubTree": "siderealist/regalia/defensive/peripleko_for_dodge"
+                    },
+                    {
+                        "SubTree": "siderealist/regalia/defensive/izuari_for_hiddens"
+                    },
+                    {
+                        "SubTree": "siderealist/regalia/defensive/ejakodosa_for_mend"
+                    }
+                ]
+            }
+        ]
+    }
+}

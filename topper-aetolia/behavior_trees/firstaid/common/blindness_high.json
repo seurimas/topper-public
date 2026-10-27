@@ -1,0 +1,58 @@
+{
+    "AddFirstAidSettings": [
+        {
+            "SimplePriority": [
+                "Courage",
+                3
+            ]
+        },
+        {
+            "SimplePriority": [
+                "Insomnia",
+                8
+            ]
+        },
+        {
+            "SimplePriority": [
+                "Fangbarrier",
+                10
+            ]
+        },
+        {
+            "SimplePriority": [
+                "Levitation",
+                10
+            ]
+        },
+        {
+            "SimplePriority": [
+                "Instawake",
+                10
+            ]
+        },
+        {
+            "SimplePriority": [
+                "Speed",
+                10
+            ]
+        },
+        {
+            "SimplePriority": [
+                "Vigor",
+                10
+            ]
+        },
+        {
+            "SimplePriority": [
+                "Arcane",
+                10
+            ]
+        },
+        {
+            "SimplePriority": [
+                "Density",
+                15
+            ]
+        }
+    ]
+}

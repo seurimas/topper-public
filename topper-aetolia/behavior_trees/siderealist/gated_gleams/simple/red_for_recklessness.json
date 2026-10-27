@@ -1,0 +1,18 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Recklessness"
+                ]
+            ]
+        },
+        {
+            "GleamInflict": [
+                "Target",
+                "Red"
+            ]
+        }
+    ]
+}

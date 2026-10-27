@@ -1,0 +1,30 @@
+{
+    "Sequence": [
+        {
+            "AscendrilPredicate": [
+                "Me",
+                {
+                    "HalfResonance": "Fire"
+                }
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Emberbrand"
+                ]
+            ]
+        },
+        {
+            "SubTree": "ascendril/gated_attacks/fire/spark"
+        },
+        {
+            "AshenFeet": "Target"
+        },
+        {
+            "SubTree": "ascendril/gated_attacks/fire/fireburst_for_resonance"
+        },
+        "Afterburn"
+    ]
+}

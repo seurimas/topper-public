@@ -1,0 +1,32 @@
+{
+    "Sequence": [
+        {
+            "BardPredicate": [
+                "Target",
+                {
+                    "PrimaryEmotion": "Happiness"
+                }
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Infatuation"
+                ]
+            ]
+        },
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "Perplexity",
+                    "Paresis"
+                ]
+            ]
+        },
+        {
+            "PerformanceAttack": "Seduce"
+        }
+    ]
+}

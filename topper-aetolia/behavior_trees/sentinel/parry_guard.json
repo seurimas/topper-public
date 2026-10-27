@@ -1,0 +1,17 @@
+{
+    "Selector": [
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "Arrhythmia"
+                ]
+            ]
+        },
+        {
+            "Inverter": {
+                "CanParry": "Target"
+            }
+        }
+    ]
+}

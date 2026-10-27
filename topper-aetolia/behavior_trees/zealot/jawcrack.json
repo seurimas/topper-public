@@ -1,0 +1,25 @@
+{
+    "Sequence": [
+        {
+            "IsRestoringAny": "Target"
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "BlurryVision",
+                    "WateryEyes"
+                ]
+            ]
+        },
+        {
+            "IsAffectedBy": [
+                "Target",
+                "Clumsiness"
+            ]
+        },
+        {
+            "HacklesJawcrack": "Target"
+        }
+    ]
+}

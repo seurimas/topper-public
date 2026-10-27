@@ -1,0 +1,40 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Dyscrasia"
+                ]
+            ]
+        },
+        {
+            "Inverter": {
+                "PredatorPredicate": [
+                    "Target",
+                    "Bloodscourged"
+                ]
+            }
+        },
+        {
+            "Sequence": [
+                {
+                    "Selector": [
+                        {
+                            "Acid": "Target"
+                        },
+                        {
+                            "Strands": "Target"
+                        },
+                        {
+                            "Web": "Target"
+                        }
+                    ]
+                },
+                {
+                    "Bloodscourge": "Target"
+                }
+            ]
+        }
+    ]
+}

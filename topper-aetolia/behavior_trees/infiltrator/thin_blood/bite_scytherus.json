@@ -1,0 +1,29 @@
+{
+    "Sequence": [
+        {
+            "AffCountOver": [
+                "Target",
+                1,
+                [
+                    "Vomiting",
+                    "Lethargy",
+                    "Allergies"
+                ]
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Dyscrasia"
+                ]
+            ]
+        },
+        {
+            "Bite": [
+                "Target",
+                "Scytherus"
+            ]
+        }
+    ]
+}

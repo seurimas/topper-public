@@ -1,0 +1,27 @@
+{
+    "Sequence": [
+        {
+            "Buffered": [
+                "Target",
+                "Addiction"
+            ]
+        },
+        {
+            "Buffered": [
+                "Target",
+                "Perplexity"
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Besilence"
+                ]
+            ]
+        },
+        {
+            "WeaveAttack": "Headstitch"
+        }
+    ]
+}

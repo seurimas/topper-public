@@ -1,0 +1,74 @@
+{
+    "Sequence": [
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "StatUnderPercent": [
+                                "Health",
+                                "Target",
+                                20
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "StatUnderPercent": [
+                                "Health",
+                                "Target",
+                                40
+                            ]
+                        },
+                        {
+                            "StatUnderPercent": [
+                                "Mana",
+                                "Target",
+                                80
+                            ]
+                        },
+                        {
+                            "NoAffs": [
+                                "Target",
+                                [
+                                    "Arcane"
+                                ]
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "AllAffs": [
+                        "Target",
+                        [
+                            "Ablaze"
+                        ]
+                    ]
+                },
+                {
+                    "Inverter": {
+                        "CanParry": "Target"
+                    }
+                },
+                {
+                    "KnownUnparry": [
+                        "Target",
+                        "HeadDamage"
+                    ]
+                }
+            ]
+        },
+        {
+            "Pyroclast": [
+                "Target",
+                "EnrichOrCatalyze"
+            ]
+        }
+    ]
+}

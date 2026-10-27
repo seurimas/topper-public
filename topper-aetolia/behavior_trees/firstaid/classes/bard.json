@@ -1,0 +1,16 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/self_loathing"
+        },
+        {
+            "SubTree": "firstaid/common/disrupted"
+        },
+        {
+            "SubTree": "firstaid/common/default_vitals"
+        },
+        {
+            "SubTree": "firstaid/common/paresis_for_tree_2_10"
+        }
+    ]
+}

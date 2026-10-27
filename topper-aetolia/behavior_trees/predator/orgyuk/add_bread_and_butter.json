@@ -1,0 +1,18 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "AddComboAttacks": [
+                    "JabLeft",
+                    "JabRight",
+                    "LowhookLeft",
+                    "LowhookRight",
+                    "Spinslash",
+                    "Vertical",
+                    "Lateral",
+                    "Gouge"
+                ]
+            }
+        ]
+    }
+}

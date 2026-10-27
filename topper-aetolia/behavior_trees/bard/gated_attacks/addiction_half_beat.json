@@ -1,0 +1,21 @@
+{
+    "Sequence": [
+        {
+            "BardPredicate": [
+                "Me",
+                "InHalfBeat"
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Addiction"
+                ]
+            ]
+        },
+        {
+            "SingOrPlaySong": "Decadence"
+        }
+    ]
+}

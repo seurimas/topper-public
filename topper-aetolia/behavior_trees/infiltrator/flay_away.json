@@ -1,0 +1,20 @@
+{
+    "Sequence": [
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "AssumedRebounding",
+                    "Rebounding",
+                    "Shielded"
+                ]
+            ]
+        },
+        {
+            "Flay": [
+                "Target",
+                "None"
+            ]
+        }
+    ]
+}

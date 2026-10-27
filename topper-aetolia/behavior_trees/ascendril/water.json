@@ -1,0 +1,13 @@
+{
+    "Sequence": [
+        {
+            "HintPlan": [
+                "STRATEGY",
+                "WATER"
+            ]
+        },
+        {
+            "SubTree": "ascendril/base"
+        }
+    ]
+}

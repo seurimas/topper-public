@@ -1,0 +1,30 @@
+{
+    "Failer": {
+        "Selector": [
+            {
+                "SubTree": "siderealist/gated_tones/crystalforest_for_shield"
+            },
+            {
+                "SubTree": "siderealist/gated_tones/stridulations"
+            },
+            {
+                "SubTree": "siderealist/gated_tones/harmony_keep_alive"
+            },
+            {
+                "SubTree": "siderealist/gated_tones/creeps_for_kill"
+            },
+            {
+                "SubTree": "siderealist/gated_tones/oscillate_for_muddled"
+            },
+            {
+                "SubTree": "siderealist/gated_tones/dissension_for_dissonance"
+            },
+            {
+                "SubTree": "siderealist/gated_tones/creeps_with_dissonance_for_loneliness"
+            },
+            {
+                "SubTree": "siderealist/gated_tones/plague_with_dissonance"
+            }
+        ]
+    }
+}

@@ -1,0 +1,46 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "ClassIn": [
+                    "Target",
+                    [
+                        "Infiltrator",
+                        "Templar",
+                        "Wayfarer",
+                        "Sentinel"
+                    ]
+                ]
+            }
+        },
+        {
+            "AffCountOver": [
+                "Me",
+                1,
+                [
+                    "Asthma",
+                    "Slickness",
+                    "Anorexia",
+                    "Clumsiness",
+                    "Weariness",
+                    "Impatience",
+                    "Dizziness",
+                    "Haemophilia",
+                    "Shyness",
+                    "Paresis",
+                    "Stupidity",
+                    "Dyscrasia",
+                    "Allergies",
+                    "Vomiting"
+                ]
+            ]
+        },
+        {
+            "RandomCuresOver": [
+                "Me",
+                5
+            ]
+        },
+        "ShrugVenom"
+    ]
+}

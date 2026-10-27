@@ -1,0 +1,62 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "Inverter": {
+                    "BardPredicate": [
+                        "Target",
+                        {
+                            "Dumb": true
+                        }
+                    ]
+                }
+            },
+            {
+                "Selector": [
+                    {
+                        "BardPredicate": [
+                            "Me",
+                            {
+                                "SingingOrPlaying": "Decadence"
+                            }
+                        ]
+                    },
+                    {
+                        "Sequence": [
+                            {
+                                "AllAffs": [
+                                    "Target",
+                                    [
+                                        "Addiction"
+                                    ]
+                                ]
+                            },
+                            {
+                                "BardPredicate": [
+                                    "Me",
+                                    {
+                                        "SingingOrPlaying": null
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "BardPredicate": [
+                    "Target",
+                    {
+                        "EmotionLevel": [
+                            "Anger",
+                            40
+                        ]
+                    }
+                ]
+            },
+            {
+                "Induce": "Anger"
+            }
+        ]
+    }
+}

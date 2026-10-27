@@ -1,0 +1,97 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "NoAffs": [
+                        "Target",
+                        [
+                            "Shielded",
+                            "Rebounding"
+                        ]
+                    ]
+                },
+                {
+                    "PredatorPredicate": [
+                        "Me",
+                        "CanFeint"
+                    ]
+                },
+                {
+                    "CanParry": "Target"
+                },
+                {
+                    "NoAffs": [
+                        "Target",
+                        [
+                            "Weariness",
+                            "Dizziness",
+                            "Veinrip"
+                        ]
+                    ]
+                },
+                {
+                    "SeriesCombo": [
+                        "Target",
+                        [
+                            "VaeSant",
+                            [
+                                "Feint",
+                                "Veinrip",
+                                "Flashkick",
+                                "Flashkick"
+                            ]
+                        ],
+                        []
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "NoAffs": [
+                        "Target",
+                        [
+                            "Shielded",
+                            "Rebounding"
+                        ]
+                    ]
+                },
+                {
+                    "Inverter": {
+                        "CanParry": "Target"
+                    }
+                },
+                {
+                    "AffCountOver": [
+                        "Target",
+                        2,
+                        [
+                            "Confusion",
+                            "Dementia",
+                            "Weariness",
+                            "Stupidity",
+                            "Dizziness"
+                        ]
+                    ]
+                },
+                {
+                    "SeriesCombo": [
+                        "Target",
+                        [
+                            "VaeSant",
+                            [
+                                "Flashkick",
+                                "Flashkick",
+                                "Flashkick",
+                                "Flashkick"
+                            ]
+                        ],
+                        []
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "PlainQebBehavior": "stand"
+            },
+            "Parry",
+            "Repipe",
+            "Fitness",
+            {
+                "Sequence": [
+                    {
+                        "ClassThreatens": [
+                            "Target",
+                            "HiddenAfflictions"
+                        ]
+                    },
+                    {
+                        "HiddenAffsOver": [
+                            "Target",
+                            3
+                        ]
+                    },
+                    "Diagnose"
+                ]
+            }
+        ]
+    }
+}

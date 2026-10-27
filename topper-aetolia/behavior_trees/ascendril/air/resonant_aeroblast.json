@@ -1,0 +1,63 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "AscendrilPredicate": [
+                    "Target",
+                    "AeroblastOn"
+                ]
+            }
+        },
+        {
+            "AffCountOver": [
+                "Target",
+                2,
+                [
+                    "Dizziness",
+                    "Vertigo",
+                    "Stupidity",
+                    "Laxity",
+                    "Confusion",
+                    "TorsoBroken"
+                ]
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "AffCountOver": [
+                                "Target",
+                                3,
+                                [
+                                    "Dizziness",
+                                    "Vertigo",
+                                    "Stupidity",
+                                    "Laxity",
+                                    "Confusion",
+                                    "TorsoBroken"
+                                ]
+                            ]
+                        },
+                        {
+                            "AeroblastFast": [
+                                "Target",
+                                "Resonating"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "AeroblastSlow": [
+                        "Target",
+                        "Resonating"
+                    ]
+                }
+            ]
+        },
+        {
+            "PlainQebBehavior": "echo Let's see how this aeroblast plays off..."
+        }
+    ]
+}

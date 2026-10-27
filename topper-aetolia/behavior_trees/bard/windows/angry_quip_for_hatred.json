@@ -1,0 +1,32 @@
+{
+    "Sequence": [
+        {
+            "BardPredicate": [
+                "Target",
+                {
+                    "PrimaryEmotion": "Anger"
+                }
+            ]
+        },
+        {
+            "Inverter": {
+                "HasFocus": [
+                    "Target",
+                    0.0
+                ]
+            }
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Hatred",
+                    "Mania"
+                ]
+            ]
+        },
+        {
+            "PerformanceAttack": "Quip"
+        }
+    ]
+}

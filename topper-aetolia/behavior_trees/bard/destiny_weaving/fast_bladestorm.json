@@ -1,0 +1,27 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Me",
+                [
+                    "SongDestiny"
+                ]
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "Inverter": {
+                        "BardPredicate": [
+                            "Target",
+                            "Bladestorm"
+                        ]
+                    }
+                },
+                {
+                    "WeaveAttack": "Bladestorm"
+                }
+            ]
+        }
+    ]
+}

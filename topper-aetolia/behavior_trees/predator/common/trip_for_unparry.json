@@ -1,0 +1,42 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "CanParry": "Target"
+            },
+            {
+                "NoAffs": [
+                    "Target",
+                    [
+                        "Fallen"
+                    ]
+                ]
+            },
+            {
+                "SomeAffs": [
+                    "Target",
+                    [
+                        "LeftLegBroken",
+                        "RightLegBroken"
+                    ]
+                ]
+            },
+            {
+                "AddComboAttacks": [
+                    "Trip"
+                ]
+            },
+            {
+                "AddGraders": [
+                    {
+                        "ValueMove": [
+                            "Trip",
+                            200,
+                            -2000
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

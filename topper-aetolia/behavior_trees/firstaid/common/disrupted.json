@@ -1,0 +1,36 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "SomeAffs": [
+                        "Me",
+                        [
+                            "Disrupted"
+                        ]
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "SimplePriority": [
+                                "Confusion",
+                                1
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "SimplePriority": [
+                        "Confusion",
+                        8
+                    ]
+                }
+            ]
+        }
+    ]
+}

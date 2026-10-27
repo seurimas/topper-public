@@ -1,0 +1,17 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "PredatorPredicate": [
+                    "Me",
+                    "TidalslashReady"
+                ]
+            },
+            {
+                "AddComboAttacks": [
+                    "Tidalslash"
+                ]
+            }
+        ]
+    }
+}

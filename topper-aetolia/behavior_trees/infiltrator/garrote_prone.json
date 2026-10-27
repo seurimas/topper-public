@@ -1,0 +1,19 @@
+{
+    "Sequence": [
+        {
+            "IsProne": "Target"
+        },
+        {
+            "SomeAffs": [
+                "Target",
+                [
+                    "Marked",
+                    "RingingEars"
+                ]
+            ]
+        },
+        {
+            "Garrote": "Target"
+        }
+    ]
+}

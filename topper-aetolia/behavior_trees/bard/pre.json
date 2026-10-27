@@ -1,0 +1,84 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "Inverter": {
+                        "BardPredicate": [
+                            "Me",
+                            "InHalfBeat"
+                        ]
+                    }
+                },
+                {
+                    "Inverter": {
+                        "BardPredicate": [
+                            "Me",
+                            "InWholeBeat"
+                        ]
+                    }
+                },
+                {
+                    "PlainQebBehavior": "halfbeat"
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "Inverter": {
+                        "BardPredicate": [
+                            "Me",
+                            {
+                                "HasAnelace": 1
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Weave": "Anelace"
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "NoAffs": [
+                        "Me",
+                        [
+                            "Discordance",
+                            "Euphonia"
+                        ]
+                    ]
+                },
+                {
+                    "PlainQebBehavior": "discordance"
+                }
+            ]
+        },
+        {
+            "Weave": "Thurible"
+        },
+        {
+            "Sequence": [
+                {
+                    "NoAffs": [
+                        "Me",
+                        [
+                            "SongDestiny"
+                        ]
+                    ]
+                },
+                {
+                    "SingSong": "Destiny"
+                }
+            ]
+        },
+        {
+            "Weave": "Boundary"
+        },
+        {
+            "PlainQebBehavior": "dither"
+        }
+    ]
+}

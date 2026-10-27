@@ -1,0 +1,13 @@
+{
+    "AddFirstAidSettings": [
+        {
+            "VitalsPriority": "Hp"
+        },
+        {
+            "ForceHealthPercent": 50
+        },
+        {
+            "ForceManaPercent": 30
+        }
+    ]
+}

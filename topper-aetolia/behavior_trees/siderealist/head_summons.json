@@ -1,0 +1,32 @@
+{
+    "Failer": {
+        "Selector": [
+            {
+                "Sequence": [
+                    {
+                        "SiderealistPredicate": [
+                            "Me",
+                            "EnigmaAlive"
+                        ]
+                    },
+                    {
+                        "EnigmaAttack": "Target"
+                    }
+                ]
+            },
+            {
+                "Sequence": [
+                    {
+                        "SiderealistPredicate": [
+                            "Me",
+                            "EmbodyAlive"
+                        ]
+                    },
+                    {
+                        "EmbodyAttack": "Target"
+                    }
+                ]
+            }
+        ]
+    }
+}

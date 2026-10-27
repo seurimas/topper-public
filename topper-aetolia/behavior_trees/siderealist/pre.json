@@ -1,0 +1,28 @@
+{
+    "Executor": [
+        {
+            "SubTree": "siderealist/head_regalia"
+        },
+        {
+            "Selector": [
+                "Gleam",
+                {
+                    "SubTree": "siderealist/prepare_vibrations"
+                },
+                {
+                    "SiderealistPredicate": [
+                        "Me",
+                        "EmbodyAlive"
+                    ]
+                },
+                {
+                    "SiderealistPredicate": [
+                        "Me",
+                        "EnigmaAlive"
+                    ]
+                },
+                "Enigma"
+            ]
+        }
+    ]
+}

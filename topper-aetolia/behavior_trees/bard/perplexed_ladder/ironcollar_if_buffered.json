@@ -1,0 +1,27 @@
+{
+    "Sequence": [
+        {
+            "BardPredicate": [
+                "Target",
+                "Runebanded"
+            ]
+        },
+        {
+            "Buffered": [
+                "Target",
+                "Perplexity"
+            ]
+        },
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Target",
+                    "IronCollared"
+                ]
+            }
+        },
+        {
+            "WeaveAttack": "Ironcollar"
+        }
+    ]
+}

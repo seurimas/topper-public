@@ -1,0 +1,25 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "BardPredicate": [
+                    "Target",
+                    {
+                        "Needled": "digitalis"
+                    }
+                ]
+            },
+            {
+                "BardPredicate": [
+                    "Target",
+                    "NeedlePending"
+                ]
+            },
+            {
+                "UnstackAffs": [
+                    "Shyness"
+                ]
+            }
+        ]
+    }
+}

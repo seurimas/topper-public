@@ -1,0 +1,43 @@
+{
+    "Sequence": [
+        {
+            "Selector": [
+                {
+                    "NoAffs": [
+                        "Target",
+                        [
+                            "Vertigo",
+                            "Confusion"
+                        ]
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "AscendrilPredicate": [
+                                "Me",
+                                {
+                                    "Resonance": "Air"
+                                }
+                            ]
+                        },
+                        {
+                            "AffCountUnder": [
+                                "Target",
+                                1,
+                                [
+                                    "Vertigo",
+                                    "Confusion",
+                                    "Laxity"
+                                ]
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Pressurize": "Target"
+        }
+    ]
+}

@@ -1,0 +1,23 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Target",
+                    "Runebanded"
+                ]
+            }
+        },
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Target",
+                    "Globed"
+                ]
+            }
+        },
+        {
+            "WeaveAttack": "Masterstroke"
+        }
+    ]
+}

@@ -1,0 +1,26 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "Inverter": {
+                    "AllAffs": [
+                        "Target",
+                        [
+                            "Confusion",
+                            "Dementia",
+                            "Weariness",
+                            "Stupidity",
+                            "Dizziness"
+                        ]
+                    ]
+                }
+            },
+            {
+                "AddComboAttacks": [
+                    "Flashkick",
+                    "Feint"
+                ]
+            }
+        ]
+    }
+}

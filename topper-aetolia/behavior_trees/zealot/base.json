@@ -1,0 +1,113 @@
+{
+    "Selector": [
+        {
+            "HacklesWelt": [
+                "Target",
+                true
+            ]
+        },
+        {
+            "SubTree": "zealot/jawcrack"
+        },
+        {
+            "Sequence": [
+                {
+                    "Inverter": {
+                        "HasBalanceEquilibrium": "Me"
+                    }
+                },
+                {
+                    "Succeeder": {
+                        "SubTree": "zealot/shock_em"
+                    }
+                }
+            ]
+        },
+        {
+            "SomeAffs": [
+                "Me",
+                [
+                    "Stun",
+                    "Asleep"
+                ]
+            ]
+        },
+        {
+            "SubTree": "defend_first"
+        },
+        {
+            "SubTree": "zealot/cinder_freely"
+        },
+        {
+            "Immolation": "Target"
+        },
+        {
+            "SubTree": "zealot/fast_psi_recover"
+        },
+        {
+            "SubTree": "zealot/zenith_freely"
+        },
+        {
+            "SomeAffs": [
+                "Me",
+                [
+                    "Paralysis"
+                ]
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "Inverter": {
+                        "ZealotPredicate": [
+                            "Me",
+                            "ZenithUp"
+                        ]
+                    }
+                },
+                {
+                    "Selector": [
+                        {
+                            "Infernal": "Target"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "IsRestoringAny": "Target"
+                },
+                {
+                    "PickBestPendulum": [
+                        "Target",
+                        2100
+                    ]
+                }
+            ]
+        },
+        {
+            "SubTree": "zealot/wrath_window"
+        },
+        {
+            "SubTree": "zealot/safe_swagger"
+        },
+        {
+            "SubTree": "zealot/firefist_winner"
+        },
+        {
+            "TouchHammer": "Target"
+        },
+        {
+            "Sequence": [
+                {
+                    "SubTree": "zealot/base_balance"
+                },
+                {
+                    "SubTree": "zealot/base_off_balance"
+                }
+            ]
+        }
+    ]
+}

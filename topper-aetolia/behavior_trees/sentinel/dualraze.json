@@ -1,0 +1,16 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Shielded",
+                    "Rebounding"
+                ]
+            ]
+        },
+        {
+            "SentinelDualraze": "Target"
+        }
+    ]
+}

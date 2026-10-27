@@ -1,0 +1,16 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Misery",
+                    "Clumsiness"
+                ]
+            ]
+        },
+        {
+            "PerformanceAttack": "Hiltblow"
+        }
+    ]
+}

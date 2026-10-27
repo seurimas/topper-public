@@ -1,0 +1,28 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "AscendrilPredicate": [
+                    "Target",
+                    "AeroblastOn"
+                ]
+            }
+        },
+        {
+            "StuckAtLeast": [
+                "Target",
+                "TorsoBroken",
+                300
+            ]
+        },
+        {
+            "AeroblastFast": [
+                "Target",
+                "Resonating"
+            ]
+        },
+        {
+            "PlainQebBehavior": "echo Let's see how this torso aeroblast plays off..."
+        }
+    ]
+}

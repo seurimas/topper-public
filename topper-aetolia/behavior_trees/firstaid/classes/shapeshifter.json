@@ -1,0 +1,32 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/disrupted"
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "VitalsPriority": "Hp"
+                },
+                {
+                    "ClotAbovePercentMana": 30
+                },
+                {
+                    "ClotAboveBleed": 50
+                },
+                {
+                    "SimplePriority": [
+                        "Rebounding",
+                        0
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Paresis",
+                        2
+                    ]
+                }
+            ]
+        }
+    ]
+}

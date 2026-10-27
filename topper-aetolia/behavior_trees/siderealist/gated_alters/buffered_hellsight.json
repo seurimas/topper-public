@@ -1,0 +1,17 @@
+{
+    "Sequence": [
+        {
+            "Buffered": [
+                "Target",
+                "Deadening"
+            ]
+        },
+        {
+            "Alteration": [
+                "Target",
+                "Deadening",
+                "Hellsight"
+            ]
+        }
+    ]
+}

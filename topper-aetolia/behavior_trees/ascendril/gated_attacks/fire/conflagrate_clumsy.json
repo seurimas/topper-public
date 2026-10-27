@@ -1,0 +1,29 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Courage"
+                ]
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Clumsiness"
+                ]
+            ]
+        },
+        {
+            "IsAffectedBy": [
+                "Target",
+                "Clumsiness"
+            ]
+        },
+        {
+            "Conflagrate": "Target"
+        }
+    ]
+}

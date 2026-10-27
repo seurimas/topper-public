@@ -1,0 +1,18 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "PredatorPredicate": [
+                    "Target",
+                    "Fleshbaned"
+                ]
+            }
+        },
+        {
+            "Pestilence": "Target"
+        },
+        {
+            "Fleshbane": "Target"
+        }
+    ]
+}

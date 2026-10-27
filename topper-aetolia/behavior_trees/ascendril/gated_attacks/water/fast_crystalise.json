@@ -1,0 +1,22 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Fallen"
+                ]
+            ]
+        },
+        {
+            "PlainQebBehavior": "echo Fallen, let's try this..."
+        },
+        {
+            "Crystalise": [
+                "Target",
+                "Resonating",
+                true
+            ]
+        }
+    ]
+}

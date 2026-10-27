@@ -1,0 +1,102 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/blindness_high"
+        },
+        {
+            "SubTree": "firstaid/common/disrupted"
+        },
+        {
+            "SubTree": "firstaid/common/self_loathing"
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "BalanceUnder": [
+                                "Me",
+                                "Tree",
+                                1.0
+                            ]
+                        },
+                        {
+                            "AddFirstAidSettings": [
+                                {
+                                    "SimplePriority": [
+                                        "Paresis",
+                                        2
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "RandomCuresOver": [
+                                "Me",
+                                4
+                            ]
+                        },
+                        {
+                            "AddFirstAidSettings": [
+                                {
+                                    "SimplePriority": [
+                                        "Paresis",
+                                        6
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "AddFirstAidSettings": [
+                        {
+                            "SimplePriority": [
+                                "Paresis",
+                                10
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "SimplePriority": [
+                        "Rebounding",
+                        5
+                    ]
+                },
+                {
+                    "VitalsPriority": "Alt"
+                },
+                {
+                    "UseClotting": "Safe"
+                },
+                {
+                    "ClotAbovePercentMana": 60
+                },
+                {
+                    "ClotAboveBleed": 150
+                },
+                {
+                    "SimplePriority": [
+                        "Dizziness",
+                        7
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "Accursed",
+                        4
+                    ]
+                }
+            ]
+        }
+    ]
+}

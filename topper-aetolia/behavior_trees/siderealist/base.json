@@ -1,0 +1,132 @@
+{
+    "Selector": [
+        {
+            "SubTree": "siderealist/fast_eventide"
+        },
+        {
+            "Inverter": {
+                "HasBalanceEquilibrium": "Me"
+            }
+        },
+        {
+            "SubTree": "defend_first"
+        },
+        {
+            "SomeAffs": [
+                "Me",
+                [
+                    "Stun",
+                    "Paralysis"
+                ]
+            ]
+        },
+        {
+            "Refract": "Target"
+        },
+        {
+            "Sequence": [
+                {
+                    "Inverter": {
+                        "SiderealistPredicate": [
+                            "Me",
+                            "EmbodyAlive"
+                        ]
+                    }
+                },
+                {
+                    "Inverter": {
+                        "SiderealistPredicate": [
+                            "Me",
+                            "EnigmaAlive"
+                        ]
+                    }
+                },
+                "Enigma"
+            ]
+        },
+        {
+            "SubTree": "siderealist/break_channel"
+        },
+        {
+            "SubTree": "siderealist/squelched_for_dustring"
+        },
+        {
+            "SubTree": "siderealist/head_regalia"
+        },
+        {
+            "SubTree": "siderealist/head_summons"
+        },
+        {
+            "SubTree": "siderealist/gated_alters/buffered_blood_poison"
+        },
+        {
+            "SubTree": "siderealist/gated_alters/buffered_hellsight"
+        },
+        {
+            "SubTree": "siderealist/head_tones"
+        },
+        {
+            "SubTree": "siderealist/struggling_equinox"
+        },
+        {
+            "SubTree": "siderealist/gated_anomalies/go_for_it"
+        },
+        {
+            "SubTree": "siderealist/mend_me"
+        },
+        {
+            "SubTree": "siderealist/foresight_freely"
+        },
+        {
+            "SubTree": "siderealist/prepare_vibrations"
+        },
+        {
+            "SubTree": "siderealist/gated_gleams/reup_gleam"
+        },
+        {
+            "SubTree": "siderealist/illgrasp_freely"
+        },
+        {
+            "SubTree": "siderealist/gated_gleams/slickness_mindfog"
+        },
+        {
+            "SubTree": "siderealist/force_weariness"
+        },
+        {
+            "SubTree": "siderealist/stillness_for_dustring"
+        },
+        {
+            "SubTree": "siderealist/parallaxes/ray_for_dustring"
+        },
+        {
+            "SubTree": "siderealist/parallaxes/ray_for_illgrasp"
+        },
+        {
+            "SubTree": "siderealist/vayua_top"
+        },
+        {
+            "SubTree": "siderealist/parallaxes/parallax_paresis"
+        },
+        {
+            "SubTree": "siderealist/parallaxes/parallax_paranoia"
+        },
+        {
+            "SubTree": "siderealist/erode_freely"
+        },
+        {
+            "SubTree": "siderealist/vayua_mid"
+        },
+        {
+            "SubTree": "siderealist/gated_gleams/clumsiness_for_class"
+        },
+        {
+            "SubTree": "siderealist/gated_gleams/buffer_with_recklessness"
+        },
+        {
+            "SubTree": "siderealist/gated_gleams/buffer_with_clumsiness"
+        },
+        {
+            "VayuaAttack": "Target"
+        }
+    ]
+}

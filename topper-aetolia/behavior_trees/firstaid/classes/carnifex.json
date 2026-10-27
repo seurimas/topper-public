@@ -1,0 +1,35 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/paresis_for_tree_2_10"
+        },
+        {
+            "SubTree": "firstaid/common/standup"
+        },
+        {
+            "SubTree": "firstaid/common/disrupted"
+        },
+        {
+            "SubTree": "firstaid/common/default_vitals"
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "SimplePriority": [
+                        "Rebounding",
+                        5
+                    ]
+                },
+                {
+                    "ClotAbovePercentMana": 20
+                },
+                {
+                    "ClotAboveBleed": 20
+                },
+                {
+                    "UseClotting": "Safe"
+                }
+            ]
+        }
+    ]
+}

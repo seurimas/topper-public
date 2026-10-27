@@ -1,0 +1,57 @@
+{
+    "Sequence": [
+        {
+            "HintSet": [
+                "STRATEGY",
+                "PILLS"
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "SubTree": "ascendril/gated_attacks/air/windlance_shield"
+                },
+                {
+                    "SubTree": "ascendril/brand_pairs/fire_air"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/air/deaf_thunderclap"
+                },
+                {
+                    "SubTree": "ascendril/water/shatter_for_pyroclast"
+                },
+                {
+                    "SubTree": "ascendril/air/prepare_aeroblast"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/fire/spark"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/fire/fireburst_for_resonance"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/fire/fireburst_full"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/fire/conflagrate_clumsy"
+                },
+                {
+                    "SubTree": "ascendril/water/shatter_for_torso_parried"
+                },
+                {
+                    "SubTree": "ascendril/water/icicle_no_arcane"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/air/windlance_direfrost"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/air/pressurize"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/air/thunderclap"
+                },
+                "Afterburn"
+            ]
+        }
+    ]
+}

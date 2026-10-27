@@ -1,0 +1,72 @@
+{
+    "Sequence": [
+        {
+            "Inverter": {
+                "BardPredicate": [
+                    "Me",
+                    {
+                        "SingingOrPlaying": null
+                    }
+                ]
+            }
+        },
+        {
+            "Selector": [
+                {
+                    "Sequence": [
+                        {
+                            "Inverter": {
+                                "BardPredicate": [
+                                    "Target",
+                                    "Fated"
+                                ]
+                            }
+                        },
+                        {
+                            "PlaySong": "Fate"
+                        },
+                        "AudienceTarget"
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "NoAffs": [
+                                "Target",
+                                [
+                                    "Generosity"
+                                ]
+                            ]
+                        },
+                        {
+                            "PlaySong": "Charity"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "NoAffs": [
+                                "Target",
+                                [
+                                    "Addiction"
+                                ]
+                            ]
+                        },
+                        {
+                            "PlaySong": "Decadence"
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "PlaySong": "Sorrow"
+                        },
+                        "AudienceTarget"
+                    ]
+                }
+            ]
+        }
+    ]
+}

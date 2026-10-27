@@ -1,0 +1,20 @@
+{
+    "Sequence": [
+        {
+            "IsAffectedBy": [
+                "Target",
+                "Clumsiness"
+            ]
+        },
+        {
+            "BalanceOver": [
+                "Target",
+                "Pill",
+                1
+            ]
+        },
+        {
+            "SubTree": "siderealist/gated_gleams/simple/green_for_clumsiness"
+        }
+    ]
+}

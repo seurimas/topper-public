@@ -1,0 +1,23 @@
+{
+    "Sequence": [
+        {
+            "PredatorPredicate": [
+                "Me",
+                {
+                    "OrelSwooping": "Target"
+                }
+            ]
+        },
+        {
+            "AffRateCombo": [
+                "Target",
+                [
+                    {
+                        "MaxBalanceTime": 240
+                    }
+                ],
+                []
+            ]
+        }
+    ]
+}

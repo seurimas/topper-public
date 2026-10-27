@@ -1,0 +1,21 @@
+{
+    "Failer": {
+        "Sequence": [
+            {
+                "SomeAffs": [
+                    "Target",
+                    [
+                        "AssumedRebounding",
+                        "Rebounding",
+                        "Shielded"
+                    ]
+                ]
+            },
+            {
+                "AddComboAttacks": [
+                    "Raze"
+                ]
+            }
+        ]
+    }
+}

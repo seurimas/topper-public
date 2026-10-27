@@ -1,0 +1,19 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "Inverter": {
+                        "AscendrilPredicate": [
+                            "Me",
+                            "FulcrumUp"
+                        ]
+                    }
+                },
+                "Fulcrum"
+            ]
+        },
+        "Schism",
+        "Imbalance"
+    ]
+}

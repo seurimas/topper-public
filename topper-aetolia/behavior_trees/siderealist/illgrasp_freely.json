@@ -1,0 +1,15 @@
+{
+    "Sequence": [
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Illgrasp"
+                ]
+            ]
+        },
+        {
+            "Illgrasp": "Target"
+        }
+    ]
+}

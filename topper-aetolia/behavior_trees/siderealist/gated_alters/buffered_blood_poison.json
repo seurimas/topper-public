@@ -1,0 +1,41 @@
+{
+    "Sequence": [
+        {
+            "AffCountOver": [
+                "Target",
+                2,
+                [
+                    "Clumsiness",
+                    "Weariness",
+                    "Asthma"
+                ]
+            ]
+        },
+        {
+            "NoAffs": [
+                "Target",
+                [
+                    "Sepsis"
+                ]
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "Alteration": [
+                        "Target",
+                        "Clumsiness",
+                        "Sepsis"
+                    ]
+                },
+                {
+                    "Alteration": [
+                        "Target",
+                        "Weariness",
+                        "Sepsis"
+                    ]
+                }
+            ]
+        }
+    ]
+}

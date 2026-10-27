@@ -1,0 +1,39 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "AffCountOver": [
+                        "Target",
+                        3,
+                        []
+                    ]
+                },
+                {
+                    "Sleight": [
+                        "Target",
+                        "Void"
+                    ]
+                }
+            ]
+        },
+        {
+            "Sleight": [
+                "Target",
+                "Dissipate"
+            ]
+        },
+        {
+            "Sleight": [
+                "Target",
+                "Invasion"
+            ]
+        },
+        {
+            "Sleight": [
+                "Target",
+                "Abrasion"
+            ]
+        }
+    ]
+}

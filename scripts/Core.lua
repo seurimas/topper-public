@@ -97,10 +97,10 @@ function start_topper(TOPPER_VERSION)
     topper = spawn(read_topper,
       HOME_DIR .. [[git\topper\target\release\topper-]] .. TOPPER_VERSION .. [[-mudlet.exe]],
       HOME_DIR .. [[topper_logs]],
-      HOME_DIR .. [[git\topper\topper.db-fixed]],
-      HOME_DIR .. [[git\topper\triggers]],
-      HOME_DIR .. [[git\topper\behavior_trees]],
-      HOME_DIR .. [[git\topper\aff_stacks]],
+      HOME_DIR .. [[git\topper\]] .. TOPPER_VERSION .. [[\topper.db-fixed]],
+      HOME_DIR .. [[git\topper\]] .. TOPPER_VERSION .. [[\triggers]],
+      HOME_DIR .. [[git\topper\]] .. TOPPER_VERSION .. [[\behavior_trees]],
+      HOME_DIR .. [[git\topper\]] .. TOPPER_VERSION .. [[\aff_stacks]],
       HOME_DIR .. [[git\topper\topper-explainer\my_logs\]])
   else
     echo("Topper already running!\n")

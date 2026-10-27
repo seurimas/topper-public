@@ -1,0 +1,29 @@
+{
+    "Executor": [
+        {
+            "SubTree": "firstaid/common/standup"
+        },
+        {
+            "SubTree": "firstaid/common/disrupted"
+        },
+        {
+            "SubTree": "firstaid/common/default_vitals"
+        },
+        {
+            "AddFirstAidSettings": [
+                {
+                    "SimplePriority": [
+                        "Rebounding",
+                        0
+                    ]
+                },
+                {
+                    "SimplePriority": [
+                        "SoreAnkle",
+                        6
+                    ]
+                }
+            ]
+        }
+    ]
+}

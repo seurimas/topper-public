@@ -1,0 +1,38 @@
+{
+    "Selector": [
+        {
+            "Sequence": [
+                {
+                    "Channeling": [
+                        "Target",
+                        "Death"
+                    ]
+                },
+                {
+                    "TwinshotVenoms": [
+                        "Target",
+                        "Asleep",
+                        "Asleep"
+                    ]
+                }
+            ]
+        },
+        {
+            "Sequence": [
+                {
+                    "Channeling": [
+                        "Target",
+                        "Shatter"
+                    ]
+                },
+                {
+                    "TwinshotVenoms": [
+                        "Target",
+                        "Asleep",
+                        "Asleep"
+                    ]
+                }
+            ]
+        }
+    ]
+}

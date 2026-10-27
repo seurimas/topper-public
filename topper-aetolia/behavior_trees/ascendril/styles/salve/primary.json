@@ -1,0 +1,137 @@
+{
+    "Sequence": [
+        {
+            "HintSet": [
+                "STRATEGY",
+                "SALVE"
+            ]
+        },
+        {
+            "Selector": [
+                {
+                    "SubTree": "ascendril/gated_attacks/air/windlance_shield"
+                },
+                {
+                    "Sequence": [
+                        {
+                            "AscendrilPredicate": [
+                                "Me",
+                                {
+                                    "HalfResonance": "Air"
+                                }
+                            ]
+                        },
+                        {
+                            "NoAffs": [
+                                "Target",
+                                [
+                                    "Frostbrand"
+                                ]
+                            ]
+                        },
+                        {
+                            "Selector": [
+                                {
+                                    "Direfrost": "Target"
+                                },
+                                {
+                                    "SubTree": "ascendril/gated_attacks/water/coldsnap"
+                                },
+                                {
+                                    "SubTree": "ascendril/water/icicle_freely"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "SubTree": "ascendril/brand_pairs/water_fire"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/water/drench_frozen"
+                },
+                {
+                    "Sequence": [
+                        {
+                            "AscendrilPredicate": [
+                                "Me",
+                                {
+                                    "NoResonance": "Water"
+                                }
+                            ]
+                        },
+                        {
+                            "NoAffs": [
+                                "Target",
+                                [
+                                    "Emberbrand"
+                                ]
+                            ]
+                        },
+                        {
+                            "AllAffs": [
+                                "Target",
+                                [
+                                    "Frostbrand"
+                                ]
+                            ]
+                        },
+                        {
+                            "Selector": [
+                                {
+                                    "AshenFeet": "Target"
+                                },
+                                "Afterburn",
+                                {
+                                    "Sequence": [
+                                        {
+                                            "AscendrilPredicate": [
+                                                "Me",
+                                                "Afterburned"
+                                            ]
+                                        },
+                                        {
+                                            "Sunspot": "Target"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Sequence": [
+                        {
+                            "AscendrilPredicate": [
+                                "Me",
+                                {
+                                    "HalfResonance": "Air"
+                                }
+                            ]
+                        },
+                        {
+                            "Selector": [
+                                {
+                                    "SubTree": "ascendril/gated_attacks/air/arcbolt_paresis"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "SubTree": "ascendril/water/shatter_for_pyroclast"
+                },
+                {
+                    "Direfrost": "Target"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/water/coldsnap"
+                },
+                {
+                    "SubTree": "ascendril/water/icicle_freely"
+                },
+                "Coldsnap"
+            ]
+        }
+    ]
+}

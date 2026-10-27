@@ -1,0 +1,25 @@
+{
+    "Sequence": [
+        {
+            "AllAffs": [
+                "Target",
+                [
+                    "Emberbrand"
+                ]
+            ]
+        },
+        {
+            "Executor": [
+                {
+                    "SubTree": "ascendril/gated_attacks/fire/fireburst_full"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/fire/fireburst_for_clumsy"
+                },
+                {
+                    "SubTree": "ascendril/gated_attacks/fire/fireburst_for_weary"
+                }
+            ]
+        }
+    ]
+}

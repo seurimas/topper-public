@@ -1,0 +1,19 @@
+{
+    "Sequence": [
+        {
+            "Sequence": [
+                {
+                    "Inverter": {
+                        "BardPredicate": [
+                            "Target",
+                            "Bladestorm"
+                        ]
+                    }
+                },
+                {
+                    "WeaveAttack": "Bladestorm"
+                }
+            ]
+        }
+    ]
+}
