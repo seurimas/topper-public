@@ -1,10 +1,13 @@
 use crate::timeline::TimeSlice;
 use regex::{Captures, Match, Regex, RegexSet, RegexSetBuilder};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::error::Error;
 use std::fs::{DirEntry, File, read_dir};
-use std::io::BufReader;
+use std::io::{self, BufReader};
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
+use std::time::{Duration, Instant, SystemTime};
 
 pub trait EnumFromArgs {
     fn enum_from_args(observation_name: &str, arguments: Vec<String>) -> Self;
@@ -98,15 +101,43 @@ impl ObservationMapping {
     }
 }
 
+const HOT_RELOAD_INTERVAL: Duration = Duration::from_secs(1);
+
+struct HotReload {
+    dir: String,
+    snapshot: HashMap<PathBuf, SystemTime>,
+    last_check: Instant,
+}
+
 pub struct ObservationParser<O> {
     mappings: Vec<ObservationMapping>,
     pub regexes: Vec<Regex>,
     // regex_set: RegexSet,
     observation_creator: fn(&String, Vec<String>) -> O,
+    hot_reload: Option<HotReload>,
 }
 
 lazy_static! {
     pub static ref BENCHMARKS: Mutex<Vec<u128>> = Mutex::new(vec![]);
+}
+
+fn snapshot_dir(dir: &Path) -> io::Result<HashMap<PathBuf, SystemTime>> {
+    let mut snapshot = HashMap::new();
+    snapshot_into(dir, &mut snapshot)?;
+    Ok(snapshot)
+}
+
+fn snapshot_into(dir: &Path, snapshot: &mut HashMap<PathBuf, SystemTime>) -> io::Result<()> {
+    for entry in read_dir(dir)? {
+        let entry = entry?;
+        let metadata = entry.metadata()?;
+        if metadata.is_dir() {
+            snapshot_into(&entry.path(), snapshot)?;
+        } else {
+            snapshot.insert(entry.path(), metadata.modified()?);
+        }
+    }
+    Ok(())
 }
 
 #[derive(Debug)]
@@ -144,6 +175,7 @@ where
             // regex_set,
             mappings,
             observation_creator,
+            hot_reload: None,
         }
     }
 
@@ -209,8 +241,8 @@ where
         mappings: &mut Vec<ObservationMapping>,
     ) -> Result<(), Box<dyn Error>> {
         if entry.file_type()?.is_dir() {
-            for path in read_dir(entry.path()).unwrap() {
-                Self::read_mappings(path.unwrap(), mappings)?;
+            for path in read_dir(entry.path())? {
+                Self::read_mappings(path?, mappings)?;
             }
         } else {
             let path_ = entry.path();
@@ -220,15 +252,76 @@ where
         Ok(())
     }
 
+    fn load_mappings(dir: &str) -> Result<Vec<ObservationMapping>, Box<dyn Error>> {
+        let mut mappings = Vec::new();
+        for path in read_dir(dir)? {
+            Self::read_mappings(path?, &mut mappings)?;
+        }
+        Ok(mappings)
+    }
+
+    fn load_compiled(dir: &str) -> Result<(Vec<ObservationMapping>, Vec<Regex>), Box<dyn Error>> {
+        let mappings = Self::load_mappings(dir)?;
+        let regexes = mappings
+            .iter()
+            .map(|mapping| Regex::new(&mapping.regex))
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok((mappings, regexes))
+    }
+
     pub fn new_from_directory(
         dir: String,
         observation_creator: fn(&String, Vec<String>) -> O,
     ) -> Result<Self, Box<dyn Error>> {
-        let mut mappings = Vec::new();
-        for path in read_dir(dir).unwrap() {
-            Self::read_mappings(path.unwrap(), &mut mappings)?;
-        }
+        let mappings = Self::load_mappings(&dir)?;
         Ok(ObservationParser::new(mappings, observation_creator))
+    }
+
+    /// Like `new_from_directory`, but `reload_if_changed` reloads triggers when the directory changes.
+    pub fn new_hot_reloading(
+        dir: String,
+        observation_creator: fn(&String, Vec<String>) -> O,
+    ) -> Result<Self, Box<dyn Error>> {
+        let snapshot = snapshot_dir(Path::new(&dir))?;
+        let mut parser = Self::new_from_directory(dir.clone(), observation_creator)?;
+        parser.hot_reload = Some(HotReload {
+            dir,
+            snapshot,
+            last_check: Instant::now(),
+        });
+        Ok(parser)
+    }
+
+    /// Checks the watched directory at most once per second. Returns true if triggers were reloaded.
+    /// A failed reload keeps the previous triggers.
+    pub fn reload_if_changed(&mut self) -> bool {
+        let Some(hot) = self.hot_reload.as_mut() else {
+            return false;
+        };
+        if hot.last_check.elapsed() < HOT_RELOAD_INTERVAL {
+            return false;
+        }
+        hot.last_check = Instant::now();
+        let Ok(current) = snapshot_dir(Path::new(&hot.dir)) else {
+            return false;
+        };
+        if current == hot.snapshot {
+            return false;
+        }
+        hot.snapshot = current;
+        let dir = hot.dir.clone();
+        match Self::load_compiled(&dir) {
+            Ok((mappings, regexes)) => {
+                self.mappings = mappings;
+                self.regexes = regexes;
+                log::info!("Reloaded triggers from {}", dir);
+                true
+            }
+            Err(err) => {
+                log::error!("Failed to reload triggers from {}: {}", dir, err);
+                false
+            }
+        }
     }
 
     pub fn write(&self, path: String) {
