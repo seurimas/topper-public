@@ -254,6 +254,25 @@ pub trait TopperHandler<BS> {
     }
 }
 
+/// Exits the process after sending `die` once `target/topper-control/shutdown` exists.
+// Assumes the executable lives in target/<profile>/.
+pub fn watch_for_build_shutdown() {
+    let Some(shutdown_file) = std::env::current_exe().ok().and_then(|exe| {
+        exe.parent()?
+            .parent()
+            .map(|target| target.join("topper-control").join("shutdown"))
+    }) else {
+        return;
+    };
+    thread::spawn(move || loop {
+        if shutdown_file.exists() {
+            send_response(&TopperResponse::<()>::die());
+            std::process::exit(0);
+        }
+        thread::sleep(Duration::from_millis(200));
+    });
+}
+
 pub fn send_response<BS: Serialize>(response: &TopperResponse<BS>) {
     println!(
         "{}",

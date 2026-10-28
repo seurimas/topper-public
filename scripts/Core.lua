@@ -83,12 +83,59 @@ function tagged(name, value)
 end
 
 -- ============================================================
+-- GMCP snapshot
+-- ============================================================
+
+-- Resolves "gmcp.Char.Vitals" to gmcp.Char.Vitals by walking the dotted path.
+function gmcp_payload(name)
+  local node = gmcp
+  for part in string.gmatch(name, "[^%.]+") do
+    if part ~= "gmcp" then
+      if type(node) ~= "table" then
+        return nil
+      end
+      node = node[part]
+    end
+  end
+  return node
+end
+
+-- Sends the current value of each game-declared snapshot event (topper_snapshot_gmcp_events)
+-- so the backend starts with GMCP state that arrived before it was launched.
+function send_gmcp_snapshot()
+  if topper_snapshot_gmcp_events == nil or topper_now == nil then
+    return
+  end
+  local items = {}
+  for _, event in ipairs(topper_snapshot_gmcp_events) do
+    local payload = gmcp_payload(event)
+    if payload ~= nil then
+      items[#items + 1] = { event, payload }
+    end
+  end
+  if #items == 0 then
+    return
+  end
+  local name = gmcp_payload("gmcp.Char.Name")
+  local time_slice = {}
+  time_slice["prompt"] = "Promptless"
+  time_slice["observations"] = {}
+  time_slice["lines"] = {}
+  time_slice["gmcp"] = items
+  time_slice["time"] = math.floor(os.clock() * 100) - topper_now
+  time_slice["me"] = name and name.name or ""
+  write_topper(tagged("TimeSlice", time_slice))
+end
+
+-- ============================================================
 -- Backend process lifecycle
 -- ============================================================
 
 function start_topper(TOPPER_VERSION)
   if topper == nil or not topper.isRunning() then
     topper_now = math.floor(os.clock() * 100)
+    topper_version = TOPPER_VERSION
+    topper_user_stopped = false
     feeds = {}
     last_feed_value = {}
     feeds["predict"] = true
@@ -102,6 +149,7 @@ function start_topper(TOPPER_VERSION)
       HOME_DIR .. [[git\topper\topper-]] .. TOPPER_VERSION .. [[\behavior_trees]],
       HOME_DIR .. [[git\topper\topper-]] .. TOPPER_VERSION .. [[\aff_stacks]],
       HOME_DIR .. [[git\topper\topper-explainer\my_logs\]])
+    send_gmcp_snapshot()
   else
     echo("Topper already running!\n")
   end
@@ -110,6 +158,7 @@ end
 function stop_topper()
   if topper ~= nil then
     if topper.isRunning() then
+      topper_user_stopped = true
       write_topper("Kill")
     end
   end
@@ -118,8 +167,31 @@ end
 function force_stop_topper()
   if topper ~= nil then
     if topper.isRunning() then
+      topper_user_stopped = true
       topper.close()
     end
+  end
+end
+
+-- ============================================================
+-- Build-triggered restart
+-- ============================================================
+
+-- Shared with topper-duris-mudlet/build.ps1 and watch_for_build_shutdown().
+local TOPPER_CONTROL_DIR = HOME_DIR .. [[git\topper\target\topper-control\]]
+
+function wait_for_build_then_restart()
+  tempTimer(1, check_build_then_restart)
+end
+
+function check_build_then_restart()
+  local done = io.open(TOPPER_CONTROL_DIR .. "build-complete", "r")
+  if done then
+    done:close()
+    os.remove(TOPPER_CONTROL_DIR .. "build-complete")
+    start_topper(topper_version)
+  else
+    wait_for_build_then_restart()
   end
 end
 
@@ -169,6 +241,9 @@ function handle_topper(value)
   end
   if response["error"] ~= nil then
     cecho("<red>Topper: " .. response["error"])
+  end
+  if response["die"] == true and not topper_user_stopped then
+    wait_for_build_then_restart()
   end
   if os.clock() - start > 0.02 then
     cecho("<magenta>\\<--" .. (os.clock() - start) .. "--\x3E")
@@ -425,4 +500,38 @@ local function install_topper_core_triggers()
   registerAnonymousEventHandler("sysDataSendRequest", "watch_data")
 end
 
+-- ============================================================
+-- Named aliases (Topper group)
+-- ============================================================
+
+-- Registry of user-facing commands, rebuilt on each install so reloads don't duplicate entries.
+local topper_commands = {}
+
+-- Creates the named alias if missing and records it for the `topper` listing.
+function register_topper_command(name, pattern, code, usage, description)
+  topper_commands[#topper_commands + 1] = { usage = usage, description = description }
+  if exists(name, "alias") == 0 then
+    permAlias(name, "Topper", pattern, code)
+  end
+end
+
+function list_topper_commands()
+  echo("Topper commands:\n")
+  for _, command in ipairs(topper_commands) do
+    echo(string.format("  %-12s %s\n", command.usage, command.description))
+  end
+end
+
+local function install_topper_core_aliases()
+  if exists("Topper", "alias") == 0 then
+    permGroup("Topper", "alias")
+  end
+  topper_commands = {}
+  register_topper_command("List", "^topper$", "list_topper_commands()", "topper", "List known topper commands")
+  register_topper_command("Startup", "^topper on$", "start_topper(topper_version)", "topper on", "Start topper")
+  register_topper_command("Shutdown", "^topper off$", "stop_topper()", "topper off", "Stop topper")
+  register_topper_command("Debug", "^tdebug$", "request_module('core', 'debug')", "tdebug", "Toggle backend debug mode")
+end
+
 install_topper_core_triggers()
+install_topper_core_aliases()

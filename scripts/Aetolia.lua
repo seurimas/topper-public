@@ -176,6 +176,15 @@ end
 
 install_aetolia_gmcp_handlers()
 
+-- Sent in one TimeSlice when topper starts (see send_gmcp_snapshot in Core.lua).
+topper_snapshot_gmcp_events = {
+  "gmcp.Char.Vitals",
+  "gmcp.Char.Status",
+  "gmcp.Room.Info",
+  "gmcp.Room.Players",
+  "gmcp.Char.Items.List",
+}
+
 -- ============================================================
 -- Aetolia prompt stats
 -- ============================================================

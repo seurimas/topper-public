@@ -23,12 +23,14 @@ use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
 use topper_core_mudlet::topper::Topper;
 use topper_core_mudlet::topper::telnet::proxy;
+use topper_core_mudlet::topper::watch_for_build_shutdown;
 
 use crate::topper::AetTopper;
 use crate::topper::battle_stats::BattleStats;
 mod topper;
 
 fn main() {
+    watch_for_build_shutdown();
     // dummy_dstab_simulation();
     // echo_time_slice();
 

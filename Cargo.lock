@@ -5385,6 +5385,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "topper-duris-helpers"
+version = "0.1.0"
+dependencies = [
+ "postcard",
+ "serde_json",
+ "sled",
+ "topper-duris",
+]
+
+[[package]]
 name = "topper-duris-mudlet"
 version = "0.1.0"
 dependencies = [
