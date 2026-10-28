@@ -223,6 +223,9 @@ end
 -- Game modules register handlers here to consume passive feeds instead of echoing them.
 topper_passive_handlers = topper_passive_handlers or {}
 
+-- Game modules register handlers here to consume structured data values from the backend.
+topper_data_handlers = topper_data_handlers or {}
+
 function handle_topper(value)
   local start = os.clock()
   if string.byte(value) ~= string.byte("{") then
@@ -258,6 +261,14 @@ function handle_topper(value)
           echo("Feed " .. feed .. ": " .. value)
         end
         last_feed_value[feed] = value
+      end
+    end
+  end
+  if response["data"] ~= nil then
+    for key, value in pairs(response["data"]) do
+      local handler = topper_data_handlers[key]
+      if handler then
+        handler(value)
       end
     end
   end

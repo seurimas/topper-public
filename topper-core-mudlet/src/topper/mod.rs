@@ -10,7 +10,7 @@ pub mod telnet;
 pub mod timeline;
 use log::info;
 use serde::{Deserialize, Serialize};
-use serde_json::from_str;
+use serde_json::{from_str, Value};
 use std::collections::HashMap;
 use std::io;
 use std::sync::mpsc::Sender;
@@ -45,6 +45,7 @@ pub struct TopperResponse<BS> {
     pub battle_stats: Option<BS>,
     pub error: Option<String>,
     pub passive: HashMap<String, String>,
+    pub data: HashMap<String, Value>,
     pub die: bool,
 }
 
@@ -117,11 +118,14 @@ impl<BS> TopperResponse<BS> {
                 passive.insert(key, new_value);
             }
         }
+        let mut data = self.data;
+        data.extend(next.data);
         TopperResponse {
             qeb: self.qeb.or(next.qeb),
             battle_stats: self.battle_stats.or(next.battle_stats),
             error: self.error.or(next.error),
             passive,
+            data,
             die: self.die || next.die,
         }
     }
@@ -131,6 +135,7 @@ impl<BS> TopperResponse<BS> {
             battle_stats: Some(battle_stats),
             error: None,
             passive: HashMap::new(),
+            data: HashMap::new(),
             die: false,
         }
     }
@@ -140,6 +145,7 @@ impl<BS> TopperResponse<BS> {
             battle_stats: None,
             error: None,
             passive: HashMap::new(),
+            data: HashMap::new(),
             die: false,
         }
     }
@@ -149,6 +155,7 @@ impl<BS> TopperResponse<BS> {
             battle_stats: None,
             error: Some(message),
             passive: HashMap::new(),
+            data: HashMap::new(),
             die: false,
         }
     }
@@ -158,6 +165,7 @@ impl<BS> TopperResponse<BS> {
             battle_stats: None,
             error: None,
             passive: HashMap::new(),
+            data: HashMap::new(),
             die: false,
         }
     }
@@ -169,6 +177,19 @@ impl<BS> TopperResponse<BS> {
             battle_stats: None,
             error: None,
             passive,
+            data: HashMap::new(),
+            die: false,
+        }
+    }
+    pub fn data(name: String, value: Value) -> TopperResponse<BS> {
+        let mut data = HashMap::new();
+        data.insert(name, value);
+        TopperResponse {
+            qeb: None,
+            battle_stats: None,
+            error: None,
+            passive: HashMap::new(),
+            data,
             die: false,
         }
     }
@@ -178,6 +199,7 @@ impl<BS> TopperResponse<BS> {
             battle_stats: None,
             error: None,
             passive: HashMap::new(),
+            data: HashMap::new(),
             die: true,
         }
     }

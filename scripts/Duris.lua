@@ -67,9 +67,9 @@ topper_snapshot_gmcp_events = {
 -- Map zone load
 -- ============================================================
 
--- The backend sends each loaded zone as a JSON string in the map.zone_data passive.
-topper_passive_handlers = topper_passive_handlers or {}
-topper_passive_handlers["map.zone_data"] = function(value)
+-- The backend sends each loaded zone as a table in the map.zone_data data entry.
+topper_data_handlers = topper_data_handlers or {}
+topper_data_handlers["map.zone_data"] = function(value)
   if duris_load_zone == nil then
     cecho("<red>Map: Duris_Mapper.lua is not loaded; zone data dropped\n")
     return
@@ -77,16 +77,16 @@ topper_passive_handlers["map.zone_data"] = function(value)
   duris_load_zone(value)
 end
 
--- The backend sends the current room's mobs as JSON in the mobs.room passive.
-topper_passive_handlers["mobs.room"] = function(value)
+-- The backend sends the current room's mobs as a table in the mobs.room data entry.
+topper_data_handlers["mobs.room"] = function(value)
   if duris_show_mobs == nil then
     return
   end
   duris_show_mobs(value)
 end
 
--- The backend sends the overland map (vnum 0) as colored cells in the map.wilderness passive.
-topper_passive_handlers["map.wilderness"] = function(value)
+-- The backend sends the overland map (vnum 0) as colored cells in the map.wilderness data entry.
+topper_data_handlers["map.wilderness"] = function(value)
   if duris_show_wilderness == nil then
     return
   end

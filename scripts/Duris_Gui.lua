@@ -10,6 +10,8 @@ local COMPASS_HEIGHT = 144
 local COMPASS_CELL = 48
 local COMPASS_ON_STYLE = [[background-color: rgb(60,60,90); border-radius: 4px; margin: 1px;]]
 local COMPASS_OFF_STYLE = [[background-color: rgb(45,45,45); color: rgb(110,110,110); border-radius: 4px; margin: 1px;]]
+local OVERLAND_BASE_FONT = 10
+local OVERLAND_MAX_FONT = 14
 
 duris_gui = {}
 local gui = duris_gui
@@ -140,6 +142,7 @@ local function build_right_panel()
     x = 0, y = 0,
     width = "100%", height = "100%",
   }, gui.mapHolder)
+  setFontSize(gui.overland.name, OVERLAND_BASE_FONT)
   gui.overland:hide()
 end
 
@@ -259,15 +262,42 @@ function duris_select_tab(name)
   select_tab(name)
 end
 
--- Draws the overland map from a map.wilderness payload, one colored cell at a time.
+-- Scales the console font so a cols x rows grid fits; returns the resulting cell size in pixels.
+local function fit_overland_font(console, cols, rows)
+  setFontSize(console.name, OVERLAND_BASE_FONT)
+  local cw, ch = calcFontSize(console.name)
+  local scale = math.min(console:get_width() / (cols * cw), console:get_height() / (rows * ch))
+  setFontSize(console.name, math.max(4, math.min(OVERLAND_MAX_FONT, math.floor(OVERLAND_BASE_FONT * scale))))
+  return calcFontSize(console.name)
+end
+
+-- Draws the overland map from a map.wilderness payload, fitted to the panel and centered.
 local function render_overland()
   local console = gui.overland
   local map = gui.wildernessMap
-  if console == nil or map == nil then
+  if console == nil or map == nil or map.rows == nil or #map.rows == 0 then
     return
   end
+  local cols, rows = 0, #map.rows
+  for _, row in ipairs(map.rows) do
+    cols = math.max(cols, #row)
+  end
+  if cols == 0 then
+    return
+  end
+  local cw, ch = fit_overland_font(console, cols, rows)
+  local visibleCols = math.floor(console:get_width() / cw)
+  local visibleRows = math.floor(console:get_height() / ch)
+  local topPad = math.max(0, math.floor((visibleRows - rows) / 2))
+  local leftPad = string.rep(" ", math.max(0, math.floor((visibleCols - cols) / 2)))
+
+  console:setWrap(visibleCols)
   console:clear()
-  for _, row in ipairs(map.rows or {}) do
+  for _ = 1, topPad do
+    echo(console.name, "\n")
+  end
+  for _, row in ipairs(map.rows) do
+    echo(console.name, leftPad)
     for _, cell in ipairs(row) do
       local fg = cell.fg or {200, 200, 200}
       local bg = cell.bg or {0, 0, 0}
@@ -282,13 +312,19 @@ end
 
 -- Stores the latest overland map and redraws it if it is on screen.
 function duris_show_wilderness(payload)
-  local ok, decoded = pcall(function() return JSON:decode(payload) end)
-  if not ok or type(decoded) ~= "table" then
+  if type(payload) ~= "table" then
     return
   end
-  gui.wildernessMap = decoded
+  gui.wildernessMap = payload
   if gui.overlandOn then
     render_overland()
+  end
+end
+
+-- Re-fits the overland map when the Mudlet window changes size.
+function duris_on_resize()
+  if gui.overlandOn then
+    tempTimer(0, render_overland)
   end
 end
 
@@ -306,7 +342,7 @@ function duris_update_overland()
   if on then
     gui.map:hide()
     gui.overland:show()
-    render_overland()
+    tempTimer(0, render_overland)
   else
     gui.overland:hide()
     gui.map:show()
@@ -315,13 +351,10 @@ end
 
 -- Redraws the Mobs tab from a mobs.room JSON payload: level, then name.
 function duris_show_mobs(payload)
-  if gui.mobs == nil then
+  if gui.mobs == nil or type(payload) ~= "table" then
     return
   end
-  local ok, decoded = pcall(function() return JSON:decode(payload) end)
-  if not ok or type(decoded) ~= "table" then
-    return
-  end
+  local decoded = payload
   gui.mobs:clear()
   if decoded.mobs == nil or #decoded.mobs == 0 then
     gui.mobs:cecho("<dim_grey>No mobs in this room.\n")
@@ -351,3 +384,4 @@ registerAnonymousEventHandler("gmcp.Comm", "duris_on_comm")
 registerAnonymousEventHandler("gmcp.Char.Vitals", "duris_on_vitals")
 registerAnonymousEventHandler("gmcp.Room.Info", "duris_update_compass")
 registerAnonymousEventHandler("gmcp.Room.Info", "duris_update_overland")
+registerAnonymousEventHandler("sysWindowResizeEvent", "duris_on_resize")
