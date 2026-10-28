@@ -127,6 +127,9 @@ end
 -- Aetolia GMCP schema
 -- ============================================================
 
+GMCP_VITALS_PATH = "gmcp.Char.Vitals"
+GMCP_NAME_PATH = "gmcp.Char.Name"
+
 function handle_gmcp(name)
   if topper_gmcp == nil then
     topper_gmcp = {}

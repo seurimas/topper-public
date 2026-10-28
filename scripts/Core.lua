@@ -86,6 +86,10 @@ end
 -- GMCP snapshot
 -- ============================================================
 
+-- Each game module sets these to its own GMCP paths (see Aetolia.lua, Duris.lua).
+GMCP_VITALS_PATH = GMCP_VITALS_PATH or "gmcp.Char.Vitals"
+GMCP_NAME_PATH = GMCP_NAME_PATH or "gmcp.Char.Name"
+
 -- Resolves "gmcp.Char.Vitals" to gmcp.Char.Vitals by walking the dotted path.
 function gmcp_payload(name)
   local node = gmcp
@@ -98,6 +102,19 @@ function gmcp_payload(name)
     end
   end
   return node
+end
+
+function topper_vitals()
+  return gmcp_payload(GMCP_VITALS_PATH)
+end
+
+-- The player's name, read from the "name" field of the configured GMCP path.
+function topper_me()
+  local who = gmcp_payload(GMCP_NAME_PATH)
+  if type(who) == "table" and who.name ~= nil then
+    return who.name
+  end
+  return ""
 end
 
 -- Sends the current value of each game-declared snapshot event (topper_snapshot_gmcp_events)
@@ -116,14 +133,13 @@ function send_gmcp_snapshot()
   if #items == 0 then
     return
   end
-  local name = gmcp_payload("gmcp.Char.Name")
   local time_slice = {}
   time_slice["prompt"] = "Promptless"
   time_slice["observations"] = {}
   time_slice["lines"] = {}
   time_slice["gmcp"] = items
   time_slice["time"] = math.floor(os.clock() * 100) - topper_now
-  time_slice["me"] = name and name.name or ""
+  time_slice["me"] = topper_me()
   write_topper(tagged("TimeSlice", time_slice))
 end
 
@@ -204,6 +220,9 @@ function read_topper(value)
   handle_topper(value)
 end
 
+-- Game modules register handlers here to consume passive feeds instead of echoing them.
+topper_passive_handlers = topper_passive_handlers or {}
+
 function handle_topper(value)
   local start = os.clock()
   if string.byte(value) ~= string.byte("{") then
@@ -226,7 +245,10 @@ function handle_topper(value)
   end
   if response["passive"] ~= nil then
     for feed, value in pairs(response["passive"]) do
-      if feeds[feed] then
+      local handler = topper_passive_handlers[feed]
+      if handler then
+        handler(value)
+      elseif feeds[feed] then
         if value ~= "" then
           expandAlias(value)
         end
@@ -254,10 +276,26 @@ end
 -- Outbound: encoding and sending messages to the backend
 -- ============================================================
 
+-- JSON null arrives from GMCP as userdata, which JSON:encode cannot serialize.
+local function topper_sanitize(value)
+  local kind = type(value)
+  if kind == "userdata" then
+    return "None"
+  elseif kind == "table" then
+    local copy = {}
+    for k, v in pairs(value) do
+      copy[k] = topper_sanitize(v)
+    end
+    return copy
+  end
+  return value
+end
+
 function write_topper(data)
   if topper ~= nil then
     if topper.isRunning() then
-      local json = JSON:encode(data):gsub([["None"]], "null")
+      local json = JSON:encode(topper_sanitize(data)):gsub([["None"]], "null")
+      echo("Sending: " .. json)
       topper.send(json .. "\n")
     end
   end
@@ -285,10 +323,10 @@ end
 
 function observe(type, first, second)
   if first == "You" or first == "you" then
-    first = gmcp.Char.Name.name
+    first = topper_me()
   end
   if second == "You" or second == "you" then
-    second = gmcp.Char.Name.name
+    second = topper_me()
   end
   if second ~= nil then
     local observation = {}
@@ -304,7 +342,7 @@ end
 
 local function de_you(who)
   if who == "You" or who == "you" or who == "Your" or who == "your" then
-    who = gmcp.Char.Name.name
+    who = topper_me()
   elseif who == nil then
     who = ""
   end
@@ -392,7 +430,7 @@ function observe_send(command)
   time_slice["lines"] = {}
   time_slice["gmcp"] = {}
   time_slice["time"] = math.floor(os.clock() * 100) - topper_now
-  time_slice["me"] = gmcp.Char.Name.name
+  time_slice["me"] = topper_me()
   write_topper(tagged("TimeSlice", time_slice))
 end
 
@@ -417,7 +455,7 @@ function build_time_slice(prompt)
   time_slice["lines"] = topper_lines or {}
   time_slice["gmcp"] = topper_gmcp or {}
   time_slice["time"] = math.floor(os.clock() * 100) - topper_now
-  time_slice["me"] = gmcp.Char.Name.name
+  time_slice["me"] = topper_me()
   return time_slice
 end
 
@@ -478,9 +516,7 @@ end
 -- accumulated TimeSlice to the backend (equivalent to the exported
 -- "Prompt Found" trigger).
 function topper_on_prompt()
-  if gmcp.Char ~= nil then
-    send_time_slice(gmcp.Char.Vitals)
-  end
+  send_time_slice(topper_vitals())
 end
 
 local function install_topper_core_triggers()
