@@ -5396,6 +5396,7 @@ name = "topper-duris-helpers"
 version = "0.1.0"
 dependencies = [
  "postcard",
+ "serde",
  "serde_json",
  "sled",
  "topper-duris",

@@ -17,11 +17,12 @@ local function build_bottom_bars()
     width = "100%", height = BOTTOM_BAR_HEIGHT,
   })
   local colors = {
-    health  = {200, 30, 30},
-    mana    = {30, 90, 220},
-    stamina = {220, 200, 30},
+    health   = {200, 30, 30},
+    mana     = {30, 90, 220},
+    movement = {220, 200, 30},
+    exp      = {160, 80, 220},
   }
-  local order = {"health", "mana", "stamina"}
+  local order = {"health", "mana", "movement", "exp"}
   gui.bars = {}
   for i, key in ipairs(order) do
     local gauge = Geyser.Gauge:new({
@@ -36,6 +37,30 @@ local function build_bottom_bars()
   gui.bottomBar = bar
 end
 
+-- Updates a bar's fill and label; max <= 0 leaves the bar empty.
+local function set_bar(key, current, max, label)
+  local gauge = gui.bars and gui.bars[key]
+  if gauge == nil or current == nil or max == nil or max <= 0 then
+    return
+  end
+  gauge:setValue(current, max, label .. ": " .. current .. "/" .. max)
+end
+
+-- Redraws the bottom bars from a gmcp.Char.Vitals table. Exp shows progress toward the next level.
+function duris_on_vitals()
+  local v = gmcp and gmcp.Char and gmcp.Char.Vitals
+  if type(v) ~= "table" then
+    return
+  end
+  set_bar("health", tonumber(v.hp), tonumber(v.maxHp), "HP")
+  set_bar("mana", tonumber(v.mana), tonumber(v.maxMana), "Mana")
+  set_bar("movement", tonumber(v.move), tonumber(v.maxMove), "Movement")
+  local exp, tnl = tonumber(v.exp), tonumber(v.tnl)
+  if exp ~= nil and tnl ~= nil then
+    set_bar("exp", exp, exp + tnl, "Exp")
+  end
+end
+
 local function build_comms()
   gui.comms = Geyser.MiniConsole:new({
     name = "DurisComms",
@@ -43,6 +68,14 @@ local function build_comms()
     width = SIDE_WIDTH, height = "100%",
   }, gui.left)
   gui.comms:setWrap(60)
+end
+
+local function build_mobs_console()
+  gui.mobs = Geyser.MiniConsole:new({
+    name = "DurisMobs",
+    x = 0, y = 0,
+    width = "100%", height = "100%",
+  }, gui.tabPages["Mobs"])
 end
 
 local function select_tab(tab)
@@ -123,11 +156,33 @@ function duris_build_gui()
 
   build_comms()
   build_right_panel()
+  build_mobs_console()
   build_bottom_bars()
 end
 
 function duris_select_tab(name)
   select_tab(name)
+end
+
+-- Redraws the Mobs tab from a mobs.room JSON payload: level, then name.
+function duris_show_mobs(payload)
+  if gui.mobs == nil then
+    return
+  end
+  local ok, decoded = pcall(function() return JSON:decode(payload) end)
+  if not ok or type(decoded) ~= "table" then
+    return
+  end
+  gui.mobs:clear()
+  if decoded.mobs == nil or #decoded.mobs == 0 then
+    gui.mobs:cecho("<dim_grey>No mobs in this room.\n")
+    return
+  end
+  for _, mob in ipairs(decoded.mobs) do
+    local level = mob.level and tostring(mob.level) or "?"
+    local exp = mob.exp and tostring(mob.exp) or "?"
+    gui.mobs:cecho(string.format("<white>[%s (%s)] <reset>%s\n", level, exp, mob.name or "?"))
+  end
 end
 
 -- Routes each gmcp.Comm event to the comms console.
@@ -144,3 +199,4 @@ end
 
 duris_build_gui()
 registerAnonymousEventHandler("gmcp.Comm", "duris_on_comm")
+registerAnonymousEventHandler("gmcp.Char.Vitals", "duris_on_vitals")

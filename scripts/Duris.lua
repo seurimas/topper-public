@@ -77,6 +77,14 @@ topper_passive_handlers["map.zone_data"] = function(value)
   duris_load_zone(value)
 end
 
+-- The backend sends the current room's mobs as JSON in the mobs.room passive.
+topper_passive_handlers["mobs.room"] = function(value)
+  if duris_show_mobs == nil then
+    return
+  end
+  duris_show_mobs(value)
+end
+
 -- ============================================================
 -- Zone reload command
 -- ============================================================

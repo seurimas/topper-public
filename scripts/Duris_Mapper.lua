@@ -39,6 +39,61 @@ local function decode_payload(payload)
   return payload
 end
 
+local syncing_room = false
+local last_synced_vnum = nil
+
+-- Moves the Mudlet player to the room whose id is the game vnum.
+-- The guard stops sysManualLocationSetEvent from re-entering map.find_me.
+local function sync_player_room(vnum)
+  local id = tonumber(vnum)
+  if id == nil or not roomExists(id) then
+    return false
+  end
+  if syncing_room then
+    return true
+  end
+  syncing_room = true
+  local ok, err = pcall(function()
+    if id ~= last_synced_vnum then
+      raiseEvent("sysManualLocationSetEvent", id)
+      centerview(id)
+      last_synced_vnum = id
+    end
+  end)
+  syncing_room = false
+  if not ok then
+    error(err, 0)
+  end
+  return true
+end
+
+-- Fires on every Room.Info so the position follows the game, not name matching.
+function duris_sync_player_room()
+  local info = gmcp and gmcp.Room and gmcp.Room.Info
+  if info then
+    sync_player_room(info.num)
+  end
+end
+registerAnonymousEventHandler("gmcp.Room.Info", "duris_sync_player_room")
+
+-- Keeps the generic mapper's find_me so it can be used when GMCP has no vnum.
+map = map or {}
+duris_generic_find_me = duris_generic_find_me or map.find_me
+
+-- Replaces the generic name-based room lookup whenever GMCP reports a vnum.
+function map.find_me(name, exits, dir, manual)
+  local info = gmcp and gmcp.Room and gmcp.Room.Info
+  if info and info.num ~= nil then
+    if not sync_player_room(info.num) then
+      cecho("<red>Map: vnum " .. tostring(info.num) .. " is not in the loaded map\n")
+    end
+    return
+  end
+  if duris_generic_find_me then
+    return duris_generic_find_me(name, exits, dir, manual)
+  end
+end
+
 -- Loads a zone map, replacing any existing area with the same name.
 function duris_load_zone(payload)
   local data, err = decode_payload(payload)
@@ -54,16 +109,29 @@ function duris_load_zone(payload)
     area_name = clean_name(data.info.name)
   end
 
+  -- Rooms use the vnum as their Mudlet id, so every id must be numeric and free.
   local existing = getAreaTable()[area_name]
+  for _, node in ipairs(nodes) do
+    local room_id = tonumber(node.id)
+    if room_id == nil then
+      cecho("<red>Map: node id '" .. tostring(node.id) .. "' is not a vnum\n")
+      return false
+    end
+    if roomExists(room_id) and getRoomArea(room_id) ~= existing then
+      cecho("<red>Map: vnum " .. room_id .. " already exists in another area\n")
+      return false
+    end
+  end
   if existing then
     deleteArea(existing)
   end
+  last_synced_vnum = nil
   local area_id = addAreaName(area_name)
 
-  -- Create rooms; topper node id -> Mudlet room id.
+  -- Create rooms; topper node id -> Mudlet room id (the vnum).
   local room_by_node = {}
   for _, node in ipairs(nodes) do
-    local room_id = createRoomID()
+    local room_id = tonumber(node.id)
     room_by_node[node.id] = room_id
     addRoom(room_id, area_id)
     setRoomName(room_id, clean_name(node.name))
@@ -144,20 +212,8 @@ function duris_load_zone(payload)
     end
   end
 
-  local player_target
   local current_num = gmcp and gmcp.Room and gmcp.Room.Info and gmcp.Room.Info.num
-  if current_num ~= nil then
-    for _, node in ipairs(nodes) do
-      if tostring(node.id) == tostring(current_num) then
-        player_target = room_by_node[node.id]
-        break
-      end
-    end
-  end
-  if player_target then
-    setPlayerRoom(player_target)
-    centerview(player_target)
-  elseif #nodes > 0 then
+  if not sync_player_room(current_num) and #nodes > 0 then
     centerview(room_by_node[nodes[1].id])
   end
 
