@@ -123,6 +123,10 @@ function duris_load_zone(payload)
 
   -- Rooms use the vnum as their Mudlet id, so every id must be numeric and free.
   local existing = getAreaTable()[area_name]
+  if existing then
+    cecho("<grey>Map: " .. area_name .. " is already mapped, skipping\n")
+    return true
+  end
   for _, node in ipairs(nodes) do
     local room_id = tonumber(node.id)
     if room_id == nil then

@@ -6,6 +6,10 @@ local TAB_NAMES = {"Mobs", "Equip", "World Map"}
 local TAB_STYLE = [[background-color: rgb(40,40,40); border-radius: 6px; margin: 1px;]]
 local TAB_ACTIVE_STYLE = [[background-color: rgb(80,80,80); border-radius: 6px; margin: 1px;]]
 local TAB_BODY_STYLE = [[background-color: rgb(20,20,20);]]
+local COMPASS_HEIGHT = 144
+local COMPASS_CELL = 48
+local COMPASS_ON_STYLE = [[background-color: rgb(60,60,90); border-radius: 4px; margin: 1px;]]
+local COMPASS_OFF_STYLE = [[background-color: rgb(45,45,45); color: rgb(110,110,110); border-radius: 4px; margin: 1px;]]
 
 duris_gui = {}
 local gui = duris_gui
@@ -123,14 +127,104 @@ local function build_right_panel()
 
   gui.mapHolder = Geyser.Container:new({
     name = "DurisMapHolder",
-    x = 0, y = "50%",
-    width = "100%", height = "50%",
+    x = 0, y = "50%+" .. COMPASS_HEIGHT .. "px",
+    width = "100%", height = "50%-" .. COMPASS_HEIGHT .. "px",
   }, gui.right)
   gui.map = Geyser.Mapper:new({
     name = "DurisMapper",
     x = 0, y = 0,
     width = "100%", height = "100%",
   }, gui.mapHolder)
+  gui.overland = Geyser.MiniConsole:new({
+    name = "DurisOverland",
+    x = 0, y = 0,
+    width = "100%", height = "100%",
+  }, gui.mapHolder)
+  gui.overland:hide()
+end
+
+-- Returns true when the exit key is present in gmcp.Room.Info.exits (keyed table or list).
+local function exit_active(exits, key)
+  if type(exits) ~= "table" then
+    return false
+  end
+  if exits[key] ~= nil and exits[key] ~= false then
+    return true
+  end
+  for _, v in ipairs(exits) do
+    if v == key then
+      return true
+    end
+  end
+  return false
+end
+
+-- Each entry: key sent to the game, label text, and grid row/column (or a side slot).
+local COMPASS_GRID = {
+  {key = "nw", text = "NW", row = 1, col = 1},
+  {key = "n",  text = "N",  row = 1, col = 2},
+  {key = "ne", text = "NE", row = 1, col = 3},
+  {key = "w",  text = "W",  row = 2, col = 1},
+  {key = "e",  text = "E",  row = 2, col = 3},
+  {key = "sw", text = "SW", row = 3, col = 1},
+  {key = "s",  text = "S",  row = 3, col = 2},
+  {key = "se", text = "SE", row = 3, col = 3},
+}
+local COMPASS_SIDE = {
+  {key = "u", text = "Up",   y = 0},
+  {key = "d", text = "Down", y = COMPASS_HEIGHT / 2 + 2},
+}
+
+-- Click handler: sends the direction only when the exit is active.
+function duris_compass_move(key)
+  if gui.compassActive and gui.compassActive[key] then
+    send(key)
+  end
+end
+
+local function make_compass_button(entry, x, y, w, h)
+  local button = Geyser.Label:new({
+    name = "DurisCompass" .. entry.key:upper(),
+    x = x, y = y,
+    width = w, height = h,
+  }, gui.compass)
+  button:echo("<center>" .. entry.text)
+  button:setClickCallback("duris_compass_move", entry.key)
+  gui.compassButtons[entry.key] = button
+  return button
+end
+
+local function build_compass()
+  gui.compass = Geyser.Container:new({
+    name = "DurisCompass",
+    x = 0, y = "50%",
+    width = "100%", height = COMPASS_HEIGHT,
+  }, gui.right)
+  gui.compassButtons = {}
+  gui.compassActive = {}
+  for _, entry in ipairs(COMPASS_GRID) do
+    make_compass_button(entry, (entry.col - 1) * COMPASS_CELL, (entry.row - 1) * COMPASS_CELL,
+      COMPASS_CELL - 2, COMPASS_CELL - 2)
+  end
+  local sideX = 3 * COMPASS_CELL + 8
+  for _, entry in ipairs(COMPASS_SIDE) do
+    make_compass_button(entry, sideX, entry.y, 80, COMPASS_HEIGHT / 2 - 2)
+  end
+  duris_update_compass()
+end
+
+-- Greys out compass buttons whose exit is not in gmcp.Room.Info.exits.
+function duris_update_compass()
+  if gui.compassButtons == nil then
+    return
+  end
+  local info = gmcp and gmcp.Room and gmcp.Room.Info
+  local exits = info and info.exits
+  for key, button in pairs(gui.compassButtons) do
+    local active = exit_active(exits, key)
+    gui.compassActive[key] = active
+    button:setStyleSheet(active and COMPASS_ON_STYLE or COMPASS_OFF_STYLE)
+  end
 end
 
 function duris_build_gui()
@@ -156,12 +250,67 @@ function duris_build_gui()
 
   build_comms()
   build_right_panel()
+  build_compass()
   build_mobs_console()
   build_bottom_bars()
 end
 
 function duris_select_tab(name)
   select_tab(name)
+end
+
+-- Draws the overland map from a map.wilderness payload, one colored cell at a time.
+local function render_overland()
+  local console = gui.overland
+  local map = gui.wildernessMap
+  if console == nil or map == nil then
+    return
+  end
+  console:clear()
+  for _, row in ipairs(map.rows or {}) do
+    for _, cell in ipairs(row) do
+      local fg = cell.fg or {200, 200, 200}
+      local bg = cell.bg or {0, 0, 0}
+      setFgColor(console.name, fg[1], fg[2], fg[3])
+      setBgColor(console.name, bg[1], bg[2], bg[3])
+      echo(console.name, cell.ch)
+    end
+    echo(console.name, "\n")
+  end
+  resetFormat(console.name)
+end
+
+-- Stores the latest overland map and redraws it if it is on screen.
+function duris_show_wilderness(payload)
+  local ok, decoded = pcall(function() return JSON:decode(payload) end)
+  if not ok or type(decoded) ~= "table" then
+    return
+  end
+  gui.wildernessMap = decoded
+  if gui.overlandOn then
+    render_overland()
+  end
+end
+
+-- Swaps the mapper for the overland map while gmcp.Room.Info reports vnum 0.
+function duris_update_overland()
+  if gui.map == nil or gui.overland == nil then
+    return
+  end
+  local info = gmcp and gmcp.Room and gmcp.Room.Info
+  local on = info ~= nil and tonumber(info.num) == 0
+  if on == gui.overlandOn then
+    return
+  end
+  gui.overlandOn = on
+  if on then
+    gui.map:hide()
+    gui.overland:show()
+    render_overland()
+  else
+    gui.overland:hide()
+    gui.map:show()
+  end
 end
 
 -- Redraws the Mobs tab from a mobs.room JSON payload: level, then name.
@@ -200,3 +349,5 @@ end
 duris_build_gui()
 registerAnonymousEventHandler("gmcp.Comm", "duris_on_comm")
 registerAnonymousEventHandler("gmcp.Char.Vitals", "duris_on_vitals")
+registerAnonymousEventHandler("gmcp.Room.Info", "duris_update_compass")
+registerAnonymousEventHandler("gmcp.Room.Info", "duris_update_overland")

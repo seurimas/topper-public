@@ -85,6 +85,14 @@ topper_passive_handlers["mobs.room"] = function(value)
   duris_show_mobs(value)
 end
 
+-- The backend sends the overland map (vnum 0) as colored cells in the map.wilderness passive.
+topper_passive_handlers["map.wilderness"] = function(value)
+  if duris_show_wilderness == nil then
+    return
+  end
+  duris_show_wilderness(value)
+end
+
 -- ============================================================
 -- Zone reload command
 -- ============================================================
