@@ -295,7 +295,6 @@ function write_topper(data)
   if topper ~= nil then
     if topper.isRunning() then
       local json = JSON:encode(topper_sanitize(data)):gsub([["None"]], "null")
-      echo("Sending: " .. json)
       topper.send(json .. "\n")
     end
   end
