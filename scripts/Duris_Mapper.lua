@@ -84,6 +84,10 @@ duris_generic_find_me = duris_generic_find_me or map.find_me
 function map.find_me(name, exits, dir, manual)
   local info = gmcp and gmcp.Room and gmcp.Room.Info
   if info and info.num ~= nil then
+    -- Overworld rooms report vnum 0, which is never mapped.
+    if tonumber(info.num) == 0 then
+      return
+    end
     if not sync_player_room(info.num) then
       cecho("<red>Map: vnum " .. tostring(info.num) .. " is not in the loaded map\n")
     end
@@ -94,14 +98,22 @@ function map.find_me(name, exits, dir, manual)
   end
 end
 
+local function report_phase(label, since)
+  local now = os.clock()
+  cecho(string.format("<grey>Map timing: %s %.1f ms\n", label, (now - since) * 1000))
+  return now
+end
+
 -- Loads a zone map, replacing any existing area with the same name.
 function duris_load_zone(payload)
+  local t = os.clock()
   local data, err = decode_payload(payload)
   if data == nil then
     cecho("<red>Map: " .. err .. "\n")
     return false
   end
 
+  t = report_phase("decode", t)
   local nodes = data.map.nodes or {}
   local edges = data.map.edges or {}
   local area_name = "Zone " .. tostring(data.zone_id or "?")
@@ -122,11 +134,16 @@ function duris_load_zone(payload)
       return false
     end
   end
+  t = report_phase("validate", t)
+  if duris_gui and duris_gui.mapHolder then
+    duris_gui.mapHolder:hide()
+  end
   if existing then
     deleteArea(existing)
   end
   last_synced_vnum = nil
   local area_id = addAreaName(area_name)
+  t = report_phase("delete old area and create area", t)
 
   -- Create rooms; topper node id -> Mudlet room id (the vnum).
   local room_by_node = {}
@@ -141,6 +158,7 @@ function duris_load_zone(payload)
       setRoomUserData(room_id, "topper_sector", tostring(node.sectorType))
     end
   end
+  t = report_phase("create rooms", t)
 
   -- Build an undirected coordinate graph from the directed edges.
   local adjacency = {}
@@ -196,10 +214,12 @@ function duris_load_zone(payload)
     end
   end
 
+  t = report_phase("build adjacency and BFS layout", t)
   for _, node in ipairs(nodes) do
     local c = coords[node.id]
     setRoomCoordinates(room_by_node[node.id], c[1], c[2], c[3])
   end
+  t = report_phase("set coordinates", t)
 
   -- Exits are set from the original directed edges so one-way exits stay one-way.
   local skipped = 0
@@ -211,6 +231,7 @@ function duris_load_zone(payload)
       skipped = skipped + 1
     end
   end
+  t = report_phase("set exits", t)
 
   local current_num = gmcp and gmcp.Room and gmcp.Room.Info and gmcp.Room.Info.num
   if not sync_player_room(current_num) and #nodes > 0 then
@@ -218,7 +239,12 @@ function duris_load_zone(payload)
   end
 
   updateMap()
+  t = report_phase("updateMap", t)
   saveMap()
+  t = report_phase("saveMap", t)
+  if duris_gui and duris_gui.mapHolder then
+    duris_gui.mapHolder:show()
+  end
 
   cecho(string.format("<green>Map: loaded %d rooms, %d exits into '%s'\n", #nodes, #edges - skipped, area_name))
   if skipped > 0 then
