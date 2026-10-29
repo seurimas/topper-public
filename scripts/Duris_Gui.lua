@@ -77,8 +77,16 @@ local function build_comms()
 end
 
 local MOBS_FONT_SIZE = 14
+local TARGET_BAR_HEIGHT = 30
 
 local function build_mobs_console()
+  gui.targetBar = Geyser.Gauge:new({
+    name = "DurisTargetBar",
+    x = 0, y = 0,
+    width = "100%", height = TARGET_BAR_HEIGHT,
+  }, gui.tabPages["Mobs"])
+  gui.targetBar:setColor(160, 30, 30)
+  gui.targetBar:hide()
   gui.mobs = Geyser.MiniConsole:new({
     name = "DurisMobs",
     x = 0, y = 0,
@@ -374,6 +382,36 @@ function duris_update_overland()
   end
 end
 
+-- Shows the fight target's health bar above the mob list while gmcp.Char.Vitals.Fighting is set.
+function duris_update_target()
+  if gui.targetBar == nil or gui.mobs == nil then
+    return
+  end
+  local fighting = gmcp and gmcp.Char and gmcp.Char.Vitals and gmcp.Char.Vitals.Fighting ~= nil
+  if fighting ~= gui.targetShown then
+    gui.targetShown = fighting
+    if fighting then
+      gui.targetBar:show()
+      gui.mobs:move(0, TARGET_BAR_HEIGHT)
+      gui.mobs:resize("100%", "100%-" .. TARGET_BAR_HEIGHT .. "px")
+    else
+      gui.targetBar:hide()
+      gui.mobs:move(0, 0)
+      gui.mobs:resize("100%", "100%")
+    end
+  end
+  if not fighting then
+    return
+  end
+  local target = gmcp.Combat and gmcp.Combat.Update and gmcp.Combat.Update.target
+  if type(target) ~= "table" then
+    gui.targetBar:setValue(0, 100, "No target")
+    return
+  end
+  local pct = math.max(0, math.min(100, tonumber(target.healthPercent) or 0))
+  gui.targetBar:setValue(pct, 100, string.format("%s: %s (%.0f%%)", target.name or "?", target.health or "?", pct))
+end
+
 -- Redraws the Mobs tab from a mobs.room JSON payload; clicking a mob sends its attack commands.
 function duris_show_mobs(payload)
   if gui.mobs == nil or type(payload) ~= "table" then
@@ -416,6 +454,22 @@ function duris_show_equipment(payload)
   end
 end
 
+-- Attaches each annotation as a tooltip to its history line; payload maps line number to text.
+function duris_annotate(payload)
+  if type(payload) ~= "table" then
+    return
+  end
+  for key, annotation in pairs(payload) do
+    local line = tonumber(key)
+    if line ~= nil and type(annotation) == "string" then
+      moveCursor(0, line)
+      selectCurrentLine()
+      setLink("", annotation)
+      moveCursorEnd()
+    end
+  end
+end
+
 -- Routes each gmcp.Comm event to the comms console.
 function duris_on_comm()
   local comm = gmcp and gmcp.Comm and gmcp.Comm.Channel
@@ -431,6 +485,8 @@ end
 duris_build_gui()
 registerAnonymousEventHandler("gmcp.Comm", "duris_on_comm")
 registerAnonymousEventHandler("gmcp.Char.Vitals", "duris_on_vitals")
+registerAnonymousEventHandler("gmcp.Char.Vitals", "duris_update_target")
+registerAnonymousEventHandler("gmcp.Combat.Update", "duris_update_target")
 registerAnonymousEventHandler("gmcp.Room.Info", "duris_update_compass")
 registerAnonymousEventHandler("gmcp.Room.Info", "duris_update_overland")
 registerAnonymousEventHandler("sysWindowResizeEvent", "duris_on_resize")

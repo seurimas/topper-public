@@ -93,6 +93,14 @@ topper_data_handlers["equipment"] = function(value)
   duris_show_equipment(value)
 end
 
+-- The backend sends shop listing history line numbers mapped to item descriptions in the annotate data entry.
+topper_data_handlers["annotate"] = function(value)
+  if duris_annotate == nil then
+    return
+  end
+  duris_annotate(value)
+end
+
 -- The backend sends the overland map (vnum 0) as colored cells in the map.wilderness data entry.
 topper_data_handlers["map.wilderness"] = function(value)
   if duris_show_wilderness == nil then
