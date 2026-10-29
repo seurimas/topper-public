@@ -127,6 +127,14 @@ impl DatabaseModule for AetMudletDatabaseModule {
             .expect(format!("Bad {} insert", key).as_ref());
     }
 
+    fn insert_by_bytes(&self, tree: &str, key: &[u8], value: &[u8]) {
+        self.db
+            .open_tree(tree)
+            .expect(format!("Bad {} tree", tree).as_ref())
+            .insert(key, value)
+            .expect("Bad insert");
+    }
+
     fn get(&self, tree: &str, key: &String) -> Option<Arc<[u8]>> {
         self.db
             .open_tree(tree)
@@ -134,6 +142,25 @@ impl DatabaseModule for AetMudletDatabaseModule {
             .get(key)
             .expect(format!("Bad {} get", key).as_ref())
             .map(|ivec: IVec| Arc::from(ivec.as_ref()))
+    }
+
+    fn get_by_bytes(&self, tree: &str, key: &[u8]) -> Option<Arc<[u8]>> {
+        self.db
+            .open_tree(tree)
+            .expect(format!("Bad {} tree", tree).as_ref())
+            .get(key)
+            .expect("Bad get")
+            .map(|ivec: IVec| Arc::from(ivec.as_ref()))
+    }
+
+    fn values(&self, tree: &str) -> Vec<Arc<[u8]>> {
+        self.db
+            .open_tree(tree)
+            .expect(format!("Bad {} tree", tree).as_ref())
+            .iter()
+            .flatten()
+            .map(|(_, value)| Arc::from(value.as_ref()))
+            .collect()
     }
 
     fn remove(&self, tree: &str, key: &String) {

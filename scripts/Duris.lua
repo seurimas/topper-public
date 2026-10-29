@@ -85,6 +85,14 @@ topper_data_handlers["mobs.room"] = function(value)
   duris_show_mobs(value)
 end
 
+-- The backend sends worn equipment as a table in the equipment data entry.
+topper_data_handlers["equipment"] = function(value)
+  if duris_show_equipment == nil then
+    return
+  end
+  duris_show_equipment(value)
+end
+
 -- The backend sends the overland map (vnum 0) as colored cells in the map.wilderness data entry.
 topper_data_handlers["map.wilderness"] = function(value)
   if duris_show_wilderness == nil then

@@ -87,6 +87,20 @@ local function build_mobs_console()
   setFontSize(gui.mobs.name, MOBS_FONT_SIZE)
 end
 
+local EQUIP_FONT_SIZE = 10
+
+local function build_equip_console()
+  gui.equip = Geyser.MiniConsole:new({
+    name = "DurisEquip",
+    x = 0, y = 0,
+    width = "100%", height = "100%",
+  }, gui.tabPages["Equip"])
+  setFontSize(gui.equip.name, EQUIP_FONT_SIZE)
+  if gui.currentTab ~= "Equip" then
+    gui.equip:hide()
+  end
+end
+
 local function select_tab(tab)
   for _, name in ipairs(TAB_NAMES) do
     gui.tabPages[name]:hide()
@@ -95,6 +109,13 @@ local function select_tab(tab)
   gui.tabPages[tab]:show()
   gui.tabLabels[tab]:setStyleSheet(TAB_ACTIVE_STYLE)
   gui.currentTab = tab
+  if gui.equip then
+    if tab == "Equip" then
+      gui.equip:show()
+    else
+      gui.equip:hide()
+    end
+  end
 end
 
 local function build_right_panel()
@@ -258,6 +279,7 @@ function duris_build_gui()
   build_right_panel()
   build_compass()
   build_mobs_console()
+  build_equip_console()
   build_bottom_bars()
 end
 
@@ -372,6 +394,24 @@ function duris_show_mobs(payload)
       gui.mobs:cechoLink(string.format("<white>%s\n", label), command, "Backstab and hit " .. mob.tag, true)
     else
       gui.mobs:cecho(string.format("<white>%s\n", label))
+    end
+  end
+end
+
+-- Redraws the Equip tab from an equipment JSON payload.
+function duris_show_equipment(payload)
+  if gui.equip == nil or type(payload) ~= "table" then
+    return
+  end
+  gui.equip:clear()
+  if payload.equipment == nil or #payload.equipment == 0 then
+    gui.equip:cecho("<dim_grey>Nothing equipped.\n")
+    return
+  end
+  for _, item in ipairs(payload.equipment) do
+    gui.equip:cecho(string.format("<white>[%s] %s\n", item.place or "?", item.name or "?"))
+    if item.desc and item.desc ~= "" then
+      gui.equip:cecho(string.format("<dim_grey> - %s\n", item.desc))
     end
   end
 end
