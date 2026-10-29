@@ -76,12 +76,15 @@ local function build_comms()
   gui.comms:setWrap(60)
 end
 
+local MOBS_FONT_SIZE = 14
+
 local function build_mobs_console()
   gui.mobs = Geyser.MiniConsole:new({
     name = "DurisMobs",
     x = 0, y = 0,
     width = "100%", height = "100%",
   }, gui.tabPages["Mobs"])
+  setFontSize(gui.mobs.name, MOBS_FONT_SIZE)
 end
 
 local function select_tab(tab)
@@ -349,7 +352,7 @@ function duris_update_overland()
   end
 end
 
--- Redraws the Mobs tab from a mobs.room JSON payload: level, then name.
+-- Redraws the Mobs tab from a mobs.room JSON payload; clicking a mob sends its attack commands.
 function duris_show_mobs(payload)
   if gui.mobs == nil or type(payload) ~= "table" then
     return
@@ -363,7 +366,13 @@ function duris_show_mobs(payload)
   for _, mob in ipairs(decoded.mobs) do
     local level = mob.level and tostring(mob.level) or "?"
     local exp = mob.exp and tostring(mob.exp) or "?"
-    gui.mobs:cecho(string.format("<white>[%s (%s)] <reset>%s\n", level, exp, mob.name or "?"))
+    local label = string.format("[%s (%s)] %s", level, exp, mob.name or "?")
+    if mob.tag then
+      local command = string.format("send(%q)", "backstab " .. mob.tag .. ";;hit " .. mob.tag)
+      gui.mobs:cechoLink(string.format("<white>%s\n", label), command, "Backstab and hit " .. mob.tag, true)
+    else
+      gui.mobs:cecho(string.format("<white>%s\n", label))
+    end
   end
 end
 
