@@ -87,7 +87,7 @@ local function build_mobs_console()
   setFontSize(gui.mobs.name, MOBS_FONT_SIZE)
 end
 
-local EQUIP_FONT_SIZE = 10
+local EQUIP_FONT_SIZE = 8
 
 local function build_equip_console()
   gui.equip = Geyser.MiniConsole:new({
