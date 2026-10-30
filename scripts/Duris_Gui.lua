@@ -3,6 +3,9 @@
 local BOTTOM_BAR_HEIGHT = 40
 local STATUS_HEIGHT = 22
 local SIDE_WIDTH = 400
+local GROUP_HEIGHT = 300
+local LEFT_TAB_HEIGHT = 30
+local LEFT_TAB_NAMES = {"Communication", "Help"}
 local TAB_NAMES = {"Mobs", "Equip", "World Map"}
 local TAB_STYLE = [[background-color: rgb(40,40,40); border-radius: 6px; margin: 1px;]]
 local TAB_ACTIVE_STYLE = [[background-color: rgb(80,80,80); border-radius: 6px; margin: 1px;]]
@@ -68,13 +71,77 @@ function duris_on_vitals()
   end
 end
 
+local function select_left_tab(tab)
+  for _, name in ipairs(LEFT_TAB_NAMES) do
+    gui.leftTabPages[name]:hide()
+    gui.leftTabLabels[name]:setStyleSheet(TAB_STYLE)
+  end
+  gui.leftTabPages[tab]:show()
+  gui.leftTabLabels[tab]:setStyleSheet(TAB_ACTIVE_STYLE)
+end
+
+function duris_select_left_tab(name)
+  select_left_tab(name)
+end
+
+local function build_left_panel()
+  gui.group = Geyser.Label:new({
+    name = "DurisGroup",
+    x = 0, y = 0,
+    width = "100%", height = GROUP_HEIGHT,
+  }, gui.left)
+  gui.group:setStyleSheet(TAB_BODY_STYLE)
+  gui.group:echo("<center>Group")
+
+  gui.leftTabHeader = Geyser.HBox:new({
+    name = "DurisLeftTabHeader",
+    x = 0, y = GROUP_HEIGHT,
+    width = "100%", height = LEFT_TAB_HEIGHT,
+  }, gui.left)
+  local bodyTop = GROUP_HEIGHT + LEFT_TAB_HEIGHT
+  gui.leftTabBody = Geyser.Label:new({
+    name = "DurisLeftTabBody",
+    x = 0, y = bodyTop,
+    width = "100%", height = "100%-" .. bodyTop .. "px",
+  }, gui.left)
+  gui.leftTabBody:setStyleSheet(TAB_BODY_STYLE)
+
+  gui.leftTabLabels = {}
+  gui.leftTabPages = {}
+  for _, name in ipairs(LEFT_TAB_NAMES) do
+    local label = Geyser.Label:new({
+      name = "DurisLeftTab" .. string.gsub(name, " ", ""),
+    }, gui.leftTabHeader)
+    label:echo("<center>" .. name)
+    label:setClickCallback("duris_select_left_tab", name)
+    gui.leftTabLabels[name] = label
+
+    local page = Geyser.Label:new({
+      name = "DurisLeftPage" .. string.gsub(name, " ", ""),
+      x = 0, y = 0,
+      width = "100%", height = "100%",
+    }, gui.leftTabBody)
+    page:setStyleSheet(TAB_BODY_STYLE)
+    page:hide()
+    gui.leftTabPages[name] = page
+  end
+end
+
 local function build_comms()
   gui.comms = Geyser.MiniConsole:new({
     name = "DurisComms",
     x = 0, y = 0,
-    width = SIDE_WIDTH, height = "100%",
-  }, gui.left)
+    width = "100%", height = "100%",
+  }, gui.leftTabPages["Communication"])
   gui.comms:setWrap(60)
+end
+
+local function build_help()
+  gui.help = Geyser.MiniConsole:new({
+    name = "DurisHelp",
+    x = 0, y = 0,
+    width = "100%", height = "100%",
+  }, gui.leftTabPages["Help"])
 end
 
 local MOBS_FONT_SIZE = 14
@@ -326,7 +393,10 @@ function duris_build_gui()
     width = SIDE_WIDTH, height = "100%-" .. BOTTOM_BAR_HEIGHT .. "px",
   })
 
+  build_left_panel()
   build_comms()
+  build_help()
+  select_left_tab(LEFT_TAB_NAMES[1])
   build_right_panel()
   build_compass()
   build_mobs_console()
