@@ -118,10 +118,14 @@ impl<BS> TopperResponse<BS> {
                 passive.insert(key, new_value);
             }
         }
+        let qeb = match (self.qeb, next.qeb) {
+            (Some(first), Some(second)) => Some(format!("{}\n{}", first, second)),
+            (first, second) => first.or(second),
+        };
         let mut data = self.data;
         data.extend(next.data);
         TopperResponse {
-            qeb: self.qeb.or(next.qeb),
+            qeb,
             battle_stats: self.battle_stats.or(next.battle_stats),
             error: self.error.or(next.error),
             passive,

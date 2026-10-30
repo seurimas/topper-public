@@ -159,7 +159,8 @@ register_topper_command("Tmap", "^tmap$", "duris_tmap()", "tmap", "Send the curr
 -- ============================================================
 
 -- Usage: autobash <min level> <max level> <alignments...>, toggles hunting on and off.
-function duris_autobash(low, high, alignment_text)
+-- With fight_only, attacks the mob in the current room and goes inactive when the fight ends.
+function duris_autobash(low, high, alignment_text, fight_only)
   local alignments = {}
   for alignment in string.gmatch(alignment_text, "%S+") do
     alignments[#alignments + 1] = alignment
@@ -168,6 +169,7 @@ function duris_autobash(low, high, alignment_text)
     type = "start",
     between = { tonumber(low), tonumber(high) },
     alignments = alignments,
+    fight_only = fight_only == true,
   }))
 end
 
@@ -176,7 +178,8 @@ function duris_autobash_stop()
 end
 
 register_topper_command("Autobash", "^autobash (\\d+) (\\d+) (.+)$", "duris_autobash(matches[2], matches[3], matches[4])", "autobash <lo> <hi> <align...>", "Toggle auto-hunting mobs in a level range and alignments (good, evil, neutral)")
-register_topper_command("AutobashStop", "^autobash stop$", "duris_autobash_stop()", "autobash stop", "Stop auto-hunting")
+register_topper_command("AutobashFight", "^autobash fight (\\d+) (\\d+) (.+)$", "duris_autobash(matches[2], matches[3], matches[4], true)", "autobash fight <lo> <hi> <align...>", "Attack the mob in this room and stop when the fight is over")
+register_topper_command("AutobashStop", "^autobash (off|stop)$", "duris_autobash_stop()", "autobash stop", "Stop auto-hunting")
 
 -- ============================================================
 -- Helper functions for the Duris module
