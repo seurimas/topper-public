@@ -1,6 +1,7 @@
 -- Three-column Duris layout: comms (left), main display (center), tabs and map (right), stat bars (bottom).
 
 local BOTTOM_BAR_HEIGHT = 40
+local STATUS_HEIGHT = 22
 local SIDE_WIDTH = 400
 local TAB_NAMES = {"Mobs", "Equip", "World Map"}
 local TAB_STYLE = [[background-color: rgb(40,40,40); border-radius: 6px; margin: 1px;]]
@@ -79,6 +80,18 @@ end
 local MOBS_FONT_SIZE = 14
 local TARGET_BAR_HEIGHT = 30
 
+-- Stacks the target bar (when fighting) above the mobs console, with the autobash status line at the bottom.
+local function layout_mobs_tab()
+  local top = 0
+  if gui.targetShown then
+    gui.targetBar:move(0, top)
+    top = top + TARGET_BAR_HEIGHT
+  end
+  gui.mobs:move(0, top)
+  gui.mobs:resize("100%", "100%-" .. (top + STATUS_HEIGHT) .. "px")
+  gui.autobashStatus:move(0, "100%-" .. STATUS_HEIGHT .. "px")
+end
+
 local function build_mobs_console()
   gui.targetBar = Geyser.Gauge:new({
     name = "DurisTargetBar",
@@ -87,12 +100,19 @@ local function build_mobs_console()
   }, gui.tabPages["Mobs"])
   gui.targetBar:setColor(160, 30, 30)
   gui.targetBar:hide()
+  gui.autobashStatus = Geyser.Label:new({
+    name = "DurisAutobashStatus",
+    x = 0, y = 0,
+    width = "100%", height = STATUS_HEIGHT,
+  }, gui.tabPages["Mobs"])
+  gui.autobashStatus:echo("<center><dim_grey>Autobash off")
   gui.mobs = Geyser.MiniConsole:new({
     name = "DurisMobs",
     x = 0, y = 0,
     width = "100%", height = "100%",
   }, gui.tabPages["Mobs"])
   setFontSize(gui.mobs.name, MOBS_FONT_SIZE)
+  layout_mobs_tab()
 end
 
 local EQUIP_FONT_SIZE = 8
@@ -213,7 +233,7 @@ local COMPASS_SIDE = {
 -- Click handler: sends the direction only when the exit is active.
 function duris_compass_move(key)
   if gui.compassActive and gui.compassActive[key] then
-    send(key)
+    do_go(key)
   end
 end
 
@@ -260,6 +280,29 @@ function duris_update_compass()
     gui.compassActive[key] = active
     button:setStyleSheet(active and COMPASS_ON_STYLE or COMPASS_OFF_STYLE)
   end
+end
+
+-- Shows the autobash state from an autobash data entry as a single status line.
+function duris_show_autobash(payload)
+  if gui.autobashStatus == nil or type(payload) ~= "table" then
+    return
+  end
+  local state = payload.state
+  local text
+  if state == "fighting" then
+    text = "Autobash: Fighting " .. (payload.target or "?")
+  elseif state == "looting" then
+    text = "Autobash: Looting " .. (payload.target or "?")
+  elseif state == "engaging" then
+    text = "Autobash: Engaging soon..."
+  elseif state == "moving" then
+    text = "Autobash: Moving..."
+  elseif state == "idle" then
+    text = "Autobash: Idle"
+  else
+    text = "Autobash off"
+  end
+  gui.autobashStatus:echo("<center><white>" .. text)
 end
 
 function duris_build_gui()
@@ -387,18 +430,15 @@ function duris_update_target()
   if gui.targetBar == nil or gui.mobs == nil then
     return
   end
-  local fighting = gmcp and gmcp.Char and gmcp.Char.Vitals and gmcp.Char.Vitals.Fighting ~= nil
+  local fighting = gmcp and gmcp.Char and gmcp.Char.Vitals and gmcp.Char.Vitals.fighting ~= nil
   if fighting ~= gui.targetShown then
     gui.targetShown = fighting
     if fighting then
       gui.targetBar:show()
-      gui.mobs:move(0, TARGET_BAR_HEIGHT)
-      gui.mobs:resize("100%", "100%-" .. TARGET_BAR_HEIGHT .. "px")
     else
       gui.targetBar:hide()
-      gui.mobs:move(0, 0)
-      gui.mobs:resize("100%", "100%")
     end
+    layout_mobs_tab()
   end
   if not fighting then
     return

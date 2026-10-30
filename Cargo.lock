@@ -5401,6 +5401,7 @@ dependencies = [
  "serde_json",
  "sled",
  "topper-duris",
+ "ureq",
 ]
 
 [[package]]

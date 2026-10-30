@@ -34,11 +34,32 @@ local DURIS_GMCP_EVENTS = {
   "gmcp.Ship.Contacts",
 }
 
+local gmcp_flush_pending = false
+
+-- Sends GMCP that arrived without any game lines to topper as a promptless, lineless TimeSlice.
+local function flush_idle_gmcp()
+  gmcp_flush_pending = false
+  if topper_now == nil or topper_gmcp == nil or #topper_gmcp == 0 then
+    return
+  end
+  if topper_lines ~= nil and #topper_lines > 0 then
+    return
+  end
+  write_topper(tagged("TimeSlice", build_time_slice("Promptless")))
+  observations = {}
+  topper_lines = {}
+  topper_gmcp = {}
+end
+
 function handle_gmcp(name)
   if topper_gmcp == nil then
     topper_gmcp = {}
   end
   topper_gmcp[#topper_gmcp + 1] = { name, gmcp_payload(name) }
+  if not gmcp_flush_pending then
+    gmcp_flush_pending = true
+    tempTimer(0.1, flush_idle_gmcp)
+  end
 end
 
 local function install_duris_gmcp_handlers()
@@ -109,6 +130,14 @@ topper_data_handlers["map.wilderness"] = function(value)
   duris_show_wilderness(value)
 end
 
+-- The backend sends the autobash state as a table in the autobash data entry.
+topper_data_handlers["autobash"] = function(value)
+  if duris_show_autobash == nil then
+    return
+  end
+  duris_show_autobash(value)
+end
+
 -- ============================================================
 -- Zone reload command
 -- ============================================================
@@ -124,5 +153,40 @@ function duris_tmap()
 end
 
 register_topper_command("Tmap", "^tmap$", "duris_tmap()", "tmap", "Send the current zone's cached map data")
+
+-- ============================================================
+-- Autobash
+-- ============================================================
+
+-- Usage: autobash <min level> <max level> <alignments...>, toggles hunting on and off.
+function duris_autobash(low, high, alignment_text)
+  local alignments = {}
+  for alignment in string.gmatch(alignment_text, "%S+") do
+    alignments[#alignments + 1] = alignment
+  end
+  request_module("autobash", JSON:encode({
+    type = "start",
+    between = { tonumber(low), tonumber(high) },
+    alignments = alignments,
+  }))
+end
+
+function duris_autobash_stop()
+  request_module("autobash", JSON:encode({ type = "stop" }))
+end
+
+register_topper_command("Autobash", "^autobash (\\d+) (\\d+) (.+)$", "duris_autobash(matches[2], matches[3], matches[4])", "autobash <lo> <hi> <align...>", "Toggle auto-hunting mobs in a level range and alignments (good, evil, neutral)")
+register_topper_command("AutobashStop", "^autobash stop$", "duris_autobash_stop()", "autobash stop", "Stop auto-hunting")
+
+-- ============================================================
+-- Helper functions for the Duris module
+-- ============================================================
+
+function do_go(direction)
+  if gmcp.Room.Info.doors and gmcp.Room.Info.doors[direction] and gmcp.Room.Info.doors[direction].closed then
+    send('open ' .. direction)
+  end
+  send(direction)
+end
 
 start_topper("duris")

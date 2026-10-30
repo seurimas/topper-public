@@ -24,7 +24,13 @@ for _, id in pairs(common_keypad_ids) do
 end
 common_keypad_ids = {}
 
+if do_go == nil then
+  function do_go(direction)
+    send(direction)
+  end
+end
+
 for _, binding in ipairs(bindings) do
-  local name, key, command = binding[1], binding[2], binding[3]
-  common_keypad_ids[name] = tempKey(SHIFT_KEYPAD, key, function() send(command) end)
+  local name, key, direction = binding[1], binding[2], binding[3]
+  common_keypad_ids[name] = tempKey(SHIFT_KEYPAD, key, function() do_go(direction) end)
 end
