@@ -147,6 +147,29 @@ end
 local MOBS_FONT_SIZE = 14
 local TARGET_BAR_HEIGHT = 30
 
+-- Renders an autobash payload on the status label.
+local function render_autobash(payload)
+  local state = payload.state
+  local text
+  if state == "fighting" then
+    text = "Autobash: Fighting " .. (payload.target or "?")
+  elseif state == "looting" then
+    text = "Autobash: Looting " .. (payload.target or "?")
+  elseif state == "resting" then
+    text = "Autobash: Resting..."
+  elseif state == "engaging" then
+    text = "Autobash: Engaging in " .. (payload.ticks_left or "?") .. " ticks"
+  elseif state == "moving" then
+    text = "Autobash: Moving..."
+  elseif state == "idle" then
+    local reason = payload.reason or ""
+    text = "Autobash: Idle" .. (reason ~= "" and " - " .. reason or "")
+  else
+    text = "Autobash off"
+  end
+  gui.autobashStatus:echo("<center><white>" .. text)
+end
+
 -- Stacks the target bar (when fighting) above the mobs console, with the autobash status line at the bottom.
 local function layout_mobs_tab()
   local top = 0
@@ -173,6 +196,9 @@ local function build_mobs_console()
     width = "100%", height = STATUS_HEIGHT,
   }, gui.tabPages["Mobs"])
   gui.autobashStatus:echo("<center><dim_grey>Autobash off")
+  if gui.autobashLast then
+    render_autobash(gui.autobashLast)
+  end
   gui.mobs = Geyser.MiniConsole:new({
     name = "DurisMobs",
     x = 0, y = 0,
@@ -351,25 +377,14 @@ end
 
 -- Shows the autobash state from an autobash data entry as a single status line.
 function duris_show_autobash(payload)
-  if gui.autobashStatus == nil or type(payload) ~= "table" then
+  if type(payload) ~= "table" then
     return
   end
-  local state = payload.state
-  local text
-  if state == "fighting" then
-    text = "Autobash: Fighting " .. (payload.target or "?")
-  elseif state == "looting" then
-    text = "Autobash: Looting " .. (payload.target or "?")
-  elseif state == "engaging" then
-    text = "Autobash: Engaging soon..."
-  elseif state == "moving" then
-    text = "Autobash: Moving..."
-  elseif state == "idle" then
-    text = "Autobash: Idle"
-  else
-    text = "Autobash off"
+  gui.autobashLast = payload
+  if gui.autobashStatus == nil then
+    return
   end
-  gui.autobashStatus:echo("<center><white>" .. text)
+  render_autobash(payload)
 end
 
 function duris_build_gui()
