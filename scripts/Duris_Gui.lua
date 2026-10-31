@@ -6,7 +6,7 @@ local SIDE_WIDTH = 400
 local GROUP_HEIGHT = 300
 local LEFT_TAB_HEIGHT = 30
 local LEFT_TAB_NAMES = {"Communication", "Help"}
-local TAB_NAMES = {"Mobs", "Equip", "World Map"}
+local TAB_NAMES = {"Mobs", "Equip", "Configs"}
 local TAB_STYLE = [[background-color: rgb(40,40,40); border-radius: 6px; margin: 1px;]]
 local TAB_ACTIVE_STYLE = [[background-color: rgb(80,80,80); border-radius: 6px; margin: 1px;]]
 local TAB_BODY_STYLE = [[background-color: rgb(20,20,20);]]
@@ -158,7 +158,7 @@ local function render_autobash(payload)
   elseif state == "resting" then
     text = "Autobash: Resting..."
   elseif state == "engaging" then
-    text = "Autobash: Engaging in " .. (payload.ticks_left or "?") .. " ticks"
+    text = "Autobash: Engaging in " .. (payload.ready_in or "?") .. " time units"
   elseif state == "moving" then
     text = "Autobash: Moving..."
   elseif state == "idle" then
@@ -219,6 +219,85 @@ local function build_equip_console()
   setFontSize(gui.equip.name, EQUIP_FONT_SIZE)
   if gui.currentTab ~= "Equip" then
     gui.equip:hide()
+  end
+end
+
+local CONFIG_ROW_HEIGHT = 28
+local CONFIG_ON_STYLE = [[background-color: rgb(40,110,60); border-radius: 4px; margin: 1px;]]
+local CONFIG_OFF_STYLE = [[background-color: rgb(45,45,45); color: rgb(160,160,160); border-radius: 4px; margin: 1px;]]
+
+-- Turns a flag key like auto_rest into a label like "Auto rest".
+local function config_label(flag)
+  local text = flag:gsub("_", " ")
+  return (text:gsub("^%l", string.upper))
+end
+
+local CONFIG_COLUMNS = {"General", "Buffs"}
+
+-- Creates the General and Buffs columns with headers the first time the Configs tab is drawn.
+local function config_columns()
+  if gui.configColumns == nil then
+    gui.configColumns = {}
+    for index, name in ipairs(CONFIG_COLUMNS) do
+      local column = Geyser.Label:new({
+        name = "DurisConfigColumn" .. name,
+        x = ((index - 1) * 50) .. "%", y = 0,
+        width = "50%", height = "100%",
+      }, gui.tabPages["Configs"])
+      column:setStyleSheet(TAB_BODY_STYLE)
+      local header = Geyser.Label:new({
+        name = "DurisConfigHeader" .. name,
+        x = 0, y = 0,
+        width = "100%", height = CONFIG_ROW_HEIGHT,
+      }, column)
+      header:echo("<center>" .. name)
+      gui.configColumns[name] = column
+    end
+  end
+  return gui.configColumns
+end
+
+-- Creates a flag's button the first time it appears; later payloads reuse it.
+local function config_button(flag, column)
+  local button = gui.configButtons[flag]
+  if button == nil then
+    button = Geyser.Label:new({
+      name = "DurisConfig" .. (flag:gsub("_", "")),
+      x = 0, y = 0,
+      width = "100%", height = CONFIG_ROW_HEIGHT,
+    }, column)
+    button:setClickCallback("duris_toggle_config", flag)
+    gui.configButtons[flag] = button
+  end
+  return button
+end
+
+-- Redraws the Configs tab from a config payload; buff flags go in the Buffs column.
+function duris_show_configs(payload)
+  if type(payload) ~= "table" or gui.tabPages == nil then
+    return
+  end
+  gui.configButtons = gui.configButtons or {}
+  local columns = config_columns()
+  local rows = {General = 0, Buffs = 0}
+  local seen = {}
+  for _, entry in ipairs(payload) do
+    if type(entry) == "table" and type(entry.flag) == "string" then
+      local name = entry.buff == true and "Buffs" or "General"
+      local button = config_button(entry.flag, columns[name])
+      seen[entry.flag] = true
+      rows[name] = rows[name] + 1
+      button:move(0, CONFIG_ROW_HEIGHT + (rows[name] - 1) * CONFIG_ROW_HEIGHT)
+      button:show()
+      local on = entry.enabled == true
+      button:setStyleSheet(on and CONFIG_ON_STYLE or CONFIG_OFF_STYLE)
+      button:echo("<center>" .. config_label(entry.flag) .. ": " .. (on and "ON" or "OFF"))
+    end
+  end
+  for flag, button in pairs(gui.configButtons) do
+    if not seen[flag] then
+      button:hide()
+    end
   end
 end
 

@@ -138,6 +138,14 @@ topper_data_handlers["autobash"] = function(value)
   duris_show_autobash(value)
 end
 
+-- The backend sends config flags as a list of {flag, enabled} in the config data entry.
+topper_data_handlers["config"] = function(value)
+  if duris_show_configs == nil then
+    return
+  end
+  duris_show_configs(value)
+end
+
 -- ============================================================
 -- Zone reload command
 -- ============================================================
@@ -180,6 +188,15 @@ end
 register_topper_command("Autobash", "^autobash (\\d+) (\\d+) (.+)$", "duris_autobash(matches[2], matches[3], matches[4])", "autobash <lo> <hi> <align...>", "Toggle auto-hunting mobs in a level range and alignments (good, evil, neutral)")
 register_topper_command("AutobashFight", "^autobash fight (\\d+) (\\d+) (.+)$", "duris_autobash(matches[2], matches[3], matches[4], true)", "autobash fight <lo> <hi> <align...>", "Attack the mob in this room and stop when the fight is over")
 register_topper_command("AutobashStop", "^autobash (off|stop)$", "duris_autobash_stop()", "autobash stop", "Stop auto-hunting")
+
+-- ============================================================
+-- Configs
+-- ============================================================
+
+-- Asks the backend to flip a config flag; the reply carries the new state.
+function duris_toggle_config(flag)
+  request_module("config", JSON:encode({ type = "toggle", flag = flag }))
+end
 
 -- ============================================================
 -- Helper functions for the Duris module
