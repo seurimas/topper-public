@@ -49,7 +49,10 @@ impl ArgumentCapture {
                 },
                 None => "".to_string(),
             },
-            ArgumentCapture::Literal(string) => string.clone(),
+            ArgumentCapture::Literal(string) => match string.as_str() {
+                "You" => slice.me.clone(),
+                x => x.to_string(),
+            },
         }
     }
 }

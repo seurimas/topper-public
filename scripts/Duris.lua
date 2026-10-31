@@ -18,7 +18,7 @@
 
 -- Duris has no Char.Name; the player's name is the "name" field of Char.Vitals.
 GMCP_VITALS_PATH = "gmcp.Char.Vitals"
-GMCP_NAME_PATH = "gmcp.Char.Vitals"
+GMCP_NAME_PATH = "gmcp.Char.Status.name"
 
 -- Every event the backend's Duris timeline (gmcp.rs) and map (maps/gmcp.rs) consume.
 local DURIS_GMCP_EVENTS = {

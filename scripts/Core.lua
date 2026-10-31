@@ -114,7 +114,7 @@ function topper_me()
   if type(who) == "table" and who.name ~= nil then
     return who.name
   end
-  return ""
+  return who
 end
 
 -- Sends the current value of each game-declared snapshot event (topper_snapshot_gmcp_events)
