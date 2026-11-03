@@ -199,6 +199,56 @@ function duris_toggle_config(flag)
 end
 
 -- ============================================================
+-- Pathfinding
+-- ============================================================
+
+-- Latest path result: { start, target, directions }, overwritten by each request.
+topper_path = nil
+
+topper_data_handlers["pathfinding.path"] = function(value)
+  topper_path = value
+  echo("Path to " .. value.target .. ": " .. value.directions .. "\n")
+end
+
+function duris_path_to(target)
+  request_module("pathfinding", JSON:encode({ cmd = "path_to", target = tonumber(target) }))
+end
+
+function duris_path_to_zone(partial_name)
+  request_module("pathfinding", JSON:encode({ cmd = "path_to_zone", partial_name = partial_name }))
+end
+
+register_topper_command("PathTo", "^tpath (\\d+)$", "duris_path_to(matches[2])", "tpath <vnum>", "Path from this room to a room vnum")
+register_topper_command("PathToZone", "^tpathzone (.+)$", "duris_path_to_zone(matches[2])", "tpathzone <name>", "Path from this room to the nearest entrance of a zone")
+
+-- Pops the first direction off topper_path and moves that way.
+function duris_pop_path_step()
+  display(topper_path.directions)
+  if topper_path == nil or topper_path.directions == nil then
+    echo("No path loaded\n")
+    return
+  end
+  local steps = {}
+  for step in string.gmatch(topper_path.directions, "[^,]+") do
+    steps[#steps + 1] = step:match("^%s*(.-)%s*$")
+  end
+  if #steps == 0 then
+    echo("No path loaded\n")
+    return
+  end
+  local first = table.remove(steps, 1)
+  topper_path.directions = table.concat(steps, ",")
+  do_go(first)
+end
+
+-- Shift+keypad In/Out pop the next path step instead of moving; replaces Common.lua's bindings.
+for _, name in ipairs({ "In", "Out" }) do
+  pcall(killKey, common_keypad_ids[name])
+end
+common_keypad_ids["Out"] = tempKey(0x02000000 + 0x20000000, 0x2f, function() duris_pop_path_step() end)
+common_keypad_ids["In"] = tempKey(0x02000000 + 0x20000000, 0x2a, function() duris_pop_path_step() end)
+
+-- ============================================================
 -- Helper functions for the Duris module
 -- ============================================================
 
