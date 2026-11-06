@@ -308,6 +308,8 @@ local function render_autobash(payload)
     text = "Autobash: Looting " .. (payload.target or "?")
   elseif state == "resting" then
     text = "Autobash: Resting..."
+  elseif state == "memorizing" then
+    text = "Autobash: Memorizing..."
   elseif state == "engaging" then
     text = "Autobash: Engaging in " .. (payload.ready_in or "?") .. " time units"
   elseif state == "moving" then
