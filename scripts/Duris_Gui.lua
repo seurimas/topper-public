@@ -16,6 +16,16 @@ local COMPASS_ON_STYLE = [[background-color: rgb(60,60,90); border-radius: 4px; 
 local COMPASS_OFF_STYLE = [[background-color: rgb(45,45,45); color: rgb(110,110,110); border-radius: 4px; margin: 1px;]]
 local OVERLAND_BASE_FONT = 10
 local OVERLAND_MAX_FONT = 14
+local GROUP_HEADER_HEIGHT = 22
+local GROUP_CARD_HEIGHT = 66
+local GROUP_COLUMNS = 2
+local GROUP_CARD_STYLE = [[background-color: rgb(40,40,55); border-radius: 4px; margin: 2px;]]
+local GROUP_LEADER_STYLE = [[background-color: rgb(60,60,90); border-radius: 4px; margin: 2px;]]
+local GROUP_TANK_OUTLINE_STYLE = [[background-color: transparent; border: 2px solid rgb(220,30,30); border-radius: 4px;]]
+local GROUP_NAME_HEIGHT = 22
+local GROUP_BAR_HEIGHT = 18
+local GROUP_POS_WIDTH = 40
+local GROUP_PADDING = 4
 
 duris_gui = {}
 local gui = duris_gui
@@ -84,6 +94,141 @@ function duris_select_left_tab(name)
   select_left_tab(name)
 end
 
+-- Returns the card for a group slot, creating it the first time the slot is used.
+local function group_card(index)
+  local card = gui.groupCards[index]
+  if card == nil then
+    local col = (index - 1) % GROUP_COLUMNS
+    local row = math.floor((index - 1) / GROUP_COLUMNS)
+    local frame = Geyser.Label:new({
+      name = "DurisGroupCard" .. index,
+      x = (col * 100 / GROUP_COLUMNS) .. "%", y = GROUP_HEADER_HEIGHT + row * GROUP_CARD_HEIGHT,
+      width = (100 / GROUP_COLUMNS) .. "%", height = GROUP_CARD_HEIGHT,
+    }, gui.group)
+    local nameLabel = Geyser.Label:new({
+      name = "DurisGroupName" .. index,
+      x = 0, y = 0,
+      width = "100%", height = GROUP_NAME_HEIGHT,
+    }, frame)
+    local hp = Geyser.Gauge:new({
+      name = "DurisGroupHp" .. index,
+      x = GROUP_PADDING, y = GROUP_NAME_HEIGHT + GROUP_PADDING,
+      width = "100%-" .. (GROUP_POS_WIDTH + 2 * GROUP_PADDING) .. "px", height = GROUP_BAR_HEIGHT,
+    }, frame)
+    hp:setColor(200, 30, 30)
+    local mv = Geyser.Gauge:new({
+      name = "DurisGroupMv" .. index,
+      x = GROUP_PADDING, y = GROUP_NAME_HEIGHT + GROUP_BAR_HEIGHT + 2 * GROUP_PADDING,
+      width = "100%-" .. (GROUP_POS_WIDTH + 2 * GROUP_PADDING) .. "px", height = GROUP_BAR_HEIGHT,
+    }, frame)
+    mv:setColor(220, 200, 30)
+    local pos = Geyser.Label:new({
+      name = "DurisGroupPos" .. index,
+      x = "100%-" .. (GROUP_POS_WIDTH + GROUP_PADDING) .. "px", y = GROUP_NAME_HEIGHT + GROUP_PADDING,
+      width = GROUP_POS_WIDTH, height = GROUP_BAR_HEIGHT * 2 + GROUP_PADDING,
+    }, frame)
+    local outline = Geyser.Label:new({
+      name = "DurisGroupTank" .. index,
+      x = 0, y = 0,
+      width = "100%", height = "100%",
+    }, frame)
+    outline:setStyleSheet(GROUP_TANK_OUTLINE_STYLE)
+    outline:hide()
+    card = {frame = frame, name = nameLabel, hp = hp, mv = mv, pos = pos, outline = outline}
+    gui.groupCards[index] = card
+  end
+  return card
+end
+
+-- Fills a card with one gmcp.Group.Status member; the front-rank leader gets a highlighted card.
+local function render_group_card(card, m, npcCount, isTank)
+  local color = m.inRoom == true and "<white>" or "<dim_grey>"
+  local npcs = npcCount > 0 and string.format(" <yellow>+%d", npcCount) or ""
+  card.frame:setStyleSheet(m.rank == "head" and GROUP_LEADER_STYLE or GROUP_CARD_STYLE)
+  if isTank then
+    card.outline:show()
+  else
+    card.outline:hide()
+  end
+  card.name:echo(string.format("<center>%s%s<reset>%s L%s %s",
+    color, m.name or "?", npcs, tostring(m.level or "?"), m.class or "?"))
+  local hp, maxHp = tonumber(m.hp), tonumber(m.maxHp)
+  if hp and maxHp then
+    card.hp:setValue(hp, maxHp, "HP " .. hp .. "/" .. maxHp)
+  end
+  local mv, maxMv = tonumber(m.move), tonumber(m.maxMove)
+  if mv and maxMv then
+    card.mv:setValue(mv, maxMv, "MV " .. mv .. "/" .. maxMv)
+  end
+  if m.position and m.position ~= "standing" then
+    card.pos:echo("<center>" .. m.position:sub(1, 3))
+  else
+    card.pos:echo("")
+  end
+  card.frame:show()
+end
+
+-- Redraws the group cards from gmcp.Group.Status.members.
+function duris_update_group()
+  if gui.group == nil or gui.groupCards == nil then
+    return
+  end
+  local status = gmcp and gmcp.Group and gmcp.Group.Status
+  local members = type(status) == "table" and type(status.members) == "table" and status.members or {}
+  local players, npcCounts = {}, {}
+  for _, m in ipairs(members) do
+    if type(m) == "table" and m.isNpc == true then
+      -- NPC names end with _Owner_ in the group list.
+      local owner = type(m.name) == "string" and m.name:match("_([^_]+)_$")
+      if owner then
+        npcCounts[owner] = (npcCounts[owner] or 0) + 1
+      end
+    elseif type(m) == "table" then
+      players[#players + 1] = m
+    end
+  end
+  gui.groupHeader:echo(string.format("<center>Group (%d/%s)", #players, tostring(status and status.maxSize or "?")))
+  for index, m in ipairs(players) do
+    render_group_card(group_card(index), m, npcCounts[m.name] or 0, m.name == gui.tankName)
+  end
+  for index = #players + 1, #gui.groupCards do
+    gui.groupCards[index].frame:hide()
+  end
+end
+
+-- Reads a name from a string, or from a table/userdata with a name field.
+local function entity_name(value)
+  if type(value) == "string" then
+    return value
+  end
+  if type(value) == "table" or type(value) == "userdata" then
+    local ok, name = pcall(function() return value.name end)
+    if ok and type(name) == "string" then
+      return name
+    end
+  end
+  return nil
+end
+
+-- Sets the tank from gui.combat and redraws the group so its card is outlined.
+function duris_update_tank()
+  gui.tankName = entity_name(gui.combat and gui.combat.tank)
+  duris_update_group()
+end
+
+-- Merges a gmcp.Combat.Update overlay into gui.combat; keys absent from the update keep their prior values.
+function duris_on_combat()
+  local update = gmcp and gmcp.Combat and gmcp.Combat.Update
+  if type(update) == "table" then
+    gui.combat = gui.combat or {}
+    for key, value in pairs(update) do
+      gui.combat[key] = value
+    end
+  end
+  duris_update_target()
+  duris_update_tank()
+end
+
 local function build_left_panel()
   gui.group = Geyser.Label:new({
     name = "DurisGroup",
@@ -91,7 +236,13 @@ local function build_left_panel()
     width = "100%", height = GROUP_HEIGHT,
   }, gui.left)
   gui.group:setStyleSheet(TAB_BODY_STYLE)
-  gui.group:echo("<center>Group")
+  gui.groupHeader = Geyser.Label:new({
+    name = "DurisGroupHeader",
+    x = 0, y = 0,
+    width = "100%", height = GROUP_HEADER_HEIGHT,
+  }, gui.group)
+  gui.groupHeader:echo("<center>Group")
+  gui.groupCards = {}
 
   gui.leftTabHeader = Geyser.HBox:new({
     name = "DurisLeftTabHeader",
@@ -607,7 +758,7 @@ function duris_update_target()
   if not fighting then
     return
   end
-  local target = gmcp.Combat and gmcp.Combat.Update and gmcp.Combat.Update.target
+  local target = gui.combat and gui.combat.target
   if type(target) ~= "table" then
     gui.targetBar:setValue(0, 100, "No target")
     return
@@ -640,6 +791,7 @@ function duris_show_mobs(payload)
   end
 end
 
+registerAnonymousEventHandler("gmcp.Group.Status", "duris_update_group")
 -- Redraws the Equip tab from an equipment JSON payload.
 function duris_show_equipment(payload)
   if gui.equip == nil or type(payload) ~= "table" then
@@ -658,17 +810,21 @@ function duris_show_equipment(payload)
   end
 end
 
--- Attaches each annotation as a tooltip to its history line; payload maps line number to text.
+-- Attaches each annotation as a tooltip to its history line; clicking sends its action.
 function duris_annotate(payload)
   if type(payload) ~= "table" then
     return
   end
   for key, annotation in pairs(payload) do
     local line = tonumber(key)
-    if line ~= nil and type(annotation) == "string" then
+    if line ~= nil and type(annotation) == "table" and type(annotation.desc) == "string" then
       moveCursor(0, line)
       selectCurrentLine()
-      setLink("", annotation)
+      if annotation.action then
+        setLink("send(\"" .. annotation.action .. "\")", annotation.desc)
+      else
+        setLink("", annotation.desc)
+      end
       moveCursorEnd()
     end
   end
@@ -690,7 +846,7 @@ duris_build_gui()
 registerAnonymousEventHandler("gmcp.Comm", "duris_on_comm")
 registerAnonymousEventHandler("gmcp.Char.Vitals", "duris_on_vitals")
 registerAnonymousEventHandler("gmcp.Char.Vitals", "duris_update_target")
-registerAnonymousEventHandler("gmcp.Combat.Update", "duris_update_target")
+registerAnonymousEventHandler("gmcp.Combat.Update", "duris_on_combat")
 registerAnonymousEventHandler("gmcp.Room.Info", "duris_update_compass")
 registerAnonymousEventHandler("gmcp.Room.Info", "duris_update_overland")
 registerAnonymousEventHandler("sysWindowResizeEvent", "duris_on_resize")

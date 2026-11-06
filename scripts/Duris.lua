@@ -114,7 +114,7 @@ topper_data_handlers["equipment"] = function(value)
   duris_show_equipment(value)
 end
 
--- The backend sends shop listing history line numbers mapped to item descriptions in the annotate data entry.
+-- The backend sends history line numbers mapped to {desc, action} annotations in the annotate data entry.
 topper_data_handlers["annotate"] = function(value)
   if duris_annotate == nil then
     return
@@ -228,16 +228,7 @@ function duris_pop_path_step()
     echo("No path loaded\n")
     return
   end
-  local steps = {}
-  for step in string.gmatch(topper_path.directions, "[^,]+") do
-    steps[#steps + 1] = step:match("^%s*(.-)%s*$")
-  end
-  if #steps == 0 then
-    echo("No path loaded\n")
-    return
-  end
-  local first = table.remove(steps, 1)
-  topper_path.directions = table.concat(steps, ",")
+  local first = table.remove(topper_path.directions, 1)
   do_go(first)
 end
 
