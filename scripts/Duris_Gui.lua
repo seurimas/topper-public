@@ -554,6 +554,11 @@ local COMPASS_SIDE = {
   {key = "u", text = "Up",   y = 0},
   {key = "d", text = "Down", y = COMPASS_HEIGHT / 2 + 2},
 }
+-- Non-exit buttons beside Up/Down; each names the global function its click calls.
+local COMPASS_ACTIONS = {
+  {key = "go",   text = "Go",   y = 0,                       callback = "duris_pop_path_step"},
+  {key = "rest", text = "Rest", y = COMPASS_HEIGHT / 2 + 2, callback = "duris_send_rest"},
+}
 
 -- Click handler: sends the direction only when the exit is active.
 function duris_compass_move(key)
@@ -590,7 +595,22 @@ local function build_compass()
   for _, entry in ipairs(COMPASS_SIDE) do
     make_compass_button(entry, sideX, entry.y, 80, COMPASS_HEIGHT / 2 - 2)
   end
+  for _, action in ipairs(COMPASS_ACTIONS) do
+    local button = Geyser.Label:new({
+      name = "DurisCompass" .. action.key:upper(),
+      x = sideX + 88, y = action.y,
+      width = 80, height = COMPASS_HEIGHT / 2 - 2,
+    }, gui.compass)
+    button:echo("<center>" .. action.text)
+    button:setStyleSheet(COMPASS_ON_STYLE)
+    button:setClickCallback(action.callback)
+  end
   duris_update_compass()
+end
+
+-- Sends the rest-and-sleep command from the Rest button.
+function duris_send_rest()
+  send("r;;sleep")
 end
 
 -- Greys out compass buttons whose exit is not in gmcp.Room.Info.exits.

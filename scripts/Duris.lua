@@ -223,7 +223,6 @@ register_topper_command("PathToZone", "^tpathzone (.+)$", "duris_path_to_zone(ma
 
 -- Pops the first direction off topper_path and moves that way.
 function duris_pop_path_step()
-  display(topper_path.directions)
   if topper_path == nil or topper_path.directions == nil then
     echo("No path loaded\n")
     return
