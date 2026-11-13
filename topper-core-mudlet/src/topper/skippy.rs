@@ -111,7 +111,7 @@ enum Session {
 }
 
 fn app_id() -> SkippyId {
-    SkippyId::Simple(APP_ID.to_string())
+    APP_ID.to_string()
 }
 
 /// Runs one connection: registers the app, then pumps commands out and server

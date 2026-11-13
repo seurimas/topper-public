@@ -832,6 +832,8 @@ function duris_show_equipment(payload)
   end
 end
 
+local APPEND_COLUMN = 80
+
 -- Attaches each annotation as a tooltip to its history line; clicking sends its action.
 function duris_annotate(payload)
   if type(payload) ~= "table" then
@@ -847,7 +849,10 @@ function duris_annotate(payload)
       else
         setLink("", annotation.desc)
       end
-      moveCursorEnd()
+      if type(annotation.append) == "string" then
+        moveCursor(APPEND_COLUMN, line)
+        insertText(annotation.append)
+      end
     end
   end
 end
