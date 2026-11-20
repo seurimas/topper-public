@@ -834,24 +834,28 @@ end
 
 local APPEND_COLUMN = 80
 
--- Attaches each annotation as a tooltip to its history line; clicking sends its action.
+-- Attaches each `[line, annotation]` pair to its history line; clicking expands the alias.
+-- A text field selects that span of the line instead of the whole line.
 function duris_annotate(payload)
   if type(payload) ~= "table" then
     return
   end
-  for key, annotation in pairs(payload) do
-    local line = tonumber(key)
-    if line ~= nil and type(annotation) == "table" and type(annotation.desc) == "string" then
+  for _, entry in ipairs(payload) do
+    local line, annotation = entry[1], entry[2]
+    if type(line) == "number" and type(annotation) == "table" and type(annotation.desc) == "string" then
+      local command = string.format("expandAlias(%q)", annotation.action)
       moveCursor(0, line)
-      selectCurrentLine()
-      if annotation.action then
-        setLink("send(\"" .. annotation.action .. "\")", annotation.desc)
+      if type(annotation.text) == "string" then
+        if selectString(annotation.text, 1) > 0 then
+          setLink(command, annotation.desc)
+        end
       else
-        setLink("", annotation.desc)
-      end
-      if type(annotation.append) == "string" then
-        moveCursor(APPEND_COLUMN, line)
-        insertText(annotation.append)
+        selectCurrentLine()
+        setLink(command, annotation.desc)
+        if type(annotation.append) == "string" then
+          moveCursor(APPEND_COLUMN, line)
+          insertText(annotation.append)
+        end
       end
     end
   end

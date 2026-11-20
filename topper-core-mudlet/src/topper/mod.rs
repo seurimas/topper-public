@@ -58,6 +58,26 @@ pub trait TopperModule<'s, TS, BS> {
     ) -> Result<TopperResponse<BS>, String>;
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn then_concatenates_array_data_with_same_name() {
+        let merged: TopperResponse<()> = TopperResponse::data("annotate".to_string(), json!([1]))
+            .then(TopperResponse::data("annotate".to_string(), json!([2])));
+        assert_eq!(merged.data["annotate"], json!([1, 2]));
+    }
+
+    #[test]
+    fn then_replaces_non_array_data_with_same_name() {
+        let merged: TopperResponse<()> = TopperResponse::data("map".to_string(), json!(1))
+            .then(TopperResponse::data("map".to_string(), json!(2)));
+        assert_eq!(merged.data["map"], json!(2));
+    }
+}
+
 pub struct TopperCore {
     pub target: Option<String>,
 }
@@ -123,7 +143,16 @@ impl<BS> TopperResponse<BS> {
             (first, second) => first.or(second),
         };
         let mut data = self.data;
-        data.extend(next.data);
+        for (key, value) in next.data {
+            let merged = match (data.remove(&key), value) {
+                (Some(Value::Array(mut existing)), Value::Array(new)) => {
+                    existing.extend(new);
+                    Value::Array(existing)
+                }
+                (_, value) => value,
+            };
+            data.insert(key, merged);
+        }
         TopperResponse {
             qeb,
             battle_stats: self.battle_stats.or(next.battle_stats),
