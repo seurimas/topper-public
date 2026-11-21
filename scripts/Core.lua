@@ -556,9 +556,10 @@ local topper_commands = {}
 -- Creates the named alias if missing and records it for the `topper` listing.
 function register_topper_command(name, pattern, code, usage, description)
   topper_commands[#topper_commands + 1] = { usage = usage, description = description }
-  if exists(name, "alias") == 0 then
-    permAlias(name, "Topper", pattern, code)
+  if exists(name, "alias") > 0 then
+    killAlias(name)
   end
+  permAlias(name, "Topper", pattern, code)
 end
 
 function list_topper_commands()

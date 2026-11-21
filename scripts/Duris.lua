@@ -146,6 +146,25 @@ topper_data_handlers["config"] = function(value)
   duris_show_configs(value)
 end
 
+-- The backend sends a Pages struct (title, page_length, wrap_width, pages) in the pages data entry.
+topper_data_handlers["pages"] = function(value)
+  if duris_show_pages == nil then
+    return
+  end
+  duris_show_pages(value)
+end
+
+-- The backend sends the nearby zone numbers; each gets its own zone report, so each Pages arrives separately.
+topper_data_handlers["nearby_zones"] = function(value)
+  if type(value) ~= "table" or #value == 0 then
+    echo("No zones nearby.\n")
+    return
+  end
+  for _, zone in ipairs(value) do
+    duris_zone_report(tostring(zone))
+  end
+end
+
 -- ============================================================
 -- Zone reload command
 -- ============================================================
@@ -161,6 +180,34 @@ function duris_tmap()
 end
 
 register_topper_command("Tmap", "^tmap$", "duris_tmap()", "tmap", "Send the current zone's cached map data")
+
+-- Asks the backend for a paged farming report of a zone by number or name; defaults to gmcp.Room.Info.zone.
+function duris_zone_report(zone)
+  local arg = (zone ~= nil and zone ~= "") and zone or nil
+  if arg == nil then
+    local current = gmcp and gmcp.Room and gmcp.Room.Info and gmcp.Room.Info.zone
+    arg = current ~= nil and tostring(current) or nil
+  end
+  if arg == nil then
+    echo("No zone given and none in gmcp.Room.Info.zone.\n")
+    return
+  end
+  request_module("info", JSON:encode({ type = "zone_report", zone = arg, page_length = duris_reader_page_length(), wrap_width = duris_reader_wrap_width() }))
+end
+
+register_topper_command("ZoneReport", "^tzone(?: (.+))?$", "duris_zone_report(matches[2])", "tzone [zone]", "Show a farming report for a zone by number or name (default: current zone)")
+
+-- Asks the backend for the zones entered within `distance` (default 200) of the current position.
+function duris_zone_nearby(distance)
+  local info = gmcp and gmcp.Room and gmcp.Room.Info
+  if info == nil or info.num == nil then
+    echo("Current room unknown from gmcp.Room.Info.\n")
+    return
+  end
+  request_module("info", JSON:encode({ type = "nearby_zones", room = tonumber(info.num), radius = tonumber(distance) or 200 }))
+end
+
+register_topper_command("ZoneNearby", "^tzonenearby(?: ([0-9]+))?$", "duris_zone_nearby(matches[2])", "tzonenearby [distance]", "Show a farming report for each zone near the current position (default distance: 200)")
 
 -- ============================================================
 -- Autobash

@@ -5,7 +5,7 @@ local STATUS_HEIGHT = 22
 local SIDE_WIDTH = 400
 local GROUP_HEIGHT = 300
 local LEFT_TAB_HEIGHT = 30
-local LEFT_TAB_NAMES = {"Communication", "Help"}
+local LEFT_TAB_NAMES = {"Communication", "Page Reader"}
 local TAB_NAMES = {"Mobs", "Equip", "Configs"}
 local TAB_STYLE = [[background-color: rgb(40,40,40); border-radius: 6px; margin: 1px;]]
 local TAB_ACTIVE_STYLE = [[background-color: rgb(80,80,80); border-radius: 6px; margin: 1px;]]
@@ -287,12 +287,240 @@ local function build_comms()
   gui.comms:setWrap(60)
 end
 
-local function build_help()
-  gui.help = Geyser.MiniConsole:new({
-    name = "DurisHelp",
+local READER_TITLE_HEIGHT = 30
+local READER_CONTROL_HEIGHT = 30
+local READER_MENU_ROW_HEIGHT = 24
+local READER_WRAP_COLUMNS = 60
+local READER_FONT_SIZE = 8
+
+-- Number of text rows that fit the reader view at its font size; sent as the zone report page length.
+function duris_reader_page_length()
+  local _, cell_height = calcFontSize(gui.readerText.name)
+  return math.max(1, math.floor(gui.readerText:get_height() / cell_height))
+end
+
+-- Text width the reader wraps to; sent with zone report requests so the backend pages match.
+function duris_reader_wrap_width()
+  return READER_WRAP_COLUMNS
+end
+
+-- Duris color codes (topper-duris colors.rs) as RGB values.
+local DURIS_FG = {
+  r = {128, 0, 0}, R = {255, 0, 0}, g = {0, 128, 0}, G = {0, 255, 0},
+  b = {0, 0, 128}, B = {0, 128, 255}, c = {0, 128, 128}, C = {0, 255, 255},
+  m = {128, 0, 128}, M = {255, 0, 255}, y = {128, 128, 0}, Y = {255, 255, 0},
+  w = {192, 192, 192}, W = {255, 255, 255}, L = {96, 96, 96}, l = {0, 0, 0},
+}
+local DURIS_BG = {
+  r = {80, 0, 0}, R = {128, 0, 0}, g = {0, 80, 0}, G = {0, 128, 0},
+  b = {0, 0, 60}, B = {0, 0, 100}, c = {0, 60, 60}, C = {0, 100, 100},
+  m = {60, 0, 60}, M = {100, 0, 100}, y = {60, 60, 0}, Y = {100, 100, 0},
+  w = {60, 60, 60}, W = {100, 100, 100}, L = {32, 32, 32}, l = {0, 0, 0},
+}
+
+local DEFAULT_FG = {200, 200, 200}
+local DEFAULT_BG = {0, 0, 0}
+
+-- decho takes RGB pairs as <fg:bg>; cecho only accepts named colors.
+local function decho_tag(fg, bg)
+  return string.format("<%d,%d,%d:%d,%d,%d>", fg[1], fg[2], fg[3], bg[1], bg[2], bg[3])
+end
+
+-- Converts Duris &-color markup in a line to Mudlet decho tags.
+function duris_to_decho(line)
+  local out = {}
+  local fg, bg = DEFAULT_FG, DEFAULT_BG
+  local i = 1
+  while i <= #line do
+    local ch = line:sub(i, i)
+    local code = line:sub(i + 1, i + 1)
+    local arg = line:sub(i + 2, i + 2)
+    local bgArg = line:sub(i + 3, i + 3)
+    local width = 0
+    if ch == "&" and code == "+" and DURIS_FG[arg] then
+      fg, width = DURIS_FG[arg], 3
+    elseif ch == "&" and code == "-" and DURIS_BG[arg] then
+      bg, width = DURIS_BG[arg], 3
+    elseif ch == "&" and code == "=" and DURIS_FG[arg] and DURIS_BG[bgArg] then
+      fg, bg, width = DURIS_FG[arg], DURIS_BG[bgArg], 4
+    elseif ch == "&" and (code == "n" or code == "N" or code == "]") then
+      fg, bg, width = DEFAULT_FG, DEFAULT_BG, 2
+    end
+    if width > 0 then
+      out[#out + 1] = decho_tag(fg, bg)
+      i = i + width
+    else
+      out[#out + 1] = ch
+      i = i + 1
+    end
+  end
+  return table.concat(out)
+end
+
+-- Shows the active page and its position in the book, or a placeholder before any Pages arrive.
+local function render_reader()
+  local books = gui.readerBooks
+  if #books == 0 then
+    gui.readerTitle:echo("<center>Page Reader")
+    gui.readerText:clear()
+    gui.readerText:echo("No pages received this session.\n")
+    gui.readerPos:echo("<center>0 / 0")
+    return
+  end
+  local book = books[gui.readerIndex]
+  gui.readerTitle:echo("<center>" .. book.title .. "  v")
+  gui.readerText:clear()
+  gui.readerText:setWrap(tonumber(book.wrap_width) or READER_WRAP_COLUMNS)
+  local page = book.pages[gui.readerPage]
+  if page ~= nil then
+    for _, line in ipairs(page.lines) do
+      gui.readerText:decho(duris_to_decho(line) .. "\n")
+    end
+  end
+  gui.readerPos:echo(string.format("<center>%d / %d", gui.readerPage, #book.pages))
+end
+
+-- Redraws the dropdown of received Pages titles, highlighting the one on screen.
+local function render_reader_menu()
+  local books = gui.readerBooks
+  for i, book in ipairs(books) do
+    local item = gui.readerMenuItems[i]
+    if item == nil then
+      item = Geyser.Label:new({
+        name = "DurisReaderMenuItem" .. i,
+        x = 0, y = (i - 1) * READER_MENU_ROW_HEIGHT,
+        width = "100%", height = READER_MENU_ROW_HEIGHT,
+      }, gui.readerMenu)
+      item:setClickCallback("duris_reader_select", i)
+      gui.readerMenuItems[i] = item
+    end
+    item:echo("<center>" .. book.title)
+    item:setStyleSheet(i == gui.readerIndex and TAB_ACTIVE_STYLE or TAB_STYLE)
+    item:show()
+  end
+  for i = #books + 1, #gui.readerMenuItems do
+    gui.readerMenuItems[i]:hide()
+  end
+  gui.readerMenu:resize("100%", #books * READER_MENU_ROW_HEIGHT)
+end
+
+-- Opens or closes the title dropdown.
+function duris_reader_toggle_menu()
+  if #gui.readerBooks == 0 then
+    return
+  end
+  gui.readerMenuOpen = not gui.readerMenuOpen
+  if gui.readerMenuOpen then
+    render_reader_menu()
+    gui.readerMenu:show()
+    raiseWindow(gui.readerMenu.name)
+  else
+    gui.readerMenu:hide()
+  end
+end
+
+-- Switches the reader to a Pages from the dropdown, starting at its first page.
+function duris_reader_select(index)
+  gui.readerIndex = index
+  gui.readerPage = 1
+  gui.readerMenuOpen = false
+  gui.readerMenu:hide()
+  render_reader()
+end
+
+function duris_reader_prev()
+  if gui.readerPage > 1 then
+    gui.readerPage = gui.readerPage - 1
+    render_reader()
+  end
+end
+
+function duris_reader_next()
+  if #gui.readerBooks == 0 then
+    return
+  end
+  local book = gui.readerBooks[gui.readerIndex]
+  if gui.readerPage < #book.pages then
+    gui.readerPage = gui.readerPage + 1
+    render_reader()
+  end
+end
+
+-- Stores a Pages payload from the pages data entry, replacing one with the same title, and opens it.
+function duris_show_pages(payload)
+  if type(payload) ~= "table" or type(payload.title) ~= "string" or type(payload.pages) ~= "table" then
+    return
+  end
+  local index
+  for i, book in ipairs(gui.readerBooks) do
+    if book.title == payload.title then
+      index = i
+    end
+  end
+  if index == nil then
+    gui.readerBooks[#gui.readerBooks + 1] = payload
+    index = #gui.readerBooks
+  else
+    gui.readerBooks[index] = payload
+  end
+  gui.readerIndex = index
+  gui.readerPage = 1
+  if gui.readerMenuOpen then
+    render_reader_menu()
+  end
+  render_reader()
+end
+
+local function build_reader()
+  gui.readerBooks = {}
+  gui.readerIndex = 1
+  gui.readerPage = 1
+  gui.readerMenuOpen = false
+  gui.readerMenuItems = {}
+  local page = gui.leftTabPages["Page Reader"]
+  gui.readerTitle = Geyser.Label:new({
+    name = "DurisReaderTitle",
     x = 0, y = 0,
-    width = "100%", height = "100%",
-  }, gui.leftTabPages["Help"])
+    width = "100%", height = READER_TITLE_HEIGHT,
+  }, page)
+  gui.readerTitle:setStyleSheet(TAB_STYLE)
+  gui.readerTitle:setClickCallback("duris_reader_toggle_menu")
+  gui.readerText = Geyser.MiniConsole:new({
+    name = "DurisReaderText",
+    x = 0, y = READER_TITLE_HEIGHT,
+    color = "black",
+    width = "100%", height = "100%-" .. (READER_TITLE_HEIGHT + READER_CONTROL_HEIGHT) .. "px",
+  }, page)
+  setFontSize(gui.readerText.name, READER_FONT_SIZE)
+  local controlY = "100%-" .. READER_CONTROL_HEIGHT .. "px"
+  gui.readerPrev = Geyser.Label:new({
+    name = "DurisReaderPrev",
+    x = 0, y = controlY,
+    width = "30%", height = READER_CONTROL_HEIGHT,
+  }, page)
+  gui.readerPrev:echo("<center>Prev")
+  gui.readerPrev:setStyleSheet(TAB_STYLE)
+  gui.readerPrev:setClickCallback("duris_reader_prev")
+  gui.readerPos = Geyser.Label:new({
+    name = "DurisReaderPos",
+    x = "30%", y = controlY,
+    width = "40%", height = READER_CONTROL_HEIGHT,
+  }, page)
+  gui.readerNext = Geyser.Label:new({
+    name = "DurisReaderNext",
+    x = "70%", y = controlY,
+    width = "30%", height = READER_CONTROL_HEIGHT,
+  }, page)
+  gui.readerNext:echo("<center>Next")
+  gui.readerNext:setStyleSheet(TAB_STYLE)
+  gui.readerNext:setClickCallback("duris_reader_next")
+  gui.readerMenu = Geyser.Container:new({
+    name = "DurisReaderMenu",
+    x = 0, y = READER_TITLE_HEIGHT,
+    width = "100%", height = 0,
+  }, page)
+  gui.readerMenu:hide()
+  render_reader()
 end
 
 local MOBS_FONT_SIZE = 14
@@ -662,7 +890,7 @@ function duris_build_gui()
 
   build_left_panel()
   build_comms()
-  build_help()
+  build_reader()
   select_left_tab(LEFT_TAB_NAMES[1])
   build_right_panel()
   build_compass()
