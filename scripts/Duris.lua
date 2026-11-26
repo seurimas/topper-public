@@ -197,6 +197,17 @@ end
 
 register_topper_command("ZoneReport", "^tzone(?: (.+))?$", "duris_zone_report(matches[2])", "tzone [zone]", "Show a farming report for a zone by number or name (default: current zone)")
 
+-- Asks the backend for a paged list of spawned mobs matching `name`, with level, zone, location, and drops.
+function duris_mob_find(name)
+  if name == nil or name == "" then
+    echo("Usage: tfind <mob name>\n")
+    return
+  end
+  request_module("info", JSON:encode({ type = "mob_find", name = name, page_length = duris_reader_page_length(), wrap_width = duris_reader_wrap_width() }))
+end
+
+register_topper_command("MobFind", "^tfind(?: (.+))?$", "duris_mob_find(matches[2])", "tfind <mob>", "Find a mob by name across all zones, showing level, location, drops, and zone")
+
 -- Asks the backend for the zones entered within `distance` (default 200) of the current position.
 function duris_zone_nearby(distance)
   local info = gmcp and gmcp.Room and gmcp.Room.Info

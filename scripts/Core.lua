@@ -553,11 +553,11 @@ end
 -- Registry of user-facing commands, rebuilt on each install so reloads don't duplicate entries.
 local topper_commands = {}
 
--- Creates the named alias if missing and records it for the `topper` listing.
+-- Creates the named alias only if none exists; aliases cannot be killed, so existing ones are left as-is.
 function register_topper_command(name, pattern, code, usage, description)
   topper_commands[#topper_commands + 1] = { usage = usage, description = description }
   if exists(name, "alias") > 0 then
-    killAlias(name)
+    return
   end
   permAlias(name, "Topper", pattern, code)
 end
